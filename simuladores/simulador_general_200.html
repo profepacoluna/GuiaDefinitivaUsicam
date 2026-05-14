@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador General USICAMM · 200 Reactivos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════
+   VARIABLES & RESET
+═══════════════════════════════════════════════════ */
+:root {
+  --bg: #f0f4ff;
+  --bg2: #e8eeff;
+  --surface: #ffffff;
+  --surface2: #f7f9ff;
+  --border: #dde5ff;
+  --text: #0d1b3e;
+  --text2: #4a5568;
+  --text3: #8899bb;
+  --primary: #2563eb;
+  --primary-d: #1d4ed8;
+  --primary-l: #eff6ff;
+  --accent: #f59e0b;
+  --accent-l: #fffbeb;
+  --green: #16a34a;
+  --green-l: #dcfce7;
+  --red: #dc2626;
+  --red-l: #fee2e2;
+  --shadow: 0 4px 24px rgba(37,99,235,.10);
+  --shadow-lg: 0 8px 40px rgba(37,99,235,.16);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-lg: 24px;
+  --transition: .22s cubic-bezier(.4,0,.2,1);
+}
+[data-theme="dark"] {
+  --bg: #0a0f1e;
+  --bg2: #0d1529;
+  --surface: #121c38;
+  --surface2: #182040;
+  --border: #1e2d5a;
+  --text: #e8eeff;
+  --text2: #8899cc;
+  --text3: #4a5a88;
+  --primary-l: #0d1b3e;
+  --accent-l: #1a1200;
+  --green-l: #062010;
+  --red-l: #1f0505;
+  --shadow: 0 4px 24px rgba(0,0,0,.5);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,.6);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  transition: background var(--transition), color var(--transition);
+  overflow-x: hidden;
+}
+
+/* ═══════════════════════════════════════════════════
+   BACKGROUND DECORATION
+═══════════════════════════════════════════════════ */
+.bg-decoration {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  overflow: hidden;
+}
+.bg-decoration::before {
+  content: '';
+  position: absolute;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(37,99,235,.12) 0%, transparent 70%);
+  top: -200px; right: -200px;
+  animation: float1 8s ease-in-out infinite;
+}
+.bg-decoration::after {
+  content: '';
+  position: absolute;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(245,158,11,.08) 0%, transparent 70%);
+  bottom: -150px; left: -150px;
+  animation: float2 10s ease-in-out infinite;
+}
+@keyframes float1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-30px,30px)} }
+@keyframes float2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(20px,-20px)} }
+
+/* ═══════════════════════════════════════════════════
+   SCREENS
+═══════════════════════════════════════════════════ */
+.screen { display: none; position: relative; z-index: 1; }
+.screen.active { display: flex; }
+
+/* ═══════════════════════════════════════════════════
+   HEADER BAR
+═══════════════════════════════════════════════════ */
+.top-bar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 64px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px;
+  z-index: 100;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 2px 12px rgba(37,99,235,.06);
+}
+.top-bar-left { display: flex; align-items: center; gap: 12px; }
+.logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 18px; font-weight: 900;
+}
+.logo-text { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 15px; color: var(--text); }
+.logo-text span { color: var(--primary); }
+.theme-btn {
+  width: 40px; height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface2);
+  cursor: pointer; font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition);
+  color: var(--text);
+}
+.theme-btn:hover { background: var(--primary-l); border-color: var(--primary); }
+
+/* ═══════════════════════════════════════════════════
+   WELCOME SCREEN
+═══════════════════════════════════════════════════ */
+#screen-welcome {
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px 40px;
+}
+.welcome-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 56px 48px;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  animation: fadeInUp .6s cubic-bezier(.4,0,.2,1) both;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(32px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.welcome-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--primary-l);
+  border: 1px solid rgba(37,99,235,.2);
+  color: var(--primary);
+  font-size: 12px; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 6px 16px; border-radius: 100px;
+  margin-bottom: 24px;
+}
+.welcome-title {
+  font-family: 'Sora', sans-serif;
+  font-size: clamp(28px, 5vw, 40px);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+.welcome-title span { color: var(--primary); }
+.welcome-subtitle {
+  font-size: 16px; color: var(--text2);
+  line-height: 1.6; margin-bottom: 36px;
+}
+.stats-row {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 16px; margin-bottom: 36px;
+}
+.stat-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px 12px;
+}
+.stat-num {
+  font-family: 'Sora', sans-serif;
+  font-size: 28px; font-weight: 700; color: var(--primary);
+  line-height: 1;
+}
+.stat-label { font-size: 11px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-top: 4px; }
+
+.name-field {
+  width: 100%;
+  padding: 14px 18px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  transition: all var(--transition);
+  margin-bottom: 12px;
+  outline: none;
+}
+.name-field:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37,99,235,.12); }
+.name-field::placeholder { color: var(--text3); }
+
+.options-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
+.opt-toggle {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 100px;
+  background: var(--surface2);
+  cursor: pointer; font-size: 13px; font-weight: 600;
+  color: var(--text2); transition: all var(--transition);
+}
+.opt-toggle input { display: none; }
+.opt-toggle.selected { border-color: var(--primary); background: var(--primary-l); color: var(--primary); }
+.opt-toggle:hover { border-color: var(--primary); }
+
+.btn-start {
+  width: 100%;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+  color: white;
+  border: none; border-radius: var(--radius-sm);
+  font-family: 'Nunito', sans-serif;
+  font-size: 17px; font-weight: 800;
+  cursor: pointer; transition: all var(--transition);
+  letter-spacing: .02em;
+  box-shadow: 0 4px 16px rgba(37,99,235,.35);
+}
+.btn-start:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(37,99,235,.45);
+}
+.btn-start:active { transform: translateY(0); }
+
+.author-tag {
+  margin-top: 24px;
+  font-size: 12px; color: var(--text3); text-align: center;
+}
+.author-tag strong { color: var(--text2); }
+
+/* ═══════════════════════════════════════════════════
+   QUIZ SCREEN
+═══════════════════════════════════════════════════ */
+#screen-quiz {
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  padding: 80px 16px 40px;
+}
+.quiz-wrapper { width: 100%; max-width: 760px; }
+
+/* Progress header */
+.quiz-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px; margin-top: 24px;
+}
+.q-counter { font-size: 13px; font-weight: 700; color: var(--text3); }
+.q-counter strong { color: var(--primary); font-size: 16px; }
+.timer-display {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 6px 16px;
+  font-family: 'Sora', sans-serif;
+  font-size: 15px; font-weight: 600;
+  color: var(--text);
+  transition: all var(--transition);
+}
+.timer-display.warning { border-color: #f97316; color: #f97316; background: #fff7ed; }
+.timer-display.danger { border-color: var(--red); color: var(--red); background: var(--red-l); animation: pulse .8s ease infinite; }
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
+.timer-icon { font-size: 14px; }
+
+.progress-bar-wrap {
+  height: 6px;
+  background: var(--border);
+  border-radius: 100px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary) 0%, #7c3aed 100%);
+  border-radius: 100px;
+  transition: width .5s cubic-bezier(.4,0,.2,1);
+}
+
+/* Tema tag */
+.tema-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--primary-l);
+  border: 1px solid rgba(37,99,235,.15);
+  color: var(--primary);
+  font-size: 11px; font-weight: 700; letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: 5px 12px; border-radius: 100px;
+  margin-bottom: 16px;
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* Question card */
+.question-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 36px 36px 28px;
+  box-shadow: var(--shadow);
+  margin-bottom: 20px;
+  animation: cardIn .3s cubic-bezier(.4,0,.2,1) both;
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.question-card.exiting {
+  animation: cardOut .2s cubic-bezier(.4,0,.2,1) both;
+}
+@keyframes cardOut {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(-20px); }
+}
+.q-num-badge {
+  font-size: 11px; font-weight: 700; color: var(--text3);
+  text-transform: uppercase; letter-spacing: .08em;
+  margin-bottom: 12px;
+}
+.q-text {
+  font-size: 17px; font-weight: 600; line-height: 1.65;
+  color: var(--text);
+}
+
+/* Options */
+.options-list { display: flex; flex-direction: column; gap: 10px; margin-top: 24px; }
+.opt-btn {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 18px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface2);
+  cursor: pointer; font-family: 'Nunito', sans-serif;
+  font-size: 14.5px; font-weight: 500; color: var(--text);
+  line-height: 1.5; text-align: left;
+  transition: all var(--transition);
+  width: 100%;
+}
+.opt-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  background: var(--primary-l);
+  transform: translateX(4px);
+}
+.opt-btn:disabled { cursor: default; }
+.opt-letter {
+  flex-shrink: 0;
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800;
+  color: var(--text2);
+  transition: all var(--transition);
+}
+.opt-btn:hover:not(:disabled) .opt-letter {
+  background: var(--primary); color: white;
+}
+.opt-btn.correct {
+  border-color: var(--green); background: var(--green-l);
+}
+.opt-btn.correct .opt-letter { background: var(--green); color: white; }
+.opt-btn.wrong {
+  border-color: var(--red); background: var(--red-l);
+}
+.opt-btn.wrong .opt-letter { background: var(--red); color: white; }
+.opt-btn.revealed {
+  border-color: var(--green); background: var(--green-l);
+  animation: revealPulse .4s ease;
+}
+.opt-btn.revealed .opt-letter { background: var(--green); color: white; }
+@keyframes revealPulse { 0%{transform:scale(1)} 40%{transform:scale(1.02)} 100%{transform:scale(1)} }
+
+/* Feedback */
+.feedback-box {
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  margin-top: 16px;
+  font-size: 14px; line-height: 1.6;
+  font-weight: 500;
+  display: none;
+}
+.feedback-box.show { display: block; animation: fadeIn .3s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.feedback-box.correct { background: var(--green-l); border: 1px solid #86efac; color: #166534; }
+.feedback-box.wrong { background: var(--red-l); border: 1px solid #fca5a5; color: #991b1b; }
+[data-theme="dark"] .feedback-box.correct { color: #86efac; }
+[data-theme="dark"] .feedback-box.wrong { color: #fca5a5; }
+
+/* Navigation */
+.nav-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+}
+.btn-nav {
+  padding: 12px 28px;
+  border-radius: var(--radius-sm);
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer; transition: all var(--transition);
+  border: 2px solid transparent;
+}
+.btn-prev {
+  background: var(--surface2);
+  border-color: var(--border);
+  color: var(--text2);
+}
+.btn-prev:hover { border-color: var(--primary); color: var(--primary); }
+.btn-next {
+  background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+  color: white;
+  box-shadow: 0 4px 14px rgba(37,99,235,.3);
+}
+.btn-next:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37,99,235,.4); }
+.btn-next:disabled { opacity: .5; cursor: default; transform: none; }
+
+.skip-label { font-size: 12px; color: var(--text3); cursor: pointer; transition: color var(--transition); }
+.skip-label:hover { color: var(--primary); }
+
+/* ═══════════════════════════════════════════════════
+   RESULTS SCREEN
+═══════════════════════════════════════════════════ */
+#screen-results {
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  padding: 80px 16px 60px;
+}
+.results-wrapper { width: 100%; max-width: 800px; }
+.results-hero {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 48px 40px;
+  text-align: center;
+  margin-top: 24px;
+  box-shadow: var(--shadow-lg);
+  animation: fadeInUp .6s ease both;
+}
+.score-ring {
+  width: 140px; height: 140px;
+  border-radius: 50%;
+  margin: 0 auto 24px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  position: relative;
+  background: conic-gradient(var(--primary) var(--pct, 0%), var(--border) 0%);
+  box-shadow: var(--shadow);
+}
+.score-ring::before {
+  content: '';
+  position: absolute; inset: 10px;
+  border-radius: 50%;
+  background: var(--surface);
+}
+.score-pct {
+  position: relative;
+  font-family: 'Sora', sans-serif;
+  font-size: 32px; font-weight: 700; color: var(--text);
+  line-height: 1;
+}
+.score-grade {
+  position: relative;
+  font-size: 12px; font-weight: 700; color: var(--text3);
+  margin-top: 2px;
+}
+.results-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 26px; font-weight: 700; color: var(--text);
+  margin-bottom: 8px;
+}
+.results-name { font-size: 16px; color: var(--text2); margin-bottom: 28px; }
+.results-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 16px; margin-bottom: 32px;
+}
+.rs-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 18px 12px;
+}
+.rs-num {
+  font-family: 'Sora', sans-serif;
+  font-size: 28px; font-weight: 700;
+  line-height: 1;
+}
+.rs-num.green { color: var(--green); }
+.rs-num.red { color: var(--red); }
+.rs-num.blue { color: var(--primary); }
+.rs-label { font-size: 11px; color: var(--text3); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-top: 4px; }
+
+.results-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn-results {
+  padding: 13px 28px;
+  border-radius: var(--radius-sm);
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer; transition: all var(--transition);
+}
+.btn-primary-results {
+  background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+  color: white; border: none;
+  box-shadow: 0 4px 14px rgba(37,99,235,.3);
+}
+.btn-primary-results:hover { transform: translateY(-2px); }
+.btn-secondary-results {
+  background: var(--surface2);
+  color: var(--text2);
+  border: 2px solid var(--border);
+}
+.btn-secondary-results:hover { border-color: var(--primary); color: var(--primary); }
+
+/* Review section */
+.review-section { margin-top: 32px; }
+.review-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+}
+.review-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 20px; font-weight: 700; color: var(--text);
+}
+.filter-btns { display: flex; gap: 8px; }
+.filter-btn {
+  padding: 7px 16px;
+  border-radius: 100px;
+  font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: all var(--transition);
+  border: 1.5px solid var(--border);
+  background: var(--surface2); color: var(--text2);
+}
+.filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+.review-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 12px;
+  border-left: 4px solid var(--border);
+  transition: all var(--transition);
+  animation: fadeIn .3s ease;
+}
+.review-item.correct { border-left-color: var(--green); }
+.review-item.wrong { border-left-color: var(--red); }
+.review-item.skipped { border-left-color: var(--accent); }
+.review-item-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 8px; }
+.review-item-num { font-size: 12px; font-weight: 700; color: var(--text3); }
+.review-item-status {
+  font-size: 11px; font-weight: 700; padding: 3px 10px;
+  border-radius: 100px; text-transform: uppercase; letter-spacing: .06em;
+}
+.review-item-status.correct { background: var(--green-l); color: var(--green); }
+.review-item-status.wrong { background: var(--red-l); color: var(--red); }
+.review-item-status.skipped { background: var(--accent-l); color: #92400e; }
+[data-theme="dark"] .review-item-status.skipped { color: var(--accent); }
+.review-q-text { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.5; margin-bottom: 12px; }
+.review-opts { display: flex; flex-direction: column; gap: 6px; }
+.review-opt {
+  font-size: 13px; padding: 8px 12px;
+  border-radius: 8px; border: 1px solid var(--border);
+  color: var(--text2);
+}
+.review-opt.correct { background: var(--green-l); border-color: #86efac; color: #166534; font-weight: 700; }
+.review-opt.user-wrong { background: var(--red-l); border-color: #fca5a5; color: #991b1b; }
+[data-theme="dark"] .review-opt.correct { color: #86efac; }
+[data-theme="dark"] .review-opt.user-wrong { color: #fca5a5; }
+
+/* ═══════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+  .welcome-card { padding: 36px 24px; }
+  .stats-row, .results-stats { grid-template-columns: repeat(3, 1fr); }
+  .question-card { padding: 24px 20px 20px; }
+  .q-text { font-size: 15px; }
+  .opt-btn { font-size: 13.5px; padding: 12px 14px; }
+  .nav-row { flex-wrap: wrap; }
+  .btn-nav { flex: 1; text-align: center; padding: 12px 16px; }
+  .review-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .top-bar { padding: 0 16px; }
+  .logo-text { display: none; }
+}
+
+/* ═══════════════════════════════════════════════════
+   CONFETTI ANIMATION
+═══════════════════════════════════════════════════ */
+.confetti-piece {
+  position: fixed;
+  width: 10px; height: 10px;
+  border-radius: 2px;
+  animation: confettifall 2.5s ease-in forwards;
+  z-index: 9999; pointer-events: none;
+}
+@keyframes confettifall {
+  0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- DECORACIÓN DE FONDO -->
+<div class="bg-decoration"></div>
+
+<!-- TOP BAR -->
+<header class="top-bar">
+  <div class="top-bar-left">
+    <div class="logo-icon">S</div>
+    <div class="logo-text">Simulador <span>USICAMM</span></div>
+  </div>
+  <button class="theme-btn" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
+</header>
+
+<!-- ═══════════════════ PANTALLA: BIENVENIDA ═══════════════════ -->
+<div class="screen active" id="screen-welcome">
+  <div class="welcome-card">
+    <div class="welcome-badge">🎓 Simulador Oficial</div>
+    <h1 class="welcome-title">Simulador General<br><span>USICAMM 2025</span></h1>
+    <p class="welcome-subtitle">
+      Pon a prueba tu conocimiento con <strong>200 reactivos</strong> de las temáticas más importantes para evaluación docente. Incluye NEM, LGE, LGDNNA, Vygotsky, CTE, PMC y mucho más.
+    </p>
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="stat-num">200</div>
+        <div class="stat-label">Reactivos</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">27</div>
+        <div class="stat-label">Temáticas</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">90</div>
+        <div class="stat-label">Min. límite</div>
+      </div>
+    </div>
+
+    <input class="name-field" id="inp-name" type="text" placeholder="Escribe tu nombre completo" maxlength="80">
+
+    <div class="options-row">
+      <label class="opt-toggle selected" id="tog-shuffle">
+        <input type="checkbox" id="chk-shuffle" checked onchange="toggleOpt('tog-shuffle',this)">
+        🔀 Aleatorizar preguntas
+      </label>
+      <label class="opt-toggle selected" id="tog-timer">
+        <input type="checkbox" id="chk-timer" checked onchange="toggleOpt('tog-timer',this)">
+        ⏱ Temporizador
+      </label>
+    </div>
+
+    <button class="btn-start" onclick="startQuiz()">Iniciar Simulacro →</button>
+    <div class="author-tag">Elaborado por <strong>Prof. Francisco de Jesús Luna Benítez</strong> · Zona Escolar 07, Calpulalpan, Tlax.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════ PANTALLA: QUIZ ═══════════════════ -->
+<div class="screen" id="screen-quiz">
+  <div class="quiz-wrapper">
+    <div class="quiz-header">
+      <div class="q-counter">Pregunta <strong id="q-current">1</strong> de <strong>200</strong></div>
+      <div class="timer-display" id="timer-display">
+        <span class="timer-icon">⏱</span>
+        <span id="timer-txt">90:00</span>
+      </div>
+    </div>
+
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="prog-bar" style="width:0%"></div>
+    </div>
+
+    <div class="tema-tag" id="tema-tag">📚 Temática</div>
+
+    <div class="question-card" id="q-card">
+      <div class="q-num-badge" id="q-num-badge">Reactivo 1 · Cuestionamiento directo</div>
+      <div class="q-text" id="q-text">Cargando…</div>
+      <div class="options-list" id="opts-list"></div>
+      <div class="feedback-box" id="feedback-box"></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-nav btn-prev" id="btn-prev" onclick="prevQuestion()">← Anterior</button>
+      <span class="skip-label" id="skip-lbl" onclick="skipQuestion()">Omitir →</span>
+      <button class="btn-nav btn-next" id="btn-next" onclick="nextQuestion()">Siguiente →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ PANTALLA: RESULTADOS ═══════════════════ -->
+<div class="screen" id="screen-results">
+  <div class="results-wrapper">
+    <div class="results-hero">
+      <div class="score-ring" id="score-ring">
+        <div class="score-pct" id="score-pct">0%</div>
+        <div class="score-grade" id="score-grade">—</div>
+      </div>
+      <h2 class="results-title" id="results-title">¡Simulacro Completado!</h2>
+      <p class="results-name" id="results-name">Nombre del participante</p>
+      <div class="results-stats">
+        <div class="rs-item">
+          <div class="rs-num green" id="rs-correct">0</div>
+          <div class="rs-label">✅ Correctas</div>
+        </div>
+        <div class="rs-item">
+          <div class="rs-num red" id="rs-wrong">0</div>
+          <div class="rs-label">❌ Incorrectas</div>
+        </div>
+        <div class="rs-item">
+          <div class="rs-num blue" id="rs-skipped">0</div>
+          <div class="rs-label">⏭ Omitidas</div>
+        </div>
+      </div>
+      <div class="results-btns">
+        <button class="btn-results btn-primary-results" onclick="restartQuiz()">🔄 Nuevo Intento</button>
+        <button class="btn-results btn-secondary-results" onclick="goHome()">🏠 Inicio</button>
+      </div>
+    </div>
+
+    <!-- REVISIÓN -->
+    <div class="review-section">
+      <div class="review-header">
+        <div class="review-title">Revisión de Respuestas</div>
+        <div class="filter-btns">
+          <button class="filter-btn active" onclick="filterReview('all',this)">Todas</button>
+          <button class="filter-btn" onclick="filterReview('wrong',this)">Incorrectas</button>
+          <button class="filter-btn" onclick="filterReview('correct',this)">Correctas</button>
+        </div>
+      </div>
+      <div id="review-list"></div>
+    </div>
+
+    <div class="author-tag" style="margin-top:32px">
+      <strong>Prof. Francisco de Jesús Luna Benítez</strong> · Simulador General USICAMM 2025
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   BANCO DE PREGUNTAS (200 reactivos)
+═══════════════════════════════════════════════════ */
+const BANCO = [{"id":1,"tema":"Acoso Escolar · Acuerdo 14/12/23","pregunta":"¿Cuál es el propósito principal de los Lineamientos establecidos en el Acuerdo número 14/12/23 emitido por la SEP?","opciones":["Establecer acciones para la prevención, atención (detección, notificación, intervención y seguimiento) y medidas de no repetición del acoso escolar en educación básica.","Sancionar penalmente a los educandos que cometan actos de acoso escolar dentro de los planteles educativos.","Regular el uso de dispositivos tecnológicos e internet en las aulas de educación preescolar, primaria y secundaria."],"correcta":0},{"id":2,"tema":"Acoso Escolar · Acuerdo 14/12/23","pregunta":"¿A quiénes están dirigidos los Lineamientos del Acuerdo 14/12/23 según el Artículo 2?","opciones":["Exclusivamente a los educandos de educación básica y a sus madres, padres o tutores.","A las Autoridades Educativas Locales (AEL) que proveen educación básica (preescolar, primaria y secundaria).","Solo al personal docente con funciones directivas o de supervisión en los planteles federales."],"correcta":1},{"id":3,"tema":"Acoso Escolar · Acuerdo 14/12/23","pregunta":"¿Cuál de las siguientes características distingue al acoso escolar de otras situaciones de violencia entre educandos?","opciones":["Que ocurre de forma espontánea y sin planificación previa entre grupos de educandos en el plantel.","Que requiere la participación activa o la negligencia de figuras educativas para que se produzca.","Que es intencional, repetitivo y se desarrolla en una relación de desigualdad de poder entre los educandos."],"correcta":2},{"id":4,"tema":"Acoso Escolar · Acuerdo 14/12/23","pregunta":"Seleccione la opción que relacione correctamente cada tipo de acoso escolar con su definición según el Artículo 6 de los Lineamientos.","opciones":["1c, 2a, 3b","1a, 2c, 3b","1b, 2a, 3c"],"correcta":0},{"id":5,"tema":"Acoso Escolar · Acuerdo 14/12/23","pregunta":"Según el Artículo 25 de los Lineamientos, ¿quiénes pueden realizar la detección de un posible caso de acoso escolar?","opciones":["Únicamente el personal directivo, docente y de apoyo y asistencia a la educación del plantel.","Las y los educandos, madres, padres o tutores, así como cualquier figura educativa del plantel.","Solo las Autoridades Educativas Locales a través de sus áreas administrativas especializadas."],"correcta":1},{"id":6,"tema":"Acoso Escolar · Acuerdo 14/12/23","pregunta":"De acuerdo con el Artículo 7, los Lineamientos se regirán bajo principios rectores que incluyen el interés superior de la niñez, la no discriminación, la inclusión y la igualdad sustantiva. Entre los demás principios también se contempla…","opciones":["…la aplicación de sanciones ejemplares y medidas punitivas para disuadir conductas de acoso escolar.","…la vigilancia permanente y el control disciplinario de los educandos dentro y fuera del plantel.","…la confidencialidad, la debida diligencia, la celeridad, la no revictimización y el acceso a la justicia."],"correcta":2},{"id":7,"tema":"Acoso Escolar · Acuerdo 14/12/23","pregunta":"¿Qué papel desempeñan los espectadores dentro de las situaciones de acoso escolar según el Artículo 6 de los Lineamientos?","opciones":["Actúan de manera pasiva o incitadora, convirtiéndose en cómplices al permitir que los hechos de violencia continúen.","Son considerados víctimas directas del acoso y deben recibir el mismo nivel de protección que la víctima principal.","Tienen la obligación jurídica de interponer una denuncia formal ante las autoridades ministeriales de forma inmediata."],"correcta":0},{"id":8,"tema":"Acoso Escolar · Acuerdo 14/12/23","pregunta":"Ordene los cuatro momentos de atención a casos de acoso escolar establecidos en el Artículo 23, del primero al último, tal como los establece el Acuerdo 14/12/23.","opciones":["2, 3, 4, 1 (Notificación → Detección → Intervención → Seguimiento)","3, 2, 4, 1 (Detección → Notificación → Intervención → Seguimiento)","4, 3, 2, 1 (Intervención → Detección → Notificación → Seguimiento)"],"correcta":1},{"id":9,"tema":"Fase 3 · Programa Analítico","pregunta":"¿Qué representa el Programa Sintético en el proceso de diseño y desarrollo curricular?","opciones":["El primer nivel de concreción curricular que presenta los elementos centrales para el trabajo docente.","El tercer nivel de concreción donde se elaboran las planeaciones didácticas del aula.","Un formato administrativo que sustituye al Programa Analítico en las escuelas."],"correcta":0},{"id":10,"tema":"Fase 3 · Programa Analítico","pregunta":"¿Cuál es la función principal de los Campos formativos en el nuevo currículo del Plan de estudio 2022?","opciones":["Organizar los aprendizajes por asignaturas para facilitar la evaluación disciplinar.","Ser organizadores que abordan temas y problemáticas desde una perspectiva complementaria entre disciplinas.","Sustituir el trabajo por proyectos con actividades individuales en cada área del conocimiento."],"correcta":1},{"id":11,"tema":"Fase 3 · Programa Analítico","pregunta":"¿Qué característica esencial distingue a los Procesos de desarrollo de aprendizaje?","opciones":["Son secuencias fijas que todos los docentes deben seguir de manera idéntica.","Son instrumentos de evaluación que miden el desempeño al final de cada fase.","Representan recorridos o rutas posibles en los que las y los estudiantes se apropian de aprendizajes que les permiten comprender el mundo."],"correcta":2},{"id":12,"tema":"Fase 3 · Programa Analítico","pregunta":"¿Qué nivel de concreción curricular representa el Programa Analítico?","opciones":["El segundo nivel, resultado de la contextualización que realiza el colectivo docente a partir de los Programas Sintéticos.","El primer nivel, donde se definen los Contenidos nacionales para la Educación Básica.","El tercer nivel, donde se desarrollan las planeaciones didácticas por sesión de clase."],"correcta":0},{"id":13,"tema":"Fase 3 · Programa Analítico","pregunta":"¿Cuál es la temporalidad del Programa Analítico según el Programa Sintético Fase 3?","opciones":["Semestral, revisada y ajustada al inicio y al final de cada semestre escolar.","Anual, construido por ciclo escolar para cada grado e incorporando los cuatro Campos formativos.","Bimestral, definida conforme al calendario de sesiones del Consejo Técnico Escolar."],"correcta":1},{"id":14,"tema":"Fase 3 · Programa Analítico","pregunta":"¿Qué son los Contenidos nuevos en el marco del Programa Analítico?","opciones":["Contenidos del Programa Sintético que se incorporan sin ningún cambio ni ajuste.","Contenidos que existen en el Programa Sintético y que requieren adaptación al contexto particular.","Contenidos locales o regionales no presentes en el Programa Sintético que el colectivo docente incorpora al Programa Analítico."],"correcta":2},{"id":15,"tema":"Fase 3 · Programa Analítico","pregunta":"Ordene los tres planos del Programa Analítico según su secuencia lógica de construcción:","opciones":["3 → Lectura de la realidad, luego 1 → Contextualización, luego 2 → Formulación.","1 → Contextualización, luego 3 → Lectura de la realidad, luego 2 → Formulación.","2 → Formulación, luego 1 → Contextualización, luego 3 → Lectura de la realidad."],"correcta":0},{"id":16,"tema":"Programa Analítico","pregunta":"¿Qué es el Programa Analítico en el marco del Plan de Estudio para la Educación Preescolar, Primaria y Secundaria 2022?","opciones":["A) Un documento oficial elaborado por la SEP con contenidos predeterminados para cada grado, que los docentes deben aplicar sin modificación alguna.","B) Una propuesta curricular flexible y contextualizada que elaboran las y los docentes de manera conjunta en los colectivos, durante un ciclo escolar.","C) Un instrumento de evaluación diseñado por la autoridad educativa para valorar el desempeño del colectivo escolar al término del ciclo."],"correcta":1},{"id":17,"tema":"Programa Analítico","pregunta":"¿Cuál es el punto de partida para construir el Programa Analítico en cada escuela?","opciones":["A) La lectura crítica de la realidad que realiza el colectivo docente para identificar problemáticas de la comunidad, necesidades de las familias y expectativas de aprendizaje del alumnado.","B) La revisión de los resultados de evaluaciones estandarizadas nacionales aplicadas al alumnado durante el ciclo anterior.","C) La asignación de contenidos temáticos definida por la autoridad educativa estatal para cada nivel y grado escolar."],"correcta":0},{"id":18,"tema":"Programa Analítico","pregunta":"El Programa Analítico se plantea al inicio del ciclo escolar y se caracteriza por ser un documento flexible y vivo, lo cual significa que…","opciones":["A) …es elaborado por la autoridad educativa municipal y se ajusta automáticamente al finalizar cada bimestre.","B) …incluye únicamente los contenidos mínimos obligatorios, dejando el resto a criterio de cada docente de forma individual.","C) …permite estar en constante revisión y ajuste a partir de la realidad cambiante de las condiciones de la escuela y del contexto."],"correcta":2},{"id":19,"tema":"Programa Analítico","pregunta":"Relacione cada plano del codiseño con su propósito principal. Plano: 1. Lectura de la realidad 2. Contextualización 3. Formulación del Programa Analítico Propósito: a) Analizar el contexto social, cultural y económico de la comunidad; identificar logros, dificultades, intereses y condiciones de la escuela. b) Analizar los Contenidos de los Programas Sintéticos para relacionarlos con situaciones cotidianas y decidir qué contextualizar o incorporar como contenido local. c) Organizar los Contenidos en secuenciación y temporalidad, enunciar metodologías y especificar cómo estarán presentes los Ejes Articuladores.","opciones":["A) 1a, 2b, 3c","B) 1b, 2c, 3a","C) 1c, 2a, 3b"],"correcta":0},{"id":20,"tema":"Programa Analítico","pregunta":"Ordene los pasos del proceso de codiseño para la construcción del Programa Analítico en la secuencia correcta: 1. Analizar el contexto social, cultural y económico de la comunidad 2. Relacionar los Contenidos Sintéticos con situaciones cotidianas del alumnado 3. Incorporar contenidos locales no previstos en los Programas Sintéticos 4. Organizar los Contenidos en secuenciación y temporalidad para el ciclo escolar 5. Especificar de qué manera estarán presentes los Ejes Articuladores","opciones":["A) 1, 2, 3, 4, 5","B) 3, 1, 5, 2, 4","C) 4, 3, 2, 5, 1"],"correcta":0},{"id":21,"tema":"Programa Analítico","pregunta":"¿En qué se diferencia el codiseño de la simple contextualización de contenidos?","opciones":["A) La contextualización abarca todos los niveles educativos, mientras que el codiseño es exclusivo de la educación secundaria.","B) El codiseño también implica que el colectivo docente reconozca e incorpore contenidos locales no previstos en los Programas Sintéticos, que considera pertinentes para la formación del alumnado.","C) El codiseño es responsabilidad de la autoridad educativa, mientras que la contextualización corresponde a cada docente de manera individual."],"correcta":1},{"id":22,"tema":"Programa Analítico","pregunta":"El Plano 3 de la Formulación del Programa Analítico se desarrolla cuando el colectivo docente…","opciones":["A) …levanta el diagnóstico socioeducativo para identificar las necesidades, intereses y características de los grupos escolares y de la comunidad.","B) …decide cuáles Contenidos nacionales serán recuperados sin ajuste y cuáles serán contextualizados a la realidad local de los estudiantes.","C) …organiza los Contenidos en secuenciación y temporalidad, enuncia vinculaciones y metodologías didácticas, y especifica cómo estarán presentes los Ejes Articuladores."],"correcta":2},{"id":23,"tema":"Planeación Didáctica NEM","pregunta":"¿Cuál es la característica principal del Codiseño de los programas de estudio en el marco del Plan de Estudio 2022?","opciones":["Es una actividad burocrática donde los docentes registran actividades realizadas para informar a supervisores escolares.","Es un proceso pedagógico permanente que fortalece la autonomía profesional docente y promueve una práctica situada.","Es una estrategia de supervisión institucional para verificar que los docentes cubran íntegramente el currículo nacional."],"correcta":1},{"id":24,"tema":"Planeación Didáctica NEM","pregunta":"¿Qué significa que la planeación didáctica es un ejercicio a priori?","opciones":["Que se elabora una vez concluidas las actividades de aula para documentar los aprendizajes logrados por los estudiantes.","Que se realiza de manera simultánea con la implementación de estrategias didácticas dentro del salón de clases.","Que se desarrolla antes de la intervención educativa, anticipando y diseñando el proceso de aprendizaje con fundamento pedagógico."],"correcta":2},{"id":25,"tema":"Planeación Didáctica NEM","pregunta":"Al elaborar la planeación didáctica, las y los docentes deben decidir qué pretenden que sus alumnos aprendan, para qué les servirá lo aprendido, con qué recursos se desarrollará el proceso, cuándo y dónde se pondrá en práctica lo planeado, y…","opciones":["…mediante qué mecanismos se verificará el logro del propósito de aprendizaje establecido.","…cuántos estudiantes participarán activamente en cada actividad grupal que se proponga.","…qué calificación obtendrá cada alumno en la evaluación sumativa que se aplicará al final."],"correcta":0},{"id":26,"tema":"Planeación Didáctica NEM","pregunta":"Seleccione la opción que relacione correctamente cada elemento de la planeación didáctica con su descripción. ElementoDescripción 1. Contenidosa) Permite hacer los ajustes necesarios para asegurar el progreso de los estudiantes. 2. Evaluación formativab) Explicitar este elemento da sentido a la implementación de estrategias didácticas. 3. Metodologíac) Provienen del Programa Analítico, contextualizado a las necesidades del grupo. Seleccione la combinación correcta:","opciones":["1a, 2c, 3b","1c, 2a, 3b","1b, 2a, 3c"],"correcta":1},{"id":27,"tema":"Planeación Didáctica NEM","pregunta":"Ordene los pasos del ejercicio creativo que implica la planeación didáctica, según el texto: 1 Diseñar propuestas pertinentes y seleccionar recursos adecuados. 2 Anticipar e investigar sobre los contenidos y el contexto de los estudiantes. 3 Analizar, sintetizar información y establecer conexiones significativas. 4 Tomar decisiones fundamentadas sobre la intervención educativa. 5 Imaginar nuevas posibilidades para la enseñanza y el aprendizaje.","opciones":["4, 1, 3, 5, 2","1, 3, 2, 4, 5","2, 3, 5, 1, 4"],"correcta":2},{"id":28,"tema":"Planeación Didáctica NEM","pregunta":"¿Por qué la planeación didáctica debe tener carácter flexible, según el documento del CTE 2025–2026?","opciones":["Para permitir ajustes y modificaciones ante imprevistos, enriqueciéndose con la experiencia y reflexión que se genera durante su puesta en práctica.","Para que el docente pueda cambiar los contenidos curriculares según sus preferencias pedagógicas personales en cada momento.","Para facilitar que diferentes docentes adapten el programa a distintos contextos sin seguir ningún lineamiento curricular común."],"correcta":0},{"id":29,"tema":"Planeación Didáctica NEM","pregunta":"Una de las ventajas de contar con una planeación didáctica bien elaborada es tener claridad sobre la ___ al plantear determinada situación problemática, lo que permite anticipar y revisar los saberes, habilidades, actitudes y valores que los alumnos pondrán en juego.","opciones":["…estrategia de evaluación sumativa que se aplicará al concluir el bloque o unidad temática correspondiente.","…intención didáctica que guía el diseño de actividades con dirección y sentido formativo claro.","…cantidad de materiales físicos y tecnológicos que se deberán adquirir o gestionar para la sesión."],"correcta":1},{"id":30,"tema":"Planeación Didáctica NEM","pregunta":"Ordene los beneficios que aporta asumir con seriedad la elaboración de una planeación didáctica, de acuerdo con Díaz (2018): 1 Asociar el abordaje de contenidos desde estrategias donde los alumnos problematicen, hagan metacognición y construyan vivencias significativas. 2 Re-leer los planes de estudio oficiales para comprender su estructura y asociarlos con las metas institucionales. 3 Re-pensar la asignatura o los Campos Formativos, su orientación y cómo se vinculan con la realidad del entorno.","opciones":["1, 3, 2","3, 1, 2","2, 3, 1"],"correcta":2},{"id":31,"tema":"Nueva Escuela Mexicana 2022","pregunta":"¿Cuál es el fundamento constitucional de la Nueva Escuela Mexicana?","opciones":["El artículo 11 de la LGE, que establece que el Estado buscará la equidad, la excelencia y la mejora continua en la educación a través de la Nueva Escuela Mexicana.","El artículo 3°, cuarto párrafo, de la CPEUM, que establece que la educación se basará en el respeto irrestricto de la dignidad de las personas, con un enfoque de derechos humanos y de igualdad sustantiva.","El artículo 14, fracción II de la LGE, que reconoce a niñas, niños, adolescentes, jóvenes y adultos como sujetos de la educación y prioridad del Sistema Educativo Nacional."],"correcta":1},{"id":32,"tema":"Nueva Escuela Mexicana 2022","pregunta":"De acuerdo con la Nueva Escuela Mexicana, la tarea principal de la educación es…","opciones":["…propiciar que niñez y juventud, junto con sus profesoras y profesores, vayan al encuentro de la humanidad de las otras y los otros, entendidos en su diversidad.","…garantizar la adquisición de competencias clave para el mercado laboral y el desarrollo económico y social del país.","…transmitir los conocimientos científicos universales necesarios para que los estudiantes alcancen los estándares internacionales de aprendizaje."],"correcta":0},{"id":33,"tema":"Nueva Escuela Mexicana 2022","pregunta":"Relacione cada concepto de la NEM con su descripción correcta. 1. Dignidad humana 2. Lo común 3. Autonomía profesional del magisterio a) Libertad de maestras y maestros para ejercer y reinventar la docencia, e intercambiar experiencias problematizando la realidad. b) Principio de corresponsabilidad y coparticipación entre miembros de la comunidad escolar comprometidos con la formación y emancipación de los estudiantes. c) Valor intrínseco, irrenunciable e inviolable que justifica el reconocimiento y ejercicio de los derechos humanos.","opciones":["1b, 2c, 3a","1c, 2a, 3b","1c, 2b, 3a"],"correcta":2},{"id":34,"tema":"Nueva Escuela Mexicana 2022","pregunta":"¿Cuál de las siguientes características define correctamente a los estudiantes en el marco de la Nueva Escuela Mexicana?","opciones":["Son sujetos de derechos con capacidad de reinterpretar, incidir y transformar el mundo que les rodea, como lo haría cualquier adulto.","Son destinatarios pasivos de la educación que necesitan la orientación constante de los adultos para comprender y participar en su entorno.","Son capital humano en proceso de formación cuyas competencias deben responder a los perfiles establecidos por el mercado laboral."],"correcta":0},{"id":35,"tema":"Nueva Escuela Mexicana 2022","pregunta":"Ordene las cuatro desigualdades digitales identificadas en la NEM en la secuencia en que se presentan en el Plan de Estudio 2022: 1. Desigualdad entre quienes desarrollan un saber instrumental y quienes desarrollan un saber reflexivo y crítico. 2. Desigualdad en el acceso a las tecnologías, la conectividad y los servicios digitales. 3. Desigualdad relacionada con la territorialidad y el dominio contextualizado de las tecnologías. 4. Desigualdad derivada de los contextos socioeconómicos que generan distintos niveles de alfabetización digital.","opciones":["2, 3, 1, 4","2, 4, 1, 3","1, 2, 4, 3"],"correcta":1},{"id":36,"tema":"Nueva Escuela Mexicana 2022","pregunta":"Para la Nueva Escuela Mexicana, la evaluación del aprendizaje tiene como función principal…","opciones":["…determinar numéricamente el nivel de cumplimiento de los objetivos de aprendizaje con el fin de acreditar o reprobar a los estudiantes al final del ciclo escolar.","…medir el desempeño comparativo de los estudiantes mediante pruebas estandarizadas que permitan clasificarlos en escalas nacionales e internacionales.","…retroalimentar el proceso educativo a través del diálogo entre el profesorado y los estudiantes para identificar logros, obstáculos y trazar acciones de mejoramiento."],"correcta":2},{"id":37,"tema":"Nueva Escuela Mexicana 2022","pregunta":"¿Cuál es el papel de la comunidad en la propuesta curricular de la Nueva Escuela Mexicana?","opciones":["Es un contexto externo que puede enriquecer los contenidos curriculares, pero cuya participación queda a criterio exclusivo del docente.","Es el núcleo integrador de los procesos de enseñanza y aprendizaje, y el espacio en que se inscribe la escuela como red de relaciones pedagógicas.","Es el destinatario final de los proyectos educativos que elaboran los estudiantes al concluir su ciclo de formación básica."],"correcta":1},{"id":38,"tema":"Nueva Escuela Mexicana 2022","pregunta":"Relacione cada desigualdad digital con su descripción correspondiente según el Plan de Estudio 2022: 1. Primera desigualdad 2. Segunda desigualdad 3. Cuarta desigualdad a) Falta de acceso a las tecnologías, la conectividad y los servicios del mundo digital. b) Diferencias en el dominio de las tecnologías según territorialidad y contextos cultural y lingüísticamente situados. c) Diferencias en contextos socioeconómicos que generan distintos niveles de alfabetización digital entre estudiantes.","opciones":["1a, 2c, 3b","1b, 2a, 3c","1c, 2b, 3a"],"correcta":0},{"id":39,"tema":"Acuerdo 17/05/25 · Violencia Sexual","pregunta":"¿Cuál es el objeto principal de los Lineamientos establecidos en el Acuerdo número 17/05/25?","opciones":["Establecer procedimientos para la Prevención primaria, Atención y Medidas de no repetición para la erradicación de la Violencia Sexual en Planteles de Educación Básica.","Regular las sanciones penales aplicables a los responsables de actos de violencia sexual en planteles educativos de cualquier nivel del sistema educativo nacional.","Definir los criterios de contratación de personal docente que no tenga antecedentes de violencia contra las mujeres en el sistema educativo."],"correcta":0},{"id":40,"tema":"Acuerdo 17/05/25 · Violencia Sexual","pregunta":"¿Para quiénes son de observancia obligatoria los Lineamientos del Acuerdo 17/05/25, según el Artículo 2?","opciones":["Exclusivamente para las Autoridades Educativas Locales y las Figuras Educativas de los planteles de Educación Básica pública.","Para la Autoridad Educativa Federal, las Autoridades Educativas Locales, las Autoridades Educativas Municipales y las Autoridades Educativas Escolares en el ámbito de su competencia.","Solo para el personal docente y directivo de los planteles de Educación Básica de sostenimiento público federal."],"correcta":1},{"id":41,"tema":"Acuerdo 17/05/25 · Violencia Sexual","pregunta":"¿Cuál de las siguientes situaciones describe correctamente el principio de 'No revictimización' según los Lineamientos?","opciones":["Una maestra informa a los compañeros de clase sobre lo ocurrido a un alumno para generar solidaridad grupal y apoyo colectivo.","La directora solicita a la víctima que repita su declaración ante diferentes autoridades escolares para documentar el caso con mayor detalle.","El personal escolar evita exponer a la víctima a experiencias que agraven su condición, preserva su identidad y promueve que realice una única declaración."],"correcta":2},{"id":42,"tema":"Acuerdo 17/05/25 · Violencia Sexual","pregunta":"Seleccione la opción que relaciona correctamente el enfoque transversal con la descripción que le corresponde según el Artículo 3 de los Lineamientos.","opciones":["1c, 2a, 3b","1b, 2a, 3c","1a, 2c, 3b"],"correcta":1},{"id":43,"tema":"Acuerdo 17/05/25 · Violencia Sexual","pregunta":"De acuerdo con el Artículo 4 de los Lineamientos, ¿qué se entiende por 'Violencia Sexual'?","opciones":["Cualquier acto de naturaleza sexual que degrada o daña el cuerpo y/o la sexualidad de una víctima en contra de su voluntad u opinión, dado que ésta no puede otorgar consentimiento por ser niña, niño o adolescente, tener discapacidad o estar bajo los efectos de sustancias, entre otras causas.","Únicamente los actos físicos de naturaleza sexual realizados con violencia explícita hacia personas menores de dieciocho años dentro del ámbito escolar.","Las acciones de connotación sexual realizadas por adultos en posición de autoridad hacia menores, exclusivamente en contextos de subordinación laboral o docente."],"correcta":0},{"id":44,"tema":"Acuerdo 17/05/25 · Violencia Sexual","pregunta":"La Prevención primaria de la Violencia Sexual tiene por objeto procurar y fomentar una cultura en la que prevalezca el entendimiento, el respeto, la dignidad e integridad de las personas, a través del diseño e implementación de estrategias, procedimientos, acciones y programas que promuevan…","opciones":["…el reconocimiento de las sanciones jurídicas aplicables a quienes cometan actos de Violencia Sexual en los Planteles de Educación Básica.","…la identificación de indicadores de riesgo en los planteles y la canalización inmediata de los casos detectados a las instancias correspondientes.","…el reconocimiento de los derechos humanos, según lo establece el Artículo 12 de los Lineamientos."],"correcta":2},{"id":45,"tema":"Acuerdo 17/05/25 · Violencia Sexual","pregunta":"Según el Artículo 15 de los Lineamientos, ¿a través de qué cinco momentos se brindará atención a las posibles víctimas de Violencia Sexual?","opciones":["Identificación, Documentación, Intervención, Sanción y Seguimiento.","Detección, Intervención, Notificación, Canalización y Seguimiento.","Denuncia, Investigación, Intervención, Canalización y Rehabilitación."],"correcta":1},{"id":46,"tema":"Acuerdo 17/05/25 · Violencia Sexual","pregunta":"Ordene los primeros cinco elementos que debe contener el protocolo para la prevención, atención y medidas de no repetición de Violencia Sexual, según el Artículo 7 de los Lineamientos. 1. Ámbito de competencia y/o aplicación 2. Denominación 3. Disposiciones generales (principios rectores, marco jurídico, marco conceptual y figuras responsables) 4. Introducción 5. Objetivos generales y específicos","opciones":["2, 4, 1, 5, 3","1, 2, 4, 3, 5","4, 2, 3, 5, 1"],"correcta":0},{"id":47,"tema":"Estrategia Vida Saludable","pregunta":"¿Cuál es el eje articulador de la Nueva Escuela Mexicana que fundamenta pedagógicamente la Estrategia Nacional Vida Saludable?","opciones":["Bienestar Colectivo e Inclusión Educativa.","Vida Saludable.","Desarrollo Comunitario y Participación Ciudadana."],"correcta":1},{"id":48,"tema":"Estrategia Vida Saludable","pregunta":"¿Cuántos pilares de salud prioritaria aborda la Estrategia Nacional Vida Saludable para niñas y niños de 6 a 12 años?","opciones":["Tres: Nutrición, Salud Visual y Salud Bucal.","Cuatro: Nutrición, Actividad Física, Salud Visual y Salud Bucal.","Dos: Nutrición y Salud Bucal."],"correcta":0},{"id":49,"tema":"Estrategia Vida Saludable","pregunta":"¿Qué campo formativo de la NEM se vincula directamente con la Estrategia Nacional Vida Saludable y promueve la intervención en problemáticas de salud del contexto inmediato?","opciones":["Saberes y Pensamiento Científico.","Ética, Naturaleza y Sociedad.","De lo Humano y lo Comunitario."],"correcta":2},{"id":50,"tema":"Estrategia Vida Saludable","pregunta":"¿Qué institución coordina la estación de Peso y Talla durante la Jornada de Salud Escolar para calcular el Índice de Masa Corporal (IMC)?","opciones":["IMSS (Instituto Mexicano del Seguro Social).","SNDIF (Sistema Nacional para el Desarrollo Integral de la Familia).","Secretaría de Educación Pública (SEP)."],"correcta":1},{"id":51,"tema":"Estrategia Vida Saludable","pregunta":"¿Qué instrumento se utiliza en la estación de Salud Visual de la Jornada de Salud Escolar para medir la agudeza visual de los estudiantes?","opciones":["Carta Snellen.","Optómetro digital de campo.","Lupa de aumento con escala milimétrica."],"correcta":0},{"id":52,"tema":"Estrategia Vida Saludable","pregunta":"La Estrategia Nacional Vida Saludable es una intervención interinstitucional coordinada por el Gobierno de México, la SEP, la Secretaría de Salud, el IMSS y…","opciones":["…la UNAM y el CONACYT, para brindar respaldo científico a las acciones de salud escolar.","…el ISSSTE y la CONADE, responsables de la activación física y la atención médica en escuelas.","…el SNDIF, que completa el esquema interinstitucional de coordinación para la salud escolar."],"correcta":2},{"id":53,"tema":"Estrategia Vida Saludable","pregunta":"¿Qué condición es indispensable para que una alumna o alumno pueda participar en la revisión de peso, talla, vista y aplicación de flúor durante la Jornada de Salud Escolar?","opciones":["Que el alumno se encuentre en buen estado de salud el día de la jornada escolar.","La firma del Consentimiento Informado por parte del tutor o tutora legalmente responsable.","Que el directivo haya notificado a la Autoridad Educativa Local con 15 días de anticipación."],"correcta":1},{"id":54,"tema":"Acoso Escolar · Guía de Campo","pregunta":"¿Cuáles son los tres elementos que, según la Guía de Campo, deben estar presentes simultáneamente para que una situación sea clasificada como acoso escolar?","opciones":["Intencionalidad, repetición y desigualdad de poder.","Violencia, conflicto y mediación pedagógica.","Agresión, víctima y espectador presente."],"correcta":0},{"id":55,"tema":"Acoso Escolar · Guía de Campo","pregunta":"En el contexto del acoso escolar en preescolar, cuando una conducta no muestra intención clara pero sí es repetitiva y causa daño, el docente debe…","opciones":["…ignorarla hasta que los niños resuelvan el conflicto de manera autónoma, pues a esta edad no existe el acoso.","…atenderla como acoso escolar, dado que aunque la intención no sea clara, la repetición y el daño son suficientes para intervenir.","…esperar a que se presente una agresión física visible antes de documentar el caso en el expediente del alumno."],"correcta":1},{"id":56,"tema":"Acoso Escolar · Guía de Campo","pregunta":"Seleccione la opción que relacione correctamente cada tipo de acoso con la acción que le corresponde.","opciones":["1c, 2d, 3a, 4b","1d, 2c, 3b, 4a","1d, 2c, 3a, 4b"],"correcta":2},{"id":57,"tema":"Acoso Escolar · Guía de Campo","pregunta":"Un estudiante de primer grado llegó golpeado un día, pero la semana siguiente ambos niños juegan juntos sin problemas. Según la guía, ¿cómo se clasifica esta situación?","opciones":["No es acoso escolar; se trata de un golpe aislado que no cumple el criterio de repetición.","Sí es acoso escolar porque hubo una agresión física intencional hacia otro estudiante.","Es acoso escolar porque implica una desigualdad de poder entre los estudiantes involucrados."],"correcta":0},{"id":58,"tema":"Acoso Escolar · Guía de Campo","pregunta":"Ordene los pasos del Protocolo de Acción Nivel 1 (Ruta Docente) en el orden correcto: 1. Documentar el proceso de incidencia y resolución 2. Detener la agresión y proteger a la víctima 3. Citar a madres, padres o tutores de los involucrados 4. Avisar por escrito a la autoridad inmediata (Director)","opciones":["2, 3, 4, 1","2, 4, 3, 1","4, 2, 3, 1"],"correcta":1},{"id":59,"tema":"Acoso Escolar · Guía de Campo","pregunta":"¿Cuál es la consecuencia compartida que enfrentan tanto los espectadores pasivos como los activos, según la Guía de Campo?","opciones":["Desarrollan habilidades de liderazgo al observar cómo el agresor maneja situaciones de conflicto.","Se convierten en víctimas potenciales al ser identificados por el agresor como posibles amenazas.","Gradualmente interiorizan actitudes violentas y pierden la capacidad de reaccionar ante injusticias."],"correcta":2},{"id":60,"tema":"Acoso Escolar · Guía de Campo","pregunta":"Un alumno de tercer grado ha bajado su rendimiento, evita ir a la escuela y muestra dificultad para integrarse a los equipos. Según la Guía de Campo, estos son indicadores de alerta de tipo…","opciones":["…académico y social, los cuales deben activar el radar de detección temprana del docente.","…fisiológico y emocional, que requieren intervención médica antes de cualquier acción pedagógica.","…conductual y psicomotriz, propios de un trastorno de aprendizaje sin relación con el acoso escolar."],"correcta":0},{"id":61,"tema":"Evaluación Formativa","pregunta":"¿Cuál es el principal objetivo del nuevo paradigma de evaluación formativa según Díaz-Barriga?","opciones":["Obtener calificaciones altas para demostrar el nivel académico del grupo.","Centrar el proceso educativo en el deseo de aprender y en el proceso de aprendizaje.","Diseñar exámenes que midan con precisión los conocimientos memorísticos del alumno."],"correcta":1},{"id":62,"tema":"Evaluación Formativa","pregunta":"Según Díaz-Barriga, la evaluación formativa no es sinónimo de una suma permanente de calificaciones, sino que…","opciones":["…es una actividad compleja que vincula aprendizaje y evaluación en diversas etapas del proceso educativo.","…es una herramienta para clasificar a los estudiantes según su rendimiento final.","…es un procedimiento administrativo centrado en registrar evidencias de logro."],"correcta":0},{"id":63,"tema":"Evaluación Formativa","pregunta":"¿Qué caracteriza al paradigma histórico de la evaluación que Díaz-Barriga critica?","opciones":["Se enfoca en desarrollar el compromiso intrínseco del estudiante hacia el aprendizaje.","Recupera el sentido pedagógico de la evaluación formativa en cada etapa.","Genera estrés y cumplimiento rutinario al centrarse en la obtención de un puntaje o calificación."],"correcta":2},{"id":64,"tema":"Evaluación Formativa","pregunta":"Relacione cada dimensión del continuum evaluativo con su descripción: 1. Dimensión del estudiante 2. Dimensión del docente a) Proceso externo: observación, recalibración didáctica y retroalimentación. b) Proceso interno: autorreflexión y responsabilidad sobre el propio aprendizaje.","opciones":["1a, 2b","1b, 2a","1a, 2a"],"correcta":1},{"id":65,"tema":"Evaluación Formativa","pregunta":"Ordene correctamente los tres principios del continuum evaluación-aprendizaje según Díaz-Barriga: 1. Responde a la complejidad de planear situaciones didácticas en distintos contextos. 2. No es sinónimo de una suma permanente de calificaciones. 3. Es una actividad compleja que vincula aprendizaje y evaluación en diversas etapas.","opciones":["2, 3, 1","1, 3, 2","3, 2, 1"],"correcta":0},{"id":66,"tema":"Evaluación Formativa","pregunta":"Un docente observa que su grupo trabaja de forma rutinaria y sin motivación durante una actividad. Conforme al planteamiento de Díaz-Barriga, ¿cuál sería la acción más pertinente?","opciones":["Llamar la atención del grupo y continuar con la planeación original sin modificarla.","Solicitar que entreguen el trabajo al finalizar la sesión para verificar resultados.","Aplicar el timing pedagógico: suspender la actividad y reflexionar con el grupo sobre lo que está sucediendo."],"correcta":2},{"id":67,"tema":"Evaluación Formativa","pregunta":"Según Díaz-Barriga, la retroalimentación eficaz debe detonar la autorreflexión y no el malestar. Para lograrlo, el primer paso consiste en…","opciones":["…señalar los errores con precisión para que el alumno conozca sus fallas de inmediato.","…visibilizar los aciertos del estudiante, pues la experiencia de éxito genera el deseo de seguir esforzándose.","…comparar el desempeño del alumno con los estándares nacionales establecidos."],"correcta":1},{"id":68,"tema":"Evaluación Formativa","pregunta":"¿Cuál es la diferencia fundamental entre 'describir' y 'juzgar' en el proceso de retroalimentación formativa?","opciones":["Describir señala con claridad los puntos de mejora evitando expresiones de rechazo; juzgar desalienta y genera malestar en el estudiante.","Describir permite asignar una calificación objetiva; juzgar identifica si el alumno cumplió los estándares.","Describir se hace de forma escrita; juzgar se hace de forma oral durante la clase."],"correcta":0},{"id":69,"tema":"Comunicación y Expresión","pregunta":"¿Cuál de las siguientes opciones describe correctamente la comunicación según la Nueva Escuela Mexicana?","opciones":["Un proceso de interacción social para analizar, debatir y construir significados compartidos.","Una técnica para transmitir información de manera unidireccional entre emisor y receptor.","Un método exclusivo para el aprendizaje formal dentro del aula."],"correcta":0},{"id":70,"tema":"Comunicación y Expresión","pregunta":"¿Cuál es el objetivo principal de la comunicación en el contexto de la Nueva Escuela Mexicana?","opciones":["Desarrollar exclusivamente las habilidades artísticas de los estudiantes.","Gestionar intercambios inclusivos para participar activamente en los asuntos de la comunidad y propiciar la convivencia.","Mejorar el rendimiento académico individual de cada alumno mediante la evaluación continua."],"correcta":1},{"id":71,"tema":"Comunicación y Expresión","pregunta":"La expresión actúa como canal de empatía porque…","opciones":["…permite al docente evaluar únicamente la ortografía y sintaxis de los estudiantes.","…estimula la imaginación y las habilidades artísticas para diseñar propuestas técnicas.","…da voz a narrativas inclusivas y diversas, rompiendo estereotipos."],"correcta":2},{"id":72,"tema":"Comunicación y Expresión","pregunta":"¿Cuáles son las barreras de comunicación que se mencionan explícitamente en la guía de estudio?","opciones":["Los prejuicios, la ambigüedad y la falta de claridad.","El ruido, la distancia física y la falta de tecnología.","La timidez, el vocabulario limitado y la escritura deficiente."],"correcta":0},{"id":73,"tema":"Comunicación y Expresión","pregunta":"Según la guía, ¿qué distingue fundamentalmente al diálogo del debate?","opciones":["El diálogo utiliza argumentos más elaborados y formales que el debate.","El diálogo busca comprender y colaborar, mientras que el debate busca vencer o persuadir.","El diálogo es una técnica exclusiva para resolver conflictos en espacios jurídicos."],"correcta":1},{"id":74,"tema":"Comunicación y Expresión","pregunta":"Seleccione la opción que relaciona correctamente cada herramienta didáctica del arsenal con su propósito:","opciones":["1a, 2c, 3b","1c, 2b, 3a","1b, 2a, 3c"],"correcta":2},{"id":75,"tema":"Comunicación y Expresión","pregunta":"¿Cuál es el propósito principal de la herramienta didáctica 'Campañas y Mesas de Diálogo'?","opciones":["Analizar frases populares para erradicar expresiones de violencia y crear un decálogo de buen trato.","Elaborar cortometrajes comunitarios con diferentes roles asumidos por los estudiantes.","Organizar lecturas públicas de poesía para generar reflexión colectiva en la comunidad."],"correcta":0},{"id":76,"tema":"Consejo Técnico Escolar","pregunta":"¿Qué es el Consejo Técnico Escolar (CTE) según el Artículo 3 del Acuerdo 05/04/24?","opciones":["El órgano colegiado de mayor decisión técnico-pedagógica de cada escuela de Educación Básica.","El órgano administrativo encargado de supervisar el cumplimiento de normas disciplinarias en la escuela.","El comité de padres de familia que participa en la toma de decisiones sobre infraestructura escolar."],"correcta":0},{"id":77,"tema":"Consejo Técnico Escolar","pregunta":"La misión principal del CTE es adoptar e implementar decisiones para...","opciones":["...cumplir los indicadores de eficiencia terminal y reducir la deserción escolar.","...el máximo logro de los aprendizajes, el pensamiento crítico y la unión con la comunidad.","...garantizar el cumplimiento del calendario escolar y los programas de estudio oficiales."],"correcta":1},{"id":78,"tema":"Consejo Técnico Escolar","pregunta":"¿Cuál de los siguientes principios corresponde al Enfoque Territorial del CTE, según el Artículo 7, Fracción I?","opciones":["El magisterio decide sobre su ejercicio didáctico y contextualiza el currículo a su realidad.","Se prioriza a niñas, niños y adolescentes en todo proceso educativo para formarlos como ciudadanos democráticos.","Se conecta la escuela con la realidad social, cultural y ambiental de la comunidad, reconociendo la diversidad."],"correcta":2},{"id":79,"tema":"Consejo Técnico Escolar","pregunta":"¿Qué pilar del CTE corresponde a la capacidad del magisterio de decidir sobre su ejercicio didáctico y contextualizar el currículo a su realidad?","opciones":["Autonomía Profesional, establecida en el Artículo 7, Fracciones III-V.","Enfoque Territorial, establecido en el Artículo 7, Fracción I.","Interés Superior de la Niñez, establecido en el Artículo 7, Fracción II."],"correcta":0},{"id":80,"tema":"Consejo Técnico Escolar","pregunta":"En una reunión del CTE, los docentes debaten cómo reorganizar el tiempo de las sesiones para atender mejor las necesidades del colectivo. ¿Qué función del CTE están ejerciendo?","opciones":["Fomentar el trabajo colegiado mediante intercambio de reflexiones pedagógicas.","Decidir la organización: definir las formas de trabajo que mejor atiendan al colectivo para lograr sus propósitos (Art. 8, Fracc. I).","Definir metas prioritarias mediante la construcción del Programa de Mejora Continua."],"correcta":1},{"id":81,"tema":"Consejo Técnico Escolar","pregunta":"¿Qué función del CTE consiste en propiciar espacios pedagógicos de intercambio, reflexión y construcción colectiva, según el Artículo 8, Fracción II?","opciones":["Definir metas prioritarias para atender problemas socioeducativos.","Decidir la organización para lograr los propósitos del colectivo.","Fomentar el trabajo colegiado entre los integrantes del CTE."],"correcta":2},{"id":82,"tema":"Consejo Técnico Escolar","pregunta":"Relacione correctamente a cada integrante del CTE con su función principal según el Acuerdo 05/04/24:","opciones":["1a, 2b, 3c","1b, 2c, 3a","1c, 2a, 3b"],"correcta":0},{"id":83,"tema":"Proceso de Mejora Continua","pregunta":"¿Cuál de las siguientes afirmaciones describe correctamente la naturaleza del Proceso de Mejora Continua (PMC)?","opciones":["Es un documento administrativo que se elabora al inicio del ciclo escolar, se entrega a la supervisión y se archiva al finalizar el año.","Es una estrategia de evaluación docente diseñada para medir el desempeño del personal educativo ante las autoridades.","Es el esfuerzo constante por ofrecer una educación humanista, integral, inclusiva, equitativa, democrática e intercultural, reconociendo que siempre hay algo que se puede hacer mejor."],"correcta":2},{"id":84,"tema":"Proceso de Mejora Continua","pregunta":"Para que la mejora escolar no se quede solo en buenos deseos, el PMC requiere dos condiciones absolutamente nucleares: perspectiva compartida y…","opciones":["…compromiso conjunto, donde todas y todos, a partir de sus atribuciones, hacen lo que les corresponde para enfrentar los retos.","…evaluación docente permanente que mida el cumplimiento de los objetivos institucionales trazados por la dirección.","…supervisión directiva continua que garantice el cumplimiento puntual de cada acción establecida en el programa."],"correcta":0},{"id":85,"tema":"Proceso de Mejora Continua","pregunta":"¿Qué característica del PMC señala que cada escuela tiene condiciones distintas y el proceso debe adaptarse a su propia realidad?","opciones":["Territorial","Diferenciado","Gradual"],"correcta":1},{"id":86,"tema":"Proceso de Mejora Continua","pregunta":"Seleccione la opción que relacione correctamente cada característica del PMC con su descripción.","opciones":["1b, 2a, 3c","1a, 2c, 3b","1c, 2b, 3a"],"correcta":2},{"id":87,"tema":"Proceso de Mejora Continua","pregunta":"Ordene correctamente las 5 fases del Proceso de Mejora Continua según su secuencia lógica de desarrollo.","opciones":["3 → 5 → 1 → 2 → 4","5 → 3 → 1 → 4 → 2","3 → 1 → 5 → 2 → 4"],"correcta":0},{"id":88,"tema":"Proceso de Mejora Continua","pregunta":"En el PMC, ¿qué implica la 'perspectiva compartida' como condición nuclear para la transformación escolar?","opciones":["Que todos los docentes apliquen exactamente las mismas estrategias didácticas en sus respectivas aulas durante el ciclo.","Una idea común acerca de la tarea de la escuela, del trabajo docente y de los estudiantes, reconociendo dónde se encuentra la escuela y caminando hacia la educación que se quiere.","Que directivos y supervisores compartan los resultados de las evaluaciones con toda la comunidad al concluir el ciclo."],"correcta":1},{"id":89,"tema":"Proceso de Mejora Continua","pregunta":"La característica 'progresivo' del Proceso de Mejora Continua significa que…","opciones":["…el proceso avanza de manera lineal y sin retrocesos hacia los objetivos propuestos dentro del mismo ciclo escolar.","…todas las acciones deben completarse en el ciclo escolar en que fueron planeadas, sin excepción.","…representa un avance paulatino a mediano y largo plazo hacia el horizonte de mejora, sin pretender resultados inmediatos."],"correcta":2},{"id":90,"tema":"Ciencia Escolar","pregunta":"¿Cuál es el punto de partida correcto para la enseñanza de la ciencia escolar exitosa según la perspectiva pedagógica moderna?","opciones":["El listado de temas del programa oficial de estudios del ciclo escolar.","La vida personal y social del estudiante adolescente, involucrándolo en asuntos vitales de su entorno.","La revisión sistemática del libro de texto para responder las preguntas al final de cada capítulo."],"correcta":1},{"id":91,"tema":"Ciencia Escolar","pregunta":"En la ciencia escolar, “aprender ciencias es reconstruir las ideas personales por medio del diálogo con otras personas y otros conocimientos.” Esta afirmación corresponde al pensamiento de…","opciones":["…Juan Ignacio Pozo, quien subraya que el aprendizaje científico es fundamentalmente un proceso dialógico y social.","…Lidya Galagovsky, quien establece que toda hipótesis debe surgir de preguntas impuestas por el docente.","…el libro de texto, cuyas actividades orientan al estudiante a resolver ejercicios de ciencias de forma individual."],"correcta":0},{"id":92,"tema":"Ciencia Escolar","pregunta":"Seleccione la opción que relaciona correctamente cada pilar del pensamiento científico escolar con su descripción.","opciones":["1b, 2d, 3a, 4c","1c, 2a, 3d, 4b","1c, 2d, 3a, 4b"],"correcta":2},{"id":93,"tema":"Ciencia Escolar","pregunta":"Ordene los pasos del “Algoritmo de la Acción” del Pilar 4 (Toma de Decisiones Informadas), del primero al último. 1. Visualizar opciones y sus impactos éticos/sociales. 2. Establecer objetivos: ¿qué queremos resolver o mejorar? 3. Evaluar, decidir y actuar llevando a la práctica la mejor opción. 4. Obtener información basada en evidencia empírica o documental.","opciones":["2, 4, 1, 3","1, 2, 4, 3","4, 1, 2, 3"],"correcta":0},{"id":94,"tema":"Ciencia Escolar","pregunta":"¿Cuál de las siguientes afirmaciones describe correctamente la característica principal de la indagación en el aula de ciencias?","opciones":["Es un método científico rígido y ordenado que los estudiantes deben seguir paso a paso.","Es un proceso lineal que inicia con la formulación de hipótesis y concluye con la obtención de resultados.","Es un proceso amplio y complejo donde convergen el planteamiento de preguntas, la formulación de hipótesis, la interpretación de datos empíricos y la creación de modelos y argumentos."],"correcta":2},{"id":95,"tema":"Ciencia Escolar","pregunta":"En la Matriz de Progresión de los 4 Tipos de Indagación, la indagación estructurada se caracteriza porque…","opciones":["…el docente provee el principio, el problema y el procedimiento paso a paso, mientras el alumno verifica los resultados esperados.","…el docente propone la pregunta y el proceso completo, mientras el alumno ejecuta el procedimiento para encontrar la respuesta.","…el docente plantea únicamente el problema inicial y el alumno diseña y desarrolla los procedimientos para resolverlo."],"correcta":1},{"id":96,"tema":"Ciencia Escolar","pregunta":"¿Cuál de los siguientes enunciados constituye una hipótesis escolar válida y comprobable?","opciones":["Si aumenta la concentración de CO₂ en los océanos, habrá disolución de arrecifes de coral.","¿Cómo evolucionan los anfibios?","¡Creo que desconoces el funcionamiento de un gato hidráulico!"],"correcta":0},{"id":97,"tema":"Convivencia Escolar","pregunta":"¿Cuál es la perspectiva correcta sobre el conflicto escolar, según Cascón (2001)?","opciones":["Es un fenómeno negativo que debe evitarse y castigarse para mantener el orden en el aula.","Es señal de falla moral en los estudiantes y debe resolverse exclusivamente por la autoridad.","Es una oportunidad educativa para aprender a hacer valer los derechos de forma no violenta y mejorar la convivencia."],"correcta":2},{"id":98,"tema":"Convivencia Escolar","pregunta":"Un docente observa que dos alumnos tienen intereses opuestos sobre cómo distribuir las tareas del equipo y ninguno cede. ¿Cuál señal de alerta del conflicto está presente?","opciones":["Incompatibilidad, porque las necesidades o intereses de ambas personas se perciben como incompatibles.","Tensión distorsionadora, porque el ambiente crea incomodidad que altera la percepción de las intenciones.","Reacción emocional, porque aparecen emociones fuertes como enojo o frustración en los involucrados."],"correcta":0},{"id":99,"tema":"Convivencia Escolar","pregunta":"La 'Tensión Distorsionadora' es una señal de alerta del conflicto que surge cuando…","opciones":["…los estudiantes expresan abiertamente enojo, tristeza o frustración ante una situación injusta en el salón.","…surge una incomodidad en el ambiente que altera la forma en que percibimos las intenciones del otro.","…las necesidades e intereses de dos o más personas chocan y se perciben como incompatibles entre sí."],"correcta":1},{"id":100,"tema":"Convivencia Escolar","pregunta":"¿Cuál de los siguientes estilos de afrontamiento del conflicto corresponde a la dinámica 'Gano/Ganas'?","opciones":["Competición, porque una parte impone su decisión sin importar la relación con el otro.","Evasión, porque se renuncia a la necesidad propia y se evita enfrentar el problema directamente.","Cooperación/Negociación, porque ambas partes ceden un poco para lograr un beneficio mutuo cuidando la relación."],"correcta":2},{"id":101,"tema":"Convivencia Escolar","pregunta":"Relacione el estilo de afrontamiento con su resultado correspondiente:","opciones":["A) 1c, 2a, 3b","B) 1b, 2a, 3c","C) 1a, 2c, 3b"],"correcta":1},{"id":102,"tema":"Convivencia Escolar","pregunta":"Un estudiante siente mucho enojo tras un conflicto con un compañero. Para calmarse, decide salir del salón unos minutos y reflexionar antes de hablar. ¿Qué técnica de enfriamiento emocional está utilizando?","opciones":["Tiempo Fuera, porque se distancia temporalmente de la situación para pensar con claridad.","Distracción Conductual, porque enfoca su atención en otra actividad para generar emociones positivas.","Reestructuración Cognitiva, porque cambia pensamientos irracionales por pensamientos racionales."],"correcta":0},{"id":103,"tema":"Convivencia Escolar","pregunta":"La técnica de 'Reestructuración Cognitiva' aplicada en el aula consiste en…","opciones":["…crear espacios seguros donde los estudiantes expresan sus emociones asertivamente en grupo.","…enfocarse en una actividad física o lúdica para generar emociones positivas y liberar la tensión.","…cambiar pensamientos irracionales ('Me odia') por pensamientos racionales ('Tal vez tuvo un mal día')."],"correcta":2},{"id":104,"tema":"Cultura de Paz","pregunta":"De acuerdo con la ONU (1999) y UNICEF, ¿cuál es la definición correcta de Cultura de Paz?","opciones":["Un estado permanente de armonía social que se logra cuando desaparecen todos los conflictos en una comunidad.","Un conjunto estructurado de elementos que rechazan la violencia y previenen los conflictos abordando sus causas fundamentales.","Un programa educativo diseñado exclusivamente para escuelas de nivel primaria orientado a enseñar valores cívicos."],"correcta":1},{"id":105,"tema":"Cultura de Paz","pregunta":"¿Cuál es la diferencia fundamental entre la Paz Negativa y la Paz Positiva según Johan Galtung?","opciones":["La Paz Negativa se refiere a la ausencia de violencia directa, mientras que la Paz Positiva fomenta activamente la justicia social, la cooperación y la empatía.","La Paz Negativa es superior porque elimina todos los conflictos, mientras que la Paz Positiva solo los gestiona superficialmente.","No existe diferencia real entre ambas; son conceptos complementarios que se aplican indistintamente en contextos escolares."],"correcta":0},{"id":106,"tema":"Cultura de Paz","pregunta":"Según Johan Galtung, ¿qué significa educar para la paz?","opciones":["Enseñar a los estudiantes a evitar cualquier tipo de conflicto mediante la obediencia y la disciplina estricta.","Capacitar a los docentes para que resuelvan todos los problemas escolares antes de que los alumnos los perciban.","Enseñarle a la gente a encarar de manera más creativa y menos violenta las situaciones de conflicto, dándoles los medios para hacerlo."],"correcta":2},{"id":107,"tema":"Cultura de Paz","pregunta":"¿Qué es el cyberbullying y cuál es su característica principal?","opciones":["Una discusión entre estudiantes que ocurre únicamente dentro del aula a través de mensajes escritos en papel.","El uso de las Tecnologías de la Información y Comunicación (TICs) para hostigar, insultar o acosar, donde los agresores se escudan en el anonimato masivo.","Un conflicto normal entre compañeros que se resuelve espontáneamente sin necesidad de intervención docente."],"correcta":1},{"id":108,"tema":"Cultura de Paz","pregunta":"¿Cuál es el objetivo central de la Educación para la Paz según la Guía de Estudio?","opciones":["Proveer autonomía para discernir, defender los derechos propios y ajenos, y valorar la diversidad cultural (la otredad) como una riqueza y no como una división.","Formar estudiantes obedientes que acaten las normas escolares sin cuestionarlas, asegurando la convivencia armoniosa.","Eliminar todas las diferencias culturales dentro del aula para lograr una convivencia homogénea y libre de tensiones."],"correcta":0},{"id":109,"tema":"Cultura de Paz","pregunta":"¿Qué implica reconocer la 'otredad' en el contexto de la paz y la educación inclusiva?","opciones":["Aceptar que existe una cultura superior que debe ser modelo para todas las demás en el contexto escolar.","Ignorar las diferencias culturales para tratar a todos los estudiantes exactamente igual, sin distinción.","Comprender que cada persona posee una identidad producto de múltiples contactos culturales, generando escenarios incluyentes y libres de prejuicios."],"correcta":2},{"id":110,"tema":"Cultura de Paz","pregunta":"¿Cuál es la característica que distingue el acoso escolar (bullying) de un conflicto ordinario entre compañeros?","opciones":["El acoso escolar siempre ocurre fuera del plantel educativo, mientras que los conflictos ordinarios suceden dentro del aula.","El acoso escolar es una agresión intencional, constante y repetida donde existe un desequilibrio de poder y la víctima no puede defenderse fácilmente.","El acoso escolar es un conflicto pasajero que se resuelve solo con el tiempo sin necesidad de intervención adulta."],"correcta":1},{"id":111,"tema":"Equidad Educativa","pregunta":"¿Cuál es el concepto que describe a la educación como un derecho que potencia simultáneamente la salud, la paz, la prosperidad y la justicia?","opciones":["La educación como derecho multiplicador, porque al ejercerla se amplían otros derechos fundamentales de la humanidad.","La educación como proceso de socialización que transfiere conocimientos entre generaciones de manera sistemática.","La educación como herramienta institucional diseñada para preservar el orden social y la cultura nacional."],"correcta":0},{"id":112,"tema":"Equidad Educativa","pregunta":"¿Cuáles son los tres cimientos sobre los que se construye la Comunidad Promotora de Equidad según la guía?","opciones":["Identidad colectiva, participación ciudadana y valores compartidos.","Lazos afectivos, confianza y resiliencia.","Familia, escuela y comunidad como actores del proceso educativo."],"correcta":1},{"id":113,"tema":"Equidad Educativa","pregunta":"Dentro de la Balanza de la Autoestima, ¿qué concepto actúa como punto de equilibrio entre el amor propio y el respeto por los demás?","opciones":["El autoconcepto, porque permite reconocer los propios límites frente a las necesidades del grupo.","La autoeficacia, ya que impulsa al individuo a actuar con seguridad en contextos sociales adversos.","La inteligencia emocional, definida como la capacidad de equilibrar y dirigir las emociones."],"correcta":2},{"id":114,"tema":"Equidad Educativa","pregunta":"Según el Prisma del Diálogo, ¿cuáles son las tres condiciones que convergen para generar una convivencia pacífica y justa?","opciones":["Respeto, empatía y solidaridad, que al integrarse en el diálogo fortalecen el tejido social.","Democracia, participación y tolerancia, pilares del modelo de convivencia comunitaria.","Igualdad, inclusión y justicia, como valores fundamentales de la educación ciudadana."],"correcta":0},{"id":115,"tema":"Equidad Educativa","pregunta":"¿Cuál es el principio rector que guía a una comunidad segura, según el tema de Seguridad y Cuidado Mutuo?","opciones":["El cumplimiento de protocolos institucionales como primera línea de protección ante la violencia.","El cuidado del otro, entendido como el principio fundamental que articula toda red de protección comunitaria.","La vigilancia permanente de los espacios escolares como garantía de seguridad para el alumnado."],"correcta":1},{"id":116,"tema":"Equidad Educativa","pregunta":"¿Qué característica define específicamente a las Asambleas-Talleres como espacios de aprendizaje adulto?","opciones":["Son reuniones donde directivos y docentes informan a las familias sobre los resultados académicos del periodo.","Son eventos esporádicos centrados en la revisión de conductas y calificaciones del alumnado.","Son reuniones periódicas donde la jerarquía desaparece y el diálogo horizontal predomina entre todos los participantes."],"correcta":2},{"id":117,"tema":"Equidad Educativa","pregunta":"Según el tema del Puente del Contexto, ¿cuál es el rol formativo que desempeña LA ESCUELA en la educación integral del alumnado?","opciones":["La sistematización del aprendizaje, la atención a la diversidad social y la formación para la ciudadanía plena.","La socialización primaria, la formación ética y el desarrollo de vínculos afectivos con el entorno familiar.","La transmisión de la cultura nacional y el refuerzo de los valores establecidos por el sistema educativo."],"correcta":0},{"id":118,"tema":"Ecosistema de Aprendizaje","pregunta":"¿Cuál de los siguientes ejemplos corresponde al aprendizaje implícito?","opciones":["La adquisición del lenguaje en niños pequeños, que ocurre sin esfuerzo consciente ni instrucción formal.","El estudio de contenidos matemáticos dentro del aula bajo la guía de un docente.","La visita guiada de un grupo escolar a un museo de ciencias naturales organizada por la escuela."],"correcta":0},{"id":119,"tema":"Ecosistema de Aprendizaje","pregunta":"Según el ecosistema del aprendizaje, una teoría bien fundada no dicta prescripciones rígidas, sino que…","opciones":["establece reglas fijas que el docente debe aplicar mecánicamente en cada situación del aula.","ofrece un marco útil para el análisis, la reflexión y la adaptación creativa del docente.","determina con exactitud los resultados de aprendizaje esperados en cada grupo escolar."],"correcta":1},{"id":120,"tema":"Ecosistema de Aprendizaje","pregunta":"¿En qué porcentaje del tiempo de vigilia transcurre el aprendizaje en entornos informales, según el ecosistema del aprendizaje?","opciones":["50% del tiempo de vigilia ocurre en entornos informales.","60% del tiempo de vigilia se da en entornos informales.","79% del tiempo de vigilia transcurre en entornos informales."],"correcta":2},{"id":121,"tema":"Ecosistema de Aprendizaje","pregunta":"Seleccione la opción que relaciona correctamente el tipo de aprendizaje con su descripción: 1. Aprendizaje formal 2. Aprendizaje informal 3. Aprendizaje implícito a) Adquisición sin esfuerzo ni consciencia b) Ocurre en hogares, museos y entre pares c) Diseño educativo en centros educativos","opciones":["1c, 2b, 3a","1b, 2a, 3c","1a, 2c, 3b"],"correcta":0},{"id":122,"tema":"Ecosistema de Aprendizaje","pregunta":"¿Cuál es el nivel de comprensión que caracteriza al experto de rutina?","opciones":["Comprende profundamente los principios subyacentes de cada tarea que realiza.","Superficial: sabe 'qué' hacer, pero no necesariamente el 'por qué'.","Transfiere sus capacidades creativamente a situaciones nuevas y distintas."],"correcta":1},{"id":123,"tema":"Ecosistema de Aprendizaje","pregunta":"El experto adaptativo, ante situaciones nuevas o problemas que no siguen el formato exacto…","opciones":["experimenta frustración o bloqueo al no encontrar el procedimiento habitual memorizado.","aplica un algoritmo escolar aunque este no sea el más adecuado para la situación.","transfiere sus capacidades creativamente a distintas y nuevas situaciones."],"correcta":2},{"id":124,"tema":"Ecosistema de Aprendizaje","pregunta":"¿Cuál de las siguientes es una característica auténtica de los 5 pilares de la Habilidad Adaptativa?","opciones":["Autorregulación motivacional: capacidad de mantener la atención y el esfuerzo ante la dificultad.","Memorización eficiente de contenidos para reproducirlos con exactitud en cualquier situación.","Dependencia progresiva de la retroalimentación del docente para avanzar en el aprendizaje."],"correcta":0},{"id":125,"tema":"Planificación Didáctica","pregunta":"¿Cómo se denomina la fase de la enseñanza en la que el docente lleva a cabo la planificación, según Philip Jackson?","opciones":["Enseñanza preactiva","Enseñanza reactiva","Enseñanza interactiva"],"correcta":0},{"id":126,"tema":"Planificación Didáctica","pregunta":"¿Qué función cumple la planificación cuando actúa como 'espacio transicional', según Winnicott?","opciones":["Elimina por completo la incertidumbre del aula","Hace que lo desconocido se vuelva familiar, transformando la incertidumbre en un territorio prefigurado y menos amenazador","Convierte la enseñanza en una actividad mecánica y totalmente predecible"],"correcta":1},{"id":127,"tema":"Planificación Didáctica","pregunta":"Según la metáfora central del entramado complejo, ¿cómo debe entenderse la planificación didáctica?","opciones":["Como una lista lineal de pasos secuenciales que el docente debe seguir rigurosamente","Como un documento burocrático que responde exclusivamente a los requerimientos institucionales","Como un tejido dinámico de constituyentes heterogéneos inseparablemente asociados"],"correcta":2},{"id":128,"tema":"Planificación Didáctica","pregunta":"¿Cuál es el rasgo de la práctica de planificar que se define como el núcleo del perfil profesional docente, al exigir conocer currículos, establecer prioridades y diseñar proyectos acordes al contexto?","opciones":["Competencia","Anticipación","Práctica Social"],"correcta":0},{"id":129,"tema":"Planificación Didáctica","pregunta":"¿Qué rasgo de la planificación describe la acción del docente de proyectar la modificación de la realidad, definiendo la naturaleza de los objetos y las respuestas adecuadas antes del acto educativo?","opciones":["Representación","Anticipación","Haceres Heterogéneos"],"correcta":1},{"id":130,"tema":"Planificación Didáctica","pregunta":"El rasgo de Representación en la planificación posee dos planos interdependientes: uno sistemático/formalizable que corresponde al documento escrito, y otro…","opciones":["…denominado práctica social, que integra normas institucionales y una estructura teleoafectiva con finalidades y valores.","…vinculado a los saberes de la experiencia, construido en el espacio laboral mediante la intuición docente.","…subjetivo/experiencial, que corresponde a la prefiguración mental de la clase por parte del docente."],"correcta":2},{"id":131,"tema":"Planificación Didáctica","pregunta":"¿Qué caracteriza al rasgo de Práctica Social (Rasgo 4) en la planificación didáctica?","opciones":["Está compuesta por formas de decir y hacer en un tiempo y espacio, atravesada por normas institucionales y una estructura teleoafectiva con finalidades, valores y emociones","Articula acciones diversas como redactar, diagnosticar y buscar información en un nudo indivisible mediado por la racionalidad","Actúa como un prisma que produce diversos efectos en la práctica educativa, desde la guía personal hasta el control institucional"],"correcta":0},{"id":132,"tema":"Planificación Didáctica","pregunta":"Según el rasgo de Saberes (Rasgo 5), planificar requiere la movilización e integración de tres tipos de conocimientos. ¿Cuáles son?","opciones":["Teórico, práctico y evaluativo","Científicos/tecnológicos, de la experiencia y profesionales","Curriculares, pedagógicos y administrativos"],"correcta":1},{"id":133,"tema":"El Plano de la Mente Infantil","pregunta":"Un docente observa que un alumno de 6 años aún no sabe leer y decide esperar sin intervenir, argumentando que \"con el tiempo madurará solo\". Esta decisión refleja una concepción:","opciones":["Diagnóstico-prescriptiva, porque implica esperar a que se identifique el déficit específico.","Naturalista, porque considera que el desarrollo es maduración interna y la naturaleza hará su trabajo.","Interaccionista, porque supone que el ambiente solo puede aportar nutrición al proceso natural."],"correcta":1},{"id":134,"tema":"El Plano de la Mente Infantil","pregunta":"Según John Locke, el niño es una \"tabula rasa\" (hoja en blanco), lo que implica que…","opciones":["…es producto exclusivo de su ambiente y experiencia, sin predisposiciones innatas que determinen su desarrollo.","…nace con un programa interno de desarrollo que se despliega de manera natural en etapas.","…su desarrollo depende de la interacción entre biología y ambiente de forma simultánea."],"correcta":0},{"id":135,"tema":"El Plano de la Mente Infantil","pregunta":"Ordene las etapas del desarrollo psicosexual de Freud de la primera (más temprana) a la última: 1. Oral &nbsp;&nbsp; 2. Fálica &nbsp;&nbsp; 3. Anal &nbsp;&nbsp; 4. Latencia &nbsp;&nbsp; 5. Genital","opciones":["Oral → Fálica → Anal → Latencia → Genital","Oral → Anal → Latencia → Fálica → Genital","Oral → Anal → Fálica → Latencia → Genital"],"correcta":2},{"id":136,"tema":"El Plano de la Mente Infantil","pregunta":"Relacione el teórico con su concepto central: TeóricoConcepto 1. Vygotskya) Determinismo recíproco: mente, conducta y ambiente se influyen mutuamente 2. Bronfenbrennerb) Las funciones mentales se transforman en superiores a través de la interacción social 3. Bandurac) El entorno como \"muñecas rusas\" de contextos interactivos","opciones":["1c – 2a – 3b","1b – 2c – 3a","1a – 2b – 3c"],"correcta":1},{"id":137,"tema":"El Plano de la Mente Infantil","pregunta":"¿Cuál de los siguientes planteamientos corresponde específicamente al condicionamiento operante de B.F. Skinner?","opciones":["El desarrollo ocurre en etapas discretas guiadas por la maduración biológica del niño.","Los niños construyen activamente su conocimiento interactuando con el ambiente físico y social.","Las conductas y el lenguaje se adquieren y fortalecen mediante recompensas y refuerzos de los adultos."],"correcta":2},{"id":138,"tema":"El Plano de la Mente Infantil","pregunta":"Según la teoría sociocultural de Vygotsky, procesos como hablar, razonar o resolver problemas…","opciones":["…se realizan primero en un plano social entre personas, y solo después se internalizan individualmente.","…son producto exclusivo de la maduración biológica y se despliegan sin necesidad de interacción.","…dependen del condicionamiento operante aplicado por los adultos para su adquisición."],"correcta":0},{"id":139,"tema":"El Plano de la Mente Infantil","pregunta":"Un niño tímido busca consistentemente actividades solitarias, evitando el juego con otros. Según la Genética Conductual Contemporánea, la explicación más adecuada es que:","opciones":["El ambiente moldea completamente su personalidad y determina sus preferencias sociales sin influencia genética.","Sus genes predisponen un temperamento que lo lleva a buscar entornos congruentes con sus características innatas.","Su etapa psicosocial actual (según Erikson) determina momentáneamente sus preferencias de interacción."],"correcta":1},{"id":140,"tema":"El Plano de la Mente Infantil","pregunta":"Ordene las etapas del desarrollo cognoscitivo de Piaget de la más temprana a la más avanzada: 1. Sensoriomotora &nbsp;&nbsp; 2. Operaciones formales &nbsp;&nbsp; 3. Preoperacional &nbsp;&nbsp; 4. Operaciones concretas","opciones":["Sensoriomotora → Preoperacional → Operaciones concretas → Operaciones formales","Sensoriomotora → Operaciones formales → Preoperacional → Operaciones concretas","Preoperacional → Sensoriomotora → Operaciones concretas → Operaciones formales"],"correcta":0},{"id":141,"tema":"Puentes NEM · Familia y Comunidad","pregunta":"¿Qué rol desempeñan las familias en la propuesta curricular de la Nueva Escuela Mexicana (NEM)?","opciones":["Constituir el puente entre la escuela y la comunidad.","Ser ayudantes periféricos que asisten únicamente a festivales escolares.","Supervisar el trabajo docente de manera sistemática."],"correcta":0},{"id":142,"tema":"Puentes NEM · Familia y Comunidad","pregunta":"En la escuela tradicional, ¿cómo se define la participación de las familias?","opciones":["Como integración de saberes locales al currículo escolar.","Como asistencia física pasiva a reuniones o festivales escolares.","Como corresponsabilidad plena en el bienestar y buen trato."],"correcta":1},{"id":143,"tema":"Puentes NEM · Familia y Comunidad","pregunta":"Según la Matriz de Transformación de la NEM, ¿cuál es el rol del docente en la Escuela NEM (Comunidad)?","opciones":["Único poseedor del saber que trabaja aislado en su santuario.","Supervisor de las actividades que realizan las familias en la escuela.","Lector crítico de la realidad social y generador de diálogos pedagógicos."],"correcta":2},{"id":144,"tema":"Puentes NEM · Familia y Comunidad","pregunta":"La participación genuina no equivale únicamente a la presencia física. Es un proceso…","opciones":["…situado, permanente y de diálogo deliberativo.","…medido por el número de reuniones a las que asisten los padres de familia.","…enfocado exclusivamente en apoyar tareas escolares desde el hogar."],"correcta":0},{"id":145,"tema":"Puentes NEM · Familia y Comunidad","pregunta":"¿Cuál de las siguientes dimensiones de la participación se refiere a desempeñar acciones concretas, tareas y responsabilidades compartidas?","opciones":["Tomar Parte (Influir).","Tener Parte (Asumir un rol).","Formar Parte (Pertenecer)."],"correcta":1},{"id":146,"tema":"Puentes NEM · Familia y Comunidad","pregunta":"¿Qué exige el codiseño de contenidos en la propuesta de la NEM?","opciones":["Que el director dicte los contenidos a abordar en cada aula.","Que los docentes elaboren individualmente los planes sin consultar a la comunidad.","La escucha activa de los estudiantes y el trabajo directo con las familias para contextualizar los contenidos."],"correcta":2},{"id":147,"tema":"Puentes NEM · Familia y Comunidad","pregunta":"En el Caso Los Pilares, la desvinculación escolar de las familias se explica principalmente por:","opciones":["Barreras estructurales: pobreza, migración de los padres varones, madres jóvenes al frente y baja escolaridad transgeneracional.","Falta de interés y apatía de los padres hacia la educación de sus hijos.","Desacuerdos con las estrategias pedagógicas del docente a cargo del grupo."],"correcta":0},{"id":148,"tema":"Ecosistema Escolar","pregunta":"¿Qué porcentaje de la población escolar de 5 a 11 años vive con sobrepeso u obesidad, según la ENSANUT 2022?","opciones":["27.3% de la población escolar en ese rango de edad.","43.7% de la población escolar en ese rango de edad.","37.3% de la población escolar en ese rango de edad."],"correcta":2},{"id":149,"tema":"Ecosistema Escolar","pregunta":"¿Cuál es el pilar del ecosistema alimentario escolar que establece que la salud y nutrición del estudiante están por encima de cualquier interés comercial, garantizando ausencia total de conflicto de intereses?","opciones":["Interés Superior de la Niñez.","Inclusión y Cultura.","Pedagogía Activa."],"correcta":0},{"id":150,"tema":"Ecosistema Escolar","pregunta":"El pilar de Sostenibilidad y Entorno establece que se deben priorizar alimentos naturales, frescos y de temporada, reducir el impacto ambiental, minimizar el desperdicio y…","opciones":["…fomentar el consumo de productos industrializados de bajo costo para beneficiar a las familias.","…comprar a productores locales de pequeña y mediana escala.","…importar insumos certificados de origen internacional que garanticen estándares de calidad."],"correcta":1},{"id":151,"tema":"Ecosistema Escolar","pregunta":"¿Cuál de los siguientes alimentos pertenece a la Zona Verde y puede ofrecerse en los espacios escolares según los lineamientos de alimentación saludable?","opciones":["Fruta en almíbar con azúcar añadida y conservadores.","Bebida con edulcorante natural para reducir calorías.","Frutas y verduras crudas, con cáscara y de temporada."],"correcta":2},{"id":152,"tema":"Ecosistema Escolar","pregunta":"De acuerdo con los lineamientos de alimentación saludable, ¿qué tipo de alimentos quedan estrictamente prohibidos en los espacios escolares según la Zona Negra?","opciones":["Alimentos preenvasados con sellos o leyendas del etiquetado frontal de advertencia.","Cereales integrales como avena y amaranto.","Leguminosas secas sin freír como frijol y lenteja."],"correcta":0},{"id":153,"tema":"Ecosistema Escolar","pregunta":"Seleccione la opción que relacione correctamente el pilar del ecosistema alimentario escolar con su descripción.","opciones":["1c, 2a, 3b","1b, 2a, 3c","1a, 2c, 3b"],"correcta":1},{"id":154,"tema":"Ecosistema Escolar","pregunta":"Según los lineamientos de hidratación inteligente, ¿cómo debe ofrecerse el agua simple potable en los planteles educativos?","opciones":["A libre demanda, sin saborizantes, fomentando el uso de bebederos escolares seguros.","En presentaciones individuales envasadas por cuestiones de higiene y control.","Con un máximo de dos raciones diarias para evitar el desperdicio de agua."],"correcta":0},{"id":155,"tema":"Ley General de Educación","pregunta":"¿Cuál es el carácter que debe tener la educación impartida por el Estado, según la Ley General de Educación?","opciones":["Universal, inclusiva, pública, gratuita y laica.","Selectiva, privada, laica, regional y obligatoria.","Opcional, confesional, arancelada, exclusiva y técnica."],"correcta":0},{"id":156,"tema":"Ley General de Educación","pregunta":"¿Qué niveles educativos se consideran obligatorios según la Ley General de Educación?","opciones":["Solo la educación primaria y la secundaria.","La educación básica (preescolar, primaria y secundaria) y la media superior.","Únicamente la educación preescolar y primaria en zonas rurales."],"correcta":1},{"id":157,"tema":"Ley General de Educación","pregunta":"Según el Artículo 78 de la LGE, las madres, padres o tutores son corresponsables en el proceso educativo de sus hijos menores de dieciocho años y tienen el deber de…","opciones":["…transferir la responsabilidad formativa exclusivamente a los docentes y directivos del plantel.","…supervisar únicamente el promedio académico al final de cada ciclo escolar.","…apoyar su aprendizaje y revisar continuamente su progreso, desempeño y conducta."],"correcta":2},{"id":158,"tema":"Ley General de Educación","pregunta":"¿Cuáles son los criterios que deben orientar la educación según el Artículo 16 de la Ley General de Educación?","opciones":["Democrática, nacional, humanista, equitativa, inclusiva, intercultural, integral y de excelencia.","Técnica, regional, productiva, selectiva, laica, bilingüe, comunitaria y federal.","Científica, artística, deportiva, cívica, digital, histórica, rural y urbana."],"correcta":0},{"id":159,"tema":"Ley General de Educación","pregunta":"Relacione cada derecho de la familia con su descripción, conforme al Artículo 128 de la LGE: DerechoDescripción 1. Participación activaa) Conocer criterios y resultados de las evaluaciones 2. Acceso a la informaciónb) Colaborar con las autoridades escolares para solucionar problemas 3. Integración a órganosc) Formar parte de las asociaciones de padres de familia","opciones":["1c, 2a, 3b","1b, 2a, 3c","1a, 2c, 3b"],"correcta":1},{"id":160,"tema":"Ley General de Educación","pregunta":"Una directora observa que su escuela atiende a niños de familias con alta marginación económica. Para atender esta situación conforme a la LGE, ¿cuál es la acción prioritaria que debe promover?","opciones":["Aplicar exámenes de diagnóstico para separar a los alumnos por nivel de conocimiento.","Solicitar a los padres de familia cuotas adicionales para mejorar los materiales educativos.","Dirigir las medidas educativas prioritariamente a los grupos con mayor rezago o vulnerabilidad socioeconómica."],"correcta":2},{"id":161,"tema":"Ley General de Educación","pregunta":"Según el Artículo 15 de la LGE, uno de los fines de la educación es formar a los estudiantes en una cultura de la paz, lo cual implica…","opciones":["…la solución no violenta de conflictos y el respeto irrestricto a la dignidad humana.","…la participación activa en actividades deportivas y recreativas dentro de la escuela.","…el cumplimiento estricto del reglamento escolar y la obediencia a las autoridades educativas."],"correcta":0},{"id":162,"tema":"Ley General de Educación","pregunta":"Un maestro de secundaria organiza actividades que buscan fomentar el pensamiento crítico y fortalecer el tejido social en su grupo. ¿Con cuál principio de la Nueva Escuela Mexicana está alineada esta práctica?","opciones":["Con el principio de obligatoriedad escolar establecido en los artículos 5° al 9°.","Con el desarrollo humano integral que impulsa la NEM para evitar la corrupción y combatir la discriminación.","Con el principio de laicidad que rige la educación impartida por el Estado."],"correcta":1},{"id":163,"tema":"LGDNNA","pregunta":"¿Qué principio debe considerarse de manera primordial al tomar decisiones que afecten a niñas, niños y adolescentes, según el Artículo 2° de la LGDNNA?","opciones":["","",""],"correcta":0},{"id":164,"tema":"LGDNNA","pregunta":"Según el Artículo 3° de la LGDNNA, la Federación, las entidades federativas, los municipios y las demarcaciones territoriales tienen la responsabilidad de concurrir en el diseño, ejecución y evaluación de políticas públicas…","opciones":["","",""],"correcta":0},{"id":165,"tema":"LGDNNA","pregunta":"¿Cuántos derechos reconoce el Artículo 13° de la LGDNNA para niñas, niños y adolescentes?","opciones":["","",""],"correcta":0},{"id":166,"tema":"LGDNNA","pregunta":"De acuerdo con el Artículo 17° de la LGDNNA, ¿qué implica el derecho de prioridad para niñas, niños y adolescentes?","opciones":["","",""],"correcta":0},{"id":167,"tema":"LGDNNA","pregunta":"Según el Artículo 22° de la LGDNNA sobre el derecho a vivir en familia, la falta de recursos económicos…","opciones":["","",""],"correcta":0},{"id":168,"tema":"LGDNNA","pregunta":"Una maestra impone castigos físicos a sus alumnos cuando no cumplen con la tarea. Desde la perspectiva de la LGDNNA, ¿qué artículo se vulnera directamente con esta práctica?","opciones":["","",""],"correcta":0},{"id":169,"tema":"LGDNNA","pregunta":"Seleccione la opción que relaciona correctamente cada artículo de la LGDNNA con el derecho que le corresponde.","opciones":["","",""],"correcta":0},{"id":170,"tema":"LGDNNA","pregunta":"¿Qué concepto protege el Artículo 39° de la LGDNNA cuando un menor enfrenta discriminación por más de una condición simultáneamente (por ejemplo, ser indígena y tener discapacidad)?","opciones":["","",""],"correcta":0},{"id":171,"tema":"Art. 3° y 4° Constitucional","pregunta":"¿Cuál es el nivel educativo que, según el Artículo 3° Constitucional, tiene como responsabilidad del Estado concientizar sobre su importancia como derecho vital de la niñez, aunque no sea obligatorio en el mismo sentido que la educación básica?","opciones":["A) La educación primaria, ya que es el primer nivel formal dentro de la educación básica obligatoria.","B) La educación inicial, cuya importancia como derecho de la niñez debe ser promovida por el Estado.","C) La educación media superior, que el Estado debe garantizar de manera obligatoria para todos."],"correcta":1},{"id":172,"tema":"Art. 3° y 4° Constitucional","pregunta":"De acuerdo con el Artículo 3°, párrafo 2, la educación pública impartida por el Estado debe ser gratuita, laica, universal e inclusiva. Además, debe ser…","opciones":["A) …pública, administrada y garantizada por las instituciones del Estado, sin costo para las personas.","B) …confesional, orientada por los principios éticos de las principales tradiciones religiosas del país.","C) …optativa a partir de secundaria, permitiendo a las familias decidir si continúan en el sistema público."],"correcta":0},{"id":173,"tema":"Art. 3° y 4° Constitucional","pregunta":"¿Cuál de los siguientes criterios educativos, establecidos en la Fracción II del Artículo 3°, concibe a la educación como un sistema de vida para el mejoramiento del pueblo y la defensa de la independencia y la cultura nacionales?","opciones":["A) El criterio equitativo, que combate las desigualdades mediante apoyos en zonas marginadas.","B) El criterio intercultural y plurilingüe, que promueve el respeto al patrimonio histórico.","C) El criterio democrático y nacional, que entiende la democracia como forma de vida colectiva."],"correcta":2},{"id":174,"tema":"Art. 3° y 4° Constitucional","pregunta":"Seleccione la opción que relacione correctamente el derecho del Artículo 4° con la obligación del Estado que le corresponde.","opciones":["A) 1b, 2c, 3a","B) 1b, 2a, 3c","C) 1a, 2b, 3c"],"correcta":1},{"id":175,"tema":"Art. 3° y 4° Constitucional","pregunta":"¿Qué garantía establece el Artículo 4° Constitucional en relación con el registro de identidad de toda persona al nacer?","opciones":["A) El Estado garantiza de forma gratuita la primera copia certificada del acta de nacimiento.","B) El Estado asigna automáticamente una clave CURP al nacer, sin necesidad de registro formal.","C) El Estado otorga documentos de identidad oficial únicamente a partir de los 18 años de edad."],"correcta":0},{"id":176,"tema":"Art. 3° y 4° Constitucional","pregunta":"Ordene los niveles de la trayectoria educativa de menor a mayor, tal como los establece el Artículo 3° Constitucional: 1. Educación Básica (preescolar, primaria y secundaria) 2. Educación Inicial 3. Educación Media Superior 4. Educación Superior","opciones":["A) 1, 2, 3, 4","B) 2, 3, 1, 4","C) 2, 1, 3, 4"],"correcta":2},{"id":177,"tema":"Art. 3° y 4° Constitucional","pregunta":"El Artículo 3°, párrafo 4, establece que la educación debe contribuir a la mejor convivencia humana. El principio que promueve específicamente la convivencia pacífica y la honestidad como valores cotidianos es…","opciones":["A) …la Igualdad Sustantiva, que busca el desarrollo armónico de todas las facultades del ser humano.","B) …la Cultura de Paz, que promueve la convivencia pacífica, el rechazo a la violencia y la honestidad.","C) …la Mejora Continua, que integra valores éticos en un proceso constante de enseñanza-aprendizaje."],"correcta":1},{"id":178,"tema":"Art. 3° y 4° Constitucional","pregunta":"¿Cuál de las siguientes afirmaciones describe correctamente el derecho a la planificación familiar reconocido en el Artículo 4° Constitucional?","opciones":["A) Toda persona tiene derecho a decidir de manera libre, responsable e informada sobre el número y espaciamiento de sus hijos.","B) El Estado determina el número óptimo de hijos por familia con base en estudios demográficos nacionales.","C) Las familias deben informar al Estado sobre su decisión de tener hijos para acceder a apoyos gubernamentales."],"correcta":0},{"id":179,"tema":"Teoría de Vygotsky","pregunta":"¿Cuáles son las cuatro premisas básicas de la teoría de Vygotsky sobre la psicología y la educación?","opciones":["Los niños construyen el conocimiento; el desarrollo no puede considerarse aparte del contexto social; el aprendizaje puede dirigir el desarrollo; el lenguaje desempeña un papel central en el desarrollo mental.","Los niños imitan el conocimiento; el desarrollo es independiente del contexto social; la maduración determina el desarrollo; el lenguaje es solo un medio de comunicación.","Los niños reciben el conocimiento pasivamente; el contexto cultural no influye en el desarrollo; aprendizaje y desarrollo son el mismo proceso; el pensamiento precede al lenguaje."],"correcta":0},{"id":180,"tema":"Teoría de Vygotsky","pregunta":"Una maestra trabaja con sus alumnos el concepto de clasificación. Señala los colores de los bloques y guía la conversación mientras los niños manipulan el material. Desde la perspectiva de Vygotsky, ¿qué papel desempeña la maestra en este proceso?","opciones":["La maestra es irrelevante para el aprendizaje; lo que importa es únicamente la manipulación física del material por parte del niño.","La maestra media el aprendizaje al señalar los atributos relevantes, influyendo directamente en lo que el niño construye cognitivamente.","La maestra determina por completo lo que el niño aprende, sin necesidad de que éste manipule el material ni participe activamente."],"correcta":1},{"id":181,"tema":"Teoría de Vygotsky","pregunta":"Según Vygotsky, el contexto social debe considerarse en tres niveles. El nivel cultural o social general está constituido por…","opciones":["…el o los individuos con quienes el niño interactúa en ese momento, incluyendo maestros y compañeros de aula.","…las estructuras sociales que influyen en el niño, tales como la familia y la escuela como institución.","…elementos de la sociedad en general, como el lenguaje, el sistema numérico y el uso de la tecnología."],"correcta":2},{"id":182,"tema":"Teoría de Vygotsky","pregunta":"Seleccione la opción que relacione correctamente cada nivel del contexto social con su descripción, según la teoría de Vygotsky.","opciones":["1a, 2b, 3c","1b, 2a, 3c","1c, 2b, 3a"],"correcta":0},{"id":183,"tema":"Teoría de Vygotsky","pregunta":"El maestro de matemáticas observa que Andrés no puede resolver ejercicios de álgebra de forma independiente, pero los resuelve al trabajar junto con un compañero más avanzado. Desde la teoría de Vygotsky, ¿qué ilustra esta situación?","opciones":["Una deficiencia cognitiva permanente en Andrés que requiere intervención psicológica especializada.","El desarrollo de procesos mentales que aparecen primero en el espacio compartido, antes de ser interiorizados y usados de forma individual.","Que Andrés ha alcanzado su nivel máximo de desarrollo y no podrá superar sus dificultades sin apoyo externo permanente."],"correcta":1},{"id":184,"tema":"Teoría de Vygotsky","pregunta":"¿Cuál es el papel fundamental del lenguaje en el desarrollo cognitivo según Vygotsky?","opciones":["El lenguaje es únicamente un medio de comunicación que refleja el estado cognitivo del niño, sin afectar directamente su desarrollo intelectual.","El lenguaje es un subproducto del pensamiento; primero se desarrolla el pensamiento lógico y luego aparece el lenguaje como resultado natural.","El lenguaje es un verdadero mecanismo para pensar: una herramienta mental que hace al pensamiento más abstracto, flexible e independiente de los estímulos inmediatos."],"correcta":2},{"id":185,"tema":"Teoría de Vygotsky","pregunta":"Ordene las siguientes fases del desarrollo de las funciones mentales superiores del paso más inicial al más avanzado, de acuerdo con la teoría de Vygotsky:","opciones":["2, 1, 3, 4","1, 2, 3, 4","3, 1, 4, 2"],"correcta":1},{"id":186,"tema":"Teoría de Vygotsky","pregunta":"La maestra ayuda a Isabel a recordar las instrucciones de un juego haciéndole preguntas como '¿qué haces con los dados?'. Isabel responde y juntas reconstruyen las reglas. Según Vygotsky, ¿qué ejemplifica esta situación?","opciones":["La memoria como proceso compartido: el proceso mental existe en el intercambio social y con el tiempo el niño lo interioriza para usarlo de forma independiente.","Una deficiencia de Isabel que deberá corregirse con ejercicios de memorización individual sin apoyo externo.","Que la memoria es exclusivamente un proceso interior que Isabel debe desarrollar por sí sola, sin intervención del adulto."],"correcta":0},{"id":187,"tema":"Enfoque STEAM","pregunta":"¿Cuál es el significado de la \"A\" en el acrónimo STEAM y cómo se relaciona con la ciencia?","opciones":["Representa la Astronomía, vinculando el cosmos con la investigación científica experimental y observacional.","Representa el Arte, que vincula la ciencia con la expresión creativa de la naturaleza y el ingenio humano.","Representa la Antropología, integrando las ciencias sociales con las naturales para una visión holística."],"correcta":1},{"id":188,"tema":"Enfoque STEAM","pregunta":"¿Cuáles son las 4C que menciona la Agenda Mundial 2030 como competencias básicas para afrontar los retos del futuro?","opciones":["Creatividad, comunicación, pensamiento crítico y colaboración.","Ciencia, cultura, competencias y conocimiento crítico aplicado.","Creatividad, ciudadanía activa, cambio social y competencias digitales."],"correcta":0},{"id":189,"tema":"Enfoque STEAM","pregunta":"¿Qué papel juega el escepticismo en la ciencia moderna, según el texto?","opciones":["Es una actitud negativa que frena el avance científico al cuestionar todo conocimiento ya establecido.","Es solo una característica personal de algunos científicos, sin implicaciones metodológicas para la ciencia.","Es uno de los principales valores de la ciencia, que exige que cualquier conclusión esté fundamentada en pruebas y sea sometida a examen crítico."],"correcta":2},{"id":190,"tema":"Enfoque STEAM","pregunta":"¿Cuál es la principal finalidad para la educación científica, según el texto?","opciones":["Promover el consumo de tecnología entre la población general para reducir la brecha digital global.","Ser la principal finalidad para la educación científica, permitiendo que la ciudadanía participe activamente en las decisiones sociales tecnocientíficas.","Garantizar que los proyectos científicos cuenten con el financiamiento necesario de la sociedad civil."],"correcta":1},{"id":191,"tema":"Enfoque STEAM","pregunta":"¿Cuál es el impacto de las actitudes negativas del profesorado hacia la enseñanza de las ciencias?","opciones":["Afectan significativamente la calidad de la oferta educativa e influyen en las concepciones de los alumnos sobre sus posibilidades de aprendizaje.","No tienen mayor impacto, pues los alumnos forman sus propias opiniones sobre las ciencias de manera independiente.","Solo afectan a los alumnos con bajo rendimiento académico, quienes necesitan mayor motivación externa."],"correcta":0},{"id":192,"tema":"Enfoque STEAM","pregunta":"¿Qué característica fundamental comparten el arte y la ciencia, según el texto?","opciones":["Ambos requieren exclusivamente formación académica especializada para ser practicados y comprendidos correctamente.","Ambos se enfocan principalmente en la memorización de datos y fórmulas para generar nuevo conocimiento.","El esfuerzo común en la creación de métodos poderosos a través de los cuales completamos el mundo, vinculando razón e imaginación creadora."],"correcta":2},{"id":193,"tema":"Enfoque STEAM","pregunta":"¿Qué beneficios aportan las experiencias informales extraescolares (museos, ferias, salidas de campo) a la alfabetización científica?","opciones":["Afectan positivamente el aprendizaje, fomentan el aprendizaje experiencial, dan acceso a materiales actualizados y permiten trabajar aspectos críticos y sociales del conocimiento.","Solo son útiles como actividades recreativas complementarias, sin impacto real en el aprendizaje formal de las ciencias.","Son efectivas únicamente para alumnos con vocaciones científicas previamente definidas desde etapas tempranas."],"correcta":0},{"id":194,"tema":"CTE · Comunidad de Aprendizaje","pregunta":"¿Cuál es la finalidad principal del CTE como Comunidad de Aprendizaje según el documento del ciclo escolar 2025-2026?","opciones":["Cumplir eficientemente con los trámites administrativos y de organización escolar.","Que los docentes aborden problemáticas de sus prácticas de forma reflexiva y crítica para mejorar el aprendizaje de sus estudiantes y llegar a acuerdos que se implementen en el aula.","Implementar programas nacionales de evaluación estandarizada para medir el desempeño docente individualmente."],"correcta":0},{"id":195,"tema":"CTE · Comunidad de Aprendizaje","pregunta":"Una Comunidad de Aprendizaje (CA) es una oportunidad de mejora educativa que establece al aprendizaje dialógico como…","opciones":["…compromiso comunitario para la mejora educativa y para construir una sociedad más justa, crítica, solidaria, pacífica y sustentable.","…estrategia institucional para evaluar el desempeño docente mediante indicadores cuantitativos de rendimiento escolar.","…metodología individual que cada docente aplica en su práctica pedagógica sin necesidad de vincularse al colectivo."],"correcta":0},{"id":196,"tema":"CTE · Comunidad de Aprendizaje","pregunta":"Seleccione la opción que relacione correctamente cada pilar de la conexión dialógica y colaborativa de las CA con los elementos que le corresponden. PilarDescripción 1. Diálogo y confianzaa) Gestión de la participación con autonomía, foco de trabajo, principio de inclusión, clima de confianza y contar con un facilitador. 2. Trabajo colaborativob) Orientar a los colectivos hacia la colaboración, el diálogo y la reflexión; conformar redes de apoyo y valorar avances. 3. Acompañamiento Supervisión/Direcciónc) Articular las CA, definir grupos de trabajo, redes de apoyo, monitorear, construcción colaborativa y solidaridad y empatía.","opciones":["A) 1a, 2c, 3b","B) 1c, 2b, 3a","C) 1c, 2a, 3b"],"correcta":0},{"id":197,"tema":"CTE · Comunidad de Aprendizaje","pregunta":"Ordene los momentos que puede considerar el proceso de construcción o fortalecimiento de una CA en el contexto de cada escuela, según el documento. N.°Momento 1Construcción de un objetivo compartido. 2Sensibilización. 3Construcción de un ambiente de confianza, respeto y apertura. 4Toma de decisiones para el trabajo colaborativo.","opciones":["A) 2, 1, 4, 3","B) 1, 2, 3, 4","C) 3, 2, 1, 4"],"correcta":0},{"id":198,"tema":"CTE · Comunidad de Aprendizaje","pregunta":"¿Qué autor señala que el cambio hacia la mejora educativa inicia \"de abajo hacia arriba, de adentro hacia afuera\"?","opciones":["Santos Guerra (2006), en su obra La escuela que aprende.","Torres (2001), en su análisis de las CA y el desarrollo local.","Freire (2008), en La educación como práctica de la Libertad."],"correcta":0},{"id":199,"tema":"CTE · Comunidad de Aprendizaje","pregunta":"Una maestra propone en CTE que el colectivo analice conjuntamente los resultados de aprendizaje y acuerde estrategias comunes para atender dificultades en lectoescritura. Esta acción refleja el CTE como CA porque…","opciones":["…permite al director evaluar el desempeño individual de cada docente y asignar responsabilidades escolares.","…favorece la colaboración entre docentes para la construcción del conocimiento colectivo que genere cambios en sus entornos escolares.","…cumple con los lineamientos administrativos de la SEP para la organización del ciclo escolar."],"correcta":0},{"id":200,"tema":"CTE · Comunidad de Aprendizaje","pregunta":"¿Cuáles son los tres pilares que permiten transitar hacia una Comunidad de Aprendizaje, según el documento?","opciones":["El diálogo colectivo, el trabajo colaborativo y las orientaciones pedagógicas del personal con funciones de acompañamiento.","La planeación didáctica, la evaluación formativa y la gestión escolar eficiente.","La autonomía docente, la infraestructura tecnológica y la capacitación permanente del personal."],"correcta":0}];
+
+/* ═══════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════ */
+let questions = [];
+let currentIdx = 0;
+let userAnswers = []; // null = sin responder, -1 = omitida, 0-2 = índice elegido
+let timerInterval = null;
+let totalSeconds = 90 * 60;
+let remainSeconds = totalSeconds;
+let useTimer = true;
+let quizStarted = false;
+let studentName = '';
+let reviewFilter = 'all';
+
+/* ═══════════════════════════════════════════════════
+   TEMA / MODO OSCURO
+═══════════════════════════════════════════════════ */
+function toggleTheme() {
+  const d = document.documentElement;
+  const isDark = d.getAttribute('data-theme') === 'dark';
+  d.setAttribute('data-theme', isDark ? '' : 'dark');
+  document.querySelector('.theme-btn').textContent = isDark ? '🌙' : '☀️';
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+}
+(function() {
+  const saved = localStorage.getItem('theme');
+  if (saved === 'dark') {
+    document.documentElement.setAttribute('data-theme','dark');
+    document.querySelector('.theme-btn').textContent = '☀️';
+  }
+})();
+
+/* ═══════════════════════════════════════════════════
+   TOGGLE OPTIONS
+═══════════════════════════════════════════════════ */
+function toggleOpt(id, chk) {
+  document.getElementById(id).classList.toggle('selected', chk.checked);
+}
+
+/* ═══════════════════════════════════════════════════
+   SHUFFLE
+═══════════════════════════════════════════════════ */
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* ═══════════════════════════════════════════════════
+   START QUIZ
+═══════════════════════════════════════════════════ */
+function startQuiz() {
+  studentName = document.getElementById('inp-name').value.trim() || 'Participante';
+  const doShuffle = document.getElementById('chk-shuffle').checked;
+  useTimer = document.getElementById('chk-timer').checked;
+
+  questions = doShuffle ? shuffle(BANCO) : [...BANCO];
+  userAnswers = new Array(questions.length).fill(null);
+  currentIdx = 0;
+  remainSeconds = totalSeconds;
+
+  switchScreen('screen-quiz');
+  renderQuestion();
+
+  if (useTimer) {
+    document.getElementById('timer-display').style.display = 'flex';
+    startTimer();
+  } else {
+    document.getElementById('timer-display').style.display = 'none';
+  }
+
+  quizStarted = true;
+  saveProgress();
+}
+
+/* ═══════════════════════════════════════════════════
+   TIMER
+═══════════════════════════════════════════════════ */
+function startTimer() {
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    remainSeconds--;
+    updateTimerUI();
+    if (remainSeconds <= 0) {
+      clearInterval(timerInterval);
+      finishQuiz();
+    }
+    saveProgress();
+  }, 1000);
+}
+
+function updateTimerUI() {
+  const m = Math.floor(remainSeconds / 60).toString().padStart(2,'0');
+  const s = (remainSeconds % 60).toString().padStart(2,'0');
+  document.getElementById('timer-txt').textContent = `${m}:${s}`;
+  const td = document.getElementById('timer-display');
+  td.className = 'timer-display';
+  if (remainSeconds < 300) td.classList.add('danger');
+  else if (remainSeconds < 600) td.classList.add('warning');
+}
+
+/* ═══════════════════════════════════════════════════
+   RENDER QUESTION
+═══════════════════════════════════════════════════ */
+function renderQuestion() {
+  const q = questions[currentIdx];
+  const ans = userAnswers[currentIdx];
+  const total = questions.length;
+
+  // Header
+  document.getElementById('q-current').textContent = currentIdx + 1;
+  document.getElementById('prog-bar').style.width = `${((currentIdx + 1) / total) * 100}%`;
+  document.getElementById('tema-tag').textContent = '📚 ' + q.tema;
+  document.getElementById('q-num-badge').textContent = `Reactivo ${currentIdx + 1} de ${total}`;
+  document.getElementById('q-text').textContent = q.pregunta;
+
+  // Options
+  const optsList = document.getElementById('opts-list');
+  optsList.innerHTML = '';
+  const letters = ['A','B','C','D'];
+
+  q.opciones.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.innerHTML = `<span class="opt-letter">${letters[i]}</span><span>${opt}</span>`;
+    btn.onclick = () => selectAnswer(i);
+
+    if (ans !== null) {
+      btn.disabled = true;
+      if (ans === -1) {
+        // omitida - reveal correct
+        if (i === q.correcta) btn.classList.add('revealed');
+      } else {
+        if (i === q.correcta) btn.classList.add('correct');
+        else if (i === ans) btn.classList.add('wrong');
+      }
+    }
+    optsList.appendChild(btn);
+  });
+
+  // Feedback
+  const fb = document.getElementById('feedback-box');
+  fb.className = 'feedback-box';
+  fb.textContent = '';
+  if (ans !== null && ans !== -1) {
+    fb.classList.add('show');
+    if (ans === q.correcta) {
+      fb.classList.add('correct');
+      fb.textContent = '✅ ¡Correcto! La opción ' + letters[q.correcta] + ' es la respuesta correcta.';
+    } else {
+      fb.classList.add('wrong');
+      fb.textContent = '❌ Incorrecto. La respuesta correcta es la opción ' + letters[q.correcta] + ': ' + q.opciones[q.correcta];
+    }
+  }
+
+  // Buttons
+  document.getElementById('btn-prev').disabled = currentIdx === 0;
+  const isLast = currentIdx === total - 1;
+  document.getElementById('btn-next').textContent = isLast ? 'Finalizar 🏁' : 'Siguiente →';
+
+  const skipLbl = document.getElementById('skip-lbl');
+  skipLbl.style.display = ans !== null ? 'none' : 'inline';
+}
+
+/* ═══════════════════════════════════════════════════
+   SELECT ANSWER
+═══════════════════════════════════════════════════ */
+function selectAnswer(idx) {
+  if (userAnswers[currentIdx] !== null) return;
+  userAnswers[currentIdx] = idx;
+  renderQuestion();
+  saveProgress();
+}
+
+/* ═══════════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════════ */
+function nextQuestion() {
+  const isLast = currentIdx === questions.length - 1;
+  if (isLast) { finishQuiz(); return; }
+  animateCard(() => {
+    currentIdx++;
+    renderQuestion();
+  });
+}
+
+function prevQuestion() {
+  if (currentIdx === 0) return;
+  animateCard(() => {
+    currentIdx--;
+    renderQuestion();
+  });
+}
+
+function skipQuestion() {
+  if (userAnswers[currentIdx] === null) {
+    userAnswers[currentIdx] = -1;
+  }
+  const isLast = currentIdx === questions.length - 1;
+  if (isLast) { finishQuiz(); return; }
+  animateCard(() => {
+    currentIdx++;
+    renderQuestion();
+  });
+}
+
+function animateCard(cb) {
+  const card = document.getElementById('q-card');
+  card.classList.add('exiting');
+  setTimeout(() => {
+    card.classList.remove('exiting');
+    cb();
+  }, 200);
+}
+
+/* ═══════════════════════════════════════════════════
+   FINISH QUIZ
+═══════════════════════════════════════════════════ */
+function finishQuiz() {
+  clearInterval(timerInterval);
+  switchScreen('screen-results');
+
+  let correct = 0, wrong = 0, skipped = 0;
+  questions.forEach((q, i) => {
+    const a = userAnswers[i];
+    if (a === null || a === -1) skipped++;
+    else if (a === q.correcta) correct++;
+    else wrong++;
+  });
+
+  const total = questions.length;
+  const pct = Math.round((correct / total) * 100);
+  const grade = pct >= 90 ? 'Excelente' : pct >= 70 ? 'Aprobado' : pct >= 50 ? 'Regular' : 'Insuficiente';
+
+  // Score ring
+  const ring = document.getElementById('score-ring');
+  ring.style.setProperty('--pct', pct + '%');
+  const color = pct >= 70 ? 'var(--green)' : pct >= 50 ? 'var(--accent)' : 'var(--red)';
+  ring.style.background = `conic-gradient(${color} ${pct}%, var(--border) 0%)`;
+
+  document.getElementById('score-pct').textContent = pct + '%';
+  document.getElementById('score-grade').textContent = grade;
+  document.getElementById('results-title').textContent = pct >= 70 ? '¡Simulacro Completado! 🎉' : 'Simulacro Finalizado';
+  document.getElementById('results-name').textContent = '👤 ' + studentName;
+  document.getElementById('rs-correct').textContent = correct;
+  document.getElementById('rs-wrong').textContent = wrong;
+  document.getElementById('rs-skipped').textContent = skipped;
+
+  if (pct >= 70) launchConfetti();
+
+  buildReview();
+  localStorage.removeItem('quiz-progress');
+}
+
+/* ═══════════════════════════════════════════════════
+   REVIEW
+═══════════════════════════════════════════════════ */
+function buildReview() {
+  const list = document.getElementById('review-list');
+  const letters = ['A','B','C','D'];
+  list.innerHTML = '';
+
+  questions.forEach((q, i) => {
+    const a = userAnswers[i];
+    let status;
+    if (a === null || a === -1) status = 'skipped';
+    else if (a === q.correcta) status = 'correct';
+    else status = 'wrong';
+
+    if (reviewFilter !== 'all' && status !== reviewFilter) return;
+
+    const item = document.createElement('div');
+    item.className = `review-item ${status}`;
+    item.setAttribute('data-status', status);
+
+    const statusLabel = { correct: '✅ Correcta', wrong: '❌ Incorrecta', skipped: '⏭ Omitida' }[status];
+    const optsHtml = q.opciones.map((opt, j) => {
+      let cls = 'review-opt';
+      if (j === q.correcta) cls += ' correct';
+      else if (j === a && status === 'wrong') cls += ' user-wrong';
+      return `<div class="${cls}"><strong>${letters[j]})</strong> ${opt}</div>`;
+    }).join('');
+
+    item.innerHTML = `
+      <div class="review-item-header">
+        <span class="review-item-num">Reactivo ${i+1} · ${q.tema}</span>
+        <span class="review-item-status ${status}">${statusLabel}</span>
+      </div>
+      <div class="review-q-text">${q.pregunta}</div>
+      <div class="review-opts">${optsHtml}</div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function filterReview(filter, btn) {
+  reviewFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  buildReview();
+}
+
+/* ═══════════════════════════════════════════════════
+   CONFETTI
+═══════════════════════════════════════════════════ */
+function launchConfetti() {
+  const colors = ['#2563eb','#7c3aed','#f59e0b','#16a34a','#ec4899','#06b6d4'];
+  for (let i = 0; i < 80; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.cssText = `
+        left:${Math.random()*100}vw;
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        animation-duration:${1.5+Math.random()*2}s;
+        animation-delay:${Math.random()*.5}s;
+        width:${6+Math.random()*8}px;
+        height:${6+Math.random()*8}px;
+        border-radius:${Math.random()>0.5?'50%':'2px'};
+      `;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 3500);
+    }, i * 20);
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   RESTART / HOME
+═══════════════════════════════════════════════════ */
+function restartQuiz() {
+  clearInterval(timerInterval);
+  startQuiz();
+}
+
+function goHome() {
+  clearInterval(timerInterval);
+  switchScreen('screen-welcome');
+}
+
+/* ═══════════════════════════════════════════════════
+   SCREEN SWITCH
+═══════════════════════════════════════════════════ */
+function switchScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+/* ═══════════════════════════════════════════════════
+   LOCAL STORAGE PROGRESS
+═══════════════════════════════════════════════════ */
+function saveProgress() {
+  if (!quizStarted) return;
+  localStorage.setItem('quiz-progress', JSON.stringify({
+    questionOrder: questions.map(q => q.id),
+    userAnswers,
+    currentIdx,
+    remainSeconds,
+    studentName,
+    useTimer
+  }));
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem('quiz-progress');
+  if (!raw) return false;
+  try {
+    const data = JSON.parse(raw);
+    if (!data.questionOrder || data.questionOrder.length !== 200) return false;
+    const lookup = Object.fromEntries(BANCO.map(q => [q.id, q]));
+    questions = data.questionOrder.map(id => lookup[id]).filter(Boolean);
+    if (questions.length !== 200) return false;
+    userAnswers = data.userAnswers;
+    currentIdx = data.currentIdx;
+    remainSeconds = data.remainSeconds;
+    studentName = data.studentName || 'Participante';
+    useTimer = data.useTimer;
+    return true;
+  } catch { return false; }
+}
+
+// Check for saved progress on load
+window.addEventListener('DOMContentLoaded', () => {
+  if (loadProgress()) {
+    const resume = confirm(`¿Deseas continuar tu sesión anterior (${studentName}, pregunta ${currentIdx+1}/200)?`);
+    if (resume) {
+      quizStarted = true;
+      switchScreen('screen-quiz');
+      renderQuestion();
+      if (useTimer) {
+        document.getElementById('timer-display').style.display = 'flex';
+        updateTimerUI();
+        startTimer();
+      } else {
+        document.getElementById('timer-display').style.display = 'none';
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>

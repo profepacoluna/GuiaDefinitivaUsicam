@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador Interactivo — Prof. Francisco De Jesus Luna Benitez</title>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700;900&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1a3a6b;
+  --blue:#2563c7;
+  --sky:#e8f2ff;
+  --sky2:#d0e6ff;
+  --amber:#f59e0b;
+  --orange:#ea6c1e;
+  --grad-bg:linear-gradient(145deg,#e8f2ff 0%,#fff8ee 50%,#fef3e2 100%);
+  --grad-head:linear-gradient(135deg,#1a3a6b 0%,#2563c7 60%,#3b82f6 100%);
+  --grad-acc:linear-gradient(135deg,#f59e0b 0%,#ea6c1e 100%);
+  --white:#ffffff;
+  --text:#1a2744;
+  --text2:#4b5c7e;
+  --border:#d4e2f8;
+  --green:#16a34a;
+  --green-bg:#f0fdf4;
+  --green-bdr:#86efac;
+  --red:#dc2626;
+  --red-bg:#fff1f2;
+  --red-bdr:#fca5a5;
+  --shadow:0 4px 24px rgba(37,99,199,.10);
+  --shadow-lg:0 8px 40px rgba(37,99,199,.14);
+  --r:16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Poppins',sans-serif;background:var(--grad-bg);min-height:100vh;color:var(--text)}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 50% at 90% 10%,rgba(37,99,199,.07) 0%,transparent 70%),
+             radial-gradient(ellipse 60% 40% at 10% 90%,rgba(245,158,11,.07) 0%,transparent 70%);}
+.wrap{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 16px 60px}
+
+/* HEADER */
+header{width:100%;max-width:820px;background:var(--grad-head);border-radius:0 0 28px 28px;padding:36px 32px 30px;text-align:center;box-shadow:var(--shadow-lg);margin-bottom:28px}
+.hdr-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:30px;padding:5px 16px;font-size:.72rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.85);margin-bottom:14px}
+header h1{font-family:'Merriweather',serif;font-size:clamp(1.3rem,3.5vw,2.1rem);line-height:1.25;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.2)}
+header h1 span{background:var(--grad-acc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hdr-sub{margin-top:8px;font-size:.85rem;color:rgba(255,255,255,.65);font-weight:500}
+.hdr-line{width:60px;height:3px;border-radius:2px;background:var(--grad-acc);margin:14px auto 0}
+
+/* TABS */
+.tabs{display:flex;gap:6px;background:#fff;border:1.5px solid var(--border);border-radius:50px;padding:5px;box-shadow:var(--shadow);margin-bottom:26px}
+.tab-btn{font-family:'Poppins',sans-serif;font-size:.83rem;font-weight:700;padding:9px 24px;border-radius:40px;border:none;cursor:pointer;transition:all .28s;color:var(--text2);background:transparent}
+.tab-btn.active{background:var(--grad-acc);color:#fff;box-shadow:0 3px 14px rgba(245,158,11,.35)}
+
+/* CARD */
+.card{width:100%;max-width:780px;background:#fff;border-radius:var(--r);padding:40px 44px;box-shadow:var(--shadow-lg);border:1.5px solid var(--border)}
+@media(max-width:600px){.card{padding:26px 18px}}
+
+/* SCREENS */
+.screen{display:none}
+.screen.active{display:block;animation:fadeUp .4s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* START */
+.s-icon{width:72px;height:72px;background:var(--grad-acc);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 20px;box-shadow:0 6px 20px rgba(245,158,11,.3)}
+.s-title{font-family:'Merriweather',serif;font-size:1.75rem;text-align:center;color:var(--navy);margin-bottom:8px}
+.s-desc{text-align:center;font-size:.9rem;color:var(--text2);margin-bottom:28px;line-height:1.65}
+.pills{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:30px}
+.pill{display:flex;align-items:center;gap:6px;background:var(--sky);border:1.5px solid var(--sky2);border-radius:30px;padding:6px 14px;font-size:.78rem;font-weight:600;color:var(--navy)}
+.pill::before{content:'●';color:var(--amber);font-size:.6rem}
+.f-label{display:block;font-size:.78rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--blue);margin-bottom:8px}
+input[type=text]{width:100%;padding:13px 16px;font-family:'Poppins',sans-serif;font-size:.97rem;font-weight:500;background:#f8faff;border:1.5px solid var(--border);border-radius:10px;color:var(--text);outline:none;transition:border-color .22s,box-shadow .22s;margin-bottom:22px}
+input[type=text]::placeholder{color:#aab6cc}
+input[type=text]:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,199,.12);background:#fff}
+input.err{border-color:var(--red)!important}
+
+/* BUTTONS */
+.btn-main{display:block;width:100%;padding:14px;font-family:'Poppins',sans-serif;font-size:1rem;font-weight:800;letter-spacing:.03em;background:var(--grad-acc);color:#fff;border:none;border-radius:11px;cursor:pointer;box-shadow:0 5px 20px rgba(245,158,11,.3);transition:transform .2s,box-shadow .2s}
+.btn-main:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(245,158,11,.4)}
+.btn-main:active{transform:translateY(0)}
+.btn-out{padding:11px 26px;font-family:'Poppins',sans-serif;font-size:.9rem;font-weight:700;background:#fff;border:1.5px solid var(--border);color:var(--text2);border-radius:10px;cursor:pointer;transition:all .22s}
+.btn-out:hover{background:var(--sky);border-color:var(--blue);color:var(--navy)}
+
+/* EXAM */
+.e-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:8px}
+.q-ctr{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text2)}
+.q-ctr strong{color:var(--blue);font-size:1rem}
+.live-score{display:flex;align-items:center;gap:6px;font-size:.8rem;font-weight:600;color:var(--text2)}
+.live-score .val{background:var(--green-bg);border:1px solid var(--green-bdr);color:var(--green);border-radius:7px;padding:2px 10px;font-weight:700}
+.prog-wrap{height:7px;background:var(--sky2);border-radius:6px;margin-bottom:24px;overflow:hidden}
+.prog-bar{height:100%;border-radius:6px;background:var(--grad-acc);transition:width .55s cubic-bezier(.4,0,.2,1)}
+.fmt-tag{display:inline-block;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.09em;padding:4px 13px;border-radius:20px;background:var(--sky);border:1.5px solid var(--sky2);color:var(--blue);margin-bottom:14px}
+.q-text{font-size:1rem;line-height:1.72;color:var(--text);font-weight:600;margin-bottom:20px}
+
+/* Table */
+.q-tbl{width:100%;border-collapse:collapse;border-radius:10px;overflow:hidden;margin-bottom:18px;font-size:.87rem;border:1.5px solid var(--border)}
+.q-tbl th{background:var(--grad-head);color:#fff;padding:9px 14px;text-align:left;font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.q-tbl td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--text);line-height:1.5;vertical-align:top}
+.q-tbl tr:last-child td{border-bottom:none}
+.q-tbl tr:nth-child(odd) td{background:var(--sky)}
+.q-tbl tr:nth-child(even) td{background:#fff}
+
+/* Options */
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:#f8faff;border:1.5px solid var(--border);border-radius:12px;cursor:pointer;transition:all .2s;text-align:left;width:100%;font-family:'Poppins',sans-serif}
+.opt:hover:not([disabled]){background:var(--sky);border-color:var(--blue);transform:translateX(3px);box-shadow:0 3px 12px rgba(37,99,199,.1)}
+.opt-ltr{flex-shrink:0;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#e9eef8;border:1.5px solid var(--border);font-size:.82rem;font-weight:800;color:var(--text2);transition:all .2s}
+.opt-txt{font-size:.9rem;font-weight:500;color:var(--text);line-height:1.6;padding-top:4px}
+.opt.ok{background:var(--green-bg)!important;border-color:var(--green)!important}
+.opt.ok .opt-ltr{background:var(--green);border-color:var(--green);color:#fff}
+.opt.ok .opt-txt{color:#14532d;font-weight:600}
+.opt.fail{background:var(--red-bg)!important;border-color:var(--red)!important}
+.opt.fail .opt-ltr{background:var(--red);border-color:var(--red);color:#fff}
+.opt.fail .opt-txt{color:#7f1d1d;font-weight:600}
+.opt.show-ok{background:#fefce8!important;border-color:#ca8a04!important}
+.opt.show-ok .opt-ltr{background:#fbbf24;border-color:#d97706;color:#fff}
+.opt.show-ok .opt-txt{color:#713f12;font-weight:600}
+.opt[disabled]{cursor:default;transform:none!important;box-shadow:none!important}
+
+/* Feedback */
+.fb{display:none;margin-top:16px;padding:14px 18px;border-radius:11px;font-size:.88rem;line-height:1.65;font-weight:500;animation:fadeUp .3s ease}
+.fb.ok{display:block;background:var(--green-bg);border:1.5px solid var(--green-bdr);color:#14532d}
+.fb.fail{display:block;background:var(--red-bg);border:1.5px solid var(--red-bdr);color:#7f1d1d}
+.fb strong{display:block;margin-bottom:4px;font-weight:700}
+.nxt-wrap{display:none;justify-content:flex-end;margin-top:20px}
+.nxt-wrap.show{display:flex}
+
+/* RESULTS */
+.res-top{text-align:center;padding-bottom:24px;border-bottom:1.5px solid var(--border);margin-bottom:26px}
+.res-ava{width:76px;height:76px;background:var(--grad-acc);border-radius:50%;font-size:2.2rem;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;box-shadow:0 6px 22px rgba(245,158,11,.3)}
+.res-name{font-family:'Merriweather',serif;font-size:1.4rem;color:var(--navy)}
+.res-sub{font-size:.82rem;color:var(--text2);margin-top:4px}
+.ring-wrap{display:flex;justify-content:center;margin:22px 0}
+.ring{position:relative;width:148px;height:148px}
+.ring svg{width:148px;height:148px;transform:rotate(-90deg)}
+.ring .r-bg{fill:none;stroke:var(--sky2);stroke-width:11}
+.ring .r-fill{fill:none;stroke:url(#rg);stroke-width:11;stroke-linecap:round;stroke-dasharray:408;stroke-dashoffset:408;transition:stroke-dashoffset 1.5s cubic-bezier(.4,0,.2,1)}
+.ring-lbl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-pct{font-family:'Merriweather',serif;font-size:2.1rem;font-weight:900;color:var(--orange);line-height:1}
+.ring-sub{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);margin-top:3px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px}
+.sc{padding:18px;border-radius:12px;text-align:center;border:1.5px solid}
+.sc.g{background:var(--green-bg);border-color:var(--green-bdr)}
+.sc.r{background:var(--red-bg);border-color:var(--red-bdr)}
+.sc-n{font-family:'Merriweather',serif;font-size:2.2rem;font-weight:900;line-height:1}
+.sc.g .sc-n{color:var(--green)}.sc.r .sc-n{color:var(--red)}
+.sc-l{margin-top:5px;font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text2)}
+.mot{background:linear-gradient(135deg,#fff8e7,#fff3d4);border:1.5px solid #fcd34d;border-radius:12px;padding:16px 20px;text-align:center;margin-bottom:24px}
+.mot-i{font-size:1.5rem;margin-bottom:5px}
+.mot-t{font-size:.92rem;font-weight:600;color:var(--navy);line-height:1.6}
+.btn-row{display:flex;gap:10px}
+.btn-row .btn-main{flex:1}
+
+/* GUIDE */
+.g-hdr{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.g-ico{width:50px;height:50px;flex-shrink:0;background:linear-gradient(135deg,#dc2626,#f59e0b);border-radius:12px;font-size:1.5rem;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(220,38,38,.25)}
+.g-ttl{font-family:'Merriweather',serif;font-size:1.4rem;color:var(--navy)}
+.g-sub{font-size:.82rem;color:var(--text2);margin-top:3px}
+.g-btns{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.g-btn{display:flex;align-items:center;gap:7px;padding:10px 20px;font-family:'Poppins',sans-serif;font-size:.85rem;font-weight:700;border-radius:9px;border:none;cursor:pointer;text-decoration:none;transition:all .2s}
+.g-btn.pri{background:var(--grad-acc);color:#fff;box-shadow:0 3px 14px rgba(245,158,11,.28)}
+.g-btn.pri:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(245,158,11,.38)}
+.g-btn.sec{background:#fff;border:1.5px solid var(--border);color:var(--text2)}
+.g-btn.sec:hover{background:var(--sky);border-color:var(--blue);color:var(--navy)}
+.pdf-wrap{border-radius:12px;overflow:hidden;border:1.5px solid var(--border);background:var(--sky);height:520px;position:relative}
+.pdf-wrap iframe{width:100%;height:100%;border:none;display:block;position:relative;z-index:2}
+.pdf-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--sky);text-align:center;padding:24px;z-index:1}
+.pdf-loading p{font-size:.88rem;color:var(--text2);font-weight:500;line-height:1.6}
+.g-note{margin-top:12px;font-size:.76rem;color:var(--text2);text-align:center}
+
+@media(max-width:500px){
+  .btn-row{flex-direction:column-reverse}
+  .tabs .tab-btn{font-size:.76rem;padding:8px 14px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- HEADER -->
+<header>
+  <div class="hdr-badge">🎓 Psicología Educativa · Universidad Autónoma de Tlaxcala</div>
+  <h1>Simulador Interactivo de Evaluación<br><span>Prof. Francisco De Jesus Luna Benitez</span></h1>
+  <p class="hdr-sub">Herramientas de la Mente · Teoría Sociocultural de Vygotsky</p>
+  <div class="hdr-line"></div>
+</header>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('exam')">📝 Simulador</button>
+  <button class="tab-btn"        onclick="showTab('guide')">📖 Guía de Estudio</button>
+</div>
+
+<!-- EXAM CARD -->
+<div id="tab-exam" class="card">
+
+  <!-- START SCREEN -->
+  <div id="scr-start" class="screen active">
+    <div class="s-icon">🧠</div>
+    <h2 class="s-title">Evaluación de Conocimientos</h2>
+    <p class="s-desc">Pon a prueba tu comprensión de la Teoría Sociocultural de Lev Vygotsky y las Herramientas de la Mente.</p>
+    <div class="pills">
+      <span class="pill">20 preguntas</span>
+      <span class="pill">3 opciones por reactivo</span>
+      <span class="pill">Retroalimentación inmediata</span>
+      <span class="pill">4 formatos de reactivos</span>
+    </div>
+    <label class="f-label" for="nom">Nombre del estudiante</label>
+    <input type="text" id="nom" placeholder="Escribe tu nombre completo…" autocomplete="off">
+    <button class="btn-main" onclick="iniciar()">🚀 Iniciar Simulador</button>
+  </div>
+
+  <!-- EXAM SCREEN -->
+  <div id="scr-exam" class="screen">
+    <div class="e-meta">
+      <div class="q-ctr">Pregunta <strong id="qn">1</strong> de 20</div>
+      <div class="live-score">Aciertos: <span class="val" id="ls">0</span></div>
+    </div>
+    <div class="prog-wrap"><div class="prog-bar" id="pb" style="width:0%"></div></div>
+    <div class="fmt-tag" id="fmt">Cuestionamiento directo</div>
+    <div class="q-text" id="qt"></div>
+    <div id="tbl-area"></div>
+    <div class="opts" id="opts"></div>
+    <div class="fb" id="fb"></div>
+    <div class="nxt-wrap" id="nxt">
+      <button class="btn-main" style="width:auto;padding:12px 32px" onclick="siguiente()">Siguiente pregunta →</button>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div id="scr-res" class="screen">
+    <div class="res-top">
+      <div class="res-ava">🏆</div>
+      <div class="res-name" id="rn">Estudiante</div>
+      <div class="res-sub">Evaluación completada · Herramientas de la Mente</div>
+    </div>
+    <div class="ring-wrap">
+      <div class="ring">
+        <svg viewBox="0 0 148 148">
+          <defs>
+            <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#f59e0b"/>
+              <stop offset="100%" style="stop-color:#ea6c1e"/>
+            </linearGradient>
+          </defs>
+          <circle class="r-bg" cx="74" cy="74" r="65"/>
+          <circle class="r-fill" id="rf" cx="74" cy="74" r="65"/>
+        </svg>
+        <div class="ring-lbl">
+          <div class="ring-pct" id="rp">0%</div>
+          <div class="ring-sub">Desempeño</div>
+        </div>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="sc g"><div class="sc-n" id="rc">0</div><div class="sc-l">✅ Aciertos</div></div>
+      <div class="sc r"><div class="sc-n" id="rw">0</div><div class="sc-l">❌ Errores</div></div>
+    </div>
+    <div class="mot">
+      <div class="mot-i" id="mi">⭐</div>
+      <div class="mot-t" id="mm">¡Buen trabajo!</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-out" onclick="showTab('guide')">📖 Ver Guía</button>
+      <button class="btn-main" onclick="reiniciar()">🔄 Nuevo intento</button>
+    </div>
+  </div>
+
+</div><!-- /exam card -->
+
+<!-- GUIDE CARD -->
+<div id="tab-guide" class="card" style="display:none">
+  <div class="g-hdr">
+    <div class="g-ico">📄</div>
+    <div>
+      <div class="g-ttl">Guía de Estudio</div>
+      <div class="g-sub">Herramientas de la Mente · Teoría de Vygotsky</div>
+    </div>
+  </div>
+  <div class="g-btns">
+    <a href="https://drive.google.com/file/d/1E2D9B5dvbd32WFIz2PDODG0Z0lRG8FQ9/view?usp=sharing"
+       target="_blank" class="g-btn pri">🔗 Abrir en nueva pestaña</a>
+    <a href="https://drive.google.com/uc?export=download&id=1E2D9B5dvbd32WFIz2PDODG0Z0lRG8FQ9"
+       target="_blank" class="g-btn sec">⬇️ Descargar PDF</a>
+  </div>
+  <div class="pdf-wrap">
+    <div class="pdf-loading" id="pdf-loading">
+      <div style="font-size:2.5rem">📄</div>
+      <p>Cargando guía de estudio…<br>Si no carga, usa <strong>"Abrir en nueva pestaña"</strong>.</p>
+    </div>
+    <iframe
+      src="https://drive.google.com/file/d/1E2D9B5dvbd32WFIz2PDODG0Z0lRG8FQ9/preview"
+      allow="autoplay"
+      title="Guía de Estudio"
+      onload="hidePdfLoading()">
+    </iframe>
+  </div>
+  <p class="g-note">💡 Si el visor muestra error, asegúrate de que el archivo de Drive esté configurado como "Cualquier persona con el enlace puede verlo".</p>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+/* ====================================================
+   BANCO DE 20 REACTIVOS — Teoría de Vygotsky
+==================================================== */
+var QS = [
+  /* 1 — Cuestionamiento directo — correcto: A (0) */
+  { fmt:"Cuestionamiento directo",
+    txt:"¿Cuáles son las cuatro premisas básicas de la teoría de Vygotsky sobre la psicología y la educación?",
+    tbl:null,
+    ops:["Los niños construyen el conocimiento; el desarrollo no puede considerarse aparte del contexto social; el aprendizaje puede dirigir el desarrollo; el lenguaje desempeña un papel central en el desarrollo mental.",
+         "Los niños imitan el conocimiento; el desarrollo es independiente del contexto social; la maduración determina el desarrollo; el lenguaje es solo un medio de comunicación.",
+         "Los niños reciben el conocimiento pasivamente; el contexto cultural no influye en el desarrollo; aprendizaje y desarrollo son el mismo proceso; el pensamiento precede al lenguaje."],
+    ok:0,
+    exp:"Las cuatro premisas de Vygotsky son: (1) los niños construyen activamente el conocimiento, (2) el desarrollo no puede separarse del contexto social, (3) el aprendizaje puede dirigir y acelerar el desarrollo, y (4) el lenguaje es herramienta mental central. Estas premisas distinguen su teoría del conductismo y del constructivismo de Piaget." },
+
+  /* 2 — Cuestionamiento directo — correcto: B (1) */
+  { fmt:"Cuestionamiento directo",
+    txt:"Una maestra trabaja con sus alumnos el concepto de clasificación. Señala los colores de los bloques y guía la conversación mientras los niños manipulan el material. Desde la perspectiva de Vygotsky, ¿qué papel desempeña la maestra en este proceso?",
+    tbl:null,
+    ops:["La maestra es irrelevante para el aprendizaje; lo que importa es únicamente la manipulación física del material por parte del niño.",
+         "La maestra media el aprendizaje al señalar los atributos relevantes, influyendo directamente en lo que el niño construye cognitivamente.",
+         "La maestra determina por completo lo que el niño aprende, sin necesidad de que éste manipule el material ni participe activamente."],
+    ok:1,
+    exp:"Para Vygotsky la maestra cumple una función de mediación: señalar características específicas del material influye en la construcción cognitiva del alumno. Sin la maestra el aprendizaje sería diferente; sin manipulación el niño no podría aplicar el concepto en situaciones nuevas. Tanto la interacción social como la experiencia física son necesarias." },
+
+  /* 3 — Completamiento — correcto: C (2) */
+  { fmt:"Completamiento",
+    txt:"Según Vygotsky, el contexto social debe considerarse en tres niveles. El nivel cultural o social general está constituido por…",
+    tbl:null,
+    ops:["…el o los individuos con quienes el niño interactúa en ese momento, incluyendo maestros y compañeros de aula.",
+         "…las estructuras sociales que influyen en el niño, tales como la familia y la escuela como institución.",
+         "…elementos de la sociedad en general, como el lenguaje, el sistema numérico y el uso de la tecnología."],
+    ok:2,
+    exp:"El nivel cultural o social general comprende elementos de toda la sociedad: el lenguaje, el sistema numérico y la tecnología. Los otros dos niveles son: el interactivo inmediato (personas con quienes se interactúa en ese momento) y el estructural (familia y escuela). Los tres niveles moldean los procesos cognitivos del niño." },
+
+  /* 4 — Relación de elementos — correcto: A (0) */
+  { fmt:"Relación de elementos",
+    txt:"Seleccione la opción que relacione correctamente cada nivel del contexto social con su descripción, según la teoría de Vygotsky.",
+    tbl:{ cols:["Nivel","Descripción"],
+          rows:[["1. Interactivo inmediato","a) Individuos con quienes el niño interactúa en ese momento"],
+                ["2. Estructural","b) Estructuras sociales como la familia y la escuela"],
+                ["3. Cultural o social general","c) Elementos generales: lenguaje, sistema numérico, tecnología"]] },
+    ops:["1a, 2b, 3c","1b, 2a, 3c","1c, 2b, 3a"],
+    ok:0,
+    exp:"La relación correcta es: nivel interactivo inmediato → individuos presentes en el momento (1a); nivel estructural → familia y escuela (2b); nivel cultural o social general → lenguaje, sistema numérico y tecnología (3c). Cada nivel influye de forma distinta en cómo y qué piensa el niño." },
+
+  /* 5 — Cuestionamiento directo — correcto: B (1) */
+  { fmt:"Cuestionamiento directo",
+    txt:"El maestro de matemáticas observa que Andrés no puede resolver ejercicios de álgebra de forma independiente, pero los resuelve al trabajar junto con un compañero más avanzado. Desde la teoría de Vygotsky, ¿qué ilustra esta situación?",
+    tbl:null,
+    ops:["Una deficiencia cognitiva permanente en Andrés que requiere intervención psicológica especializada.",
+         "El desarrollo de procesos mentales que aparecen primero en el espacio compartido, antes de ser interiorizados y usados de forma individual.",
+         "Que Andrés ha alcanzado su nivel máximo de desarrollo y no podrá superar sus dificultades sin apoyo externo permanente."],
+    ok:1,
+    exp:"Esta situación ilustra el principio de que todos los procesos mentales ocurren primero en el plano interpsicológico (entre personas) y después pasan al plano intrapsicológico (dentro del individuo). La actividad compartida es el medio que facilita la interiorización de los procesos mentales superiores." },
+
+  /* 6 — Cuestionamiento directo — correcto: C (2) */
+  { fmt:"Cuestionamiento directo",
+    txt:"¿Cuál es el papel fundamental del lenguaje en el desarrollo cognitivo según Vygotsky?",
+    tbl:null,
+    ops:["El lenguaje es únicamente un medio de comunicación que refleja el estado cognitivo del niño, sin afectar directamente su desarrollo intelectual.",
+         "El lenguaje es un subproducto del pensamiento; primero se desarrolla el pensamiento lógico y luego aparece el lenguaje como resultado natural.",
+         "El lenguaje es un verdadero mecanismo para pensar: una herramienta mental que hace al pensamiento más abstracto, flexible e independiente de los estímulos inmediatos."],
+    ok:2,
+    exp:"Para Vygotsky el lenguaje es herramienta mental de primer orden: transforma el pensamiento haciéndolo más abstracto y flexible. Permite evocar recuerdos, hacer previsiones, imaginar y compartir ideas. Desempeña dos papeles simultáneos: es instrumental en el desarrollo de la cognición y forma parte del propio proceso cognitivo." },
+
+  /* 7 — Ordenamiento — correcto: B (1) */
+  { fmt:"Ordenamiento",
+    txt:"Ordene las siguientes fases del desarrollo de las funciones mentales superiores del paso más inicial al más avanzado, de acuerdo con la teoría de Vygotsky:",
+    tbl:{ cols:["Paso","Descripción"],
+          rows:[["1","Las funciones mentales inferiores se desarrollan hasta un nivel suficiente."],
+                ["2","La función mental superior aparece en una actividad compartida entre el niño y otra persona."],
+                ["3","El niño interioriza la herramienta o proceso mental."],
+                ["4","El niño aplica la función de manera completamente independiente."]] },
+    ops:["2, 1, 3, 4","1, 2, 3, 4","3, 1, 4, 2"],
+    ok:1,
+    exp:"El orden correcto es: (1) las funciones inferiores se desarrollan como base biológica; (2) la función superior emerge en actividad compartida; (3) el niño la interioriza; (4) finalmente la usa de forma autónoma. Este proceso muestra cómo lo cognitivo va de lo compartido a lo individual." },
+
+  /* 8 — Cuestionamiento directo — correcto: A (0) */
+  { fmt:"Cuestionamiento directo",
+    txt:"La maestra ayuda a Isabel a recordar las instrucciones de un juego haciéndole preguntas como '¿qué haces con los dados?'. Isabel responde y juntas reconstruyen las reglas. Según Vygotsky, ¿qué ejemplifica esta situación?",
+    tbl:null,
+    ops:["La memoria como proceso compartido: el proceso mental existe en el intercambio social y con el tiempo el niño lo interioriza para usarlo de forma independiente.",
+         "Una deficiencia de Isabel que deberá corregirse con ejercicios de memorización individual sin apoyo externo.",
+         "Que la memoria es exclusivamente un proceso interior que Isabel debe desarrollar por sí sola, sin intervención del adulto."],
+    ok:0,
+    exp:"Esta situación ejemplifica la memoria compartida: la maestra tiene estrategias para recordar; Isabel conoce el juego; juntas reconstruyen la información. Por ahora la memoria existe en el intercambio. Conforme Isabel crezca, se apropiará de la estrategia y podrá usarla de forma independiente, sin preguntas del maestro." },
+
+  /* 9 — Completamiento — correcto: C (2) */
+  { fmt:"Completamiento",
+    txt:"A diferencia de los conductistas, quienes ven el aprendizaje como un proceso meramente acumulativo, Vygotsky sostenía que…",
+    tbl:null,
+    ops:["…el aprendizaje y el desarrollo son exactamente el mismo proceso y no pueden distinguirse ni abordarse por separado.",
+         "…la maduración biológica determina totalmente el desarrollo, sin que el aprendizaje pueda modificarlo.",
+         "…el aprendizaje puede reorganizar y modificar cualitativamente la estructura del pensamiento, produciendo cambios que no se explican por la simple acumulación de habilidades."],
+    ok:2,
+    exp:"Vygotsky señalaba que hay cambios cualitativos en el pensamiento que no se explican por la mera acumulación. El aprendizaje puede reorganizar la mente: cuando los niños adquieren el lenguaje comienzan a pensar con palabras, modificando su pensamiento sensomotor y su capacidad para resolver problemas. Es un punto de diferencia central con el conductismo." },
+
+  /* 10 — Cuestionamiento directo — correcto: B (1) */
+  { fmt:"Cuestionamiento directo",
+    txt:"¿En qué se diferencia la visión de Vygotsky sobre la construcción del conocimiento respecto a la de Piaget?",
+    tbl:null,
+    ops:["Vygotsky creía que los niños no construyen su propio conocimiento, sino que lo reciben pasivamente de los adultos y la cultura.",
+         "Para Vygotsky la construcción cognitiva está siempre mediada socialmente, mientras que para Piaget ocurre principalmente en la interacción con objetos físicos.",
+         "Piaget consideraba que la interacción social es el factor más importante en el desarrollo cognitivo, mientras que Vygotsky la ignoraba en su teoría."],
+    ok:1,
+    exp:"Para Piaget la construcción cognitiva ocurre principalmente en la interacción con objetos físicos; las personas tienen un papel indirecto. Para Vygotsky la construcción siempre está mediada socialmente: lo que el maestro señala al alumno influye en lo que éste construye. La interacción social no es periférica sino el núcleo mismo del desarrollo cognitivo." },
+
+  /* 11 — Relación de elementos — correcto: A (0) */
+  { fmt:"Relación de elementos",
+    txt:"Seleccione la opción que relacione correctamente a cada teórico con el papel que le asigna al lenguaje en el desarrollo cognitivo.",
+    tbl:{ cols:["Teórico","Papel del lenguaje"],
+          rows:[["1. Vygotsky","a) Núcleo de las funciones mentales; herramienta central del pensamiento"],
+                ["2. Piaget","b) Subproducto del desarrollo intelectual que refleja la etapa cognitiva"],
+                ["3. Watson / Conductismo","c) El pensamiento es simplemente 'habla silenciosa', sin distinción cualitativa"]] },
+    ops:["1a, 2b, 3c","1c, 2a, 3b","1b, 2c, 3a"],
+    ok:0,
+    exp:"Para Vygotsky (1a) el lenguaje es el núcleo de las funciones mentales superiores. Para Piaget (2b) el lenguaje refleja la etapa cognitiva pero no la trasciende. Para Watson (3c) el pensamiento era 'habla silenciosa', sin distinción cualitativa, postura que Vygotsky rechazó pues pensamiento y habla son distintos en forma y función." },
+
+  /* 12 — Cuestionamiento directo — correcto: C (2) */
+  { fmt:"Cuestionamiento directo",
+    txt:"La maestra de preescolar nota que Cecilia, de tres años, no clasifica objetos por tamaño de forma autónoma. Le proporciona dos cajas etiquetadas con imágenes grande/chico. Pronto Cecilia clasifica sin las cajas. Según Vygotsky, ¿qué demuestra esta situación?",
+    tbl:null,
+    ops:["Que la maduración biológica fue el único factor que permitió a Cecilia aprender a clasificar, independientemente de la intervención docente.",
+         "Que la maestra controló completamente el aprendizaje de Cecilia, quien dependió totalmente del adulto sin desarrollar autonomía.",
+         "Que el aprendizaje puede acelerar el desarrollo: aprender grande/chico impulsó el pensamiento por categorías más allá del apoyo inicial."],
+    ok:2,
+    exp:"Esta situación ejemplifica que el aprendizaje puede dirigir y acelerar el desarrollo. Las cajas funcionaron como herramientas mediadoras que sostuvieron las categorías mientras Cecilia las interiorizaba. Una vez apropiado el concepto, lo aplicó de forma autónoma, mostrando cómo un paso en el aprendizaje puede generar dos pasos en el desarrollo." },
+
+  /* 13 — Cuestionamiento directo — correcto: B (1) */
+  { fmt:"Cuestionamiento directo",
+    txt:"¿Cuál es la principal semejanza entre la teoría de Vygotsky y la teoría del procesamiento de la información?",
+    tbl:null,
+    ops:["Ambas teorías otorgan el mismo peso al contexto social como factor que moldea los procesos cognitivos individuales.",
+         "Ambas subrayan la importancia de la metacognición: autorregulación, autorreflexión, evaluación y monitoreo en el pensamiento maduro.",
+         "Ambas consideran que el niño es un participante pasivo en el aprendizaje que solo recibe y almacena información del entorno."],
+    ok:1,
+    exp:"Una semejanza importante es que ambas teorías destacan la metacognición: autorregulación, autorreflexión, evaluación y monitoreo. Ambas también acuerdan que el aprendizaje no es pasivo y que el nuevo aprendizaje modifica el conocimiento anterior. La principal diferencia es que el procesamiento de información ignora el contexto social." },
+
+  /* 14 — Completamiento — correcto: A (0) */
+  { fmt:"Completamiento",
+    txt:"Vygotsky sostenía que todos los procesos mentales suceden primero en un espacio compartido y de ahí pasan al plano individual. A esta idea se le conoce como…",
+    tbl:null,
+    ops:["…cognición compartida socialmente, y es fundamental para entender cómo el niño adquiere primero en interacción social y luego interioriza los procesos mentales superiores.",
+         "…maduración cognitiva, y explica que los procesos mentales solo emergen cuando el cerebro ha alcanzado su pleno desarrollo biológico.",
+         "…procesamiento de la información, y describe cómo la mente humana funciona de manera análoga a una computadora al procesar datos del entorno."],
+    ok:0,
+    exp:"La idea de que los procesos mentales ocurren primero entre personas (plano interpsicológico) y luego dentro del individuo (plano intrapsicológico) se denomina cognición compartida socialmente. Esta noción es central en Vygotsky y contrasta con la tradición occidental que consideraba la cognición como proceso exclusivamente interior." },
+
+  /* 15 — Cuestionamiento directo — correcto: C (2) */
+  { fmt:"Cuestionamiento directo",
+    txt:"La maestra y Lucía observan mariposas saliendo de su capullo. La maestra pregunta: '¿Cuándo se vuelven brillantes? ¿Por qué serán sus alas de un color diferente?'. Según Vygotsky, ¿qué función cumple este diálogo en el desarrollo de Lucía?",
+    tbl:null,
+    ops:["El diálogo es irrelevante para el aprendizaje; lo que importa es que Lucía observe directamente el fenómeno sin intervención verbal del adulto.",
+         "El diálogo sirve solo para mantener la atención de Lucía, sin contribuir realmente a su desarrollo cognitivo.",
+         "El lenguaje facilita experiencias compartidas necesarias para construir procesos cognitivos; mediante el diálogo Lucía no solo aprende sobre mariposas sino que asimila los procesos propios del descubrimiento científico."],
+    ok:2,
+    exp:"Para Vygotsky el diálogo tiene una función cognitiva esencial: facilita las experiencias compartidas necesarias para construir procesos cognitivos. Al hablar sobre lo que observan, maestra y alumna comparten la actividad. Mediante muchos diálogos como éste Lucía aprenderá no solo sobre mariposas sino que asimilará los procesos cognitivos del descubrimiento científico." },
+
+  /* 16 — Cuestionamiento directo — correcto: B (1) */
+  { fmt:"Cuestionamiento directo",
+    txt:"¿Cuál es la diferencia fundamental entre las funciones mentales inferiores y las superiores según Vygotsky?",
+    tbl:null,
+    ops:["Las funciones mentales superiores son innatas y biológicas, mientras que las inferiores son aprendidas exclusivamente a través del contexto social y la instrucción escolar.",
+         "Las funciones mentales inferiores son biológicas e independientes del contexto cultural, mientras que las superiores están determinadas culturalmente y se desarrollan de lo compartido a lo individual.",
+         "Las funciones mentales inferiores solo existen en animales; los seres humanos únicamente poseen y desarrollan funciones mentales superiores."],
+    ok:1,
+    exp:"Las funciones mentales inferiores forman parte de nuestra herencia biológica, son independientes del contexto cultural y su desarrollo depende de la maduración. Las superiores se construyen sobre las inferiores, están determinadas culturalmente, implican la interiorización de una herramienta y siguen la trayectoria de lo compartido a lo individual." },
+
+  /* 17 — Relación de elementos — correcto: A (0) */
+  { fmt:"Relación de elementos",
+    txt:"Seleccione la opción que relacione correctamente cada concepto con su descripción según la teoría de Vygotsky.",
+    tbl:{ cols:["Concepto","Descripción"],
+          rows:[["1. Mediación","a) Utilización de signos o símbolos en el procesamiento mental para representar objetos o conductas"],
+                ["2. Interiorización","b) Proceso por el cual una conducta externa se introduce en la mente conservando su estructura y función"],
+                ["3. Herramientas de la mente","c) Instrumentos que modifican funciones mentales inferiores y las reestructuran en superiores"]] },
+    ops:["1a, 2b, 3c","1b, 2c, 3a","1c, 2a, 3b"],
+    ok:0,
+    exp:"La mediación (1a) es el uso de signos o símbolos para representar objetos o conductas en el procesamiento mental. La interiorización (2b) es el proceso por el cual una conducta externa 'entra a la mente', como pasar de sumar con dedos a sumar mentalmente. Las herramientas de la mente (3c) modifican funciones inferiores y las reestructuran en superiores." },
+
+  /* 18 — Cuestionamiento directo — correcto: C (2) */
+  { fmt:"Cuestionamiento directo",
+    txt:"Un profesor de secundaria presenta contenidos de álgebra antes de que sus alumnos dominen con fluidez las operaciones aritméticas básicas. Según Vygotsky, ¿qué error está cometiendo?",
+    tbl:null,
+    ops:["Está aplicando correctamente la teoría, ya que para Vygotsky la enseñanza siempre debe adelantarse al desarrollo sin tomar en cuenta el nivel alcanzado.",
+         "Está siendo demasiado conservador; Vygotsky recomendaba presentar solo contenidos que el alumno ya domina plenamente de forma autónoma.",
+         "Está ignorando el nivel de desarrollo alcanzado; presentar material demasiado difícil frustra al estudiante porque se omite la base necesaria para construir el nuevo aprendizaje."],
+    ok:2,
+    exp:"Vygotsky insistía en considerar el nivel de avance real del niño antes de presentar nuevo contenido. Si bien la enseñanza debe dirigirse hacia habilidades emergentes, saltarse la base necesaria —como la aritmética fluida antes del álgebra— lleva a la frustración. Su propio texto menciona como error análogo presentar la suma antes de que el niño pueda contar con fluidez." },
+
+  /* 19 — Ordenamiento — correcto: B (1) */
+  { fmt:"Ordenamiento",
+    txt:"Ordene las siguientes acciones del proceso de enseñanza-aprendizaje del paso más inicial al más avanzado, de acuerdo con el principio vygotskiano de construcción del conocimiento:",
+    tbl:{ cols:["Paso","Acción"],
+          rows:[["1","El alumno aplica el concepto de forma autónoma en situaciones nuevas."],
+                ["2","El maestro identifica lo que el alumno ya comprende realmente."],
+                ["3","El maestro y el alumno comparten la actividad usando el lenguaje para clarificar significados."],
+                ["4","El alumno interioriza el proceso mental y lo incorpora a su repertorio cognitivo."]] },
+    ops:["1, 2, 3, 4","2, 3, 4, 1","3, 2, 1, 4"],
+    ok:1,
+    exp:"El orden correcto es: (2) el maestro identifica lo que el alumno realmente comprende; (3) juntos comparten la actividad usando el lenguaje; (4) el alumno interioriza el proceso mental; (1) finalmente lo aplica de forma autónoma. Este proceso refleja el paso de la cognición compartida a la individual, núcleo de la teoría vygotskiana." },
+
+  /* 20 — Cuestionamiento directo — correcto: A (0) */
+  { fmt:"Cuestionamiento directo",
+    txt:"Según Vygotsky, ¿por qué la enseñanza es una tarea tan compleja y exigente para los docentes?",
+    tbl:null,
+    ops:["Porque las diferencias individuales hacen que la relación entre aprendizaje y desarrollo sea distinta en cada niño y en cada área, por lo que los maestros deben ajustar constantemente sus métodos.",
+         "Porque el desarrollo siempre precede al aprendizaje, haciendo imposible enseñar algo nuevo hasta que el niño haya madurado lo suficiente en todos sus aspectos cognitivos.",
+         "Porque el lenguaje es la única herramienta disponible para transmitir conocimiento y no todos los niños lo dominan al mismo ritmo ni con la misma facilidad."],
+    ok:0,
+    exp:"Para Vygotsky la enseñanza es difícil porque no se pueden ofrecer recetas exactas: dadas las diferencias individuales, la relación entre aprendizaje y desarrollo es distinta en cada niño y en cada área. A veces un paso en el aprendizaje genera dos en el desarrollo; en otros el ritmo es más uniforme. Esto exige que los maestros ajusten sus métodos constantemente." }
+];
+
+/* ================================================
+   ESTADO
+================================================ */
+var cur = 0, pts = 0, nom = "", responded = false;
+
+/* ================================================
+   TABS
+================================================ */
+function showTab(t) {
+  document.querySelectorAll('.tab-btn').forEach(function(b, i) {
+    b.classList.toggle('active', (i===0 && t==='exam') || (i===1 && t==='guide'));
+  });
+  document.getElementById('tab-exam').style.display  = (t==='exam')  ? '' : 'none';
+  document.getElementById('tab-guide').style.display = (t==='guide') ? '' : 'none';
+}
+
+/* ================================================
+   CAMBIAR PANTALLA
+================================================ */
+function showScr(id) {
+  var screens = ['start','exam','res'];
+  screens.forEach(function(s) {
+    var el = document.getElementById('scr-' + s);
+    if (el) el.classList.toggle('active', s === id);
+  });
+}
+
+/* ================================================
+   INICIAR
+================================================ */
+function iniciar() {
+  var el = document.getElementById('nom');
+  var v  = el.value.trim();
+  if (!v) {
+    el.classList.add('err');
+    el.placeholder = '⚠ Escribe tu nombre para continuar';
+    el.focus();
+    return;
+  }
+  el.classList.remove('err');
+  nom = v; cur = 0; pts = 0; responded = false;
+  document.getElementById('ls').textContent = '0';
+  showScr('exam');
+  render();
+}
+
+/* ================================================
+   RENDERIZAR PREGUNTA
+================================================ */
+function render() {
+  responded = false;
+  var q = QS[cur];
+
+  document.getElementById('qn').textContent  = cur + 1;
+  document.getElementById('pb').style.width  = (cur / 20 * 100) + '%';
+  document.getElementById('fmt').textContent = q.fmt;
+  document.getElementById('qt').textContent  = q.txt;
+
+  /* Tabla */
+  var tArea = document.getElementById('tbl-area');
+  tArea.innerHTML = '';
+  if (q.tbl) {
+    var table = document.createElement('table');
+    table.className = 'q-tbl';
+    var thead = document.createElement('thead');
+    var hrow  = document.createElement('tr');
+    q.tbl.cols.forEach(function(c) {
+      var th = document.createElement('th');
+      th.textContent = c;
+      hrow.appendChild(th);
+    });
+    thead.appendChild(hrow);
+    table.appendChild(thead);
+    var tbody = document.createElement('tbody');
+    q.tbl.rows.forEach(function(r) {
+      var tr = document.createElement('tr');
+      r.forEach(function(cell) {
+        var td = document.createElement('td');
+        td.textContent = cell;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    tArea.appendChild(table);
+  }
+
+  /* Opciones */
+  var oArea = document.getElementById('opts');
+  oArea.innerHTML = '';
+  var letters = ['A','B','C'];
+  q.ops.forEach(function(op, i) {
+    var btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.innerHTML = '<span class="opt-ltr">' + letters[i] + '</span><span class="opt-txt">' + op + '</span>';
+    btn.addEventListener('click', function() { responder(i); });
+    oArea.appendChild(btn);
+  });
+
+  /* Feedback */
+  var fb = document.getElementById('fb');
+  fb.className = 'fb';
+  fb.innerHTML = '';
+
+  /* Botón siguiente */
+  document.getElementById('nxt').classList.remove('show');
+}
+
+/* ================================================
+   RESPONDER
+================================================ */
+function responder(i) {
+  if (responded) return;
+  responded = true;
+
+  var q    = QS[cur];
+  var btns = document.querySelectorAll('.opt');
+  var lets = ['A','B','C'];
+
+  btns.forEach(function(b) { b.disabled = true; });
+
+  var fb = document.getElementById('fb');
+
+  if (i === q.ok) {
+    pts++;
+    document.getElementById('ls').textContent = pts;
+    btns[i].classList.add('ok');
+    fb.className = 'fb ok';
+    fb.innerHTML = '<strong>✅ ¡Respuesta correcta!</strong>' + q.exp;
+  } else {
+    btns[i].classList.add('fail');
+    btns[q.ok].classList.add('show-ok');
+    fb.className = 'fb fail';
+    fb.innerHTML = '<strong>❌ Respuesta incorrecta. La opción correcta es ' + lets[q.ok] + '.</strong>' + q.exp;
+  }
+
+  document.getElementById('nxt').classList.add('show');
+}
+
+/* ================================================
+   SIGUIENTE
+================================================ */
+function siguiente() {
+  cur++;
+  if (cur >= 20) { resultados(); } else { render(); }
+}
+
+/* ================================================
+   RESULTADOS
+================================================ */
+function resultados() {
+  document.getElementById('pb').style.width = '100%';
+  showScr('res');
+
+  document.getElementById('rn').textContent = nom;
+  document.getElementById('rc').textContent = pts;
+  document.getElementById('rw').textContent = 20 - pts;
+
+  var pct = Math.round(pts / 20 * 100);
+  document.getElementById('rp').textContent = pct + '%';
+
+  /* Animar anillo */
+  var C   = 2 * Math.PI * 65;   /* ≈ 408.41 */
+  var off = C - (pct / 100) * C;
+  setTimeout(function() {
+    document.getElementById('rf').style.strokeDashoffset = off;
+  }, 250);
+
+  /* Mensaje motivador */
+  var ico, msg;
+  if      (pct >= 90) { ico = '🌟'; msg = '¡Excelente desempeño! Dominas sólidamente la teoría de Vygotsky. ¡Sigue adelante!'; }
+  else if (pct >= 75) { ico = '👏'; msg = 'Muy buen trabajo. Tienes una comprensión clara de los principios vygotskianos. Refuerza los temas con errores.'; }
+  else if (pct >= 60) { ico = '💪'; msg = 'Buen esfuerzo. Estás en el camino correcto. Revisa la guía de estudio y vuelve a intentarlo.'; }
+  else                { ico = '📚'; msg = 'Hay oportunidades de mejora. Revisa la guía de estudio y practica nuevamente. ¡Tú puedes!'; }
+
+  document.getElementById('mi').textContent = ico;
+  document.getElementById('mm').textContent = msg;
+}
+
+/* ================================================
+   REINICIAR
+================================================ */
+function reiniciar() {
+  cur = 0; pts = 0; responded = false;
+  var el = document.getElementById('nom');
+  el.value = '';
+  el.classList.remove('err');
+  el.placeholder = 'Escribe tu nombre completo…';
+  document.getElementById('ls').textContent = '0';
+  document.getElementById('pb').style.width = '0%';
+  document.getElementById('rf').style.strokeDashoffset = '408';
+  showScr('start');
+}
+
+/* ================================================
+   PDF LOADING
+================================================ */
+function hidePdfLoading() {
+  var el = document.getElementById('pdf-loading');
+  if (el) el.style.display = 'none';
+}
+</script>
+</body>
+</html>

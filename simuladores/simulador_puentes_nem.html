@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador Interactivo – Tejiendo Puentes en la NEM</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold:       #D4A017;
+    --gold-light: #F5D97A;
+    --navy:       #1A3557;
+    --navy-mid:   #2B5183;
+    --cream:      #FDF8EF;
+    --amber:      #F0A830;
+    --green:      #2E8B57;
+    --green-light:#E6F7EE;
+    --red:        #C0392B;
+    --red-light:  #FDECEA;
+    --white:      #FFFFFF;
+    --text:       #1C2B3A;
+    --text-soft:  #4A5568;
+    --shadow:     0 8px 32px rgba(26,53,87,0.13);
+    --radius:     18px;
+    --radius-sm:  10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #FDF8EF 0%, #FEF3DC 40%, #EBF4FF 100%);
+    min-height: 100vh;
+    color: var(--text);
+  }
+
+  /* ── HEADER ── */
+  .site-header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, #1A5276 100%);
+    padding: 28px 20px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(26,53,87,0.25);
+  }
+  .site-header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .header-badge {
+    display: inline-block;
+    background: rgba(212,160,23,0.25);
+    border: 1px solid rgba(212,160,23,0.5);
+    color: var(--gold-light);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+  .header-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(1.4rem, 4vw, 2.1rem);
+    font-weight: 800;
+    color: var(--white);
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .header-title span {
+    color: var(--gold-light);
+  }
+  .header-subtitle {
+    font-size: 0.92rem;
+    color: rgba(255,255,255,0.75);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+  .header-divider {
+    width: 60px; height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--amber));
+    border-radius: 3px;
+    margin: 12px auto 0;
+  }
+
+  /* ── NAV TABS ── */
+  .nav-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    background: var(--navy);
+    padding: 0 20px 14px;
+    flex-wrap: wrap;
+  }
+  .nav-tab {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.7);
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 7px 20px;
+    border-radius: 20px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  .nav-tab.active, .nav-tab:hover {
+    background: var(--gold);
+    color: var(--navy);
+    border-color: var(--gold);
+  }
+
+  /* ── MAIN WRAPPER ── */
+  .main {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 30px 16px 60px;
+  }
+
+  /* ── SCREEN SECTIONS ── */
+  .screen { display: none; animation: fadeUp 0.45s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── WELCOME SCREEN ── */
+  .welcome-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 44px 36px;
+    text-align: center;
+    border-top: 5px solid var(--gold);
+  }
+  .welcome-icon { font-size: 3.5rem; margin-bottom: 16px; }
+  .welcome-card h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.55rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 10px;
+  }
+  .welcome-card p {
+    color: var(--text-soft);
+    font-size: 0.97rem;
+    line-height: 1.65;
+    max-width: 480px;
+    margin: 0 auto 28px;
+  }
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 30px;
+  }
+  .info-chip {
+    background: linear-gradient(135deg, #EBF4FF, #F0F8FF);
+    border: 1px solid #BFD9F5;
+    border-radius: var(--radius-sm);
+    padding: 12px 10px;
+    font-size: 0.83rem;
+    font-weight: 600;
+    color: var(--navy-mid);
+  }
+  .info-chip span { display: block; font-size: 1.4rem; margin-bottom: 4px; }
+  .input-group { margin-bottom: 22px; text-align: left; }
+  .input-group label {
+    display: block;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+  .input-group input {
+    width: 100%;
+    padding: 13px 18px;
+    border: 2px solid #D1E3F8;
+    border-radius: var(--radius-sm);
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    color: var(--text);
+    background: #F8FBFF;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .input-group input:focus { border-color: var(--navy-mid); background: white; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 32px;
+    border-radius: 50px;
+    border: none;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s;
+    letter-spacing: 0.3px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+    color: white;
+    box-shadow: 0 4px 18px rgba(26,53,87,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,53,87,0.35); }
+  .btn-gold {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--amber) 100%);
+    color: var(--navy);
+    box-shadow: 0 4px 18px rgba(212,160,23,0.35);
+  }
+  .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(212,160,23,0.4); }
+  .btn-outline {
+    background: white;
+    color: var(--navy);
+    border: 2px solid var(--navy);
+  }
+  .btn-outline:hover { background: var(--navy); color: white; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+  /* ── EXAM SCREEN ── */
+  .exam-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    border-radius: var(--radius);
+    padding: 14px 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 12px rgba(26,53,87,0.08);
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .exam-topbar .student-name {
+    font-weight: 700;
+    color: var(--navy);
+    font-size: 0.92rem;
+  }
+  .exam-topbar .student-name span { color: var(--text-soft); font-weight: 500; }
+  .progress-wrap { flex: 1; min-width: 160px; max-width: 320px; }
+  .progress-label {
+    font-size: 0.78rem;
+    color: var(--text-soft);
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .progress-bar {
+    background: #E2ECF8;
+    border-radius: 8px;
+    height: 8px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--amber));
+    border-radius: 8px;
+    transition: width 0.5s ease;
+  }
+  .score-badge {
+    display: flex;
+    gap: 10px;
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+  .score-correct { color: var(--green); }
+  .score-wrong { color: var(--red); }
+
+  /* ── QUESTION CARD ── */
+  .question-card {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .question-header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+    padding: 18px 26px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .q-number {
+    background: var(--gold);
+    color: var(--navy);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    padding: 4px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .q-format {
+    background: rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.85);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 12px;
+    letter-spacing: 0.5px;
+  }
+  .question-body { padding: 26px 26px 20px; }
+  .question-text {
+    font-size: 1.02rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.65;
+    margin-bottom: 20px;
+  }
+
+  /* Relation table */
+  .rel-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 18px;
+    font-size: 0.88rem;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 6px rgba(26,53,87,0.1);
+  }
+  .rel-table th {
+    background: var(--navy);
+    color: white;
+    padding: 9px 14px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 0.82rem;
+  }
+  .rel-table td {
+    padding: 8px 14px;
+    border-bottom: 1px solid #EAF1FB;
+    line-height: 1.45;
+  }
+  .rel-table tr:nth-child(even) td { background: #F5F9FF; }
+  .rel-table tr:last-child td { border-bottom: none; }
+
+  /* Options */
+  .options-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .option-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 18px;
+    border: 2px solid #D9E8F8;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #FAFCFF;
+    user-select: none;
+  }
+  .option-item:hover:not(.disabled) {
+    border-color: var(--navy-mid);
+    background: #EBF4FF;
+    transform: translateX(4px);
+  }
+  .option-item.selected {
+    border-color: var(--navy-mid);
+    background: #EBF4FF;
+  }
+  .option-item.correct {
+    border-color: var(--green);
+    background: var(--green-light);
+  }
+  .option-item.wrong {
+    border-color: var(--red);
+    background: var(--red-light);
+  }
+  .option-item.disabled { cursor: default; }
+  .option-letter {
+    min-width: 30px; height: 30px;
+    background: linear-gradient(135deg, var(--navy), var(--navy-mid));
+    color: white;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+  .option-item.correct .option-letter { background: var(--green); }
+  .option-item.wrong .option-letter { background: var(--red); }
+  .option-text { font-size: 0.94rem; line-height: 1.55; padding-top: 4px; }
+
+  /* Feedback */
+  .feedback-box {
+    margin-top: 16px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    animation: fadeUp 0.3s ease;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .feedback-box.correct {
+    background: var(--green-light);
+    border-left: 4px solid var(--green);
+    color: #1A5C38;
+  }
+  .feedback-box.wrong {
+    background: var(--red-light);
+    border-left: 4px solid var(--red);
+    color: #7B241C;
+  }
+  .feedback-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 1px; }
+
+  /* Next button area */
+  .question-footer {
+    padding: 0 26px 24px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+
+  /* ── RESULTS SCREEN ── */
+  .results-card {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    text-align: center;
+  }
+  .results-hero {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, #1A6496 100%);
+    padding: 40px 30px 36px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  .results-hero::after {
+    content: '🎓';
+    position: absolute;
+    right: 30px; top: 20px;
+    font-size: 5rem;
+    opacity: 0.12;
+  }
+  .results-hero h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .results-hero .student-result-name {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--gold-light);
+  }
+  .score-ring-wrap { margin: 24px auto 0; }
+  .score-ring {
+    width: 130px; height: 130px;
+    border-radius: 50%;
+    background: conic-gradient(var(--gold) 0deg, var(--amber) var(--score-deg), rgba(255,255,255,0.1) var(--score-deg));
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto;
+    box-shadow: 0 0 0 8px rgba(255,255,255,0.08);
+  }
+  .score-ring-inner {
+    width: 96px; height: 96px;
+    background: var(--navy);
+    border-radius: 50%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .score-pct {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: white;
+    line-height: 1;
+  }
+  .score-pct-label { font-size: 0.7rem; color: rgba(255,255,255,0.6); font-weight: 600; }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: #E8EFF8;
+    border-top: 1px solid #E8EFF8;
+  }
+  .stat-cell {
+    background: white;
+    padding: 22px 16px;
+    text-align: center;
+  }
+  .stat-cell .val {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 5px;
+  }
+  .stat-cell .lbl {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .stat-cell.green .val { color: var(--green); }
+  .stat-cell.red .val { color: var(--red); }
+  .stat-cell.blue .val { color: var(--navy-mid); }
+  .level-badge {
+    margin: 24px auto 0;
+    display: inline-block;
+    padding: 8px 24px;
+    border-radius: 30px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+  .motivational {
+    padding: 26px 30px 14px;
+    font-size: 1rem;
+    color: var(--text-soft);
+    line-height: 1.7;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+  .motivational strong { color: var(--navy); }
+  .results-actions {
+    padding: 10px 30px 36px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* ── GUIDE SCREEN ── */
+  .guide-card {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .guide-header {
+    background: linear-gradient(135deg, #1A4568, #2B6CB0);
+    padding: 26px 30px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .guide-header-icon { font-size: 2.4rem; }
+  .guide-header h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+  }
+  .guide-header p { font-size: 0.85rem; opacity: 0.8; margin-top: 3px; }
+  .guide-actions {
+    padding: 22px 26px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid #EAF1FB;
+  }
+  .pdf-viewer {
+    width: 100%;
+    height: 680px;
+    border: none;
+    display: block;
+    background: #F0F4F8;
+  }
+  .pdf-placeholder {
+    padding: 50px 30px;
+    text-align: center;
+    color: var(--text-soft);
+    display: none;
+  }
+  .pdf-placeholder .icon { font-size: 3rem; margin-bottom: 12px; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .welcome-card { padding: 30px 20px; }
+    .question-body { padding: 20px 18px 16px; }
+    .question-footer { padding: 0 18px 20px; }
+    .stats-grid { grid-template-columns: repeat(3, 1fr); }
+    .stat-cell .val { font-size: 1.5rem; }
+    .results-hero { padding: 30px 20px; }
+    .motivational { padding: 20px 20px 10px; }
+    .results-actions { padding: 10px 20px 28px; }
+    .exam-topbar { flex-direction: column; align-items: flex-start; }
+    .progress-wrap { width: 100%; max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<header class="site-header">
+  <div class="header-badge">Simulador Interactivo de Evaluación</div>
+  <h1 class="header-title">Tejiendo <span>Puentes</span> en la NEM</h1>
+  <p class="header-subtitle">Las relaciones entre Escuela, Familias y Comunidad</p>
+  <div class="header-divider"></div>
+</header>
+
+<!-- ══ NAV TABS ══ -->
+<nav class="nav-tabs">
+  <button class="nav-tab active" onclick="showTab('simulador')">📝 Simulador</button>
+  <button class="nav-tab" onclick="showTab('guia')">📖 Guía de Estudio</button>
+</nav>
+
+<!-- ══ MAIN ══ -->
+<main class="main">
+
+  <!-- ── TAB: SIMULADOR ── -->
+  <div id="tab-simulador">
+
+    <!-- WELCOME -->
+    <div id="screen-welcome" class="screen active">
+      <div class="welcome-card">
+        <div class="welcome-icon">🏫</div>
+        <h2>Bienvenido/a al Simulador</h2>
+        <p>Pon a prueba tus conocimientos sobre la Guía <strong>Tejiendo Puentes en la NEM</strong>. Contesta las 30 preguntas y recibe retroalimentación inmediata.</p>
+        <div class="info-grid">
+          <div class="info-chip"><span>📋</span>30 preguntas</div>
+          <div class="info-chip"><span>🔤</span>Opción múltiple A/B/C</div>
+          <div class="info-chip"><span>💬</span>Retroalimentación</div>
+          <div class="info-chip"><span>📊</span>Resultados finales</div>
+        </div>
+        <div class="input-group">
+          <label for="studentName">👤 Tu nombre completo</label>
+          <input type="text" id="studentName" placeholder="Escribe tu nombre aquí…" autocomplete="off">
+        </div>
+        <button class="btn btn-primary" onclick="startExam()">
+          🚀 Iniciar Simulador
+        </button>
+      </div>
+    </div>
+
+    <!-- EXAM -->
+    <div id="screen-exam" class="screen">
+      <div class="exam-topbar">
+        <div class="student-name"><span>Estudiante: </span><span id="nameDisplay"></span></div>
+        <div class="progress-wrap">
+          <div class="progress-label">
+            <span>Progreso</span>
+            <span id="progressText">0 / 30</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        </div>
+        <div class="score-badge">
+          <span class="score-correct">✔ <span id="correctCount">0</span></span>
+          <span class="score-wrong">✘ <span id="wrongCount">0</span></span>
+        </div>
+      </div>
+
+      <div class="question-card" id="questionCard">
+        <div class="question-header">
+          <span class="q-number" id="qNumber">Pregunta 1 de 30</span>
+          <span class="q-format" id="qFormat">Cuestionamiento directo</span>
+        </div>
+        <div class="question-body">
+          <p class="question-text" id="questionText"></p>
+          <div id="relTableContainer"></div>
+          <ul class="options-list" id="optionsList"></ul>
+          <div id="feedbackBox" class="feedback-box" style="display:none"></div>
+        </div>
+        <div class="question-footer">
+          <button class="btn btn-gold" id="btnNext" onclick="nextQuestion()" disabled>
+            Siguiente pregunta →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="screen-results" class="screen">
+      <div class="results-card">
+        <div class="results-hero">
+          <p style="font-size:0.8rem;opacity:0.7;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Resultado del Simulador</p>
+          <h2>¡Evaluación completada!</h2>
+          <div class="student-result-name" id="resultName"></div>
+          <div class="score-ring-wrap">
+            <div class="score-ring" id="scoreRing">
+              <div class="score-ring-inner">
+                <div class="score-pct" id="scorePct">0%</div>
+                <div class="score-pct-label">desempeño</div>
+              </div>
+            </div>
+          </div>
+          <div id="levelBadge" class="level-badge" style="margin-top:18px;"></div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-cell green"><div class="val" id="resCorrect">0</div><div class="lbl">Aciertos</div></div>
+          <div class="stat-cell red"><div class="val" id="resWrong">0</div><div class="lbl">Errores</div></div>
+          <div class="stat-cell blue"><div class="val">30</div><div class="lbl">Preguntas</div></div>
+        </div>
+        <div class="motivational" id="motivationalMsg"></div>
+        <div class="results-actions">
+          <button class="btn btn-primary" onclick="restartExam()">🔄 Reintentar examen</button>
+          <button class="btn btn-gold" onclick="showTab('guia')">📖 Ver Guía de Estudio</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-simulador -->
+
+  <!-- ── TAB: GUIA ── -->
+  <div id="tab-guia" style="display:none">
+    <div class="guide-card">
+      <div class="guide-header">
+        <div class="guide-header-icon">📚</div>
+        <div>
+          <h2>Guía de Estudio: Tejiendo Puentes en la NEM</h2>
+          <p>Prof. Francisco De Jesus Luna Benitez · Ciclo Escolar 2025-2026</p>
+        </div>
+      </div>
+      <div class="guide-actions">
+        <a href="https://drive.google.com/file/d/1P3Po8ahLkI_QeNYuLCzY4IpvzcM4Zo03/view?usp=sharing" target="_blank" class="btn btn-primary" style="text-decoration:none;">
+          🔗 Abrir en Google Drive
+        </a>
+        <button class="btn btn-gold" onclick="togglePDF()">👁 Ver PDF aquí</button>
+      </div>
+      <div id="pdfContainer" style="display:none;">
+        <iframe
+          id="pdfFrame"
+          class="pdf-viewer"
+          src="https://drive.google.com/file/d/1P3Po8ahLkI_QeNYuLCzY4IpvzcM4Zo03/preview"
+          allow="autoplay"
+          loading="lazy"
+        ></iframe>
+      </div>
+    </div>
+  </div><!-- /tab-guia -->
+
+</main>
+
+<script>
+// ══════════════════════════════════
+//  PREGUNTAS
+// ══════════════════════════════════
+const questions = [
+  {
+    id: 1,
+    format: 'Cuestionamiento directo',
+    text: '¿Qué rol desempeñan las familias en la propuesta curricular de la Nueva Escuela Mexicana (NEM)?',
+    options: [
+      'Constituir el puente entre la escuela y la comunidad.',
+      'Ser ayudantes periféricos que asisten únicamente a festivales escolares.',
+      'Supervisar el trabajo docente de manera sistemática.'
+    ],
+    correct: 0,
+    explanation: 'En la propuesta curricular de la NEM, las familias constituyen el puente entre la escuela y la comunidad, formando un núcleo de relaciones pedagógicas mediadas por el diálogo constante. Ya no son actores periféricos, sino corresponsables activos.'
+  },
+  {
+    id: 2,
+    format: 'Cuestionamiento directo',
+    text: 'En la escuela tradicional, ¿cómo se define la participación de las familias?',
+    options: [
+      'Como integración de saberes locales al currículo escolar.',
+      'Como asistencia física pasiva a reuniones o festivales escolares.',
+      'Como corresponsabilidad plena en el bienestar y buen trato.'
+    ],
+    correct: 1,
+    explanation: 'Según la Matriz de Transformación de la guía, en la escuela tradicional la participación familiar se limita a la asistencia física pasiva a reuniones o festivales escolares, sin un involucramiento real en las decisiones pedagógicas.'
+  },
+  {
+    id: 3,
+    format: 'Cuestionamiento directo',
+    text: 'Según la Matriz de Transformación de la NEM, ¿cuál es el rol del docente en la Escuela NEM (Comunidad)?',
+    options: [
+      'Único poseedor del saber que trabaja aislado en su santuario.',
+      'Supervisor de las actividades que realizan las familias en la escuela.',
+      'Lector crítico de la realidad social y generador de diálogos pedagógicos.'
+    ],
+    correct: 2,
+    explanation: 'En contraste con la escuela tradicional donde el docente era el único poseedor del saber, en la Escuela NEM el docente asume el rol de lector crítico de la realidad social y generador de diálogos pedagógicos, trabajando en comunidad.'
+  },
+  {
+    id: 4,
+    format: 'Completamiento',
+    text: 'La participación genuina no equivale únicamente a la presencia física. Es un proceso…',
+    options: [
+      '…situado, permanente y de diálogo deliberativo.',
+      '…medido por el número de reuniones a las que asisten los padres de familia.',
+      '…enfocado exclusivamente en apoyar tareas escolares desde el hogar.'
+    ],
+    correct: 0,
+    explanation: 'Según la guía, la participación genuina es un proceso situado, permanente y de diálogo deliberativo. Esto significa que va más allá de la presencia física e implica una relación continua y significativa con la comunidad escolar.'
+  },
+  {
+    id: 5,
+    format: 'Cuestionamiento directo',
+    text: '¿Cuál de las siguientes dimensiones de la participación se refiere a desempeñar acciones concretas, tareas y responsabilidades compartidas?',
+    options: [
+      'Tomar Parte (Influir).',
+      'Tener Parte (Asumir un rol).',
+      'Formar Parte (Pertenecer).'
+    ],
+    correct: 1,
+    explanation: '"Tener Parte" implica asumir un rol activo: desempeñar acciones concretas, tareas y responsabilidades compartidas dentro de la comunidad escolar, diferenciándose del simple sentido de pertenencia (Formar Parte) o de la influencia en decisiones (Tomar Parte).'
+  },
+  {
+    id: 6,
+    format: 'Cuestionamiento directo',
+    text: '¿Qué exige el codiseño de contenidos en la propuesta de la NEM?',
+    options: [
+      'Que el director dicte los contenidos a abordar en cada aula.',
+      'Que los docentes elaboren individualmente los planes sin consultar a la comunidad.',
+      'La escucha activa de los estudiantes y el trabajo directo con las familias para contextualizar los contenidos.'
+    ],
+    correct: 2,
+    explanation: 'El codiseño exige escucha activa de los estudiantes y trabajo directo con las familias para contextualizar los contenidos. Implica integrar saberes locales —historias, costumbres de crianza, tradiciones, artesanos, músicos— como riqueza curricular.'
+  },
+  {
+    id: 7,
+    format: 'Caso aplicado',
+    text: 'En el Caso Los Pilares, la desvinculación escolar de las familias se explica principalmente por:',
+    options: [
+      'Barreras estructurales: pobreza, migración de los padres varones, madres jóvenes al frente y baja escolaridad transgeneracional.',
+      'Falta de interés y apatía de los padres hacia la educación de sus hijos.',
+      'Desacuerdos con las estrategias pedagógicas del docente a cargo del grupo.'
+    ],
+    correct: 0,
+    explanation: 'El Caso Los Pilares muestra que la inasistencia no siempre es apatía. La cadena es: pobreza y marginación → migración masculina → mujeres jóvenes (15-17 años) asumen la carga económica y emocional → barreras estructurales que dificultan la vinculación escolar.'
+  },
+  {
+    id: 8,
+    format: 'Cuestionamiento directo',
+    text: '¿Qué representa el "Espejo Roto" en la guía Tejiendo Puentes en la NEM?',
+    options: [
+      'La falta de infraestructura escolar adecuada para recibir a las familias.',
+      'Las prácticas sedimentadas de docentes que culpan o descalifican a las familias.',
+      'La ruptura de la relación escuela-comunidad por falta de recursos económicos.'
+    ],
+    correct: 1,
+    explanation: 'El "Espejo Roto" representa las prácticas sedimentadas que llevan a los docentes a descalificar a las familias con frases como "Las familias no son como antes" o "Los dejan en la puerta y se desentienden", sin reflexionar críticamente sobre las causas estructurales.'
+  },
+  {
+    id: 9,
+    format: 'Relación de elementos',
+    text: 'Seleccione la opción que relaciona correctamente cada dimensión de la participación con su descripción.',
+    tableData: {
+      col1Header: 'Dimensión',
+      col2Header: 'Descripción',
+      rows: [
+        ['1. Formar Parte', 'a) Desempeñar acciones concretas, tareas y responsabilidades compartidas.'],
+        ['2. Tener Parte', 'b) La capacidad real de influir a partir de la acción y la toma de decisiones conjuntas.'],
+        ['3. Tomar Parte', 'c) El sentido de identidad, arraigo y de ser un integrante valorado de la comunidad escolar.'],
+      ]
+    },
+    options: [
+      '1-a, 2-b, 3-c',
+      '1-b, 2-c, 3-a',
+      '1-c, 2-a, 3-b'
+    ],
+    correct: 2,
+    explanation: 'La relación correcta es: Formar Parte (Pertenecer) = sentido de identidad y arraigo (c); Tener Parte (Asumir un rol) = acciones concretas y responsabilidades (a); Tomar Parte (Influir) = capacidad de incidir en decisiones conjuntas (b).'
+  },
+  {
+    id: 10,
+    format: 'Cuestionamiento directo',
+    text: '¿Cuál es la meta del liderazgo distribuido en el Consejo Técnico Escolar (CTE) según la guía?',
+    options: [
+      'Transformar los proyectos escolares en procesos de profunda innovación pedagógica comunitaria.',
+      'Reducir la carga administrativa de los directivos escolares.',
+      'Aumentar el número de reuniones entre docentes y familias durante el ciclo escolar.'
+    ],
+    correct: 0,
+    explanation: 'La meta del liderazgo distribuido en el CTE es transformar los proyectos escolares para que dejen de ser ejercicios puramente operativos y se conviertan en procesos de profunda innovación pedagógica comunitaria, con una visión compartida.'
+  },
+  {
+    id: 11,
+    format: 'Completamiento',
+    text: 'En la NEM, aunque las familias apoyan y acompañan, la escuela es la responsable final de lograr que todos los estudiantes…',
+    options: [
+      '…cumplan con los reglamentos y normas de conducta del sistema educativo.',
+      '…desarrollen sus capacidades con equidad.',
+      '…superen las pruebas estandarizadas con calificaciones aprobatorias.'
+    ],
+    correct: 1,
+    explanation: 'El principio de Responsabilidad Pedagógica establece que las familias apoyan y acompañan, pero la escuela es la responsable final de garantizar que todos los estudiantes desarrollen sus capacidades con equidad, sin depender del capital cultural de cada familia.'
+  },
+  {
+    id: 12,
+    format: 'Cuestionamiento directo',
+    text: 'Según la guía, ¿qué postura debe asumir la escuela ante la diversidad de tipos de familias?',
+    options: [
+      'Priorizar el trabajo con familias tradicionales por su mayor disponibilidad.',
+      'Establecer un modelo único de acompañamiento para garantizar la equidad.',
+      'Abrazar la heterogeneidad, reconociendo que no existe un modelo único para el acompañamiento.'
+    ],
+    correct: 2,
+    explanation: 'La guía es clara: la escuela debe abrazar la heterogeneidad. Existen familias tradicionales, homoparentales, monoparentales, reconstruidas y extensas, entre otras. No existe un modelo único de acompañamiento; cada familia aporta desde su realidad.'
+  },
+  {
+    id: 13,
+    format: 'Cuestionamiento directo',
+    text: '¿Cuál de las siguientes opciones NO es un ámbito de involucramiento familiar establecido por la NEM?',
+    options: [
+      'Sustituir al docente durante sus ausencias programadas en el aula.',
+      'Reforzar conocimientos y apoyar la rehabilitación e inclusión plena.',
+      'Construir proactivamente ambientes sanos y libres de violencia.'
+    ],
+    correct: 0,
+    explanation: 'Los ámbitos de involucramiento familiar en la NEM son: reforzar conocimientos y apoyar la inclusión; mejorar las condiciones organizativas; y construir ambientes sanos y libres de violencia. Sustituir al docente no es una función asignada a las familias.'
+  },
+  {
+    id: 14,
+    format: 'Ordenamiento',
+    text: 'Ordene los pasos del Caso Los Pilares que explican la cadena de desvinculación escolar en la comunidad.\n\n1. Pobreza y vulnerabilidad (alta marginación y falta de opciones locales)\n2. Migración (los padres varones se ausentan prolongadamente por trabajo)\n3. Mujeres jóvenes asumen el rol central económico y emocional del hogar\n4. Barreras estructurales y desvinculación escolar transgeneracional',
+    options: [
+      '2 → 1 → 4 → 3',
+      '1 → 2 → 3 → 4',
+      '3 → 4 → 1 → 2'
+    ],
+    correct: 1,
+    explanation: 'El orden correcto es: (1) pobreza y marginación → (2) migración masculina por trabajo → (3) madres adolescentes de 15-17 años asumen el frente del hogar → (4) barreras estructurales que producen desvinculación escolar transgeneracional.'
+  },
+  {
+    id: 15,
+    format: 'Cuestionamiento directo',
+    text: 'Según la guía, ¿cuál es la acción docente clave en el marco de la equidad e iniciativa pedagógica?',
+    options: [
+      'Exigir a las familias mayor presencia en la escuela para mejorar el rendimiento.',
+      'Delegar en las familias la responsabilidad de la formación en valores de los estudiantes.',
+      'Informar, coordinar acciones y valorar las aportaciones de las madres/padres para enriquecer la enseñanza.'
+    ],
+    correct: 2,
+    explanation: 'La Acción Docente en la NEM consiste en informar, coordinar acciones y, sobre todo, valorar las aportaciones de las madres y padres para enriquecer la enseñanza. El docente no exige ni delega, sino que reconoce y aprovecha el saber familiar.'
+  },
+  {
+    id: 16,
+    format: 'Caso aplicado',
+    text: 'Una docente invita a un artesano de la comunidad a compartir su oficio con el grupo y lo integra al plan de trabajo. ¿Qué elemento del codiseño curricular de la NEM está poniendo en práctica?',
+    options: [
+      'La integración de saberes locales como fuentes de conocimiento de alta riqueza cultural.',
+      'La aplicación de los libros de texto gratuitos distribuidos por la SEP a nivel nacional.',
+      'El uso de pruebas estandarizadas para evaluar los aprendizajes del grupo.'
+    ],
+    correct: 0,
+    explanation: 'El codiseño incluye integrar saberes locales: historias locales, costumbres de crianza, tradiciones comunitarias, artesanos y músicos locales. Como señala Torres (2023): "Que se den cuenta que ellos son fuentes de conocimiento de alta riqueza cultural."'
+  },
+  {
+    id: 17,
+    format: 'Completamiento',
+    text: 'En la propuesta de la NEM, la escuela deja de ser el santuario aislado del maestro y se transita hacia…',
+    options: [
+      '…un espacio de control y supervisión del aprendizaje individual de cada estudiante.',
+      '…un núcleo de relaciones pedagógicas mediadas por el diálogo constante.',
+      '…un centro de evaluación y acreditación de competencias ciudadanas.'
+    ],
+    correct: 1,
+    explanation: 'La transformación central de la NEM implica pasar de una escuela aislada a un núcleo de relaciones pedagógicas mediadas por el diálogo constante, donde escuela, familias y comunidad construyen juntos el proceso educativo.'
+  },
+  {
+    id: 18,
+    format: 'Cuestionamiento directo',
+    text: 'En la síntesis "El Puente hacia la Nueva Ciudadanía", ¿qué implica el principio de "Leer la Realidad"?',
+    options: [
+      'Aplicar encuestas de satisfacción a las familias al inicio del ciclo escolar.',
+      'Revisar los planes y programas de estudio oficiales publicados por la SEP.',
+      'Comprender el contexto socioeconómico de la comunidad sin prejuicios.'
+    ],
+    correct: 2,
+    explanation: '"Leer la Realidad" es el primer principio de síntesis de la guía: comprender el contexto socioeconómico sin prejuicios. El docente debe interpretar críticamente las condiciones de vida de las familias para adaptar sus apuestas pedagógicas.'
+  },
+  {
+    id: 19,
+    format: 'Relación de elementos',
+    text: 'Seleccione la opción que relaciona correctamente cada dimensión con su descripción en la Escuela NEM (Comunidad).',
+    tableData: {
+      col1Header: 'Dimensión (NEM)',
+      col2Header: 'Descripción',
+      rows: [
+        ['1. Rol del Docente', 'a) Pilares integrados; corresponsables en el bienestar y buen trato.'],
+        ['2. Expectativa Familiar', 'b) Compartir decisiones, integrar saberes locales y asumir roles activos.'],
+        ['3. Definición de Participación', 'c) Lector crítico de la realidad social; generador de diálogos pedagógicos.'],
+      ]
+    },
+    options: [
+      '1-c, 2-a, 3-b',
+      '1-b, 2-a, 3-c',
+      '1-a, 2-c, 3-b'
+    ],
+    correct: 0,
+    explanation: 'En la Escuela NEM: el Rol del Docente es ser lector crítico y generador de diálogos (c); la Expectativa Familiar es que sean pilares integrados y corresponsables (a); y la Participación implica compartir decisiones e integrar saberes locales (b).'
+  },
+  {
+    id: 20,
+    format: 'Cuestionamiento directo',
+    text: '¿Qué actores conforman la red de liderazgo distribuido en el CTE según la guía?',
+    options: [
+      'Solo directivos y docentes, como responsables directos del proceso de aprendizaje.',
+      'Directivos, docentes, familias y colaboradores externos, articulados por una visión compartida.',
+      'Supervisores escolares, directivos y personal administrativo de la zona.'
+    ],
+    correct: 1,
+    explanation: 'El liderazgo distribuido en el CTE articula a directivos, docentes, familias y colaboradores externos alrededor de una visión compartida. El rol directivo es vital para delegar responsabilidades, promover comunicación asertiva y generar consensos.'
+  },
+  {
+    id: 21,
+    format: 'Cuestionamiento directo',
+    text: 'Según el principio de "Dar el Primer Paso" en la NEM, ¿quién tiene la responsabilidad de diseñar los primeros encuentros positivos y colaborativos con las familias?',
+    options: [
+      'Las familias, como corresponsables del proceso educativo.',
+      'Los estudiantes, a través de sus representantes en el comité escolar.',
+      'La institución escolar.'
+    ],
+    correct: 2,
+    explanation: 'El principio de "Dar el Primer Paso" establece que es la institución escolar quien debe diseñar y propiciar los primeros encuentros positivos y colaborativos. La escuela no espera que la familia llegue; va al encuentro de ella.'
+  },
+  {
+    id: 22,
+    format: 'Completamiento',
+    text: 'El "Codiseño Vivo" en la síntesis de la guía Tejiendo Puentes en la NEM se refiere a…',
+    options: [
+      '…integrar los saberes locales como riqueza curricular en la propuesta pedagógica.',
+      '…diseñar materiales didácticos con herramientas digitales de última generación.',
+      '…elaborar proyectos escolares alineados exclusivamente con los planes nacionales de la SEP.'
+    ],
+    correct: 0,
+    explanation: '"Codiseño Vivo" es el tercer principio de síntesis de la guía: integrar los saberes locales como riqueza curricular. Implica que el currículo no se impone desde afuera, sino que se construye incorporando los conocimientos y tradiciones de la comunidad.'
+  },
+  {
+    id: 23,
+    format: 'Caso aplicado',
+    text: 'Una docente observa que varios estudiantes faltan frecuentemente y que las madres no asisten a reuniones escolares. Según la perspectiva de la NEM, ¿cuál es la acción más adecuada?',
+    options: [
+      'Documentar las ausencias como señal de apatía familiar y reportarlas a la supervisión.',
+      'Leer críticamente la realidad socioeconómica para adaptar las estrategias pedagógicas a las posibilidades reales de la comunidad.',
+      'Implementar sanciones progresivas para asegurar la asistencia de los estudiantes y sus familias.'
+    ],
+    correct: 1,
+    explanation: 'La guía es enfática: "La inasistencia no siempre es apatía." El docente debe leer críticamente la realidad para comprender las barreras estructurales (pobreza, migración, responsabilidades del hogar) y adaptar sus apuestas pedagógicas a las verdaderas posibilidades.'
+  },
+  {
+    id: 24,
+    format: 'Cuestionamiento directo',
+    text: '¿Cuál de los siguientes tipos de familia es reconocido en el espectro de heterogeneidad familiar de la NEM?',
+    options: [
+      'Familia contributiva.',
+      'Familia corporativa.',
+      'Familia extensa.'
+    ],
+    correct: 2,
+    explanation: 'La guía reconoce cinco tipos de familias en el espectro: tradicionales, homoparentales, monoparentales, reconstruidas y extensas. La escuela debe trabajar con todas ellas sin imponer un modelo único de acompañamiento.'
+  },
+  {
+    id: 25,
+    format: 'Completamiento',
+    text: 'Según la guía, complete la siguiente afirmación: "Las relaciones con las familias, conflictivas o no, constituyen…"',
+    options: [
+      '…una cuestión de identidad de nuestra profesión docente.',
+      '…un obstáculo que el docente debe gestionar para concentrarse en lo pedagógico.',
+      '…una responsabilidad exclusiva del área de trabajo social de la escuela.'
+    ],
+    correct: 0,
+    explanation: 'La frase de cierre de la guía afirma que las relaciones con las familias, conflictivas o no, constituyen una cuestión de identidad de la profesión docente. Esto sitúa el vínculo con las familias en el núcleo del ser maestro/a, no como algo periférico.'
+  },
+  {
+    id: 26,
+    format: 'Cuestionamiento directo',
+    text: '¿Qué representa la "Ventana Abierta" en la guía Tejiendo Puentes en la NEM?',
+    options: [
+      'El uso de plataformas digitales para la comunicación entre docentes y familias.',
+      'El reencuadre crítico que permite reconocer el valor inherente de las familias en la educación.',
+      'La apertura de la escuela a la supervisión externa por parte de autoridades educativas.'
+    ],
+    correct: 1,
+    explanation: 'La "Ventana Abierta" representa el Reencuadre Crítico: reflexionar sobre por qué la escuela asume más responsabilidades sociales y afectivas estructurales, y reconocer que identificar estas percepciones es esencial para no demeritar el valor inherente de las familias.'
+  },
+  {
+    id: 27,
+    format: 'Ordenamiento',
+    text: 'Ordene los elementos de la iniciativa pedagógica de la NEM según la secuencia lógica presentada en la guía.\n\n1. La institución escolar diseña los primeros encuentros positivos y colaborativos con las familias\n2. La escuela garantiza que todos los estudiantes desarrollen sus capacidades con equidad\n3. El docente valora las aportaciones de madres/padres para enriquecer la enseñanza',
+    options: [
+      '2 → 3 → 1',
+      '3 → 2 → 1',
+      '1 → 2 → 3'
+    ],
+    correct: 2,
+    explanation: 'La secuencia lógica es: (1) la escuela da el primer paso diseñando encuentros positivos → (2) se asegura la equidad en el desarrollo de capacidades de todos los estudiantes → (3) el docente valora y capitaliza las aportaciones de las familias.'
+  },
+  {
+    id: 28,
+    format: 'Cuestionamiento directo',
+    text: 'En la escuela tradicional, ¿cómo era vista la expectativa sobre las familias según la Matriz de Transformación?',
+    options: [
+      'Como ayudantes periféricos con involucramiento intermitente o esporádico.',
+      'Como pilares integrados y corresponsables del bienestar y buen trato escolar.',
+      'Como codiseñadores del programa analítico escolar en el CTE.'
+    ],
+    correct: 0,
+    explanation: 'En la escuela tradicional, las familias eran vistas como ayudantes periféricos con involucramiento intermitente o esporádico. En contraste, la Escuela NEM las considera pilares integrados y corresponsables en el bienestar y buen trato.'
+  },
+  {
+    id: 29,
+    format: 'Caso aplicado',
+    text: 'El director de una escuela decide que únicamente él y el subdirector tomarán las decisiones sobre los proyectos escolares del ciclo, sin consultar a docentes ni a las familias. Según la guía, ¿qué principio de la NEM se está omitiendo?',
+    options: [
+      'La aplicación de instrumentos de apreciación de conocimientos a todos los docentes.',
+      'El liderazgo distribuido que articula a directivos, docentes, familias y colaboradores externos en torno a una visión compartida.',
+      'La elaboración de un reglamento escolar con sanciones para regular la asistencia familiar.'
+    ],
+    correct: 1,
+    explanation: 'Se omite el Liderazgo Distribuido en el CTE. Como señala la guía: "Una golondrina no hace verano. Los esfuerzos aislados de un solo docente no transforman la cultura escolar; se requiere cohesión." El directivo debe delegar, generar consensos y articular a todos los actores.'
+  },
+  {
+    id: 30,
+    format: 'Cuestionamiento directo',
+    text: 'Según la guía Tejiendo Puentes en la NEM, ¿cuál es el objetivo central de la relación escuela-familias-comunidad?',
+    options: [
+      'Incrementar los índices de aprovechamiento en evaluaciones nacionales e internacionales.',
+      'Establecer protocolos administrativos para regular formalmente la participación de las familias.',
+      'Formar en y para una nueva ciudadanía a través del diálogo entre escuela, familias y comunidad.'
+    ],
+    correct: 2,
+    explanation: 'El objetivo central de la propuesta curricular de la NEM es formar en y para una nueva ciudadanía. Esto se logra transitando de una escuela aislada a un núcleo de relaciones pedagógicas mediadas por el diálogo entre escuela, familias y comunidad.'
+  }
+];
+
+// ══════════════════════════════════
+//  ESTADO
+// ══════════════════════════════════
+let state = {
+  studentName: '',
+  currentQ: 0,
+  correct: 0,
+  wrong: 0,
+  answered: false
+};
+
+// ══════════════════════════════════
+//  NAVEGACIÓN DE TABS
+// ══════════════════════════════════
+function showTab(tab) {
+  document.getElementById('tab-simulador').style.display = tab === 'simulador' ? 'block' : 'none';
+  document.getElementById('tab-guia').style.display = tab === 'guia' ? 'block' : 'none';
+  document.querySelectorAll('.nav-tab').forEach((t, i) => {
+    t.classList.toggle('active', (tab === 'simulador' && i === 0) || (tab === 'guia' && i === 1));
+  });
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+
+// ══════════════════════════════════
+//  INICIO
+// ══════════════════════════════════
+function startExam() {
+  const name = document.getElementById('studentName').value.trim();
+  if (!name) {
+    document.getElementById('studentName').focus();
+    document.getElementById('studentName').style.borderColor = '#C0392B';
+    setTimeout(() => document.getElementById('studentName').style.borderColor = '', 1500);
+    return;
+  }
+  state = { studentName: name, currentQ: 0, correct: 0, wrong: 0, answered: false };
+  document.getElementById('nameDisplay').textContent = name;
+  showScreen('exam');
+  renderQuestion();
+}
+
+// ══════════════════════════════════
+//  RENDER PREGUNTA
+// ══════════════════════════════════
+function renderQuestion() {
+  const q = questions[state.currentQ];
+  state.answered = false;
+
+  document.getElementById('qNumber').textContent = `Pregunta ${q.id} de 30`;
+  document.getElementById('qFormat').textContent = q.format;
+  document.getElementById('questionText').textContent = q.text;
+  document.getElementById('feedbackBox').style.display = 'none';
+  document.getElementById('btnNext').disabled = true;
+
+  // Progress
+  const pct = Math.round((state.currentQ / 30) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `${state.currentQ} / 30`;
+  document.getElementById('correctCount').textContent = state.correct;
+  document.getElementById('wrongCount').textContent = state.wrong;
+
+  // Table (relación de elementos)
+  const tableContainer = document.getElementById('relTableContainer');
+  if (q.tableData) {
+    tableContainer.innerHTML = buildTable(q.tableData);
+  } else {
+    tableContainer.innerHTML = '';
+  }
+
+  // Options
+  const list = document.getElementById('optionsList');
+  list.innerHTML = '';
+  const letters = ['A', 'B', 'C'];
+  q.options.forEach((opt, i) => {
+    const li = document.createElement('li');
+    li.className = 'option-item';
+    li.dataset.index = i;
+    li.innerHTML = `<div class="option-letter">${letters[i]}</div><div class="option-text">${opt}</div>`;
+    li.addEventListener('click', () => selectOption(i));
+    list.appendChild(li);
+  });
+}
+
+function buildTable(td) {
+  let html = `<table class="rel-table"><thead><tr><th>${td.col1Header}</th><th>${td.col2Header}</th></tr></thead><tbody>`;
+  td.rows.forEach(r => { html += `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`; });
+  html += '</tbody></table>';
+  return html;
+}
+
+// ══════════════════════════════════
+//  SELECCIÓN
+// ══════════════════════════════════
+function selectOption(idx) {
+  if (state.answered) return;
+  state.answered = true;
+
+  const q = questions[state.currentQ];
+  const items = document.querySelectorAll('.option-item');
+
+  items.forEach(item => item.classList.add('disabled'));
+  items[idx].classList.add(idx === q.correct ? 'correct' : 'wrong');
+  if (idx !== q.correct) items[q.correct].classList.add('correct');
+
+  const fb = document.getElementById('feedbackBox');
+  fb.style.display = 'flex';
+
+  if (idx === q.correct) {
+    state.correct++;
+    fb.className = 'feedback-box correct';
+    const msgs = ['¡Excelente! Respuesta correcta.', '¡Muy bien! Lo has logrado.', '¡Correcto! Sigue así.', '¡Perfecto! Dominas el tema.'];
+    fb.innerHTML = `<span class="feedback-icon">✅</span><div><strong>${msgs[Math.floor(Math.random()*msgs.length)]}</strong> ${q.explanation}</div>`;
+  } else {
+    state.wrong++;
+    fb.className = 'feedback-box wrong';
+    fb.innerHTML = `<span class="feedback-icon">❌</span><div><strong>Respuesta incorrecta.</strong> ${q.explanation}</div>`;
+  }
+
+  document.getElementById('correctCount').textContent = state.correct;
+  document.getElementById('wrongCount').textContent = state.wrong;
+  document.getElementById('btnNext').disabled = false;
+}
+
+// ══════════════════════════════════
+//  SIGUIENTE / RESULTADOS
+// ══════════════════════════════════
+function nextQuestion() {
+  state.currentQ++;
+  if (state.currentQ >= 30) {
+    showResults();
+  } else {
+    renderQuestion();
+    document.getElementById('questionCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function showResults() {
+  const pct = Math.round((state.correct / 30) * 100);
+  const deg = Math.round((pct / 100) * 360);
+
+  document.getElementById('resultName').textContent = state.studentName;
+  document.getElementById('resCorrect').textContent = state.correct;
+  document.getElementById('resWrong').textContent = state.wrong;
+  document.getElementById('scorePct').textContent = pct + '%';
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressText').textContent = '30 / 30';
+
+  // Ring
+  document.getElementById('scoreRing').style.setProperty('--score-deg', deg + 'deg');
+
+  // Level badge
+  const badge = document.getElementById('levelBadge');
+  let level, badgeColor, msg;
+  if (pct >= 90) {
+    level = '🏆 Nivel Experto'; badgeColor = 'background:linear-gradient(135deg,#D4A017,#F5D97A);color:#1A3557;';
+    msg = `<strong>¡Desempeño sobresaliente, ${state.studentName}!</strong> Dominas los principios de la Nueva Escuela Mexicana y la relación escuela-familias-comunidad. Eres un referente pedagógico en tu colectivo.`;
+  } else if (pct >= 70) {
+    level = '⭐ Nivel Avanzado'; badgeColor = 'background:linear-gradient(135deg,#2E8B57,#5DB87B);color:white;';
+    msg = `<strong>¡Buen trabajo, ${state.studentName}!</strong> Tienes una comprensión sólida de la guía. Revisa los temas donde tuviste dificultades para fortalecer tu dominio completo.`;
+  } else if (pct >= 50) {
+    level = '📘 Nivel Intermedio'; badgeColor = 'background:linear-gradient(135deg,#2B5183,#4A90D9);color:white;';
+    msg = `<strong>Vas por buen camino, ${state.studentName}.</strong> Tienes las bases, pero hay conceptos clave por consolidar. Te recomendamos repasar la Guía de Estudio y volver a intentarlo.`;
+  } else {
+    level = '📚 En proceso'; badgeColor = 'background:linear-gradient(135deg,#888,#aaa);color:white;';
+    msg = `<strong>No te desanimes, ${state.studentName}.</strong> Cada intento es una oportunidad de aprendizaje. Consulta la Guía de Estudio con detenimiento y regresa al simulador. ¡Tú puedes!`;
+  }
+  badge.setAttribute('style', badgeColor + 'padding:8px 24px;border-radius:30px;font-family:Poppins,sans-serif;font-weight:700;font-size:0.9rem;');
+  badge.textContent = level;
+  document.getElementById('motivationalMsg').innerHTML = `<p>${msg}</p>`;
+
+  showScreen('results');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function restartExam() {
+  state = { studentName: state.studentName, currentQ: 0, correct: 0, wrong: 0, answered: false };
+  document.getElementById('nameDisplay').textContent = state.studentName;
+  showScreen('exam');
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ══════════════════════════════════
+//  GUÍA PDF
+// ══════════════════════════════════
+let pdfVisible = false;
+function togglePDF() {
+  pdfVisible = !pdfVisible;
+  const c = document.getElementById('pdfContainer');
+  c.style.display = pdfVisible ? 'block' : 'none';
+  document.querySelector('[onclick="togglePDF()"]').textContent = pdfVisible ? '✖ Cerrar visor' : '👁 Ver PDF aquí';
+}
+</script>
+</body>
+</html>

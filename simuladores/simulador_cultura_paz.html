@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador Interactivo – Cultura de Paz y Educación Inclusiva</title>
+<style>
+  /* ============================================================
+     VARIABLES Y RESET
+  ============================================================ */
+  :root {
+    --dawn-peach:   #FFF0E6;
+    --dawn-yellow:  #FFF8DC;
+    --coral:        #FF7F5C;
+    --coral-light:  #FFAD9A;
+    --teal:         #4ECDC4;
+    --teal-dark:    #2BAF9F;
+    --purple:       #7B6CF6;
+    --purple-light: #B8B0FF;
+    --amber:        #F9A825;
+    --amber-light:  #FFD54F;
+    --sky:          #87CEEB;
+    --navy:         #2C3E6B;
+    --navy-light:   #3D5096;
+    --white:        #FFFFFF;
+    --gray-soft:    #F6F6F6;
+    --text-main:    #2C2C4A;
+    --text-mid:     #5A5A7A;
+    --text-light:   #9090AA;
+    --success:      #34C17B;
+    --success-bg:   #E8FBF2;
+    --error:        #EF5350;
+    --error-bg:     #FFF0F0;
+    --border-r:     18px;
+    --border-s:     10px;
+    --shadow-sm: 0 4px 16px rgba(44,62,107,.10);
+    --shadow-md: 0 8px 30px rgba(44,62,107,.15);
+    --shadow-lg: 0 16px 50px rgba(44,62,107,.22);
+    --transition: .35s cubic-bezier(.4,0,.2,1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #FFF8DC 0%, #FFF0E6 30%, #E8F8FF 65%, #EAE8FF 100%);
+    min-height: 100vh;
+    color: var(--text-main);
+    overflow-x: hidden;
+  }
+
+  /* ============================================================
+     FONDO DECORATIVO
+  ============================================================ */
+  .bg-deco {
+    position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0;
+  }
+  .bg-deco span {
+    position: absolute; border-radius: 50%; opacity: .18;
+    animation: floatDeco 8s ease-in-out infinite alternate;
+  }
+  .bg-deco span:nth-child(1){ width:320px;height:320px;background:var(--coral-light);top:-80px;right:-80px; animation-delay:0s;}
+  .bg-deco span:nth-child(2){ width:200px;height:200px;background:var(--teal);bottom:5%;left:-60px; animation-delay:2s;}
+  .bg-deco span:nth-child(3){ width:160px;height:160px;background:var(--amber-light);top:40%;right:5%; animation-delay:4s;}
+  .bg-deco span:nth-child(4){ width:120px;height:120px;background:var(--purple-light);bottom:15%;right:15%; animation-delay:1s;}
+  .bg-deco span:nth-child(5){ width:100px;height:100px;background:var(--sky);top:60%;left:10%; animation-delay:3s;}
+
+  @keyframes floatDeco {
+    from { transform: translateY(0) scale(1); }
+    to   { transform: translateY(-30px) scale(1.08); }
+  }
+
+  /* ============================================================
+     WRAPPER PRINCIPAL
+  ============================================================ */
+  .app {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 0 16px 40px;
+  }
+
+  /* ============================================================
+     ENCABEZADO FIJO
+  ============================================================ */
+  .site-header {
+    width: 100%; max-width: 860px;
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 50%, #5B4ED9 100%);
+    border-radius: 0 0 28px 28px;
+    padding: 28px 32px 24px;
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+    margin-bottom: 32px;
+  }
+  .header-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,.15); border-radius: 30px;
+    padding: 6px 18px; margin-bottom: 14px;
+    font-size: .78rem; color: rgba(255,255,255,.9); letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  .header-badge svg { width:16px;height:16px;fill:var(--amber-light); }
+  .site-header h1 {
+    font-size: clamp(1.2rem, 3.5vw, 1.75rem);
+    font-weight: 800; color: #fff;
+    line-height: 1.25; letter-spacing: -.01em;
+  }
+  .site-header h1 span { color: var(--amber-light); }
+  .site-header .author {
+    margin-top: 8px; font-size: .88rem;
+    color: rgba(255,255,255,.72); font-style: italic;
+  }
+  .header-pills {
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+    margin-top: 14px;
+  }
+  .header-pills span {
+    background: rgba(255,255,255,.15); color: rgba(255,255,255,.9);
+    border-radius: 20px; padding: 4px 14px; font-size: .75rem;
+  }
+
+  /* ============================================================
+     PANTALLAS
+  ============================================================ */
+  .screen {
+    display: none; width: 100%; max-width: 760px;
+    animation: fadeUp .5s ease both;
+  }
+  .screen.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(22px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============================================================
+     TARJETA BASE
+  ============================================================ */
+  .card {
+    background: var(--white);
+    border-radius: var(--border-r);
+    box-shadow: var(--shadow-md);
+    padding: 36px 40px;
+    position: relative; overflow: hidden;
+  }
+  .card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:5px;
+    background: linear-gradient(90deg, var(--coral), var(--amber), var(--teal));
+  }
+
+  /* ============================================================
+     PANTALLA BIENVENIDA
+  ============================================================ */
+  #screen-welcome .welcome-icon {
+    width: 90px; height: 90px; margin: 0 auto 20px;
+    background: linear-gradient(135deg, var(--coral-light), var(--amber-light));
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 2.8rem; box-shadow: 0 8px 24px rgba(255,127,92,.3);
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100%{ transform: scale(1); }
+    50%{ transform: scale(1.07); }
+  }
+  #screen-welcome h2 {
+    font-size: clamp(1.3rem, 3.5vw, 1.85rem); font-weight: 800;
+    color: var(--navy); text-align: center; line-height: 1.3;
+    margin-bottom: 8px;
+  }
+  #screen-welcome .subtitle {
+    text-align: center; color: var(--text-mid); font-size: .95rem;
+    margin-bottom: 28px; line-height: 1.5;
+  }
+  .info-chips {
+    display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+    margin-bottom: 28px;
+  }
+  .info-chip {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--gray-soft); border-radius: 20px;
+    padding: 7px 16px; font-size: .82rem; color: var(--text-mid);
+    font-weight: 600;
+  }
+  .info-chip .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+  .form-group { margin-bottom: 20px; }
+  .form-group label {
+    display: block; font-weight: 700; font-size: .9rem;
+    color: var(--navy); margin-bottom: 8px;
+  }
+  .form-group input[type="text"] {
+    width: 100%; padding: 14px 18px;
+    border: 2.5px solid #E8E8F0; border-radius: var(--border-s);
+    font-size: 1rem; color: var(--text-main);
+    transition: border-color var(--transition), box-shadow var(--transition);
+    outline: none; background: var(--gray-soft);
+  }
+  .form-group input[type="text"]:focus {
+    border-color: var(--purple); background: var(--white);
+    box-shadow: 0 0 0 4px rgba(123,108,246,.12);
+  }
+
+  /* ============================================================
+     BOTONES
+  ============================================================ */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 14px 32px; border-radius: 50px;
+    font-size: 1rem; font-weight: 700; cursor: pointer;
+    border: none; transition: all var(--transition);
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--coral) 0%, var(--amber) 100%);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(255,127,92,.4);
+    width: 100%;
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(255,127,92,.5);
+  }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-teal {
+    background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal) 100%);
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(78,205,196,.4);
+  }
+  .btn-teal:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(78,205,196,.5); }
+
+  .btn-purple {
+    background: linear-gradient(135deg, var(--purple) 0%, #9B86FF 100%);
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(123,108,246,.4);
+  }
+  .btn-purple:hover { transform: translateY(-2px); }
+
+  .btn-ghost {
+    background: transparent; color: var(--navy);
+    border: 2.5px solid var(--navy); padding: 11px 28px;
+  }
+  .btn-ghost:hover { background: var(--navy); color: #fff; }
+
+  .btn-full { width: 100%; }
+
+  /* ============================================================
+     BARRA DE PROGRESO
+  ============================================================ */
+  .progress-bar-wrap {
+    background: var(--white); border-radius: 12px;
+    padding: 14px 20px; box-shadow: var(--shadow-sm);
+    margin-bottom: 20px;
+  }
+  .progress-top {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px; flex-wrap: wrap; gap: 6px;
+  }
+  .progress-label { font-size: .82rem; font-weight: 700; color: var(--text-mid); }
+  .progress-counters { display: flex; gap: 14px; }
+  .progress-counters span {
+    font-size: .82rem; font-weight: 700;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .p-correct { color: var(--success); }
+  .p-wrong { color: var(--error); }
+  .prog-track {
+    height: 10px; background: #EEE; border-radius: 10px; overflow: hidden;
+  }
+  .prog-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--coral), var(--amber), var(--teal));
+    border-radius: 10px;
+    transition: width .6s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* ============================================================
+     PANTALLA DE PREGUNTA
+  ============================================================ */
+  .q-type-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: linear-gradient(135deg, var(--purple), var(--purple-light));
+    color: #fff; border-radius: 20px; padding: 5px 14px;
+    font-size: .74rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .04em; margin-bottom: 14px;
+  }
+  .q-number { font-size: .82rem; color: var(--text-light); margin-bottom: 6px; }
+  .q-base {
+    font-size: 1.05rem; font-weight: 700; color: var(--navy);
+    line-height: 1.55; margin-bottom: 12px;
+  }
+  .q-extra {
+    background: linear-gradient(135deg, #F0F8FF, #F5F0FF);
+    border-radius: var(--border-s); border-left: 4px solid var(--purple);
+    padding: 12px 16px; margin-bottom: 18px;
+    font-size: .88rem; color: var(--text-mid); line-height: 1.7;
+    white-space: pre-line;
+  }
+
+  /* Opciones */
+  .options-list { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+  .option-item {
+    background: var(--gray-soft); border-radius: var(--border-s);
+    border: 2.5px solid transparent;
+    padding: 14px 18px; cursor: pointer;
+    display: flex; align-items: flex-start; gap: 12px;
+    transition: all var(--transition); position: relative; overflow: hidden;
+  }
+  .option-item:hover:not(.disabled) {
+    border-color: var(--purple-light);
+    background: #F0EEFF; transform: translateX(4px);
+  }
+  .opt-letter {
+    min-width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    color: #fff; font-size: .9rem; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 2px;
+    transition: transform .2s;
+  }
+  .option-item:hover:not(.disabled) .opt-letter { transform: scale(1.12); }
+  .opt-text { font-size: .93rem; color: var(--text-main); line-height: 1.5; padding-top: 4px; }
+
+  /* Estados de respuesta */
+  .option-item.selected-correct {
+    background: var(--success-bg); border-color: var(--success);
+  }
+  .option-item.selected-correct .opt-letter {
+    background: linear-gradient(135deg, var(--success), #5DDC9A);
+  }
+  .option-item.selected-wrong {
+    background: var(--error-bg); border-color: var(--error);
+  }
+  .option-item.selected-wrong .opt-letter {
+    background: linear-gradient(135deg, var(--error), #FF8A80);
+  }
+  .option-item.show-correct {
+    background: var(--success-bg); border-color: var(--success); opacity: .85;
+  }
+  .option-item.show-correct .opt-letter {
+    background: linear-gradient(135deg, var(--success), #5DDC9A);
+  }
+  .option-item.disabled { cursor: default; pointer-events: none; }
+
+  /* Icono de resultado */
+  .opt-icon {
+    position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+    font-size: 1.3rem; display: none;
+  }
+  .selected-correct .opt-icon,
+  .selected-wrong .opt-icon,
+  .show-correct .opt-icon { display: block; }
+
+  /* Retroalimentación */
+  .feedback-box {
+    border-radius: var(--border-s); padding: 14px 18px;
+    font-size: .9rem; line-height: 1.55; margin-bottom: 18px;
+    display: none; animation: fadeUp .3s ease;
+  }
+  .feedback-box.correct {
+    background: var(--success-bg); border-left: 4px solid var(--success);
+    color: #1B6B46; display: block;
+  }
+  .feedback-box.wrong {
+    background: var(--error-bg); border-left: 4px solid var(--error);
+    color: #7D1A1A; display: block;
+  }
+  .feedback-box strong { display: block; margin-bottom: 4px; font-size: .95rem; }
+
+  /* Botón siguiente */
+  #btn-next { display: none; }
+
+  /* ============================================================
+     PANTALLA DE RESULTADOS
+  ============================================================ */
+  .results-hero {
+    text-align: center; margin-bottom: 28px;
+  }
+  .results-trophy {
+    width: 100px; height: 100px; margin: 0 auto 16px;
+    background: linear-gradient(135deg, var(--amber-light), var(--coral-light));
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 3.2rem; box-shadow: 0 10px 30px rgba(249,168,37,.4);
+    animation: bounceIn .7s cubic-bezier(.175,.885,.32,1.275) both;
+  }
+  @keyframes bounceIn {
+    from { opacity:0; transform: scale(.3); }
+    to   { opacity:1; transform: scale(1); }
+  }
+  .results-name { font-size: 1rem; color: var(--text-mid); margin-bottom: 4px; }
+  .results-title { font-size: clamp(1.3rem, 3.5vw, 1.8rem); font-weight: 800; color: var(--navy); }
+
+  /* Círculo de porcentaje */
+  .pct-ring-wrap {
+    display: flex; justify-content: center; margin: 24px 0;
+  }
+  .pct-ring { position: relative; width: 140px; height: 140px; }
+  .pct-ring svg { transform: rotate(-90deg); }
+  .pct-ring circle { fill: none; stroke-width: 12; }
+  .ring-bg   { stroke: #EEE; }
+  .ring-fill {
+    stroke: url(#ringGrad); stroke-linecap: round;
+    transition: stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1);
+  }
+  .pct-label {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .pct-number { font-size: 2rem; font-weight: 900; color: var(--navy); line-height:1; }
+  .pct-unit   { font-size: .8rem; color: var(--text-light); font-weight: 600; }
+
+  /* Cuadros de estadísticas */
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(3,1fr); gap: 14px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    border-radius: var(--border-s); padding: 16px 12px; text-align: center;
+  }
+  .stat-card.total  { background: linear-gradient(135deg,#EAF3FF,#D6EEFF); }
+  .stat-card.good   { background: linear-gradient(135deg,#EAFBF2,#C8F5E0); }
+  .stat-card.bad    { background: linear-gradient(135deg,#FFF0F0,#FFD6D6); }
+  .stat-num {
+    font-size: 2rem; font-weight: 900; line-height:1; margin-bottom: 4px;
+  }
+  .stat-card.total .stat-num  { color: var(--navy); }
+  .stat-card.good  .stat-num  { color: var(--success); }
+  .stat-card.bad   .stat-num  { color: var(--error); }
+  .stat-lbl { font-size: .78rem; font-weight: 600; color: var(--text-mid); }
+
+  /* Barra de nivel */
+  .level-bar { margin-bottom: 24px; }
+  .level-label { font-size: .85rem; font-weight: 700; color: var(--text-mid); margin-bottom: 8px; }
+  .level-track { height: 14px; background: #EEE; border-radius: 14px; overflow: hidden; margin-bottom: 8px; }
+  .level-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--coral), var(--amber), var(--teal));
+    border-radius: 14px;
+    transition: width 1.4s cubic-bezier(.4,0,.2,1);
+  }
+  .level-badges { display: flex; justify-content: space-between; font-size: .72rem; color: var(--text-light); }
+
+  /* Mensaje motivador */
+  .motivator {
+    background: linear-gradient(135deg, var(--dawn-peach), var(--dawn-yellow));
+    border-radius: var(--border-s); padding: 18px 20px;
+    text-align: center; margin-bottom: 20px;
+    border: 2px solid rgba(255,127,92,.2);
+  }
+  .motivator .mot-emoji { font-size: 1.8rem; margin-bottom: 8px; display: block; }
+  .motivator .mot-text { font-size: .95rem; color: var(--navy); font-weight: 600; line-height: 1.5; }
+
+  /* Botones de resultado */
+  .result-actions { display: flex; flex-direction: column; gap: 12px; }
+
+  /* ============================================================
+     GUÍA DE ESTUDIO
+  ============================================================ */
+  #screen-guide { max-width: 760px; }
+
+  .guide-header {
+    display: flex; align-items: center; gap: 14px;
+    background: linear-gradient(135deg, var(--teal-dark), var(--teal));
+    border-radius: var(--border-r) var(--border-r) 0 0;
+    padding: 18px 24px; color: #fff;
+  }
+  .guide-icon { font-size: 2rem; }
+  .guide-header-text h3 { font-size: 1.15rem; font-weight: 800; }
+  .guide-header-text p { font-size: .84rem; opacity: .85; margin-top: 2px; }
+
+  .guide-body { background: var(--white); border-radius: 0 0 var(--border-r) var(--border-r); padding: 24px; box-shadow: var(--shadow-md); }
+
+  .pdf-frame-wrap {
+    width: 100%; background: var(--gray-soft); border-radius: var(--border-s);
+    overflow: hidden; margin-bottom: 16px;
+    border: 2px solid #E0E0F0;
+    min-height: 60px;
+  }
+  .pdf-frame-wrap iframe { width: 100%; height: 520px; border: none; display: block; }
+  .pdf-placeholder {
+    padding: 30px 20px; text-align: center; color: var(--text-mid); font-size: .9rem;
+  }
+  .pdf-placeholder svg { margin: 0 auto 12px; display: block; opacity: .4; }
+
+  .guide-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+
+  /* ============================================================
+     NAV INFERIOR
+  ============================================================ */
+  .bottom-nav {
+    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+    margin-top: 24px;
+  }
+  .bottom-nav button, .bottom-nav a {
+    background: var(--white); border: 2px solid #E0E0F0;
+    border-radius: 30px; padding: 8px 20px;
+    font-size: .82rem; font-weight: 600; cursor: pointer;
+    color: var(--navy); transition: all var(--transition);
+    text-decoration: none;
+  }
+  .bottom-nav button:hover, .bottom-nav a:hover {
+    background: var(--navy); color: #fff; border-color: var(--navy);
+  }
+
+  /* ============================================================
+     BOTÓN FLOTANTE GUÍA
+  ============================================================ */
+  .fab-guide {
+    position: fixed; bottom: 24px; right: 20px; z-index: 999;
+    background: linear-gradient(135deg, var(--teal-dark), var(--teal));
+    color: #fff; border: none; border-radius: 50px;
+    padding: 12px 20px; font-size: .88rem; font-weight: 700;
+    cursor: pointer; box-shadow: 0 6px 20px rgba(78,205,196,.5);
+    display: flex; align-items: center; gap: 7px;
+    transition: all var(--transition);
+  }
+  .fab-guide:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(78,205,196,.6);
+  }
+
+  /* ============================================================
+     TOAST NOTIFICACIÓN
+  ============================================================ */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(60px);
+    background: var(--navy); color: #fff; border-radius: 30px;
+    padding: 10px 24px; font-size: .88rem; font-weight: 600;
+    box-shadow: var(--shadow-lg); z-index: 9999;
+    transition: transform .4s cubic-bezier(.4,0,.2,1), opacity .4s;
+    opacity: 0; pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  /* ============================================================
+     RESPONSIVE
+  ============================================================ */
+  @media (max-width: 600px) {
+    .card { padding: 24px 20px; }
+    .stats-grid { grid-template-columns: repeat(3,1fr); gap: 8px; }
+    .stat-num { font-size: 1.5rem; }
+    .guide-actions { flex-direction: column; }
+    .guide-actions .btn { width: 100%; }
+    .pdf-frame-wrap iframe { height: 360px; }
+  }
+  @media (max-width: 400px) {
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .stat-card.total { grid-column: span 2; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Decoración de fondo -->
+<div class="bg-deco">
+  <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- BOTÓN FLOTANTE GUÍA -->
+<button class="fab-guide" onclick="goToGuide()" title="Abrir Guía de Estudio">
+  📖 Guía de Estudio
+</button>
+
+<div class="app">
+
+  <!-- ======================================================
+       ENCABEZADO
+  ====================================================== -->
+  <header class="site-header">
+    <div class="header-badge">
+      <svg viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+      Instrumento de Evaluación Docente
+    </div>
+    <h1>Simulador Interactivo de Evaluación<br><span>Cultura de Paz y Educación Inclusiva</span></h1>
+    <p class="author">Prof. Francisco De Jesus Luna Benitez</p>
+    <div class="header-pills">
+      <span>🕊️ 30 Reactivos</span>
+      <span>📋 4 Formatos</span>
+      <span>⏱️ Autoevaluación</span>
+      <span>🏫 Nivel Secundaria</span>
+    </div>
+  </header>
+
+  <!-- ======================================================
+       PANTALLA 1: BIENVENIDA
+  ====================================================== -->
+  <div class="screen active" id="screen-welcome">
+    <div class="card">
+      <div class="welcome-icon">🕊️</div>
+      <h2>¡Bienvenido al Simulador!</h2>
+      <p class="subtitle">Evalúa tus conocimientos sobre Cultura de Paz y Educación Inclusiva.<br>Completa los 30 reactivos y recibe retroalimentación inmediata.</p>
+
+      <div class="info-chips">
+        <div class="info-chip"><span class="dot" style="background:var(--coral)"></span>30 preguntas</div>
+        <div class="info-chip"><span class="dot" style="background:var(--teal)"></span>3 opciones por reactivo</div>
+        <div class="info-chip"><span class="dot" style="background:var(--purple)"></span>Retroalimentación inmediata</div>
+        <div class="info-chip"><span class="dot" style="background:var(--amber)"></span>4 tipos de reactivos</div>
+      </div>
+
+      <div class="form-group">
+        <label for="student-name">📝 Ingresa tu nombre completo</label>
+        <input type="text" id="student-name" placeholder="Ej. María González López" autocomplete="name">
+      </div>
+
+      <button class="btn btn-primary" onclick="startSimulator()">
+        🚀 Iniciar Simulador
+      </button>
+      <button class="btn btn-teal btn-full" style="margin-top:12px;" onclick="goToGuide()">
+        📖 Ver Guía de Estudio (PDF)
+      </button>
+    </div>
+  </div>
+
+  <!-- ======================================================
+       PANTALLA 2: PREGUNTA
+  ====================================================== -->
+  <div class="screen" id="screen-question">
+
+    <!-- Barra de progreso -->
+    <div class="progress-bar-wrap">
+      <div class="progress-top">
+        <span class="progress-label" id="prog-label">Pregunta 1 de 30</span>
+        <div class="progress-counters">
+          <span class="p-correct">✅ <span id="prog-correct">0</span></span>
+          <span class="p-wrong">❌ <span id="prog-wrong">0</span></span>
+        </div>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+
+    <!-- Tarjeta de pregunta -->
+    <div class="card">
+      <div class="q-type-badge" id="q-type-badge">📝 Cuestionamiento directo</div>
+      <div class="q-number" id="q-number">Reactivo 1</div>
+      <div class="q-base" id="q-base"></div>
+      <div class="q-extra" id="q-extra" style="display:none"></div>
+
+      <ul class="options-list" id="options-list"></ul>
+
+      <div class="feedback-box" id="feedback-box"></div>
+
+      <button class="btn btn-primary" id="btn-next" onclick="nextQuestion()">
+        Siguiente pregunta →
+      </button>
+    </div>
+
+    <div class="bottom-nav">
+      <button onclick="goToGuide()">📖 Guía de Estudio</button>
+    </div>
+  </div>
+
+  <!-- ======================================================
+       PANTALLA 3: RESULTADOS
+  ====================================================== -->
+  <div class="screen" id="screen-results">
+    <div class="card">
+      <div class="results-hero">
+        <div class="results-trophy" id="result-trophy">🏆</div>
+        <p class="results-name" id="result-name-display"></p>
+        <h2 class="results-title">¡Evaluación Completada!</h2>
+      </div>
+
+      <!-- Círculo porcentaje -->
+      <div class="pct-ring-wrap">
+        <div class="pct-ring">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <defs>
+              <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:var(--coral)"/>
+                <stop offset="50%" style="stop-color:var(--amber)"/>
+                <stop offset="100%" style="stop-color:var(--teal)"/>
+              </linearGradient>
+            </defs>
+            <circle class="ring-bg" cx="70" cy="70" r="58" />
+            <circle class="ring-fill" id="ring-fill" cx="70" cy="70" r="58"
+              stroke-dasharray="364.4"
+              stroke-dashoffset="364.4"/>
+          </svg>
+          <div class="pct-label">
+            <span class="pct-number" id="pct-number">0%</span>
+            <span class="pct-unit">Desempeño</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card total">
+          <div class="stat-num">30</div>
+          <div class="stat-lbl">Total<br>reactivos</div>
+        </div>
+        <div class="stat-card good">
+          <div class="stat-num" id="res-correct">0</div>
+          <div class="stat-lbl">Respuestas<br>correctas</div>
+        </div>
+        <div class="stat-card bad">
+          <div class="stat-num" id="res-wrong">0</div>
+          <div class="stat-lbl">Respuestas<br>incorrectas</div>
+        </div>
+      </div>
+
+      <!-- Barra de nivel -->
+      <div class="level-bar">
+        <div class="level-label">Nivel de dominio</div>
+        <div class="level-track"><div class="level-fill" id="level-fill" style="width:0%"></div></div>
+        <div class="level-badges">
+          <span>Básico</span><span>En desarrollo</span><span>Competente</span><span>Destacado</span>
+        </div>
+      </div>
+
+      <!-- Motivador -->
+      <div class="motivator" id="motivator-box">
+        <span class="mot-emoji" id="mot-emoji">⭐</span>
+        <p class="mot-text" id="mot-text"></p>
+      </div>
+
+      <!-- Acciones -->
+      <div class="result-actions">
+        <button class="btn btn-primary" onclick="restartSimulator()">🔄 Reiniciar Simulador</button>
+        <button class="btn btn-teal" onclick="goToGuide()">📖 Ver Guía de Estudio</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================
+       PANTALLA 4: GUÍA DE ESTUDIO
+  ====================================================== -->
+  <div class="screen" id="screen-guide">
+    <div class="guide-header">
+      <span class="guide-icon">📚</span>
+      <div class="guide-header-text">
+        <h3>Guía de Estudio</h3>
+        <p>Cultura de Paz y Educación Inclusiva — Prof. Francisco De Jesus Luna Benitez</p>
+      </div>
+    </div>
+    <div class="guide-body">
+      <div class="pdf-frame-wrap" id="pdf-frame-wrap">
+        <!-- El iframe se inyecta por JS si hay URL configurada -->
+        <div class="pdf-placeholder" id="pdf-placeholder">
+          <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+            <polyline points="14,2 14,8 20,8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+            <polyline points="10,9 9,9 8,9"/>
+          </svg>
+          <p><strong>Enlace de Google Drive pendiente.</strong></p>
+          <p style="margin-top:6px;font-size:.82rem;">Para activar el visor PDF, edita la variable <code style="background:#EEE;padding:2px 6px;border-radius:4px;">PDF_DRIVE_URL</code> al inicio del archivo HTML.</p>
+        </div>
+      </div>
+      <div class="guide-actions">
+        <a id="btn-open-pdf" class="btn btn-teal" target="_blank" href="#" style="display:none">
+          🔗 Abrir PDF en nueva pestaña
+        </a>
+        <button class="btn btn-ghost" onclick="backFromGuide()">← Regresar</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- ======================================================
+     JAVASCRIPT
+====================================================== -->
+<script>
+/* ============================================================
+   CONFIGURACIÓN — EDITA AQUÍ EL ENLACE DE GOOGLE DRIVE
+   Ejemplo: "https://drive.google.com/file/d/XXXX/preview"
+   (usa el enlace de vista previa, termina en /preview)
+============================================================ */
+const PDF_DRIVE_URL = "https://drive.google.com/file/d/16DHC6QujoD3NtmEtThLHNeLESyKEmqYA/preview"; // Guía de Estudio — Cultura de Paz y Educación Inclusiva
+
+/* ============================================================
+   BANCO DE 30 REACTIVOS
+============================================================ */
+const questions = [
+  {
+    type: "Cuestionamiento directo",
+    base: "De acuerdo con la ONU (1999) y UNICEF, ¿cuál es la definición correcta de Cultura de Paz?",
+    options: [
+      "Un estado permanente de armonía social que se logra cuando desaparecen todos los conflictos en una comunidad.",
+      "Un conjunto estructurado de elementos que rechazan la violencia y previenen los conflictos abordando sus causas fundamentales.",
+      "Un programa educativo diseñado exclusivamente para escuelas de nivel primaria orientado a enseñar valores cívicos."
+    ],
+    correct: 1,
+    explanation: "Según la ONU (1999) y UNICEF, la Cultura de Paz es un <strong>conjunto estructurado de elementos</strong> que rechazan la violencia y previenen los conflictos abordando sus causas fundamentales. Se compone de valores y actitudes, comportamientos, diálogo y cooperación, y derechos humanos."
+  },
+  {
+    type: "Cuestionamiento directo",
+    base: "¿Cuál es la diferencia fundamental entre la Paz Negativa y la Paz Positiva según Johan Galtung?",
+    options: [
+      "La Paz Negativa se refiere a la ausencia de violencia directa, mientras que la Paz Positiva fomenta activamente la justicia social, la cooperación y la empatía.",
+      "La Paz Negativa es superior porque elimina todos los conflictos, mientras que la Paz Positiva solo los gestiona superficialmente.",
+      "No existe diferencia real entre ambas; son conceptos complementarios que se aplican indistintamente en contextos escolares."
+    ],
+    correct: 0,
+    explanation: "Galtung distingue: <strong>Paz Negativa</strong> = ausencia de violencia directa (puede esconder violencia estructural). <strong>Paz Positiva</strong> = ecosistema de prosperidad social que fomenta justicia, cooperación, empatía e interdependencia, transformando creativamente los conflictos."
+  },
+  {
+    type: "Cuestionamiento directo",
+    base: "Según Johan Galtung, ¿qué significa educar para la paz?",
+    options: [
+      "Enseñar a los estudiantes a evitar cualquier tipo de conflicto mediante la obediencia y la disciplina estricta.",
+      "Capacitar a los docentes para que resuelvan todos los problemas escolares antes de que los alumnos los perciban.",
+      "Enseñarle a la gente a encarar de manera más creativa y menos violenta las situaciones de conflicto, dándoles los medios para hacerlo."
+    ],
+    correct: 2,
+    explanation: "Para Galtung, <strong>educar para la paz</strong> implica dotar a las personas de herramientas creativas y no violentas para afrontar los conflictos. El objetivo es proveer autonomía para discernir, defender derechos y valorar la diversidad cultural como riqueza, no como división."
+  },
+  {
+    type: "Cuestionamiento directo",
+    base: "¿Qué es el cyberbullying y cuál es su característica principal?",
+    options: [
+      "Una discusión entre estudiantes que ocurre únicamente dentro del aula a través de mensajes escritos en papel.",
+      "El uso de las Tecnologías de la Información y Comunicación (TICs) para hostigar, insultar o acosar, donde los agresores se escudan en el anonimato masivo.",
+      "Un conflicto normal entre compañeros que se resuelve espontáneamente sin necesidad de intervención docente."
+    ],
+    correct: 1,
+    explanation: "El <strong>cyberbullying</strong> utiliza las TICs (internet, teléfonos móviles) para hostigar, insultar o acosar. Su rasgo distintivo es que los agresores se protegen en el <strong>anonimato masivo</strong>, lo que dificulta identificarlos y hace más difícil la defensa de la víctima."
+  },
+  {
+    type: "Cuestionamiento directo",
+    base: "¿Cuál es el objetivo central de la Educación para la Paz según la Guía de Estudio?",
+    options: [
+      "Proveer autonomía para discernir, defender los derechos propios y ajenos, y valorar la diversidad cultural (la otredad) como una riqueza y no como una división.",
+      "Formar estudiantes obedientes que acaten las normas escolares sin cuestionarlas, asegurando la convivencia armoniosa.",
+      "Eliminar todas las diferencias culturales dentro del aula para lograr una convivencia homogénea y libre de tensiones."
+    ],
+    correct: 0,
+    explanation: "La Educación para la Paz tiene como objetivo <strong>proveer autonomía</strong> para discernir, defender los derechos propios y ajenos, y valorar la <strong>otredad</strong> (diversidad cultural) como riqueza. Implica formar ciudadanos activos y críticos que promuevan entornos incluyentes."
+  },
+  {
+    type: "Cuestionamiento directo",
+    base: "¿Qué implica reconocer la 'otredad' en el contexto de la paz y la educación inclusiva?",
+    options: [
+      "Aceptar que existe una cultura superior que debe ser modelo para todas las demás en el contexto escolar.",
+      "Ignorar las diferencias culturales para tratar a todos los estudiantes exactamente igual, sin distinción.",
+      "Comprender que cada persona posee una identidad producto de múltiples contactos culturales, generando escenarios incluyentes y libres de prejuicios."
+    ],
+    correct: 2,
+    explanation: "Reconocer la <strong>otredad</strong> significa comprender que cada persona tiene una identidad formada por múltiples contactos culturales. Implica propiciar que los estudiantes descubran y aprecien al otro, relativizando la propia cultura para generar escenarios <strong>incluyentes, equitativos y libres de prejuicios o racismo</strong>."
+  },
+  {
+    type: "Cuestionamiento directo",
+    base: "¿Cuál es la característica que distingue el acoso escolar (bullying) de un conflicto ordinario entre compañeros?",
+    options: [
+      "El acoso escolar siempre ocurre fuera del plantel educativo, mientras que los conflictos ordinarios suceden dentro del aula.",
+      "El acoso escolar es una agresión intencional, constante y repetida donde existe un desequilibrio de poder y la víctima no puede defenderse fácilmente.",
+      "El acoso escolar es un conflicto pasajero que se resuelve solo con el tiempo sin necesidad de intervención adulta."
+    ],
+    correct: 1,
+    explanation: "El <strong>bullying</strong> se distingue por ser: intencional, constante y repetido, con un <strong>desequilibrio de poder</strong> que impide a la víctima defenderse. No es un conflicto normal: es violencia deliberada que genera daños físicos, emocionales, sociales y económicos."
+  },
+  {
+    type: "Cuestionamiento directo",
+    base: "¿Cómo se define la negociación como herramienta de resolución pacífica de conflictos?",
+    options: [
+      "Comunicación directa entre dos o más personas involucradas en el conflicto, cuya finalidad es resolver mediante una decisión justa para ambas partes sin intervención externa.",
+      "Proceso en el que una tercera persona neutral facilita la comunicación y el diálogo manteniendo la confidencialidad.",
+      "Mecanismo donde un facilitador autorizado interviene activamente y puede proponer opciones idóneas de solución."
+    ],
+    correct: 0,
+    explanation: "La <strong>negociación</strong> es la comunicación directa entre las partes involucradas, <strong>sin intervención externa</strong>. Su objetivo es llegar a una decisión justa para ambas partes. Se distingue de la mediación (con tercero neutral) y la conciliación (con facilitador que propone soluciones)."
+  },
+  {
+    type: "Cuestionamiento directo",
+    base: "¿Cuál es la función específica de la mediación dentro de las herramientas de resolución pacífica?",
+    options: [
+      "Imponer una solución definitiva a las partes en conflicto para garantizar que no vuelva a repetirse la situación.",
+      "Sustituir completamente el rol del docente en la gestión de conflictos escolares dentro del aula.",
+      "Facilitar la comunicación y el diálogo entre las partes con apoyo de un tercero neutral que mantiene la confidencialidad y guía a las partes para que encuentren su propia solución."
+    ],
+    correct: 2,
+    explanation: "La <strong>mediación</strong> es asistida por un tercero neutral que facilita la comunicación manteniendo la confidencialidad. A diferencia de la conciliación, el mediador <strong>no propone soluciones</strong>; guía a las partes para que ellas mismas las encuentren."
+  },
+  {
+    type: "Cuestionamiento directo",
+    base: "¿Cuál fue el origen histórico de la Educación para la Paz?",
+    options: [
+      "Surgió en el siglo XXI como respuesta a la proliferación del cyberbullying y las redes sociales en el ámbito escolar.",
+      "Surgió tras las Guerras Mundiales como herramienta indispensable para prevenir agresiones futuras y fomentar espacios de convivencia pacífica sustentados en la democracia.",
+      "Fue propuesta por la UNESCO en los años 90 exclusivamente para países en vías de desarrollo con altos índices de violencia."
+    ],
+    correct: 1,
+    explanation: "La Educación para la Paz surgió <strong>tras las Guerras Mundiales</strong> como herramienta indispensable para prevenir agresiones futuras y fomentar espacios de convivencia pacífica sustentados en la democracia. Es descrita como 'nuestra brújula' para la transformación escolar y social."
+  },
+  /* ─── COMPLETAMIENTO ─── */
+  {
+    type: "Completamiento",
+    base: "Según Nelson Mandela, citado en la Guía de Estudio: 'La paz no es simplemente la ausencia de conflicto; la paz es…'",
+    options: [
+      "…la creación de un entorno en el que todos podemos prosperar.",
+      "…el resultado de la eliminación total de las desigualdades económicas y sociales en la comunidad.",
+      "…la imposición de normas de convivencia acordadas por la mayoría de la comunidad escolar."
+    ],
+    correct: 0,
+    explanation: "Mandela definió la paz como <strong>'la creación de un entorno en el que todos podemos prosperar'</strong>. Esta visión coincide con el concepto de Paz Positiva de Galtung: va más allá de evitar la violencia y apunta a construir un ecosistema de bienestar colectivo."
+  },
+  {
+    type: "Completamiento",
+    base: "El conflicto es inherente a la convivencia y producto de la diversidad humana. Desde la perspectiva de la Cultura de Paz, el conflicto no equivale a violencia; es…",
+    options: [
+      "…una señal de fracaso institucional que debe eliminarse mediante reglamentos más estrictos.",
+      "…un fenómeno exclusivamente negativo que deteriora inevitablemente las relaciones humanas.",
+      "…una oportunidad para crecer, siempre que se aborde de manera pacífica, creativa y constructiva."
+    ],
+    correct: 2,
+    explanation: "El conflicto es <strong>inherente a la convivencia</strong> y no equivale a violencia. Es una <strong>oportunidad para crecer</strong>. El problema surge cuando llega a la fase de Crisis sin intervención pacífica. Desde la Cultura de Paz, el conflicto se gestiona, resuelve y transforma constructivamente."
+  },
+  {
+    type: "Completamiento",
+    base: "La Paz Negativa, según la Matriz de Galtung, evade o esconde los conflictos. Bajo su apariencia de calma, en realidad…",
+    options: [
+      "…promueve la participación democrática de todos los actores de la comunidad escolar.",
+      "…existen valores de poder y dominación que perpetúan injusticias invisibles como la violencia estructural y la desigualdad.",
+      "…garantiza el respeto pleno a los derechos humanos fundamentales de todos los ciudadanos."
+    ],
+    correct: 1,
+    explanation: "La Paz Negativa es solo la 'calma después de la tormenta'. Su <strong>realidad oculta</strong>, como la parte sumergida de un iceberg, son los valores de poder y dominación que perpetúan injusticias invisibles: la <strong>violencia estructural</strong> y la <strong>desigualdad</strong>."
+  },
+  {
+    type: "Completamiento",
+    base: "La conciliación se distingue de la mediación como herramienta de resolución pacífica porque el conciliador, a diferencia del mediador, …",
+    options: [
+      "…puede intervenir activamente y proponer opciones idóneas de solución para generar acuerdos de conformidad.",
+      "…permanece completamente neutral y se limita a facilitar el diálogo sin intervenir en la solución.",
+      "…actúa únicamente como observador externo que documenta el proceso sin participar en decisiones."
+    ],
+    correct: 0,
+    explanation: "La diferencia clave: el <strong>mediador</strong> es neutral y no propone soluciones (las partes las encuentran). El <strong>conciliador</strong> es un facilitador autorizado que puede <strong>intervenir activamente y proponer opciones idóneas</strong> para generar acuerdos de conformidad."
+  },
+  {
+    type: "Completamiento",
+    base: "El Manifiesto 2000, formulado por los Premios Nobel de la Paz, invita a cada individuo a…",
+    options: [
+      "…delegar en los gobiernos la responsabilidad exclusiva de construir la paz a nivel nacional e internacional.",
+      "…participar únicamente en organizaciones internacionales para promover la no-violencia a gran escala.",
+      "…asumir su responsabilidad personal en la práctica de la Cultura de Paz, comprometiéndose con acciones concretas como respetar la vida, practicar la no-violencia y defender la libertad de expresión."
+    ],
+    correct: 2,
+    explanation: "El Manifiesto 2000 es un <strong>contrato social personal</strong>. Invita a cada individuo a asumir su responsabilidad en la Cultura de Paz. Sus compromisos: respetar la vida y dignidad, practicar la no-violencia activa, compartir tiempo y recursos, defender la libertad de expresión y contribuir al desarrollo democrático."
+  },
+  {
+    type: "Completamiento",
+    base: "La empatía, como motor de la paz, significa ser capaz de ponerse en el lugar de las otras personas y es…",
+    options: [
+      "…la capacidad de solucionar los problemas ajenos de manera eficiente sin comprometer los propios intereses.",
+      "…la expresión de sentimientos auténticos por el sufrimiento ajeno, guiando las interacciones de la vida hacia la comprensión mutua.",
+      "…la habilidad de mantener la distancia emocional necesaria para analizar los conflictos de forma objetiva e imparcial."
+    ],
+    correct: 1,
+    explanation: "La <strong>empatía</strong> guía las interacciones de la vida. Significa ponerse en el lugar de las otras personas y es la <strong>expresión de sentimientos auténticos por el sufrimiento ajeno</strong>. Es el motor de la paz porque genera comprensión y propicia escenarios incluyentes y libres de prejuicios."
+  },
+  {
+    type: "Completamiento",
+    base: "La Paz Positiva, a diferencia de la Paz Negativa, fomenta la justicia social, la cooperación, la empatía y la interdependencia. Además…",
+    options: [
+      "…transforma creativamente los conflictos y respeta los derechos humanos, constituyendo un verdadero ecosistema de prosperidad social.",
+      "…elimina por completo la posibilidad de que surjan nuevos conflictos dentro de la comunidad escolar.",
+      "…requiere la intervención permanente de autoridades externas para mantener el orden y la armonía en el aula."
+    ],
+    correct: 0,
+    explanation: "La Paz Positiva es un <strong>ecosistema de prosperidad social</strong>. Fomenta la justicia social, la cooperación, la empatía y la interdependencia, y <strong>transforma creativamente los conflictos</strong> respetando los derechos humanos. Sus raíces profundas son la empatía y la justicia."
+  },
+  {
+    type: "Completamiento",
+    base: "En el 'Árbol de la Paz', la Solidaridad es uno de los cuatro valores esenciales y se define como…",
+    options: [
+      "…la defensa de la expresión libre y la valoración de la diversidad cultural en todos los ámbitos de la vida.",
+      "…la equidad en las relaciones sociales que garantiza un trato justo para todos los miembros de la comunidad.",
+      "…la generosidad hacia las personas y los seres vivos, que nutre el árbol junto con la empatía, la justicia y la libertad."
+    ],
+    correct: 2,
+    explanation: "En el <strong>Árbol de la Paz</strong>, la <strong>Solidaridad</strong> se define como generosidad hacia las personas y los seres vivos. Los cuatro valores que nutren el árbol son: Empatía (escuchar activamente), Solidaridad (generosidad), Justicia (equidad social) y Libertad (defensa de la expresión y diversidad)."
+  },
+  /* ─── ORDENAMIENTO ─── */
+  {
+    type: "Ordenamiento",
+    base: "Ordene las fases de la 'Anatomía del Conflicto' de menor a mayor intensidad y riesgo de violencia.",
+    extra: "1. Crisis\n2. Necesidades\n3. Problema",
+    options: [
+      "A) 1 → 3 → 2",
+      "B) 2 → 3 → 1",
+      "C) 3 → 2 → 1"
+    ],
+    correct: 1,
+    explanation: "La anatomía del conflicto escala así: <strong>Necesidades</strong> no cubiertas (biológicas, económicas, emocionales) → <strong>Problema</strong> (propósitos incompatibles, contraposición de intereses y valores) → <strong>Crisis</strong> (punto crítico donde, sin intervención pacífica, pueden surgir manifestaciones de violencia)."
+  },
+  {
+    type: "Ordenamiento",
+    base: "Ordene los niveles de la 'Escala de Acción para Afrontar el Conflicto' de menor a mayor profundidad de intervención y cambio.",
+    extra: "1. Resolver\n2. Transformar\n3. Gestionar",
+    options: [
+      "A) 3 → 1 → 2",
+      "B) 1 → 3 → 2",
+      "C) 2 → 3 → 1"
+    ],
+    correct: 0,
+    explanation: "La escala tiene tres niveles de mayor a menor profundidad: <strong>Gestionar</strong> (contención: limitar consecuencias inmediatas) → <strong>Resolver</strong> (acuerdo: negociar una solución justa) → <strong>Transformar</strong> (cambio profundo: actuar sobre causas estructurales y relaciones subyacentes)."
+  },
+  {
+    type: "Ordenamiento",
+    base: "Ordene correctamente las primeras tres acciones de prevención proactiva del acoso escolar, según el 'Escudo de Acción'.",
+    extra: "1. Pensar colectivamente en las consecuencias de actitudes y comportamientos.\n2. Educar activamente en la no-violencia y la inclusión.\n3. Fomentar la empatía y la valoración de la diversidad.",
+    options: [
+      "A) 3 → 1 → 2",
+      "B) 1 → 2 → 3",
+      "C) 2 → 3 → 1"
+    ],
+    correct: 2,
+    explanation: "El Escudo de Acción (prevención proactiva) presenta este orden: 1° <strong>Educar activamente en la no-violencia e inclusión</strong>, 2° <strong>Fomentar la empatía y valoración de la diversidad</strong>, 3° <strong>Pensar colectivamente en consecuencias</strong>, y 4° Estar atentos a dinámicas fuera y dentro del aula."
+  },
+  {
+    type: "Ordenamiento",
+    base: "Una vez detectado un caso de acoso escolar, ordene las acciones de atención reactiva según deben implementarse.",
+    extra: "1. Involucrar y hablar directamente con las familias.\n2. Reconocer el problema sin minimizarlo.\n3. Escuchar y validar los sentimientos de las víctimas sin juzgar.",
+    options: [
+      "A) 3 → 1 → 2",
+      "B) 2 → 3 → 1",
+      "C) 1 → 2 → 3"
+    ],
+    correct: 1,
+    explanation: "Las acciones de atención reactiva siguen este orden: 1° <strong>Reconocer el problema sin minimizarlo</strong> (el acoso no es normal), 2° <strong>Escuchar y validar sentimientos de la víctima</strong> sin juzgar, 3° <strong>Involucrar a las familias</strong>, y 4° Solicitar ayuda especializada (DIF, SIPINNA) cuando sea necesario."
+  },
+  {
+    type: "Ordenamiento",
+    base: "Ordene los primeros tres compromisos del Manifiesto 2000, tal como aparecen listados en la Guía de Estudio.",
+    extra: "1. Compartir mi tiempo y recursos para terminar con la exclusión.\n2. Respetar la vida y la dignidad, sin discriminación ni prejuicios.\n3. Practicar la no-violencia activa, protegiendo a los vulnerables.",
+    options: [
+      "A) 2 → 3 → 1",
+      "B) 3 → 1 → 2",
+      "C) 1 → 2 → 3"
+    ],
+    correct: 0,
+    explanation: "El Manifiesto 2000 lista sus compromisos: 1° <strong>Respetar la vida y dignidad</strong> sin discriminación, 2° <strong>Practicar la no-violencia activa</strong> protegiendo a los vulnerables, 3° <strong>Compartir tiempo y recursos</strong> para terminar con la exclusión, y continúa con defender la libertad de expresión y contribuir al desarrollo democrático."
+  },
+  /* ─── RELACIÓN DE ELEMENTOS ─── */
+  {
+    type: "Relación de elementos",
+    base: "Seleccione la opción que relacione correctamente cada componente de la Cultura de Paz con su descripción.",
+    extra: "Componente              | Descripción\n1. Valores y Actitudes  | a) Práctica activa de la no-violencia y la solidaridad en la vida cotidiana\n2. Comportamientos       | b) Compromiso con el arreglo pacífico de los conflictos\n3. Diálogo y Cooperación | c) Fomento del respeto a la vida, la dignidad y el medio ambiente",
+    options: [
+      "A) 1b, 2a, 3c",
+      "B) 1a, 2c, 3b",
+      "C) 1c, 2a, 3b"
+    ],
+    correct: 2,
+    explanation: "Relación correcta: <strong>Valores y Actitudes (1c)</strong> → fomento del respeto a la vida, la dignidad y el medio ambiente; <strong>Comportamientos (2a)</strong> → práctica activa de la no-violencia y la solidaridad; <strong>Diálogo y Cooperación (3b)</strong> → compromiso con el arreglo pacífico de los conflictos."
+  },
+  {
+    type: "Relación de elementos",
+    base: "Relacione correctamente cada herramienta de resolución pacífica con su característica principal.",
+    extra: "Herramienta      | Característica\n1. Negociación   | a) Las partes resuelven directamente sin intervención externa\n2. Mediación      | b) Tercero neutral que guía sin proponer soluciones\n3. Conciliación   | c) Facilitador autorizado que puede proponer opciones de acuerdo",
+    options: [
+      "A) 1a, 2b, 3c",
+      "B) 1b, 2c, 3a",
+      "C) 1c, 2a, 3b"
+    ],
+    correct: 0,
+    explanation: "Relación correcta: <strong>Negociación (1a)</strong> → comunicación directa sin intervención externa; <strong>Mediación (2b)</strong> → tercero neutral que guía pero no propone soluciones; <strong>Conciliación (3c)</strong> → facilitador autorizado que puede proponer opciones idóneas para generar acuerdos."
+  },
+  {
+    type: "Relación de elementos",
+    base: "Relacione cada tipo de paz de la Matriz de Galtung con su realidad subyacente.",
+    extra: "Tipo de paz       | Realidad\n1. Paz Negativa   | a) Fomenta justicia social, cooperación, empatía e interdependencia\n2. Paz Positiva   | b) Evade conflictos y perpetúa injusticias invisibles y violencia estructural",
+    options: [
+      "A) 1a, 2b",
+      "B) 1b, 2a",
+      "C) Ambas realidades corresponden indistintamente a los dos tipos de paz"
+    ],
+    correct: 1,
+    explanation: "Relación correcta: <strong>Paz Negativa (1b)</strong> → evade conflictos, perpetúa injusticias invisibles, violencia estructural y desigualdad; <strong>Paz Positiva (2a)</strong> → fomenta justicia social, cooperación, empatía e interdependencia, transformando creativamente los conflictos."
+  },
+  {
+    type: "Relación de elementos",
+    base: "Relacione correctamente cada valor del 'Árbol de la Paz' con su definición.",
+    extra: "Valor        | Definición\n1. Empatía   | a) Equidad en las relaciones sociales\n2. Justicia  | b) Defensa de la expresión y la diversidad\n3. Libertad  | c) Escuchar activamente para comprender al otro",
+    options: [
+      "A) 1b, 2c, 3a",
+      "B) 1a, 2b, 3c",
+      "C) 1c, 2a, 3b"
+    ],
+    correct: 2,
+    explanation: "Relación correcta: <strong>Empatía (1c)</strong> → escuchar activamente para comprender al otro; <strong>Justicia (2a)</strong> → equidad en las relaciones sociales; <strong>Libertad (3b)</strong> → defensa de la expresión y la diversidad. El cuarto valor, <strong>Solidaridad</strong>, se define como generosidad hacia las personas y los seres vivos."
+  },
+  {
+    type: "Relación de elementos",
+    base: "Relacione correctamente cada raíz del 'Árbol de la Paz' con la acción base que representa.",
+    extra: "Raíz             | Acción base\n1. Primera raíz  | a) Cuidado de los recursos naturales y el medio ambiente\n2. Segunda raíz  | b) Respeto irrestricto a la vida\n3. Tercera raíz  | c) Rechazo a la violencia simbólica y estructural",
+    options: [
+      "A) 1c, 2b, 3a",
+      "B) 1b, 2a, 3c",
+      "C) 1a, 2c, 3b"
+    ],
+    correct: 1,
+    explanation: "Relación correcta: <strong>Primera raíz (1b)</strong> → respeto irrestricto a la vida; <strong>Segunda raíz (2a)</strong> → cuidado de los recursos naturales y el medio ambiente; <strong>Tercera raíz (3c)</strong> → rechazo a la violencia simbólica y estructural. Estas raíces sustentan los valores de empatía, solidaridad, justicia y libertad."
+  },
+  {
+    type: "Relación de elementos",
+    base: "Relacione correctamente cada nivel de la 'Escala de Acción' con su descripción y objetivo.",
+    extra: "Nivel            | Descripción y objetivo\n1. Gestionar     | a) Limitar las consecuencias negativas inmediatas (contención)\n2. Resolver      | b) Negociar y encontrar solución justa antes de la crisis (acuerdo)\n3. Transformar   | c) Actuar sobre causas estructurales y relaciones subyacentes (cambio profundo)",
+    options: [
+      "A) 1a, 2b, 3c",
+      "B) 1b, 2c, 3a",
+      "C) 1c, 2a, 3b"
+    ],
+    correct: 0,
+    explanation: "Relación correcta: <strong>Gestionar (1a)</strong> → reconoce la imposibilidad de librarse del conflicto; limita consecuencias negativas inmediatas; <strong>Resolver (2b)</strong> → busca el origen de necesidades para negociar una solución justa; <strong>Transformar (3c)</strong> → actúa sobre causas estructurales para un cambio profundo y positivo."
+  },
+  {
+    type: "Relación de elementos",
+    base: "Relacione correctamente cada organismo con su papel en la definición de la Cultura de Paz.",
+    extra: "Institución                  | Contribución\n1. ONU (1999)                | a) Fomenta el desarrollo de los derechos del niño y la protección infantil\n2. UNICEF                    | b) Emite la resolución A/RES/53/243 que establece formalmente la Cultura de Paz\n3. Premios Nobel de la Paz   | c) Formulan el Manifiesto 2000 invitando a responsabilidad personal",
+    options: [
+      "A) 1b, 2c, 3a",
+      "B) 1a, 2b, 3c",
+      "C) 1b, 2a, 3c"
+    ],
+    correct: 2,
+    explanation: "Relación correcta: <strong>ONU 1999 (1b)</strong> → emite formalmente la declaración sobre Cultura de Paz; <strong>UNICEF (2a)</strong> → promueve los derechos del niño y la protección infantil; <strong>Premios Nobel de la Paz (3c)</strong> → formularon el Manifiesto 2000 invitando a cada individuo a asumir responsabilidad personal en la Cultura de Paz."
+  }
+];
+
+/* ============================================================
+   ESTADO
+============================================================ */
+let currentQ      = 0;
+let score         = 0;
+let wrongCount    = 0;
+let studentName   = "";
+let answered      = false;
+
+/* ============================================================
+   INICIO
+============================================================ */
+function startSimulator() {
+  const nameInput = document.getElementById("student-name").value.trim();
+  if (!nameInput) {
+    showToast("✏️ Por favor ingresa tu nombre para continuar.");
+    document.getElementById("student-name").focus();
+    return;
+  }
+  studentName = nameInput;
+  currentQ = 0; score = 0; wrongCount = 0;
+  showScreen("screen-question");
+  renderQuestion();
+}
+
+/* ============================================================
+   RENDER PREGUNTA
+============================================================ */
+function renderQuestion() {
+  answered = false;
+  const q = questions[currentQ];
+
+  // Progreso
+  document.getElementById("prog-label").textContent  = `Pregunta ${currentQ+1} de ${questions.length}`;
+  document.getElementById("prog-correct").textContent = score;
+  document.getElementById("prog-wrong").textContent   = wrongCount;
+  document.getElementById("prog-fill").style.width    = `${(currentQ/questions.length)*100}%`;
+
+  // Badge
+  const badges = {
+    "Cuestionamiento directo": "💬 Cuestionamiento directo",
+    "Completamiento":          "🔤 Completamiento",
+    "Ordenamiento":            "🔢 Ordenamiento",
+    "Relación de elementos":   "🔗 Relación de elementos"
+  };
+  document.getElementById("q-type-badge").textContent = badges[q.type] || q.type;
+  document.getElementById("q-number").textContent     = `Reactivo ${currentQ+1}`;
+  document.getElementById("q-base").textContent       = q.base;
+
+  const extraEl = document.getElementById("q-extra");
+  if (q.extra) {
+    extraEl.textContent = q.extra;
+    extraEl.style.display = "block";
+  } else {
+    extraEl.style.display = "none";
+  }
+
+  // Opciones
+  const list = document.getElementById("options-list");
+  list.innerHTML = "";
+  const letters = ["A","B","C"];
+  q.options.forEach((opt, i) => {
+    const li = document.createElement("li");
+    li.className = "option-item";
+    li.innerHTML = `
+      <div class="opt-letter">${letters[i]}</div>
+      <div class="opt-text">${opt}</div>
+      <span class="opt-icon"></span>
+    `;
+    li.addEventListener("click", () => handleAnswer(i, li));
+    list.appendChild(li);
+  });
+
+  // Feedback y botón
+  const fb = document.getElementById("feedback-box");
+  fb.className = "feedback-box";
+  fb.innerHTML = "";
+  document.getElementById("btn-next").style.display = "none";
+}
+
+/* ============================================================
+   MANEJAR RESPUESTA
+============================================================ */
+function handleAnswer(selectedIdx, selectedEl) {
+  if (answered) return;
+  answered = true;
+
+  const q = questions[currentQ];
+  const items = document.querySelectorAll(".option-item");
+  const fb    = document.getElementById("feedback-box");
+  const isCorrect = selectedIdx === q.correct;
+
+  // Deshabilitar todas
+  items.forEach(el => el.classList.add("disabled"));
+
+  if (isCorrect) {
+    score++;
+    selectedEl.classList.add("selected-correct");
+    selectedEl.querySelector(".opt-icon").textContent = "✅";
+
+    fb.classList.add("correct");
+    fb.innerHTML = `<strong>✅ ¡Respuesta correcta!</strong>${q.explanation}`;
+  } else {
+    wrongCount++;
+    selectedEl.classList.add("selected-wrong");
+    selectedEl.querySelector(".opt-icon").textContent = "❌";
+
+    // Mostrar correcta
+    items[q.correct].classList.add("show-correct");
+    items[q.correct].querySelector(".opt-icon").textContent = "✅";
+
+    fb.classList.add("wrong");
+    fb.innerHTML = `<strong>❌ Respuesta incorrecta</strong>${q.explanation}`;
+  }
+
+  // Actualizar contadores
+  document.getElementById("prog-correct").textContent = score;
+  document.getElementById("prog-wrong").textContent   = wrongCount;
+
+  const nextBtn = document.getElementById("btn-next");
+  nextBtn.style.display = "flex";
+  nextBtn.textContent = currentQ < questions.length - 1 ? "Siguiente pregunta →" : "🏁 Ver mis resultados";
+}
+
+/* ============================================================
+   SIGUIENTE PREGUNTA
+============================================================ */
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) {
+    showResults();
+    return;
+  }
+  renderQuestion();
+  // Scroll top en móvil
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* ============================================================
+   RESULTADOS
+============================================================ */
+function showResults() {
+  showScreen("screen-results");
+  const pct = Math.round((score / questions.length) * 100);
+
+  // Nombre
+  document.getElementById("result-name-display").textContent = studentName;
+
+  // Trofeo según desempeño
+  const trophies = pct >= 90 ? "🏆" : pct >= 70 ? "🥈" : pct >= 50 ? "🥉" : "📚";
+  document.getElementById("result-trophy").textContent = trophies;
+
+  // Números
+  document.getElementById("res-correct").textContent = score;
+  document.getElementById("res-wrong").textContent   = wrongCount;
+  document.getElementById("pct-number").textContent  = pct + "%";
+
+  // Anillo animado
+  setTimeout(() => {
+    const circumference = 2 * Math.PI * 58; // 364.4
+    const offset = circumference - (pct / 100) * circumference;
+    document.getElementById("ring-fill").style.strokeDashoffset = offset;
+    document.getElementById("level-fill").style.width = pct + "%";
+  }, 200);
+
+  // Mensaje motivador
+  let emoji, msg;
+  if (pct >= 90) {
+    emoji = "🌟";
+    msg   = "¡Excelente desempeño! Demuestras un dominio sobresaliente de la Cultura de Paz. Eres un ejemplo de compromiso con la educación inclusiva.";
+  } else if (pct >= 80) {
+    emoji = "🌈";
+    msg   = "¡Muy buen trabajo! Tu comprensión de la Cultura de Paz es sólida. Sigue fortaleciendo los temas donde tuviste dudas para alcanzar la excelencia.";
+  } else if (pct >= 70) {
+    emoji = "💪";
+    msg   = "Buen desempeño. Manejas los conceptos esenciales de la Cultura de Paz. Revisa los reactivos incorrectos con la Guía de Estudio para consolidar tu aprendizaje.";
+  } else if (pct >= 50) {
+    emoji = "📖";
+    msg   = "Vas por buen camino. Identifica las áreas de oportunidad y apóyate en la Guía de Estudio. Con práctica constante lograrás un nivel competente.";
+  } else {
+    emoji = "🌱";
+    msg   = "Este es el inicio de tu camino hacia la Cultura de Paz. Revisa la Guía de Estudio, practica nuevamente y recuerda: ¡la paz también es un proceso de aprendizaje continuo!";
+  }
+  document.getElementById("mot-emoji").textContent = emoji;
+  document.getElementById("mot-text").textContent  = msg;
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* ============================================================
+   GUÍA DE ESTUDIO
+============================================================ */
+function goToGuide() {
+  showScreen("screen-guide");
+  const wrap        = document.getElementById("pdf-frame-wrap");
+  const placeholder = document.getElementById("pdf-placeholder");
+  const openBtn     = document.getElementById("btn-open-pdf");
+
+  if (PDF_DRIVE_URL && PDF_DRIVE_URL.startsWith("http")) {
+    placeholder.style.display = "none";
+    openBtn.style.display     = "inline-flex";
+    openBtn.href = PDF_DRIVE_URL.replace("/view", "/preview");
+
+    if (!wrap.querySelector("iframe")) {
+      const iframe = document.createElement("iframe");
+      iframe.src = PDF_DRIVE_URL.replace("/view", "/preview");
+      iframe.allow = "autoplay";
+      wrap.appendChild(iframe);
+    }
+  } else {
+    placeholder.style.display = "block";
+    openBtn.style.display     = "none";
+  }
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function backFromGuide() {
+  if (currentQ >= questions.length) {
+    showScreen("screen-results");
+  } else if (currentQ === 0 && score === 0 && wrongCount === 0) {
+    showScreen("screen-welcome");
+  } else {
+    showScreen("screen-question");
+  }
+}
+
+/* ============================================================
+   REINICIAR
+============================================================ */
+function restartSimulator() {
+  currentQ = 0; score = 0; wrongCount = 0; answered = false;
+  showScreen("screen-welcome");
+  document.getElementById("student-name").value = "";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* ============================================================
+   UTILIDADES
+============================================================ */
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3200);
+}
+
+/* ============================================================
+   ENTER para iniciar
+============================================================ */
+document.getElementById("student-name").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") startSimulator();
+});
+
+/* ============================================================
+   INIT PDF guide si hay URL
+============================================================ */
+window.addEventListener("DOMContentLoaded", () => {
+  if (PDF_DRIVE_URL && PDF_DRIVE_URL.startsWith("http")) {
+    document.getElementById("pdf-placeholder").style.display = "none";
+  }
+});
+</script>
+</body>
+</html>

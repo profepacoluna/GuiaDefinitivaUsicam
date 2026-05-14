@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Simulador STEAM – Prof. Francisco De Jesús Luna Benítez</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --c1:#0ea5e9;--c2:#06b6d4;--c3:#10b981;--c4:#f59e0b;--c5:#8b5cf6;
+    --grad:linear-gradient(135deg,#e0f7fa 0%,#e8f5e9 40%,#fff9e6 100%);
+    --white:#ffffff;--surface:#f8fdff;--border:#d1ecf7;
+    --text:#1e3a5f;--muted:#5a7fa0;--radius:18px;--shadow:0 8px 32px rgba(14,165,233,.13);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Nunito',sans-serif;background:var(--grad);min-height:100vh;color:var(--text);overflow-x:hidden}
+
+  /* ───── HEADER ───── */
+  .header{background:linear-gradient(120deg,#0284c7 0%,#0891b2 45%,#059669 100%);
+    color:#fff;text-align:center;padding:28px 20px 22px;position:relative;overflow:hidden}
+  .header::before{content:'';position:absolute;inset:0;
+    background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");}
+  .header-title{font-family:'Playfair Display',serif;font-size:clamp(1.4rem,4vw,2.2rem);
+    font-weight:800;letter-spacing:.5px;text-shadow:0 2px 12px rgba(0,0,0,.2);position:relative}
+  .header-subtitle{font-size:clamp(.8rem,2.5vw,1.05rem);font-weight:600;opacity:.9;
+    margin-top:6px;position:relative;letter-spacing:.3px}
+  .header-badge{display:inline-flex;align-items:center;gap:6px;
+    background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);
+    border-radius:999px;padding:5px 16px;font-size:.78rem;font-weight:700;
+    margin-top:12px;position:relative;backdrop-filter:blur(4px)}
+
+  /* ───── TABS ───── */
+  .tabs{display:flex;justify-content:center;gap:12px;padding:20px 16px 0}
+  .tab-btn{border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;
+    font-size:.9rem;padding:11px 28px;border-radius:999px;transition:all .25s;
+    background:#e2f4fb;color:var(--muted);border:2px solid transparent}
+  .tab-btn.active{background:linear-gradient(120deg,var(--c1),var(--c2));
+    color:#fff;box-shadow:0 4px 18px rgba(14,165,233,.35)}
+  .tab-btn:hover:not(.active){background:#cce9f7;color:var(--c1)}
+
+  /* ───── PANELS ───── */
+  .panel{display:none;animation:fadeUp .35s ease both}
+  .panel.active{display:block}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+  /* ───── WELCOME ───── */
+  .welcome{max-width:540px;margin:32px auto;background:var(--white);
+    border-radius:var(--radius);box-shadow:var(--shadow);padding:42px 36px;text-align:center}
+  .welcome-icon{font-size:3.5rem;margin-bottom:12px}
+  .welcome h2{font-family:'Playfair Display',serif;font-size:1.7rem;color:var(--c1);margin-bottom:8px}
+  .welcome p{color:var(--muted);font-size:.95rem;margin-bottom:24px;line-height:1.6}
+  .welcome-info{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:28px}
+  .info-chip{background:#e0f7fa;color:#0277bd;border-radius:999px;
+    padding:6px 16px;font-size:.8rem;font-weight:700}
+  .input-group{text-align:left;margin-bottom:20px}
+  .input-group label{display:block;font-weight:800;font-size:.88rem;
+    color:var(--text);margin-bottom:6px}
+  .input-group input{width:100%;padding:13px 16px;border:2px solid var(--border);
+    border-radius:12px;font-family:'Nunito',sans-serif;font-size:1rem;
+    color:var(--text);background:#f8fdff;outline:none;transition:border .2s}
+  .input-group input:focus{border-color:var(--c1)}
+
+  /* ───── BUTTONS ───── */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;
+    border-radius:12px;transition:all .22s;text-decoration:none}
+  .btn-primary{background:linear-gradient(120deg,var(--c1),var(--c2));
+    color:#fff;padding:14px 36px;font-size:1rem;box-shadow:0 4px 18px rgba(14,165,233,.35)}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(14,165,233,.45)}
+  .btn-success{background:linear-gradient(120deg,var(--c3),#0d9488);
+    color:#fff;padding:14px 36px;font-size:1rem;box-shadow:0 4px 18px rgba(16,185,129,.35)}
+  .btn-success:hover{transform:translateY(-2px)}
+  .btn-outline{background:#fff;color:var(--c1);border:2px solid var(--c1);
+    padding:12px 28px;font-size:.9rem}
+  .btn-outline:hover{background:var(--c1);color:#fff}
+  .btn-lg{padding:16px 42px;font-size:1.05rem}
+  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+  /* ───── QUIZ WRAPPER ───── */
+  .quiz-wrapper{max-width:720px;margin:0 auto;padding:24px 16px 40px}
+  
+  /* PROGRESS */
+  .progress-area{background:var(--white);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:20px 28px;margin-bottom:20px}
+  .progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .progress-label{font-weight:800;font-size:.9rem;color:var(--text)}
+  .progress-stats{display:flex;gap:14px}
+  .stat{font-size:.82rem;font-weight:700;padding:4px 12px;border-radius:999px}
+  .stat-ok{background:#dcfce7;color:#166534}
+  .stat-err{background:#fee2e2;color:#991b1b}
+  .progress-bar{height:10px;background:#e2f4fb;border-radius:999px;overflow:hidden}
+  .progress-fill{height:100%;border-radius:999px;
+    background:linear-gradient(90deg,var(--c1),var(--c2),var(--c3));
+    transition:width .4s ease;will-change:width}
+
+  /* QUESTION CARD */
+  .q-card{background:var(--white);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:32px 36px;animation:fadeUp .3s ease both}
+  @media(max-width:600px){.q-card{padding:22px 18px}}
+
+  .q-type-badge{display:inline-flex;align-items:center;gap:6px;
+    border-radius:999px;padding:5px 14px;font-size:.75rem;font-weight:800;
+    margin-bottom:16px;letter-spacing:.4px;text-transform:uppercase}
+  .badge-cd{background:#e0f2fe;color:#0369a1}
+  .badge-co{background:#f0fdf4;color:#15803d}
+  .badge-or{background:#fef3c7;color:#92400e}
+  .badge-re{background:#faf5ff;color:#7c3aed}
+
+  .q-num{font-size:.8rem;font-weight:800;color:var(--muted);margin-bottom:8px}
+  .q-text{font-size:1.05rem;font-weight:700;line-height:1.65;color:var(--text);margin-bottom:8px}
+  .q-table-wrap{overflow-x:auto;margin:14px 0}
+  .q-table{width:100%;border-collapse:collapse;font-size:.88rem}
+  .q-table th{background:#e0f7fa;color:#0277bd;font-weight:800;padding:9px 14px;
+    text-align:left;border:1px solid #b2ebf2}
+  .q-table td{padding:9px 14px;border:1px solid #e2f4fb;vertical-align:top;line-height:1.5}
+  .q-table tr:nth-child(even) td{background:#f8fdff}
+
+  /* OPTIONS */
+  .options-grid{display:flex;flex-direction:column;gap:12px;margin-top:20px}
+  .option-btn{display:flex;align-items:flex-start;gap:14px;width:100%;
+    background:#f8fdff;border:2px solid var(--border);border-radius:14px;
+    padding:14px 18px;cursor:pointer;text-align:left;font-family:'Nunito',sans-serif;
+    font-size:.95rem;font-weight:600;color:var(--text);transition:all .2s;line-height:1.5}
+  .option-btn:hover:not(:disabled):not(.answered){
+    border-color:var(--c1);background:#e8f7fe;transform:translateX(4px)}
+  .option-letter{min-width:34px;height:34px;border-radius:50%;
+    background:linear-gradient(135deg,var(--c1),var(--c2));
+    color:#fff;font-weight:800;font-size:.88rem;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+  .option-btn.correct{border-color:#10b981;background:#f0fdf4}
+  .option-btn.correct .option-letter{background:linear-gradient(135deg,#10b981,#059669)}
+  .option-btn.wrong{border-color:#ef4444;background:#fff1f2}
+  .option-btn.wrong .option-letter{background:linear-gradient(135deg,#ef4444,#dc2626)}
+  .option-btn.reveal{border-color:#10b981;background:#f0fdf4;opacity:.75}
+  .option-btn.reveal .option-letter{background:linear-gradient(135deg,#10b981,#059669)}
+  .option-btn:disabled{cursor:default}
+
+  /* FEEDBACK */
+  .feedback-box{border-radius:14px;padding:16px 20px;margin-top:18px;
+    font-size:.92rem;line-height:1.6;animation:fadeUp .25s ease}
+  .feedback-ok{background:#f0fdf4;border-left:4px solid #10b981;color:#14532d}
+  .feedback-err{background:#fff1f2;border-left:4px solid #ef4444;color:#7f1d1d}
+  .feedback-icon{font-size:1.1rem;margin-right:4px}
+
+  /* NAVIGATION */
+  .q-nav{display:flex;justify-content:flex-end;margin-top:24px}
+
+  /* ───── RESULTS ───── */
+  .results{max-width:620px;margin:32px auto;text-align:center;padding:0 16px 40px}
+  .results-card{background:var(--white);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:40px 36px}
+  .results-icon{font-size:4rem;margin-bottom:8px}
+  .results-name{font-family:'Playfair Display',serif;font-size:1.7rem;color:var(--c1);
+    margin-bottom:4px}
+  .results-subtitle{color:var(--muted);font-size:.92rem;margin-bottom:28px}
+  .score-ring{width:140px;height:140px;margin:0 auto 28px;position:relative}
+  .score-ring svg{transform:rotate(-90deg)}
+  .score-ring-text{position:absolute;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center}
+  .score-pct{font-family:'Playfair Display',serif;font-size:2rem;
+    font-weight:800;color:var(--c1)}
+  .score-label{font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.5px}
+  .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px}
+  .stat-card{border-radius:14px;padding:18px 14px}
+  .stat-card-ok{background:linear-gradient(135deg,#dcfce7,#bbf7d0)}
+  .stat-card-err{background:linear-gradient(135deg,#fee2e2,#fecaca)}
+  .stat-card-num{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:800}
+  .stat-card-ok .stat-card-num{color:#15803d}
+  .stat-card-err .stat-card-num{color:#dc2626}
+  .stat-card-lbl{font-size:.8rem;font-weight:700;color:var(--muted);margin-top:2px}
+  .motivator{background:linear-gradient(120deg,#e0f7fa,#e8f5e9);
+    border-radius:14px;padding:18px 22px;margin-bottom:24px;
+    font-size:.95rem;font-weight:700;color:#0277bd;line-height:1.6}
+  .results-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+  /* ───── GUIDE PANEL ───── */
+  .guide-panel{max-width:900px;margin:24px auto;padding:0 16px 40px}
+  .guide-card{background:var(--white);border-radius:var(--radius);
+    box-shadow:var(--shadow);overflow:hidden}
+  .guide-header{background:linear-gradient(120deg,var(--c5),#6d28d9);
+    color:#fff;padding:22px 28px;display:flex;align-items:center;gap:16px}
+  .guide-header-icon{font-size:2.2rem}
+  .guide-header h3{font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:4px}
+  .guide-header p{font-size:.85rem;opacity:.85}
+  .guide-actions{padding:18px 28px;display:flex;gap:12px;flex-wrap:wrap;
+    border-bottom:1px solid var(--border)}
+  .guide-iframe-wrap{position:relative;width:100%;padding-top:72%;overflow:hidden}
+  .guide-iframe-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
+  .guide-placeholder{padding:48px 28px;text-align:center;color:var(--muted)}
+  .guide-placeholder .ph-icon{font-size:3.5rem;margin-bottom:12px}
+
+  /* ───── UTILS ───── */
+  .hidden{display:none!important}
+  .mt12{margin-top:12px}
+  .center{text-align:center}
+  
+  /* Spinner */
+  @keyframes spin{to{transform:rotate(360deg)}}
+  
+  @media(max-width:500px){
+    .stats-grid{grid-template-columns:1fr 1fr}
+    .results-actions{flex-direction:column;align-items:center}
+    .btn-lg{width:100%}
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-title">🔬 Simulador Interactivo de Evaluación</div>
+  <div class="header-subtitle">Educación STEAM — Ciencia con Ciencia</div>
+  <div><span class="header-badge">✍️ Prof. Francisco De Jesús Luna Benítez &nbsp;|&nbsp; Universidad Autónoma de Tlaxcala</span></div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('sim',this)">🎯 Simulador</button>
+  <button class="tab-btn" onclick="showTab('guide',this)">📄 Guía de Estudio</button>
+</div>
+
+<!-- ====== SIMULATOR PANEL ====== -->
+<div id="panel-sim" class="panel active">
+
+  <!-- WELCOME -->
+  <div id="screen-welcome" class="welcome">
+    <div class="welcome-icon">🚀</div>
+    <h2>¡Bienvenido/a al Simulador!</h2>
+    <p>Pon a prueba tus conocimientos sobre la enseñanza STEAM, sus fundamentos, implicaciones didácticas y su vinculación con los Objetivos de Desarrollo Sostenible.</p>
+    <div class="welcome-info">
+      <span class="info-chip">📝 30 Reactivos</span>
+      <span class="info-chip">🔢 3 Opciones c/u</span>
+      <span class="info-chip">⚡ Retroalimentación inmediata</span>
+      <span class="info-chip">4 Formatos USICAMM</span>
+    </div>
+    <div class="input-group">
+      <label for="student-name">👤 Nombre completo del estudiante</label>
+      <input type="text" id="student-name" placeholder="Escribe tu nombre aquí…" autocomplete="off"/>
+    </div>
+    <button class="btn btn-primary btn-lg" onclick="startQuiz()">Iniciar simulador →</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="screen-quiz" class="quiz-wrapper hidden">
+
+    <div class="progress-area">
+      <div class="progress-top">
+        <span class="progress-label" id="prog-label">Pregunta 1 de 30</span>
+        <div class="progress-stats">
+          <span class="stat stat-ok" id="stat-ok">✔ 0</span>
+          <span class="stat stat-err" id="stat-err">✘ 0</span>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+
+    <div id="q-card-area"></div>
+
+  </div>
+
+  <!-- RESULTS -->
+  <div id="screen-results" class="results hidden">
+    <div class="results-card">
+      <div class="results-icon" id="res-icon">🏆</div>
+      <div class="results-name" id="res-name">Estudiante</div>
+      <div class="results-subtitle">Resultados de tu evaluación</div>
+
+      <div class="score-ring" id="score-ring-wrap">
+        <svg width="140" height="140" viewBox="0 0 140 140">
+          <circle cx="70" cy="70" r="58" fill="none" stroke="#e2f4fb" stroke-width="14"/>
+          <circle cx="70" cy="70" r="58" fill="none" stroke="url(#rgrad)" stroke-width="14"
+            stroke-linecap="round" id="ring-circle"
+            stroke-dasharray="364.4" stroke-dashoffset="364.4"/>
+          <defs>
+            <linearGradient id="rgrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#0ea5e9"/>
+              <stop offset="100%" stop-color="#10b981"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="score-ring-text">
+          <span class="score-pct" id="res-pct">0%</span>
+          <span class="score-label">ACIERTOS</span>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card stat-card-ok">
+          <div class="stat-card-num" id="res-ok">0</div>
+          <div class="stat-card-lbl">✔ Respuestas correctas</div>
+        </div>
+        <div class="stat-card stat-card-err">
+          <div class="stat-card-num" id="res-err">0</div>
+          <div class="stat-card-lbl">✘ Respuestas incorrectas</div>
+        </div>
+      </div>
+
+      <div class="motivator" id="res-motivator"></div>
+
+      <div class="results-actions">
+        <button class="btn btn-outline" onclick="restartQuiz()">🔄 Intentar de nuevo</button>
+        <button class="btn btn-success btn-lg" onclick="showTab('guide',document.querySelectorAll('.tab-btn')[1])">📄 Ver Guía de Estudio</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /panel-sim -->
+
+<!-- ====== GUIDE PANEL ====== -->
+<div id="panel-guide" class="panel">
+  <div class="guide-panel">
+    <div class="guide-card">
+      <div class="guide-header">
+        <div class="guide-header-icon">📚</div>
+        <div>
+          <h3>Guía de Estudio — Educación STEAM</h3>
+          <p>Material de consulta para el simulador de evaluación docente</p>
+        </div>
+      </div>
+      <div class="guide-actions">
+        <a class="btn btn-primary" href="https://drive.google.com/file/d/10tf1_oO2iIGO_QzGrnypU2pAaAZ68grq/view?usp=sharing" target="_blank">
+          🔗 Abrir en Google Drive
+        </a>
+        <button class="btn btn-outline" onclick="toggleGuideView()">👁 Ver aquí / Ocultar</button>
+      </div>
+      <div id="guide-view-area" class="hidden">
+        <div class="guide-iframe-wrap">
+          <iframe
+            src="https://drive.google.com/file/d/10tf1_oO2iIGO_QzGrnypU2pAaAZ68grq/preview"
+            allow="autoplay"
+            loading="lazy"
+            title="Guía de Estudio PDF">
+          </iframe>
+        </div>
+      </div>
+      <div id="guide-placeholder" class="guide-placeholder">
+        <div class="ph-icon">📖</div>
+        <p style="font-weight:700;font-size:1rem;color:var(--text);margin-bottom:6px">Material de apoyo listo para consultar</p>
+        <p>Haz clic en <strong>"Ver aquí"</strong> para mostrar el PDF en esta misma página,<br>o en <strong>"Abrir en Google Drive"</strong> para verlo en pantalla completa.</p>
+      </div>
+    </div>
+  </div>
+</div><!-- /panel-guide -->
+
+<script>
+/* ===========================
+   BANCO DE REACTIVOS – 30 Qs
+   =========================== */
+const questions = [
+  // ── CUESTIONAMIENTO DIRECTO ────────────────────────────────────────
+  {
+    id:1, type:"Cuestionamiento directo", badge:"badge-cd",
+    question:"¿Cuál es el significado de la \"A\" en el acrónimo STEAM y cómo se relaciona con la ciencia?",
+    options:[
+      "Representa la Astronomía, vinculando el cosmos con la investigación científica experimental y observacional.",
+      "Representa el Arte, que vincula la ciencia con la expresión creativa de la naturaleza y el ingenio humano.",
+      "Representa la Antropología, integrando las ciencias sociales con las naturales para una visión holística."
+    ],
+    correct:1,
+    feedback:"La \"A\" en STEAM representa el Arte como expresión de la Naturaleza e ingenio humano. Esta dimensión creativa vincula la ciencia con múltiples perspectivas y miradas, preparando al alumnado para conocer e interpretar la realidad desde ángulos diversos."
+  },
+  {
+    id:2, type:"Cuestionamiento directo", badge:"badge-cd",
+    question:"¿Cuáles son las 4C que menciona la Agenda Mundial 2030 como competencias básicas para afrontar los retos del futuro?",
+    options:[
+      "Creatividad, comunicación, pensamiento crítico y colaboración.",
+      "Ciencia, cultura, competencias y conocimiento crítico aplicado.",
+      "Creatividad, ciudadanía activa, cambio social y competencias digitales."
+    ],
+    correct:0,
+    feedback:"El texto señala explícitamente que la enseñanza STEAM busca el incremento del capital científico y la adquisición de las competencias básicas para afrontar el futuro, resumidas en las 4C de la Agenda Mundial 2030: creatividad, comunicación, pensamiento crítico y colaboración."
+  },
+  {
+    id:3, type:"Cuestionamiento directo", badge:"badge-cd",
+    question:"¿Qué papel juega el escepticismo en la ciencia moderna, según el texto?",
+    options:[
+      "Es una actitud negativa que frena el avance científico al cuestionar todo conocimiento ya establecido.",
+      "Es solo una característica personal de algunos científicos, sin implicaciones metodológicas para la ciencia.",
+      "Es uno de los principales valores de la ciencia, que exige que cualquier conclusión esté fundamentada en pruebas y sea sometida a examen crítico."
+    ],
+    correct:2,
+    feedback:"El texto identifica el escepticismo como uno de los principales valores de la ciencia moderna. Señala que el conocimiento científico debe someterse a un examen crítico en busca de errores y contradicciones, y que toda conclusión debe estar fundamentada en pruebas."
+  },
+  {
+    id:4, type:"Cuestionamiento directo", badge:"badge-cd",
+    question:"¿Cuál es la principal finalidad para la educación científica, según el texto?",
+    options:[
+      "Promover el consumo de tecnología entre la población general para reducir la brecha digital global.",
+      "Ser la principal finalidad para la educación científica, permitiendo que la ciudadanía participe activamente en las decisiones sociales tecnocientíficas.",
+      "Garantizar que los proyectos científicos cuenten con el financiamiento necesario de la sociedad civil."
+    ],
+    correct:1,
+    feedback:"Según el texto, la participación de la ciudadanía en las decisiones sociales tecnocientíficas es la principal finalidad para la educación científica. En una auténtica democracia, la ciudadanía debe saber analizar la información de forma crítica e intervenir activamente en las decisiones que la afectan."
+  },
+  {
+    id:5, type:"Cuestionamiento directo", badge:"badge-cd",
+    question:"¿Cuál es el impacto de las actitudes negativas del profesorado hacia la enseñanza de las ciencias?",
+    options:[
+      "Afectan significativamente la calidad de la oferta educativa e influyen en las concepciones de los alumnos sobre sus posibilidades de aprendizaje.",
+      "No tienen mayor impacto, pues los alumnos forman sus propias opiniones sobre las ciencias de manera independiente.",
+      "Solo afectan a los alumnos con bajo rendimiento académico, quienes necesitan mayor motivación externa."
+    ],
+    correct:0,
+    feedback:"El texto afirma que las actitudes negativas del profesorado hacia la enseñanza de la ciencia afectan de forma significativa la calidad de la oferta educativa, llegando a influir en el comportamiento y rendimiento de los alumnos. Las percepciones del docente sobre sí mismo afectan las concepciones que los alumnos elaboran sobre sus posibilidades de aprendizaje."
+  },
+  {
+    id:6, type:"Cuestionamiento directo", badge:"badge-cd",
+    question:"¿Qué característica fundamental comparten el arte y la ciencia, según el texto?",
+    options:[
+      "Ambos requieren exclusivamente formación académica especializada para ser practicados y comprendidos correctamente.",
+      "Ambos se enfocan principalmente en la memorización de datos y fórmulas para generar nuevo conocimiento.",
+      "El esfuerzo común en la creación de métodos poderosos a través de los cuales completamos el mundo, vinculando razón e imaginación creadora."
+    ],
+    correct:2,
+    feedback:"El texto señala que una de las características más importantes que comparten arte y ciencia es el esfuerzo común en la creación de los poderosos métodos a través de los cuales completamos el mundo, basándose en una concepción de la creatividad vinculada al pensamiento racional y científico, que va más allá del modelo místico-intuitivo."
+  },
+  {
+    id:7, type:"Cuestionamiento directo", badge:"badge-cd",
+    question:"¿Qué beneficios aportan las experiencias informales extraescolares (museos, ferias, salidas de campo) a la alfabetización científica?",
+    options:[
+      "Afectan positivamente el aprendizaje, fomentan el aprendizaje experiencial, dan acceso a materiales actualizados y permiten trabajar aspectos críticos y sociales del conocimiento.",
+      "Solo son útiles como actividades recreativas complementarias, sin impacto real en el aprendizaje formal de las ciencias.",
+      "Son efectivas únicamente para alumnos con vocaciones científicas previamente definidas desde etapas tempranas."
+    ],
+    correct:0,
+    feedback:"El texto presenta evidencias de los beneficios de las experiencias informales extraescolares: afectan positivamente el aprendizaje científico, contribuyen a la integración de conceptos, fomentan el aprendizaje experiencial y la actividad práctica, dan acceso a materiales y herramientas actualizados, y permiten trabajar las dimensiones más transversales, críticas y sociales del conocimiento científico."
+  },
+  {
+    id:8, type:"Cuestionamiento directo", badge:"badge-cd",
+    question:"Según la cita de Einstein incluida en el texto, ¿qué representa para la ciencia plantearse nuevas cuestiones y ver viejos problemas desde un nuevo ángulo?",
+    options:[
+      "Que la solución matemática de un problema es siempre más importante que su formulación, pues demuestra destreza experimental.",
+      "Que plantearse nuevas preguntas y ver los problemas desde nuevos ángulos requiere imaginación creadora y marca un avance real en la ciencia.",
+      "Que los problemas científicos deben ser planteados exclusivamente por expertos con formación especializada en cada área."
+    ],
+    correct:1,
+    feedback:"Einstein señala: \"La formulación de un problema es frecuentemente más esencial que su solución\". Plantearse nuevas cuestiones, nuevas posibilidades y ver viejos problemas desde un nuevo ángulo requiere una imaginación creadora y marca un avance real en la ciencia, evidenciando el vínculo entre creatividad y pensamiento científico."
+  },
+  // ── COMPLETAMIENTO ─────────────────────────────────────────────────
+  {
+    id:9, type:"Completamiento", badge:"badge-co",
+    question:"La educación STEAM, basada en el diálogo, reflexividad y pensamiento crítico, permite practicar en el aula…",
+    options:[
+      "…métodos memorísticos que refuerzan los conocimientos teóricos establecidos por la comunidad científica internacional.",
+      "…únicamente actividades relacionadas con las ciencias naturales y exactas mediante experimentos controlados.",
+      "…procesos de democratización del conocimiento científico-tecnológico, ampliando las posibilidades de acercamiento a un mundo más tecnológico y virtual."
+    ],
+    correct:2,
+    feedback:"Según el texto, la educación STEAM permite practicar en el aula procesos de democratización del conocimiento científico-tecnológico. Además, amplía las posibilidades de acercamiento de la sociedad a un mundo cada vez más tecnológico y virtual, promoviendo inclusión y equidad, y desarrollando todo el potencial del alumnado para la liberación de dependencias."
+  },
+  {
+    id:10, type:"Completamiento", badge:"badge-co",
+    question:"En el contexto de la posverdad, la selección de información correcta y no sesgada es clave en la didáctica de las ciencias porque está relacionada con…",
+    options:[
+      "…la necesidad de rechazar cualquier información proveniente de redes sociales o medios de comunicación no especializados.",
+      "…la implementación de filtros tecnológicos que impidan el acceso del alumnado a noticias infundadas.",
+      "…la comunicación como competencia base para el presente-futuro científico, entendiendo la ciencia como un derecho universal que debe llegar a todos y ser parte de todos."
+    ],
+    correct:2,
+    feedback:"El texto establece que la selección de información correcta en la era de la posverdad toma particular relevancia en relación con la comunicación como competencia base para nuestro presente-futuro científico. La ciencia debe entenderse como un derecho universal que llegue a todos, razón por la cual la divulgación científica cobra especial trascendencia."
+  },
+  {
+    id:11, type:"Completamiento", badge:"badge-co",
+    question:"La divulgación científica cobra especial trascendencia en el ámbito educativo porque…",
+    options:[
+      "…es el único mecanismo válido para transmitir el conocimiento científico más allá de los laboratorios especializados.",
+      "…reemplaza a la educación formal en ciencias al ser más accesible y atractiva para toda la población general.",
+      "…la ciencia se entiende como un derecho universal que debe llegar a todos y ser parte de todos, convirtiéndose en voz y experiencia compartida dentro del proceso enseñanza-aprendizaje."
+    ],
+    correct:2,
+    feedback:"Según el texto, la divulgación científica cobra trascendencia en el ámbito donde la ciencia se entiende como derecho universal que debe llegar a todos y ser parte de todos. Es aquí donde la enseñanza-aprendizaje de la ciencia se torna voz y experiencia compartida, y donde la comunicación como competencia resulta esencial."
+  },
+  {
+    id:12, type:"Completamiento", badge:"badge-co",
+    question:"Cuando el texto señala que \"la persona no se puede dividir en bloques\" y que en otros países los currículos están más mezclados, se hace referencia a que…",
+    options:[
+      "…la integración curricular de ciencias y humanidades responde a una visión holística del ser humano, donde la ciencia es cultura y es sociedad.",
+      "…los currículos escolares deben separar claramente las áreas de ciencias y humanidades para lograr mayor especialización académica.",
+      "…la evaluación educativa debe considerar únicamente el desempeño académico sin factores personales ni contextuales."
+    ],
+    correct:0,
+    feedback:"El texto sostiene que la ciencia es cultura y es sociedad. La idea de que \"la persona no se puede dividir en bloques\" refleja una visión holística del ser humano que demanda currículos integrados, donde la ciencia y las humanidades no estén separadas artificialmente. La cultura científica amplía las miras, extiende los horizontes y convierte a las personas en más capaces, responsables y libres."
+  },
+  {
+    id:13, type:"Completamiento", badge:"badge-co",
+    question:"La vinculación del alumnado en proyectos científico-tecnológicos mejora sus competencias asociadas al desarrollo de los 17 objetivos de la ONU porque…",
+    options:[
+      "…les proporciona herramientas exclusivamente para competir en el mercado laboral globalizado sin importar el contexto social.",
+      "…los proyectos tecnológicos son la única vía para cumplir con los estándares educativos internacionales establecidos por la ONU.",
+      "…el capital científico adquirido desde edades tempranas puede y debe contribuir a los Objetivos de Desarrollo Sostenible, siendo la educación científico-tecnológica un elemento imprescindible."
+    ],
+    correct:2,
+    feedback:"Según el texto, el capital científico adquirido por el alumnado desde edades tempranas puede y debe contribuir a los Objetivos de Desarrollo Sostenible. La educación científico-tecnológica desempeñará un papel imprescindible en la consecución de los objetivos propuestos por la ONU para el desarrollo sostenible."
+  },
+  {
+    id:14, type:"Completamiento", badge:"badge-co",
+    question:"El trabajo en equipo en un entorno STEAM, concebido desde un enfoque interdisciplinar, constituye…",
+    options:[
+      "…una herramienta fundamental para la construcción social del futuro, con enfoques múltiples, conciencia global de la ciencia y creatividad en la resolución de problemas complejos.",
+      "…una estrategia exclusivamente útil en etapas universitarias, donde los estudiantes tienen mayor madurez intelectual para el trabajo colaborativo.",
+      "…un método secundario que complementa el aprendizaje individual como forma principal de adquisición del conocimiento científico."
+    ],
+    correct:0,
+    feedback:"El texto describe el trabajo en equipo en entornos STEAM como una oportunidad única para el desarrollo de enfoques múltiples y una conciencia global de la ciencia, siendo un caldo de cultivo para el desarrollo de la creatividad en la identificación y resolución de problemas complejos, y una herramienta fundamental para la construcción social del futuro."
+  },
+  {
+    id:15, type:"Completamiento", badge:"badge-co",
+    question:"Según el texto, el desarrollo tecnocientífico tiene lugar en un contexto histórico definido por un marco filosófico y político. Por esa razón la enseñanza de la ciencia se puede beneficiar…",
+    options:[
+      "…eliminando cualquier referencia política o filosófica de los contenidos científicos para mantener la objetividad del conocimiento.",
+      "…limitando el análisis histórico al periodo contemporáneo, más relevante y cercano para los estudiantes actuales.",
+      "…de la adopción de una mirada tecno-política y filosófica que permita al alumnado entender los vínculos existentes entre ciencia, valores y política."
+    ],
+    correct:2,
+    feedback:"El texto afirma que el desarrollo tecnocientífico tiene lugar en un contexto histórico definido por un marco filosófico y político. Por esa razón, la enseñanza de la ciencia se puede beneficiar de la adopción de una mirada tecno-política y filosófica que permita al alumnado entender los vínculos existentes entre ciencia, valores y política."
+  },
+  {
+    id:16, type:"Completamiento", badge:"badge-co",
+    question:"La literatura y el cine de ciencia ficción se convierten en excelentes recursos didácticos para la enseñanza de las ciencias gracias a…",
+    options:[
+      "…su capacidad para reemplazar los contenidos curriculares establecidos con narrativas más atractivas para el alumnado moderno.",
+      "…su potencial motivador, que permite acercarse a una enseñanza de la ciencia para la ciudadanía y desarrollar un alumnado crítico capaz de diferenciar ciencia, ciencia posible y ciencia imposible.",
+      "…que presentan siempre información científica verificada y actualizada que complementa eficazmente los libros de texto escolares."
+    ],
+    correct:1,
+    feedback:"El texto señala que la literatura y el cine de ciencia ficción, gracias a su potencial motivador, se convierten en excelentes recursos didácticos. Analizar un filme desde la perspectiva de las ciencias naturales nos permite acercarnos a una enseñanza de la ciencia para la ciudadanía, contribuyendo al desarrollo de un alumnado crítico capaz de diferenciar ciencia, ciencia posible y ciencia imposible."
+  },
+  // ── ORDENAMIENTO ───────────────────────────────────────────────────
+  {
+    id:17, type:"Ordenamiento", badge:"badge-or",
+    question:"Ordene correctamente los componentes del acrónimo STEAM en el orden que va desde la Ciencia hasta las Matemáticas:\n\n1. Science (Ciencia)\n2. Technology (Tecnología)\n3. Engineering (Ingeniería)\n4. Art (Arte)\n5. Mathematics (Matemáticas)",
+    options:[
+      "3 – 1 – 5 – 2 – 4",
+      "2 – 4 – 1 – 3 – 5",
+      "1 – 2 – 3 – 4 – 5"
+    ],
+    correct:2,
+    feedback:"El acrónimo STEAM se forma en orden con: Science (Ciencia), Technology (Tecnología), Engineering (Ingeniería), Art (Arte) y Mathematics (Matemáticas), siendo precisamente estas cinco disciplinas las que integran el enfoque educativo interdisciplinar que propone el texto."
+  },
+  {
+    id:18, type:"Ordenamiento", badge:"badge-or",
+    question:"Ordene los beneficios de las experiencias informales extraescolares, comenzando por el más relacionado con el acceso a recursos materiales actualizados y avanzando hacia el impacto más general en el aprendizaje:\n\n1. Dan acceso a materiales y herramientas actualizados\n2. Contribuyen a la integración de conceptos\n3. Afectan positivamente el aprendizaje científico\n4. Fomentan el aprendizaje experiencial y la actividad práctica",
+    options:[
+      "1 – 4 – 2 – 3",
+      "3 – 2 – 4 – 1",
+      "2 – 1 – 3 – 4"
+    ],
+    correct:0,
+    feedback:"Partiendo del acceso a recursos materiales actualizados como punto inicial, la secuencia lógica progresa hacia impactos más generales: 1) Dan acceso a materiales y herramientas actualizados, lo que 4) Fomenta el aprendizaje experiencial y la actividad práctica, que a su vez 2) Contribuye a la integración de conceptos, hasta que 3) Afectan positivamente el aprendizaje científico de manera integral."
+  },
+  {
+    id:19, type:"Ordenamiento", badge:"badge-or",
+    question:"Ordene cronológicamente los pasos que siguió Harold Kroto para identificar la forma estable del C60 (fullereno), según el texto:\n\n1. Solo observaba hexágonos y pentágonos en su investigación cristalográfica\n2. Conoció la arquitectura de Buckminster Fuller basada en cúpulas de pentágonos y hexágonos\n3. Imaginó la \"forma\" del C60 inspirado en las cúpulas de Fuller\n4. Concluyó que el C60 (fullereno) era estable",
+    options:[
+      "1 – 2 – 3 – 4",
+      "2 – 1 – 4 – 3",
+      "3 – 1 – 4 – 2"
+    ],
+    correct:0,
+    feedback:"Según el texto, Kroto primero (1) observaba hexágonos y pentágonos en sus estudios cristalográficos; luego (2) conoció la arquitectura de Buckminster Fuller; a partir de esa conexión artística-científica (3) imaginó la forma del C60; y finalmente (4) concluyó que era estable, nombrándolo fullereno en honor al arquitecto. Este caso ilustra la vinculación entre arte y ciencia que promueve el enfoque STEAM."
+  },
+  {
+    id:20, type:"Ordenamiento", badge:"badge-or",
+    question:"Ordene los ámbitos de contribución STEAM a los ODS, comenzando por las necesidades humanas más básicas hasta la cooperación global interdisciplinar:\n\n1. Acabar con la pobreza e inseguridad alimentaria (STM)\n2. Mejorar la salud y bienestar con nuevas técnicas biomédicas (STE)\n3. Velar por la recuperación y sostenibilidad del planeta (STEAM)\n4. Trabajar en equipos interdisciplinares y redes de ciencia (STEAM)",
+    options:[
+      "1 – 2 – 3 – 4",
+      "3 – 4 – 1 – 2",
+      "2 – 3 – 4 – 1"
+    ],
+    correct:0,
+    feedback:"El texto presenta una progresión desde las necesidades más básicas hasta las más globales: 1) Acabar con la pobreza y asegurar la alimentación (necesidades básicas, Obj. 1, 2, 8, 12); 2) Mejorar la salud y bienestar (Obj. 3); 3) Velar por la sostenibilidad del planeta y biodiversidad; 4) Trabajar en redes interdisciplinares para la cooperación científica global (Obj. 16, 17)."
+  },
+  {
+    id:21, type:"Ordenamiento", badge:"badge-or",
+    question:"Ordene los pasos del proceso que llevó al matrimonio Odone a convertirse en agentes de cambio científico, según el texto:\n\n1. Su hijo sufrió la enfermedad degenerativa ALD\n2. Se convirtieron en grandes conocedores del problema científico\n3. Encontraron soluciones paliativas para su hijo\n4. Congregaron a multitud de expertos para unir fuerzas contra el ALD",
+    options:[
+      "2 – 3 – 1 – 4",
+      "1 – 2 – 3 – 4",
+      "3 – 1 – 4 – 2"
+    ],
+    correct:1,
+    feedback:"La secuencia fue: 1) El hijo sufrió la terrible enfermedad degenerativa ALD, motivando la acción; 2) Los Odone se convirtieron en grandes conocedores del problema, sin formación científica previa; 3) Llegaron a encontrar soluciones paliativas para su hijo; 4) Congregaron a expertos para unir fuerzas. Este caso demuestra que la ciencia pertenece a toda la humanidad, no solo al colectivo científico."
+  },
+  {
+    id:22, type:"Ordenamiento", badge:"badge-or",
+    question:"Ordene las dimensiones de la ciencia ciudadana descritas en el texto, desde la más básica y accesible hasta la más orientada a la conciencia de los grandes retos sociales:\n\n1. Facilita la participación de la ciudadanía en procesos reales de investigación científica\n2. Reduce la distancia con el conocimiento científico\n3. Hace consciente al alumnado de los retos tecnocientíficos y sociales contemporáneos\n4. Demanda soluciones a problemas que no se habían planteado antes",
+    options:[
+      "3 – 4 – 1 – 2",
+      "2 – 1 – 4 – 3",
+      "1 – 3 – 2 – 4"
+    ],
+    correct:1,
+    feedback:"La progresión lógica parte de: 2) Reducir la distancia con el conocimiento (punto de entrada más básico), para luego 1) Facilitar la participación en investigación real, después 4) Demandar soluciones a nuevos problemas no planteados antes, y finalmente 3) Hacer consciente al alumnado de los grandes retos tecnocientíficos y sociales contemporáneos, que es la dimensión más avanzada y reflexiva."
+  },
+  {
+    id:23, type:"Ordenamiento", badge:"badge-or",
+    question:"Ordene los ámbitos de acción de la ciencia enumerados en el texto, comenzando con el más directamente relacionado con la salud y el conocimiento de la naturaleza viva:\n\n1. Es medicina y conocimiento de nuevas especies\n2. Es lucha contra el cambio climático\n3. Es avance en comunicaciones\n4. Es mejoras en fuentes de energía",
+    options:[
+      "2 – 3 – 4 – 1",
+      "1 – 2 – 3 – 4",
+      "4 – 3 – 2 – 1"
+    ],
+    correct:1,
+    feedback:"El texto enumera los ámbitos de la ciencia comenzando con: 1) medicina y conocimiento de nuevas especies (directamente relacionado con la vida y la salud), 2) lucha contra el cambio climático (medio ambiente), 3) avance en comunicaciones (tecnología social), 4) mejoras en fuentes de energía (infraestructura), concluyendo que todo eso hace del acceso a la ciencia un derecho primordial del ser humano."
+  },
+  // ── RELACIÓN DE ELEMENTOS ──────────────────────────────────────────
+  {
+    id:24, type:"Relación de elementos", badge:"badge-re",
+    question:"Seleccione la opción que relacione correctamente a cada científico o creador con su área de conocimiento o logro mencionado en el texto.",
+    tableData:{
+      leftHeader:"Persona",rightHeader:"Logro / Área",
+      left:["1. William Herschel","2. Harold Kroto","3. Susan Wojcicki"],
+      right:["a) Premio Nobel de Química por identificar el fullereno C60","b) Observó por primera vez a Urano en 1781; era músico","c) Presidenta de YouTube; licenciada en Historia y Literatura"]
+    },
+    options:["1b, 2a, 3c","1a, 2c, 3b","1c, 2b, 3a"],
+    correct:0,
+    feedback:"Según el texto: William Herschel observó Urano en 1781 y era músico (1b); Harold Kroto fue Premio Nobel de Química por identificar la forma halotrópica del C60, el fullereno (2a); y Susan Wojcicki es presidenta de YouTube con formación en Historia y Literatura (3c). Todos ilustran la conexión entre humanidades, arte y ciencia que promueve STEAM."
+  },
+  {
+    id:25, type:"Relación de elementos", badge:"badge-re",
+    question:"Seleccione la opción que relacione correctamente cada área STEAM con el campo de aplicación para los Objetivos de Desarrollo Sostenible que le corresponde, según el texto.",
+    tableData:{
+      leftHeader:"Área STEAM",rightHeader:"Campo ODS",
+      left:["1. STM (Ciencia, Tecnología, Matemáticas)","2. STE (Ciencia, Tecnología, Ingeniería)","3. STEAM completo"],
+      right:["a) Garantizar educación de calidad e inclusión con acceso universal a ciencia y tecnología","b) Acabar con la pobreza mediante nuevas estrategias de producción de alimentos","c) Mejorar la salud con nuevas técnicas biomédicas y medicamentos inteligentes"]
+    },
+    options:["1a, 2b, 3c","1b, 2c, 3a","1c, 2a, 3b"],
+    correct:1,
+    feedback:"El texto vincula: STM con acabar con la pobreza y la producción alimentaria (Objetivos 1, 2, 8, 12) → 1b; STE con mejorar la salud y bienestar mediante técnicas biomédicas (Objetivo 3) → 2c; y STEAM completo con garantizar educación de calidad con inclusión, universalidad y sin brecha de género (Objetivos 4, 5, 10) → 3a."
+  },
+  {
+    id:26, type:"Relación de elementos", badge:"badge-re",
+    question:"Seleccione la opción que relacione correctamente cada una de las \"4C\" de la Agenda Mundial 2030 con su descripción según el contenido del texto.",
+    tableData:{
+      leftHeader:"Competencia (4C)",rightHeader:"Descripción en el texto",
+      left:["1. Creatividad","2. Comunicación","3. Colaboración"],
+      right:["a) Entender la ciencia como derecho universal que debe llegar a todos; voz y experiencia compartida","b) Trabajo en equipo interdisciplinar como herramienta para la construcción social del futuro","c) La \"A\" del acrónimo STEAM: vincula la ciencia con el arte como expresión de la naturaleza"]
+    },
+    options:["1a, 2c, 3b","1b, 2a, 3c","1c, 2a, 3b"],
+    correct:2,
+    feedback:"La Creatividad se refleja en la \"A\" del acrónimo STEAM, vinculando la ciencia con el arte (1c); la Comunicación está relacionada con entender la ciencia como derecho universal donde la divulgación cobra trascendencia (2a); y la Colaboración se expresa en el trabajo en equipo con enfoque interdisciplinar para la construcción social del futuro (3b)."
+  },
+  {
+    id:27, type:"Relación de elementos", badge:"badge-re",
+    question:"Seleccione la opción que relacione correctamente la formación académica de cada fundador de empresa tecnológica con su nombre, según los datos del texto.",
+    tableData:{
+      leftHeader:"Formación académica",rightHeader:"Fundador / Empresa",
+      left:["1. Historia y Literatura","2. Bellas Artes","3. Filología inglesa"],
+      right:["a) Jack Ma – Alibaba","b) Susan Wojcicki – YouTube","c) Brian Chesky – Airbnb"]
+    },
+    options:["1b, 2c, 3a","1a, 2b, 3c","1c, 2a, 3b"],
+    correct:0,
+    feedback:"El texto señala: Susan Wojcicki (YouTube) es licenciada en Historia y Literatura → 1b; Brian Chesky (Airbnb) es licenciado en Bellas Artes → 2c; Jack Ma (Alibaba) tiene formación en Filología inglesa → 3a. El texto usa estos casos para ilustrar que las humanidades y las artes son también la base de grandes innovaciones tecnológicas."
+  },
+  {
+    id:28, type:"Relación de elementos", badge:"badge-re",
+    question:"Seleccione la opción que relacione correctamente cada edu-mito con la evidencia o argumento que lo refuta, según el texto.",
+    tableData:{
+      leftHeader:"Edu-mito",rightHeader:"Refutación del texto",
+      left:["1. \u00ABCómo voy a enseñar ciencias si soy de letras?\u00BB","2. \u00ABLa educación científica aleja al alumnado de la creatividad\u00BB","3. \u00ABLa ciencia solo en clase de ciencias\u00BB"],
+      right:["a) Arte y ciencia comparten la creación de métodos poderosos; la creatividad está vinculada al pensamiento racional y científico","b) La ciencia es cultura; la ciudadanía sin formación científica ha liderado soluciones a problemas que la afectaban","c) Las experiencias informales extraescolares benefician significativamente la alfabetización científica"]
+    },
+    options:["1a, 2b, 3c","1b, 2a, 3c","1c, 2b, 3a"],
+    correct:1,
+    feedback:"El texto refuta: el mito de 'no puedo enseñar ciencias si soy de letras' con que la ciencia es cultura y la ciudadanía sin formación científica puede liderar soluciones (1b); el mito de que la ciencia aleja de la creatividad con el vínculo arte-ciencia y la creatividad vinculada al pensamiento racional (2a); y el mito de 'la ciencia solo en clase' con los beneficios evidenciados de las experiencias informales extraescolares (3c)."
+  },
+  {
+    id:29, type:"Relación de elementos", badge:"badge-re",
+    question:"Seleccione la opción que relacione correctamente cada grupo de Objetivos de Desarrollo Sostenible con el área STEAM que les corresponde, según el texto.",
+    tableData:{
+      leftHeader:"Objetivos de Desarrollo Sostenible",rightHeader:"Área STEAM",
+      left:["1. Recuperación y sostenibilidad del planeta, biodiversidad, cambio climático (Obj. 6, 13, 14, 15)","2. Garantizar educación de calidad con inclusión y universalidad (Obj. 4, 5, 10)","3. Diseñar e innovar en industria, infraestructuras y energías limpias (Obj. 9, 7, 11)"],
+      right:["a) STEAM completo","b) STEAM (Obj. 6, 13, 14, 15)","c) TEAM"]
+    },
+    options:["1a, 2c, 3b","1b, 2a, 3c","1c, 2b, 3a"],
+    correct:1,
+    feedback:"Según el texto: la recuperación y sostenibilidad del planeta corresponde a STEAM (Objetivos 6, 13, 14, 15) → 1b; garantizar educación de calidad con inclusión y universalidad corresponde a STEAM completo (Objetivos 4, 5, 10) → 2a; y el diseño e innovación en industria e infraestructuras con energías limpias corresponde a TEAM (Objetivos 9, 7, 11) → 3c."
+  },
+  {
+    id:30, type:"Relación de elementos", badge:"badge-re",
+    question:"Seleccione la opción que relacione correctamente cada concepto clave de la educación científica con su definición o implicación, según el texto.",
+    tableData:{
+      leftHeader:"Concepto",rightHeader:"Definición / Implicación en el texto",
+      left:["1. Capital científico","2. Ciencia ciudadana","3. Divulgación científica"],
+      right:["a) Plataformas digitales (ciencia-ciudadana.es, citizenscience.org) donde cualquier persona puede participar en proyectos reales de investigación","b) Conocimiento científico acumulado por el alumnado desde edades tempranas que puede contribuir a los ODS","c) Estrategia para difundir el conocimiento al público no especializado y para potenciar los aspectos comunicativos en la educación formal"]
+    },
+    options:["1b, 2a, 3c","1a, 2c, 3b","1c, 2b, 3a"],
+    correct:0,
+    feedback:"El texto define: el capital científico como el conocimiento acumulado desde edades tempranas que puede contribuir a los ODS → 1b; la ciencia ciudadana como la participación de cualquier persona a través de plataformas digitales en procesos reales de investigación → 2a; y la divulgación científica como estrategia para difundir el conocimiento al público no especializado y potenciar los aspectos comunicativos en la educación formal → 3c."
+  }
+];
+
+/* ===========================
+   STATE
+   =========================== */
+let current=0, score=0, errors=0, studentName="", answered=false;
+
+/* ===========================
+   TAB LOGIC
+   =========================== */
+function showTab(id, el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+}
+
+/* ===========================
+   GUIDE TOGGLE
+   =========================== */
+function toggleGuideView(){
+  const area=document.getElementById('guide-view-area');
+  const ph=document.getElementById('guide-placeholder');
+  const hidden=area.classList.contains('hidden');
+  area.classList.toggle('hidden',!hidden);
+  ph.classList.toggle('hidden',hidden);
+}
+
+/* ===========================
+   QUIZ LOGIC
+   =========================== */
+function startQuiz(){
+  const n=document.getElementById('student-name').value.trim();
+  if(!n){
+    document.getElementById('student-name').focus();
+    document.getElementById('student-name').style.borderColor='#ef4444';
+    return;
+  }
+  studentName=n;
+  current=0;score=0;errors=0;answered=false;
+  document.getElementById('screen-welcome').classList.add('hidden');
+  document.getElementById('screen-quiz').classList.remove('hidden');
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q=questions[current];
+  answered=false;
+
+  // Progress
+  document.getElementById('prog-label').textContent=`Pregunta ${current+1} de ${questions.length}`;
+  document.getElementById('stat-ok').textContent=`✔ ${score}`;
+  document.getElementById('stat-err').textContent=`✘ ${errors}`;
+  document.getElementById('prog-fill').style.width=`${(current/questions.length)*100}%`;
+
+  // Build table HTML if needed
+  let tableHTML='';
+  if(q.tableData){
+    const td=q.tableData;
+    tableHTML=`<div class="q-table-wrap"><table class="q-table">
+      <thead><tr><th>${td.leftHeader}</th><th>${td.rightHeader}</th></tr></thead>
+      <tbody>`;
+    const rows=Math.max(td.left.length,td.right.length);
+    for(let i=0;i<rows;i++){
+      tableHTML+=`<tr><td>${td.left[i]||''}</td><td>${td.right[i]||''}</td></tr>`;
+    }
+    tableHTML+=`</tbody></table></div>`;
+  }
+
+  // Format question text (preserve line breaks)
+  const qTextFormatted=q.question.replace(/\n/g,'<br>');
+
+  // Options
+  const optLetters=['A','B','C'];
+  const optHTML=q.options.map((opt,i)=>`
+    <button class="option-btn" onclick="selectAnswer(${i})" id="opt-${i}">
+      <span class="option-letter">${optLetters[i]}</span>
+      <span>${opt}</span>
+    </button>
+  `).join('');
+
+  document.getElementById('q-card-area').innerHTML=`
+    <div class="q-card">
+      <span class="q-type-badge ${q.badge}">${q.type}</span>
+      <div class="q-num">Reactivo ${q.id} de ${questions.length}</div>
+      <div class="q-text">${qTextFormatted}</div>
+      ${tableHTML}
+      <div class="options-grid">${optHTML}</div>
+      <div id="feedback-area"></div>
+      <div class="q-nav" id="nav-area"></div>
+    </div>
+  `;
+}
+
+function selectAnswer(idx){
+  if(answered)return;
+  answered=true;
+  const q=questions[current];
+  const isCorrect=(idx===q.correct);
+  if(isCorrect)score++;else errors++;
+
+  // Style options
+  const btns=document.querySelectorAll('.option-btn');
+  btns.forEach((btn,i)=>{
+    btn.disabled=true;
+    btn.classList.add('answered');
+    if(i===q.correct)btn.classList.add(isCorrect&&i===idx?'correct':'reveal');
+    if(i===idx&&!isCorrect)btn.classList.add('wrong');
+  });
+  if(isCorrect){
+    btns[idx].classList.remove('reveal');
+    btns[idx].classList.add('correct');
+  }
+
+  // Update stats live
+  document.getElementById('stat-ok').textContent=`✔ ${score}`;
+  document.getElementById('stat-err').textContent=`✘ ${errors}`;
+
+  // Feedback
+  const fb=document.getElementById('feedback-area');
+  if(isCorrect){
+    fb.innerHTML=`<div class="feedback-box feedback-ok"><span class="feedback-icon">✅</span><strong>¡Correcto!</strong> ${q.feedback}</div>`;
+  } else {
+    fb.innerHTML=`<div class="feedback-box feedback-err"><span class="feedback-icon">❌</span><strong>Respuesta incorrecta.</strong> ${q.feedback}</div>`;
+  }
+
+  // Nav button
+  const nav=document.getElementById('nav-area');
+  if(current<questions.length-1){
+    nav.innerHTML=`<button class="btn btn-primary" onclick="nextQuestion()">Siguiente pregunta →</button>`;
+  } else {
+    nav.innerHTML=`<button class="btn btn-success" onclick="showResults()">Ver resultados 🏆</button>`;
+  }
+}
+
+function nextQuestion(){
+  current++;
+  renderQuestion();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ===========================
+   RESULTS
+   =========================== */
+function showResults(){
+  document.getElementById('screen-quiz').classList.add('hidden');
+  document.getElementById('screen-results').classList.remove('hidden');
+
+  const pct=Math.round((score/questions.length)*100);
+  document.getElementById('res-name').textContent=studentName;
+  document.getElementById('res-ok').textContent=score;
+  document.getElementById('res-err').textContent=errors;
+  document.getElementById('res-pct').textContent=pct+'%';
+
+  // Ring animation
+  const circle=document.getElementById('ring-circle');
+  const circ=364.4;
+  const offset=circ-(circ*(pct/100));
+  setTimeout(()=>{ circle.style.transition='stroke-dashoffset 1.2s ease'; circle.style.strokeDashoffset=offset; },150);
+
+  // Icon & motivator
+  let icon,msg;
+  if(pct>=90){ icon='🏆'; msg='¡Excelente desempeño! Dominas sólidamente los fundamentos de la educación STEAM. ¡Sigue así, tu comprensión es sobresaliente!';}
+  else if(pct>=75){ icon='🌟'; msg='¡Muy buen trabajo! Tienes una comprensión sólida del contenido. Revisa los reactivos que no acertaste para fortalecer esos temas.';}
+  else if(pct>=60){ icon='📚'; msg='¡Buen esfuerzo! Estás en el camino correcto. Consulta la guía de estudio para reforzar los conceptos en los que tuviste dificultades.';}
+  else if(pct>=40){ icon='💪'; msg='Tienes bases importantes, pero es momento de profundizar. Revisa el material teórico e intenta el simulador de nuevo.';}
+  else { icon='🔍'; msg='Sigue practicando para fortalecer tus conocimientos. Consulta la guía de estudio, repasa el contenido con calma y vuelve a intentarlo. ¡Tú puedes!';}
+
+  document.getElementById('res-icon').textContent=icon;
+  document.getElementById('res-motivator').textContent=msg;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function restartQuiz(){
+  current=0;score=0;errors=0;answered=false;
+  document.getElementById('screen-results').classList.add('hidden');
+  document.getElementById('screen-welcome').classList.remove('hidden');
+  document.getElementById('student-name').value='';
+  document.getElementById('student-name').style.borderColor='';
+}
+</script>
+</body>
+</html>

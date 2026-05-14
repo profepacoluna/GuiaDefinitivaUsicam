@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Simulador CTE – Prof. Francisco De Jesus Luna Benitez</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --primary: #FF6B6B;
+    --secondary: #4ECDC4;
+    --accent: #FFE66D;
+    --deep: #2C3E50;
+    --light: #F8F9FA;
+    --success: #2ECC71;
+    --error: #E74C3C;
+    --warning: #F39C12;
+    --grad1: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+    --grad2: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+    --grad3: linear-gradient(135deg, #A8EDEA 0%, #FED6E3 100%);
+    --grad4: linear-gradient(135deg, #FFE66D 0%, #FF6B6B 100%);
+    --shadow: 0 8px 32px rgba(0,0,0,0.12);
+    --shadow-lg: 0 16px 48px rgba(0,0,0,0.18);
+    --radius: 20px;
+    --radius-sm: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(160deg, #FFF5F5 0%, #E8F8F5 50%, #FFFDE7 100%);
+    min-height: 100vh;
+    color: var(--deep);
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--grad1);
+    padding: 28px 20px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(255,107,107,0.35);
+  }
+  .header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.08'%3E%3Ccircle cx='30' cy='30' r='8'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .header-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.25);
+    border: 2px solid rgba(255,255,255,0.5);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 5px 16px;
+    border-radius: 100px;
+    margin-bottom: 10px;
+  }
+  .header h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(1.5rem, 4vw, 2.6rem);
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    line-height: 1.2;
+    position: relative;
+  }
+  .header h1 span { color: var(--accent); }
+  .header p {
+    margin-top: 8px;
+    color: rgba(255,255,255,0.9);
+    font-size: clamp(0.82rem, 2vw, 1rem);
+    font-weight: 600;
+    position: relative;
+  }
+
+  /* ── NAV TABS ── */
+  .nav-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 20px;
+    background: #fff;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    padding: 9px 22px;
+    border: 2px solid transparent;
+    border-radius: 100px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    background: var(--light);
+    color: #666;
+  }
+  .tab-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  .tab-btn.active {
+    background: var(--grad1);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 4px 16px rgba(255,107,107,0.4);
+  }
+
+  /* ── MAIN CONTAINER ── */
+  .main { max-width: 820px; margin: 0 auto; padding: 30px 16px 60px; }
+
+  /* ── SCREEN ── */
+  .screen { display: none; animation: fadeIn 0.4s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+  /* ── WELCOME SCREEN ── */
+  .welcome-card {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 48px 40px;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+  }
+  .welcome-icon {
+    width: 90px; height: 90px;
+    background: var(--grad1);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.6rem;
+    margin: 0 auto 24px;
+    box-shadow: 0 8px 24px rgba(255,107,107,0.35);
+  }
+  .welcome-card h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(1.4rem, 3.5vw, 2rem);
+    font-weight: 800;
+    color: var(--deep);
+    margin-bottom: 12px;
+  }
+  .welcome-card p {
+    color: #666;
+    font-size: 1rem;
+    line-height: 1.6;
+    max-width: 500px;
+    margin: 0 auto 32px;
+  }
+  .info-pills {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 36px;
+  }
+  .pill {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--light);
+    border-radius: 100px;
+    padding: 8px 18px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #555;
+  }
+  .pill .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+  }
+  .input-group {
+    max-width: 380px;
+    margin: 0 auto 24px;
+    text-align: left;
+  }
+  .input-group label {
+    display: block;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--deep);
+    margin-bottom: 8px;
+  }
+  .input-group input {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid #E0E0E0;
+    border-radius: var(--radius-sm);
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--deep);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: #FAFAFA;
+    outline: none;
+  }
+  .input-group input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(255,107,107,0.12);
+    background: #fff;
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 15px 40px;
+    background: var(--grad1);
+    color: #fff;
+    border: none;
+    border-radius: 100px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(255,107,107,0.4);
+    transition: all 0.25s;
+  }
+  .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(255,107,107,0.5); }
+  .btn-primary:active { transform: translateY(-1px); }
+
+  /* ── QUIZ SCREEN ── */
+  .quiz-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .q-counter {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #666;
+  }
+  .q-counter span { color: var(--primary); font-size: 1.3rem; }
+  .score-live {
+    display: flex; gap: 12px;
+  }
+  .score-chip {
+    display: flex; align-items: center; gap: 5px;
+    padding: 5px 14px;
+    border-radius: 100px;
+    font-weight: 800;
+    font-size: 0.85rem;
+  }
+  .score-chip.correct { background: #D5F5E3; color: #1A8A4B; }
+  .score-chip.wrong { background: #FADBD8; color: #C0392B; }
+
+  /* Progress bar */
+  .progress-track {
+    height: 10px;
+    background: #E8E8E8;
+    border-radius: 100px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--grad1);
+    border-radius: 100px;
+    transition: width 0.5s ease;
+  }
+
+  /* Question card */
+  .q-card {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 36px 36px 30px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    border-top: 5px solid var(--primary);
+    transition: transform 0.3s;
+  }
+  .q-type-badge {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .badge-cd { background: #FDE8E8; color: #C0392B; }
+  .badge-cm { background: #EAF5FB; color: #1A5276; }
+  .badge-or { background: #FEF9E7; color: #9A7D0A; }
+  .badge-re { background: #E8F8F5; color: #1A6B5C; }
+
+  .q-text {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+    font-weight: 600;
+    color: var(--deep);
+    line-height: 1.65;
+    margin-bottom: 26px;
+  }
+
+  /* Table for relacion/ordenamiento */
+  .q-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-size: 0.88rem;
+  }
+  .q-table th {
+    background: #F5F6F7;
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 700;
+    color: #555;
+    border-bottom: 2px solid #E8E8E8;
+  }
+  .q-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid #F0F0F0;
+    color: #444;
+    vertical-align: top;
+  }
+  .q-table tr:last-child td { border-bottom: none; }
+
+  /* Options */
+  .options { display: flex; flex-direction: column; gap: 12px; }
+  .option-btn {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 16px 20px;
+    background: #FAFAFA;
+    border: 2px solid #E8E8E8;
+    border-radius: var(--radius-sm);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #444;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    line-height: 1.5;
+  }
+  .option-btn:hover:not(:disabled) {
+    background: #FFF5F5;
+    border-color: var(--primary);
+    transform: translateX(4px);
+    color: var(--deep);
+  }
+  .option-letter {
+    display: flex; align-items: center; justify-content: center;
+    min-width: 30px; height: 30px;
+    background: #E8E8E8;
+    border-radius: 50%;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: #666;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .option-btn:hover:not(:disabled) .option-letter { background: var(--primary); color: #fff; }
+
+  .option-btn.correct {
+    background: #D5F5E3 !important;
+    border-color: #27AE60 !important;
+    color: #1A6B3C !important;
+  }
+  .option-btn.correct .option-letter { background: #27AE60 !important; color: #fff !important; }
+  .option-btn.wrong {
+    background: #FADBD8 !important;
+    border-color: #E74C3C !important;
+    color: #922B21 !important;
+  }
+  .option-btn.wrong .option-letter { background: #E74C3C !important; color: #fff !important; }
+  .option-btn:disabled { cursor: not-allowed; }
+
+  /* Feedback box */
+  .feedback-box {
+    display: none;
+    margin-top: 18px;
+    padding: 16px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 0.93rem;
+    line-height: 1.6;
+    font-weight: 600;
+    animation: popIn 0.3s ease;
+  }
+  @keyframes popIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+  .feedback-box.show { display: flex; align-items: flex-start; gap: 12px; }
+  .feedback-box.correct-fb { background: #D5F5E3; color: #1A5C35; border-left: 4px solid #27AE60; }
+  .feedback-box.wrong-fb { background: #FADBD8; color: #7B241C; border-left: 4px solid #E74C3C; }
+  .fb-icon { font-size: 1.4rem; flex-shrink: 0; }
+
+  /* Next button */
+  .btn-next {
+    display: none;
+    margin-top: 20px;
+    padding: 14px 36px;
+    background: var(--grad2);
+    color: #fff;
+    border: none;
+    border-radius: 100px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(78,205,196,0.4);
+    transition: all 0.25s;
+    float: right;
+  }
+  .btn-next:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(78,205,196,0.5); }
+
+  /* ── RESULTS SCREEN ── */
+  .results-card {
+    background: #fff;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+  }
+  .results-header {
+    background: var(--grad1);
+    padding: 40px 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .results-header h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+  .results-header p { color: rgba(255,255,255,0.85); font-size: 1.05rem; font-weight: 600; }
+
+  .trophy { font-size: 4rem; margin-bottom: 12px; animation: bounce 1s ease infinite alternate; }
+  @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+
+  .results-body { padding: 36px 30px; }
+
+  .student-name-result {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(1.2rem, 3vw, 1.6rem);
+    font-weight: 800;
+    color: var(--deep);
+    margin-bottom: 28px;
+    text-align: center;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    text-align: center;
+    padding: 20px 12px;
+    border-radius: var(--radius-sm);
+  }
+  .stat-card.aciertos { background: #D5F5E3; }
+  .stat-card.errores { background: #FADBD8; }
+  .stat-card.porcentaje { background: #EBF5FB; }
+  .stat-num {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.4rem;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-card.aciertos .stat-num { color: #1A8A4B; }
+  .stat-card.errores .stat-num { color: #C0392B; }
+  .stat-card.porcentaje .stat-num { color: #1A5276; }
+  .stat-label { font-size: 0.8rem; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+
+  .score-bar-track {
+    height: 22px;
+    background: #E8E8E8;
+    border-radius: 100px;
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+  .score-bar-fill {
+    height: 100%;
+    background: var(--grad1);
+    border-radius: 100px;
+    display: flex; align-items: center; justify-content: flex-end;
+    padding-right: 10px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #fff;
+    transition: width 1.2s ease;
+    min-width: 40px;
+  }
+
+  .motivational {
+    background: linear-gradient(135deg, #FFF9E6 0%, #FFF0F0 100%);
+    border: 2px dashed #FFD89B;
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--deep);
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+  .motivational .emoji { font-size: 1.8rem; display: block; margin-bottom: 8px; }
+
+  .btn-retry {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 36px;
+    background: var(--grad1);
+    color: #fff;
+    border: none;
+    border-radius: 100px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(255,107,107,0.4);
+    transition: all 0.25s;
+    margin: 0 auto;
+    display: flex;
+    width: fit-content;
+  }
+  .btn-retry:hover { transform: translateY(-3px); }
+
+  /* ── GUÍA SCREEN ── */
+  .guide-card {
+    background: #fff;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+  }
+  .guide-header {
+    background: var(--grad2);
+    padding: 28px;
+    text-align: center;
+  }
+  .guide-header h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+  .guide-header p { color: rgba(255,255,255,0.85); font-size: 0.95rem; font-weight: 600; }
+  .guide-actions {
+    display: flex;
+    gap: 12px;
+    padding: 20px 24px 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .btn-guide {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 28px;
+    border-radius: 100px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.25s;
+  }
+  .btn-guide.embed { background: var(--grad2); color: #fff; box-shadow: 0 4px 14px rgba(78,205,196,0.4); }
+  .btn-guide.new-tab { background: var(--grad4); color: var(--deep); box-shadow: 0 4px 14px rgba(255,230,109,0.5); }
+  .btn-guide:hover { transform: translateY(-2px); }
+  .pdf-frame-wrap {
+    padding: 0 20px 24px;
+  }
+  .pdf-frame {
+    width: 100%;
+    height: 620px;
+    border: none;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  }
+  .pdf-placeholder {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+    color: #888;
+  }
+  .pdf-frame-wrap.show .pdf-placeholder { display: none; }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 0.82rem;
+    color: #AAA;
+    font-weight: 600;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .q-card { padding: 22px 18px 18px; }
+    .welcome-card { padding: 32px 20px; }
+    .stats-grid { grid-template-columns: 1fr; }
+    .results-body { padding: 24px 18px; }
+    .guide-actions { flex-direction: column; align-items: center; }
+    .btn-next { float: none; width: 100%; }
+    .btn-primary { width: 100%; justify-content: center; }
+  }
+
+  /* Confetti */
+  .confetti-piece {
+    position: fixed;
+    width: 10px; height: 10px;
+    pointer-events: none;
+    z-index: 999;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall {
+    0% { transform: translateY(-10px) rotate(0deg); opacity:1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity:0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-badge">Acuerdo 05/04/24 · CTE</div>
+  <h1>Simulador Interactivo de <span>Evaluación</span></h1>
+  <p>Prof. Francisco De Jesus Luna Benitez</p>
+</div>
+
+<!-- NAV TABS -->
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="showTab('quiz')">📝 Simulador</button>
+  <button class="tab-btn" onclick="showTab('guide')">📖 Guía de Estudio</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- QUIZ TAB -->
+  <div id="tab-quiz">
+
+    <!-- WELCOME -->
+    <div id="screen-welcome" class="screen active">
+      <div class="welcome-card">
+        <div class="welcome-icon">🏫</div>
+        <h2>Bienvenido al Simulador CTE</h2>
+        <p>Pon a prueba tus conocimientos sobre los Lineamientos del Consejo Técnico Escolar basados en el <strong>Acuerdo 05/04/24</strong>. Responde 30 preguntas de opción múltiple y obtén retroalimentación inmediata.</p>
+        <div class="info-pills">
+          <div class="pill"><span class="dot" style="background:#FF6B6B"></span>30 preguntas</div>
+          <div class="pill"><span class="dot" style="background:#4ECDC4"></span>3 opciones cada una</div>
+          <div class="pill"><span class="dot" style="background:#FFE66D"></span>Retroalimentación inmediata</div>
+          <div class="pill"><span class="dot" style="background:#A29BFE"></span>Resultados detallados</div>
+        </div>
+        <div class="input-group">
+          <label for="studentName">👤 Nombre del estudiante</label>
+          <input type="text" id="studentName" placeholder="Escribe tu nombre completo..." autocomplete="off"/>
+        </div>
+        <button class="btn-primary" onclick="startQuiz()">🚀 Iniciar Simulador</button>
+      </div>
+    </div>
+
+    <!-- QUIZ -->
+    <div id="screen-quiz" class="screen">
+      <div class="quiz-meta">
+        <div class="q-counter">Pregunta <span id="qNum">1</span> de 30</div>
+        <div class="score-live">
+          <div class="score-chip correct">✅ <span id="liveCorrect">0</span></div>
+          <div class="score-chip wrong">❌ <span id="liveWrong">0</span></div>
+        </div>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <div class="q-card" id="questionCard">
+        <span class="q-type-badge" id="qTypeBadge"></span>
+        <div class="q-text" id="qText"></div>
+        <div id="qTableWrap"></div>
+        <div class="options" id="optionsContainer"></div>
+        <div class="feedback-box" id="feedbackBox">
+          <span class="fb-icon" id="fbIcon"></span>
+          <span id="fbText"></span>
+        </div>
+      </div>
+      <button class="btn-next" id="btnNext" onclick="nextQuestion()">Siguiente pregunta →</button>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="screen-results" class="screen">
+      <div class="results-card">
+        <div class="results-header">
+          <div class="trophy" id="trophyEmoji">🏆</div>
+          <h2>¡Simulacro Completado!</h2>
+          <p>Aquí están tus resultados</p>
+        </div>
+        <div class="results-body">
+          <div class="student-name-result" id="resultName"></div>
+          <div class="stats-grid">
+            <div class="stat-card aciertos">
+              <div class="stat-num" id="rCorrect">0</div>
+              <div class="stat-label">✅ Aciertos</div>
+            </div>
+            <div class="stat-card errores">
+              <div class="stat-num" id="rWrong">0</div>
+              <div class="stat-label">❌ Errores</div>
+            </div>
+            <div class="stat-card porcentaje">
+              <div class="stat-num" id="rPct">0%</div>
+              <div class="stat-label">📊 Desempeño</div>
+            </div>
+          </div>
+          <div class="score-bar-track">
+            <div class="score-bar-fill" id="scoreBarFill" style="width:0%"></div>
+          </div>
+          <div class="motivational" id="motivational"></div>
+          <button class="btn-retry" onclick="retryQuiz()">🔄 Volver a intentar</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end tab-quiz -->
+
+  <!-- GUIDE TAB -->
+  <div id="tab-guide" style="display:none">
+    <div class="guide-card">
+      <div class="guide-header">
+        <h2>📖 Guía de Estudio Definitiva</h2>
+        <p>Lineamientos del CTE · Acuerdo 05/04/24</p>
+        <p style="margin-top:4px; font-size:0.82rem; opacity:.8">Prof. Francisco De Jesus Luna Benitez</p>
+      </div>
+      <div class="guide-actions">
+        <button class="btn-guide embed" onclick="showPDF()">📄 Ver PDF aquí</button>
+        <button class="btn-guide new-tab" onclick="openNewTab()">🔗 Abrir en nueva pestaña</button>
+      </div>
+      <div class="pdf-frame-wrap" id="pdfWrap">
+        <iframe
+          id="pdfFrame"
+          class="pdf-frame"
+          src="https://drive.google.com/file/d/1AMn6zBSo6Haj8EnVuxsZQrrLP32JqKpJ/preview"
+          allow="autoplay"
+          title="Guía de Estudio CTE">
+        </iframe>
+      </div>
+    </div>
+  </div><!-- end tab-guide -->
+
+</div><!-- end main -->
+
+<div class="footer">Simulador CTE · Acuerdo 05/04/24 · Elaborado por Prof. Francisco De Jesus Luna Benitez</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  QUESTION BANK (30 questions)
+// ─────────────────────────────────────────────
+const questions = [
+  // 1 – A
+  {
+    type: "cd",
+    text: "¿Qué es el Consejo Técnico Escolar (CTE) según el Artículo 3 del Acuerdo 05/04/24?",
+    table: null,
+    options: [
+      "El órgano colegiado de mayor decisión técnico-pedagógica de cada escuela de Educación Básica.",
+      "El órgano administrativo encargado de supervisar el cumplimiento de normas disciplinarias en la escuela.",
+      "El comité de padres de familia que participa en la toma de decisiones sobre infraestructura escolar."
+    ],
+    correct: 0,
+    explanation: "Según el Artículo 3, el CTE es el órgano colegiado de mayor decisión técnico-pedagógica de cada escuela de Educación Básica."
+  },
+  // 2 – B
+  {
+    type: "cm",
+    text: "La misión principal del CTE es adoptar e implementar decisiones para...",
+    table: null,
+    options: [
+      "...cumplir los indicadores de eficiencia terminal y reducir la deserción escolar.",
+      "...el máximo logro de los aprendizajes, el pensamiento crítico y la unión con la comunidad.",
+      "...garantizar el cumplimiento del calendario escolar y los programas de estudio oficiales."
+    ],
+    correct: 1,
+    explanation: "La misión principal del CTE es adoptar e implementar decisiones para el máximo logro de los aprendizajes, el pensamiento crítico y la unión con la comunidad."
+  },
+  // 3 – C
+  {
+    type: "cd",
+    text: "¿Cuál de los siguientes principios corresponde al Enfoque Territorial del CTE, según el Artículo 7, Fracción I?",
+    table: null,
+    options: [
+      "El magisterio decide sobre su ejercicio didáctico y contextualiza el currículo a su realidad.",
+      "Se prioriza a niñas, niños y adolescentes en todo proceso educativo para formarlos como ciudadanos democráticos.",
+      "Se conecta la escuela con la realidad social, cultural y ambiental de la comunidad, reconociendo la diversidad."
+    ],
+    correct: 2,
+    explanation: "El Enfoque Territorial (Art. 7, Fracc. I) consiste en conectar la escuela con la realidad social, cultural y ambiental de la comunidad, reconociendo la diversidad."
+  },
+  // 4 – A
+  {
+    type: "cd",
+    text: "¿Qué pilar del CTE corresponde a la capacidad del magisterio de decidir sobre su ejercicio didáctico y contextualizar el currículo a su realidad?",
+    table: null,
+    options: [
+      "Autonomía Profesional, establecida en el Artículo 7, Fracciones III-V.",
+      "Enfoque Territorial, establecido en el Artículo 7, Fracción I.",
+      "Interés Superior de la Niñez, establecido en el Artículo 7, Fracción II."
+    ],
+    correct: 0,
+    explanation: "La Autonomía Profesional (Art. 7, Fracc. III-V) establece que el magisterio tiene la capacidad de decidir sobre su ejercicio didáctico, contextualizando el currículo a su realidad."
+  },
+  // 5 – B
+  {
+    type: "ca",
+    text: "En una reunión del CTE, los docentes debaten cómo reorganizar el tiempo de las sesiones para atender mejor las necesidades del colectivo. ¿Qué función del CTE están ejerciendo?",
+    table: null,
+    options: [
+      "Fomentar el trabajo colegiado mediante intercambio de reflexiones pedagógicas.",
+      "Decidir la organización: definir las formas de trabajo que mejor atiendan al colectivo para lograr sus propósitos (Art. 8, Fracc. I).",
+      "Definir metas prioritarias mediante la construcción del Programa de Mejora Continua."
+    ],
+    correct: 1,
+    explanation: "Decidir la organización (Art. 8, Fracc. I) implica definir las formas de trabajo que mejor atiendan al colectivo para lograr sus propósitos."
+  },
+  // 6 – C
+  {
+    type: "cd",
+    text: "¿Qué función del CTE consiste en propiciar espacios pedagógicos de intercambio, reflexión y construcción colectiva, según el Artículo 8, Fracción II?",
+    table: null,
+    options: [
+      "Definir metas prioritarias para atender problemas socioeducativos.",
+      "Decidir la organización para lograr los propósitos del colectivo.",
+      "Fomentar el trabajo colegiado entre los integrantes del CTE."
+    ],
+    correct: 2,
+    explanation: "Fomentar el trabajo colegiado (Art. 8, Fracc. II) consiste en propiciar espacios pedagógicos de intercambio, reflexión y construcción colectiva."
+  },
+  // 7 – A
+  {
+    type: "re",
+    text: "Relacione correctamente a cada integrante del CTE con su función principal según el Acuerdo 05/04/24:",
+    table: {
+      col1: ["1. Colectivo Docente", "2. Personal Directivo", "3. Supervisión Escolar"],
+      col2: [
+        "a) Toma decisiones pedagógicas; núcleo del trabajo colegiado (Art. 9).",
+        "b) Instala condiciones y propicia ambiente de confianza (Art. 10 y 11).",
+        "c) Brinda asesoría y acompañamiento sistemático (Art. 27 y 28)."
+      ]
+    },
+    options: ["1a, 2b, 3c", "1b, 2c, 3a", "1c, 2a, 3b"],
+    correct: 0,
+    explanation: "El Colectivo Docente toma decisiones pedagógicas (Art. 9); el Personal Directivo instala condiciones (Art. 10-11); la Supervisión Escolar brinda asesoría y acompañamiento (Art. 27-28)."
+  },
+  // 8 – B
+  {
+    type: "cd",
+    text: "¿Cuántos días comprende la Fase Intensiva del calendario de sesiones del CTE?",
+    table: null,
+    options: [
+      "3 días previos al inicio del ciclo escolar.",
+      "5 días previos al inicio del ciclo escolar.",
+      "8 días distribuidos a lo largo del ciclo escolar."
+    ],
+    correct: 1,
+    explanation: "La Fase Intensiva comprende 5 días que se realizan previos al inicio del ciclo escolar para preparar, dialogar y elegir al Comité."
+  },
+  // 9 – C
+  {
+    type: "cd",
+    text: "¿Cuántos días comprende la Fase Ordinaria del calendario de sesiones del CTE y cuál es su propósito?",
+    table: null,
+    options: [
+      "3 días, para revisar indicadores nacionales de desempeño escolar.",
+      "5 días, distribuidos a lo largo del ciclo escolar para planear proyectos.",
+      "8 días, distribuidos a lo largo del ciclo escolar para dar seguimiento continuo a las metas."
+    ],
+    correct: 2,
+    explanation: "La Fase Ordinaria comprende 8 días distribuidos a lo largo del ciclo escolar, con el propósito de dar seguimiento continuo a las metas del PMC."
+  },
+  // 10 – A
+  {
+    type: "ca",
+    text: "Durante la Fase Intensiva, la directora propone destinar la última sesión para organizar el festival de fin de año y una asamblea sindical. ¿Es correcto esto conforme al Acuerdo 05/04/24?",
+    table: null,
+    options: [
+      "No es correcto. El Art. 16 establece que las sesiones abarcan el total de horas de la jornada y por ningún motivo pueden usarse para actividades sindicales o festivales.",
+      "Sí es correcto, siempre que las actividades sindicales sean aprobadas por mayoría del colectivo docente.",
+      "Sí es correcto, ya que los festivales escolares forman parte del trabajo colegiado del CTE."
+    ],
+    correct: 0,
+    explanation: "El Artículo 16 es claro: las sesiones del CTE abarcan el total de horas de la jornada escolar y por ningún motivo pueden usarse para actividades sindicales o festivales."
+  },
+  // 11 – B
+  {
+    type: "cd",
+    text: "¿Durante qué fase del calendario del CTE se elige el Comité de Planeación y Evaluación?",
+    table: null,
+    options: [
+      "Durante la Fase Ordinaria, en la primera sesión del ciclo escolar.",
+      "Durante la Fase Intensiva, conforme al Artículo 18 del Acuerdo.",
+      "Durante la última sesión ordinaria del ciclo escolar anterior."
+    ],
+    correct: 1,
+    explanation: "El Comité de Planeación y Evaluación se elige durante la Fase Intensiva, de acuerdo con el Artículo 18 del Acuerdo 05/04/24."
+  },
+  // 12 – C
+  {
+    type: "cm",
+    text: "El Comité de Planeación y Evaluación del CTE está integrado por...",
+    table: null,
+    options: [
+      "...únicamente el personal directivo, quienes coordinan la formulación del Programa de Mejora Continua.",
+      "...representantes de las familias y autoridades educativas de zona, elegidos por votación abierta.",
+      "...personal directivo y docentes elegidos por el colectivo, según el Artículo 18 del Acuerdo."
+    ],
+    correct: 2,
+    explanation: "Según el Artículo 18, el Comité de Planeación y Evaluación está integrado por personal directivo y docentes elegidos por el colectivo docente."
+  },
+  // 13 – A
+  {
+    type: "cd",
+    text: "¿Cuál es la función del Comité de Planeación y Evaluación según el Artículo 19, Fracción I?",
+    table: null,
+    options: [
+      "Coordinar la formulación y evaluación del Programa de Mejora Continua.",
+      "Sistematizar la información del Diagnóstico Socioeducativo de la escuela.",
+      "Comunicar los avances de las metas a la comunidad escolar periódicamente."
+    ],
+    correct: 0,
+    explanation: "Según el Art. 19, Fracc. I, la función principal del Comité es coordinar la formulación y evaluación del Programa de Mejora Continua."
+  },
+  // 14 – B
+  {
+    type: "ca",
+    text: "El Comité de Planeación y Evaluación organiza una reunión con familias de la comunidad para integrar sus necesidades en los objetivos del ciclo escolar. ¿Qué función del Comité refleja esta acción?",
+    table: null,
+    options: [
+      "Sistematizar la información del Diagnóstico Socioeducativo de la escuela.",
+      "Vincular a la comunidad y familias en los objetivos contextualizados del CTE.",
+      "Coordinar la formulación y evaluación del Programa de Mejora Continua."
+    ],
+    correct: 1,
+    explanation: "Una función del Comité es vincular a la comunidad y familias en los objetivos contextualizados, integrando el contexto territorial en el trabajo del CTE."
+  },
+  // 15 – C
+  {
+    type: "cd",
+    text: "¿Qué característica define al Programa de Mejora Continua (PMC) según el Artículo 21 del Acuerdo 05/04/24?",
+    table: null,
+    options: [
+      "Tiene carácter anual y se renueva completamente al inicio de cada ciclo escolar.",
+      "Es un formato de control administrativo que verifica el cumplimiento de indicadores nacionales.",
+      "Tiene carácter plurianual: plantea metas a largo plazo, realistas y contextualizadas a las problemáticas prioritarias."
+    ],
+    correct: 2,
+    explanation: "El Art. 21 establece que el PMC tiene carácter plurianual, con metas a largo plazo, realistas y contextualizadas a las problemáticas prioritarias de cada escuela."
+  },
+  // 16 – A
+  {
+    type: "cd",
+    text: "¿Qué establece el Artículo 22 sobre el Diagnóstico Socioeducativo en el marco del CTE?",
+    table: null,
+    options: [
+      "Es una lectura profunda de las realidades (infraestructura, aprendizajes, contexto sociocultural) desde una mirada de territorialidad.",
+      "Es un instrumento estandarizado nacional que mide indicadores de aprovechamiento escolar por zona.",
+      "Es un reporte administrativo elaborado únicamente por el personal directivo para la supervisión."
+    ],
+    correct: 0,
+    explanation: "El Art. 22 establece que el Diagnóstico Socioeducativo es una lectura profunda de las realidades (infraestructura, aprendizajes, contexto sociocultural) desde una mirada de territorialidad."
+  },
+  // 17 – B
+  {
+    type: "cm",
+    text: "Según el Artículo 25, el Programa de Mejora Continua NO es un formato con fines administrativos ni está sujeto a control; es...",
+    table: null,
+    options: [
+      "...un instrumento de rendición de cuentas ante las autoridades educativas de la entidad.",
+      "...un documento vivo desde, en y para la escuela.",
+      "...una bitácora de cumplimiento curricular supervisada por la supervisión escolar."
+    ],
+    correct: 1,
+    explanation: "El Art. 25 es explícito: el PMC es un documento vivo desde, en y para la escuela, no un formato administrativo ni sujeto a control externo."
+  },
+  // 18 – C
+  {
+    type: "ca",
+    text: "En el CTE, la maestra Sofía propone que el colectivo defina estrategias para atender las problemáticas detectadas en la encuesta aplicada a las familias. Esta acción corresponde principalmente a la función del CTE de...",
+    table: null,
+    options: [
+      "...decidir la organización para definir las formas de trabajo del colectivo.",
+      "...fomentar el trabajo colegiado propiciando espacios de reflexión pedagógica.",
+      "...definir metas prioritarias atendiendo problemáticas socioeducativas mediante el Programa de Mejora Continua (Art. 8, Fracc. III y VIII)."
+    ],
+    correct: 2,
+    explanation: "Definir metas prioritarias (Art. 8, Fracc. III y VIII) implica atender los problemas socioeducativos mediante la construcción del Programa de Mejora Continua."
+  },
+  // 19 – A
+  {
+    type: "cd",
+    text: "¿Cuál es el pilar del CTE que prioriza a niñas, niños y adolescentes en todo proceso educativo para formarlos como ciudadanos democráticos, según el Artículo 7, Fracción II?",
+    table: null,
+    options: [
+      "El Interés Superior de la Niñez.",
+      "La Autonomía Profesional.",
+      "El Enfoque Territorial."
+    ],
+    correct: 0,
+    explanation: "El Interés Superior de la Niñez (Art. 7, Fracc. II) establece la prioridad de niñas, niños y adolescentes en todo proceso educativo para formarlos como ciudadanos democráticos."
+  },
+  // 20 – B
+  {
+    type: "re",
+    text: "Relacione cada propósito del CTE con el artículo y fracción que lo fundamenta:",
+    table: {
+      col1: ["1. Enfoque Territorial", "2. Interés Superior de la Niñez", "3. Autonomía Profesional"],
+      col2: [
+        "a) Art. 7, Fracc. II",
+        "b) Art. 7, Fracc. I",
+        "c) Art. 7, Fracc. III-V"
+      ]
+    },
+    options: ["1a, 2c, 3b", "1b, 2a, 3c", "1c, 2b, 3a"],
+    correct: 1,
+    explanation: "El Enfoque Territorial → Art. 7, Fracc. I; Interés Superior de la Niñez → Art. 7, Fracc. II; Autonomía Profesional → Art. 7, Fracc. III-V."
+  },
+  // 21 – C
+  {
+    type: "ca",
+    text: "El supervisor visita regularmente la escuela, dialoga con el colectivo y ofrece orientaciones para fortalecer el trabajo pedagógico. ¿Qué función cumple según el Acuerdo 05/04/24?",
+    table: null,
+    options: [
+      "Instalar y propiciar las mejores condiciones y el ambiente de confianza para el buen desarrollo del CTE.",
+      "Coordinar la formulación y evaluación del Programa de Mejora Continua de la escuela.",
+      "Brindar asesoría y acompañamiento sistemático, facilitando la autonomía y vinculación (Art. 27 y 28)."
+    ],
+    correct: 2,
+    explanation: "Según los Artículos 27 y 28, la Supervisión Escolar brinda asesoría y acompañamiento sistemático, facilitando la autonomía y vinculación del colectivo docente."
+  },
+  // 22 – A
+  {
+    type: "cd",
+    text: "¿Cuál es la función principal del personal directivo en el CTE según los Artículos 10 y 11?",
+    table: null,
+    options: [
+      "Instalar y propiciar las mejores condiciones y el ambiente de confianza para el buen desarrollo del CTE.",
+      "Tomar las decisiones pedagógicas siendo el núcleo del trabajo colegiado en la escuela.",
+      "Brindar asesoría y acompañamiento sistemático facilitando la autonomía del colectivo."
+    ],
+    correct: 0,
+    explanation: "Los Art. 10 y 11 establecen que el personal directivo es responsable de instalar y propiciar las mejores condiciones y el ambiente de confianza para el buen desarrollo del CTE."
+  },
+  // 23 – B
+  {
+    type: "cm",
+    text: "El Colectivo Docente, según el Artículo 9, está integrado por...",
+    table: null,
+    options: [
+      "...el personal directivo y los representantes de la supervisión escolar de la zona.",
+      "...la totalidad de las maestras, maestros y personal técnico, siendo el núcleo del trabajo colegiado.",
+      "...los docentes con mayor antigüedad designados por la autoridad educativa de la entidad."
+    ],
+    correct: 1,
+    explanation: "El Art. 9 establece que el Colectivo Docente es la totalidad de las maestras, maestros y personal técnico; son el núcleo del trabajo colegiado y toman las decisiones pedagógicas."
+  },
+  // 24 – C
+  {
+    type: "ca",
+    text: "Al inicio del ciclo escolar, el director convoca al personal para 5 días de trabajo intensivo: se dialogará sobre las prioridades del año y se elegirá al Comité. ¿Con qué fase del calendario del CTE corresponde esto?",
+    table: null,
+    options: [
+      "Con la Fase Ordinaria, que se distribuye a lo largo del ciclo escolar.",
+      "Con la Fase de Diagnóstico, establecida en el Artículo 22 del Acuerdo.",
+      "Con la Fase Intensiva, que se realiza previa al inicio del ciclo escolar para preparar, dialogar y elegir al Comité."
+    ],
+    correct: 2,
+    explanation: "La Fase Intensiva (5 días) se realiza previa al inicio del ciclo escolar para preparar el trabajo, dialogar sobre prioridades y elegir al Comité de Planeación y Evaluación."
+  },
+  // 25 – A
+  {
+    type: "or",
+    text: "Ordene las etapas del ecosistema del CTE según la secuencia lógica del Acuerdo 05/04/24:\n1. Diagnóstico Socioeducativo del territorio\n2. Construcción del Programa de Mejora Continua\n3. Colectivo Docente impulsado y guiado por el Comité\n4. Decisiones centradas en el Interés Superior de la Niñez",
+    table: null,
+    options: ["3 → 1 → 2 → 4", "1 → 3 → 4 → 2", "2 → 4 → 1 → 3"],
+    correct: 0,
+    explanation: "El proceso inicia con el Colectivo guiado por el Comité (3), se basa en el Diagnóstico Socioeducativo (1), se materializa en el PMC (2) y todo siempre poniendo el Interés Superior de la Niñez en el centro (4)."
+  },
+  // 26 – B
+  {
+    type: "cd",
+    text: "¿Cuál de las siguientes opciones describe correctamente una función del Comité de Planeación y Evaluación?",
+    table: null,
+    options: [
+      "Supervisar el cumplimiento del calendario escolar y reportar incumplimientos a la autoridad educativa.",
+      "Sistematizar la información del Diagnóstico Socioeducativo de la escuela para orientar el trabajo del CTE.",
+      "Evaluar el desempeño individual de cada docente y proponer medidas de mejora ante la dirección."
+    ],
+    correct: 1,
+    explanation: "Una función del Comité es sistematizar la información del Diagnóstico Socioeducativo para fundamentar las decisiones del colectivo docente."
+  },
+  // 27 – C
+  {
+    type: "cd",
+    text: "¿Cuál de los siguientes enunciados refleja mejor la naturaleza del CTE según la síntesis del Acuerdo 05/04/24?",
+    table: null,
+    options: [
+      "El CTE es una reunión mensual obligatoria para informar a los docentes sobre disposiciones administrativas.",
+      "El CTE es un órgano de supervisión que evalúa el desempeño del colectivo docente ante las autoridades.",
+      "El CTE es la autonomía profesional en acción: un espacio colegiado que conecta a la escuela con su comunidad."
+    ],
+    correct: 2,
+    explanation: "La síntesis del Acuerdo enfatiza que el CTE no es solo una reunión mensual, sino la autonomía profesional en acción, conectando a la escuela con su comunidad desde un enfoque territorial."
+  },
+  // 28 – A
+  {
+    type: "ca",
+    text: "Una maestra señala en CTE que varios estudiantes tienen dificultades de lectura vinculadas al contexto familiar. El colectivo decide incorporar esta problemática como meta prioritaria en su PMC. ¿Qué pilar fundamenta principalmente esta decisión?",
+    table: null,
+    options: [
+      "El Interés Superior de la Niñez: priorizar a niñas, niños y adolescentes en todo proceso educativo (Art. 7, Fracc. II).",
+      "El Enfoque Territorial: conectar la escuela con la realidad social y cultural de la comunidad.",
+      "La Autonomía Profesional: el magisterio contextualiza el currículo a su realidad."
+    ],
+    correct: 0,
+    explanation: "El Interés Superior de la Niñez (Art. 7, Fracc. II) es el pilar que fundamenta priorizar las necesidades de los estudiantes en todo proceso educativo para garantizar su formación."
+  },
+  // 29 – B
+  {
+    type: "re",
+    text: "Relacione cada fase del calendario del CTE con su característica principal:",
+    table: {
+      col1: ["1. Fase Intensiva", "2. Fase Ordinaria", "3. Ambas fases"],
+      col2: [
+        "a) Permiten dar seguimiento continuo a las metas durante el ciclo.",
+        "b) Se realizan previas al ciclo escolar para preparar y elegir al Comité.",
+        "c) Abarcan el total de horas de la jornada y no pueden usarse para actividades sindicales (Art. 16)."
+      ]
+    },
+    options: ["1a, 2c, 3b", "1b, 2a, 3c", "1c, 2b, 3a"],
+    correct: 1,
+    explanation: "La Fase Intensiva: previa al ciclo para preparar y elegir al Comité. La Fase Ordinaria: seguimiento continuo a metas. Ambas: abarcan el total de horas sin poder usarse para actividades sindicales (Art. 16)."
+  },
+  // 30 – C
+  {
+    type: "ca",
+    text: "Al finalizar el ciclo escolar, el Comité presenta ante la comunidad escolar un informe sobre el avance en las metas del PMC, destacando logros y áreas de oportunidad. ¿Qué función del Comité de Planeación y Evaluación se está ejerciendo?",
+    table: null,
+    options: [
+      "Sistematizar la información del Diagnóstico Socioeducativo para el siguiente ciclo.",
+      "Vincular a la comunidad y familias en los objetivos contextualizados del CTE.",
+      "Comunicar los avances de las metas a la comunidad escolar periódicamente."
+    ],
+    correct: 2,
+    explanation: "Una función del Comité es comunicar los avances de las metas a la comunidad escolar periódicamente, manteniendo informados a todos los actores del proceso educativo."
+  }
+];
+
+// ─────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────
+let currentQ = 0;
+let score = 0;
+let wrongs = 0;
+let studentName = '';
+let answered = false;
+
+const typeLabels = { cd:"Cuestionamiento Directo", cm:"Completamiento", or:"Ordenamiento", re:"Relación de Elementos", ca:"Caso Aplicado" };
+const typeClasses = { cd:"badge-cd", cm:"badge-cm", or:"badge-or", re:"badge-re", ca:"badge-cd" };
+
+// ─────────────────────────────────────────────
+//  TAB NAVIGATION
+// ─────────────────────────────────────────────
+function showTab(tab) {
+  document.getElementById('tab-quiz').style.display = tab==='quiz' ? 'block' : 'none';
+  document.getElementById('tab-guide').style.display = tab==='guide' ? 'block' : 'none';
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', (i===0 && tab==='quiz') || (i===1 && tab==='guide'));
+  });
+}
+
+// ─────────────────────────────────────────────
+//  QUIZ LOGIC
+// ─────────────────────────────────────────────
+function startQuiz() {
+  const input = document.getElementById('studentName').value.trim();
+  if (!input) {
+    document.getElementById('studentName').focus();
+    document.getElementById('studentName').style.borderColor = '#E74C3C';
+    setTimeout(() => document.getElementById('studentName').style.borderColor = '#E0E0E0', 2000);
+    return;
+  }
+  studentName = input;
+  currentQ = 0; score = 0; wrongs = 0;
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function renderQuestion() {
+  answered = false;
+  const q = questions[currentQ];
+  document.getElementById('qNum').textContent = currentQ + 1;
+  document.getElementById('liveCorrect').textContent = score;
+  document.getElementById('liveWrong').textContent = wrongs;
+  document.getElementById('progressFill').style.width = (currentQ / 30 * 100) + '%';
+
+  // Badge
+  const badge = document.getElementById('qTypeBadge');
+  badge.textContent = typeLabels[q.type] || '';
+  badge.className = 'q-type-badge ' + (typeClasses[q.type] || '');
+
+  // Question text (handle multi-line)
+  document.getElementById('qText').innerHTML = q.text.replace(/\n/g, '<br>');
+
+  // Table
+  const wrap = document.getElementById('qTableWrap');
+  if (q.table) {
+    let html = '<table class="q-table"><thead><tr><th>Integrante / Fase / Propósito</th><th>Descripción</th></tr></thead><tbody>';
+    q.table.col1.forEach((c, i) => {
+      html += `<tr><td><strong>${c}</strong></td><td>${q.table.col2[i]}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    wrap.innerHTML = html;
+  } else {
+    wrap.innerHTML = '';
+  }
+
+  // Options
+  const letters = ['A', 'B', 'C'];
+  const container = document.getElementById('optionsContainer');
+  container.innerHTML = '';
+  q.options.forEach((opt, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="option-letter">${letters[idx]}</span><span>${opt}</span>`;
+    btn.onclick = () => selectAnswer(idx);
+    container.appendChild(btn);
+  });
+
+  // Reset feedback & next btn
+  const fb = document.getElementById('feedbackBox');
+  fb.className = 'feedback-box';
+  fb.classList.remove('show');
+  document.getElementById('btnNext').style.display = 'none';
+
+  // Animate card
+  const card = document.getElementById('questionCard');
+  card.style.opacity = '0';
+  card.style.transform = 'translateY(20px)';
+  setTimeout(() => {
+    card.style.transition = 'all 0.35s ease';
+    card.style.opacity = '1';
+    card.style.transform = 'translateY(0)';
+  }, 30);
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[currentQ];
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach(b => b.disabled = true);
+
+  const fb = document.getElementById('feedbackBox');
+  if (idx === q.correct) {
+    score++;
+    btns[idx].classList.add('correct');
+    fb.className = 'feedback-box show correct-fb';
+    document.getElementById('fbIcon').textContent = '🎉';
+    document.getElementById('fbText').innerHTML = '<strong>¡Correcto!</strong> ' + q.explanation;
+  } else {
+    wrongs++;
+    btns[idx].classList.add('wrong');
+    btns[q.correct].classList.add('correct');
+    fb.className = 'feedback-box show wrong-fb';
+    document.getElementById('fbIcon').textContent = '💡';
+    document.getElementById('fbText').innerHTML = '<strong>Respuesta incorrecta.</strong> La opción correcta es <strong>' + ['A','B','C'][q.correct] + '</strong>. ' + q.explanation;
+  }
+  document.getElementById('liveCorrect').textContent = score;
+  document.getElementById('liveWrong').textContent = wrongs;
+
+  const btnNext = document.getElementById('btnNext');
+  btnNext.style.display = 'inline-flex';
+  btnNext.textContent = currentQ === 29 ? '🏁 Ver resultados' : 'Siguiente pregunta →';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= 30) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showResults() {
+  showScreen('screen-results');
+  const pct = Math.round(score / 30 * 100);
+
+  document.getElementById('resultName').textContent = '👤 ' + studentName;
+  document.getElementById('rCorrect').textContent = score;
+  document.getElementById('rWrong').textContent = wrongs;
+  document.getElementById('rPct').textContent = pct + '%';
+
+  // Trophy
+  let trophy = '🏆';
+  if (pct < 50) trophy = '📚';
+  else if (pct < 70) trophy = '💪';
+  else if (pct < 85) trophy = '🌟';
+  document.getElementById('trophyEmoji').textContent = trophy;
+
+  // Score bar
+  setTimeout(() => {
+    document.getElementById('scoreBarFill').style.width = pct + '%';
+    document.getElementById('scoreBarFill').textContent = pct + '%';
+  }, 300);
+
+  // Motivational message
+  let msg, emoji;
+  if (pct >= 90) { emoji = '🚀'; msg = '¡Excelente desempeño! Demuestras un dominio sólido de los Lineamientos del CTE. ¡Estás listo para la evaluación!'; }
+  else if (pct >= 75) { emoji = '🌟'; msg = '¡Muy buen trabajo! Conoces bien los lineamientos del Acuerdo 05/04/24. Repasa los temas donde cometiste errores para alcanzar la excelencia.'; }
+  else if (pct >= 60) { emoji = '💪'; msg = 'Buen intento. Tienes una base sólida, pero aún hay conceptos por fortalecer. Revisa la Guía de Estudio y vuelve a intentarlo.'; }
+  else if (pct >= 40) { emoji = '📖'; msg = 'Sigue adelante. Te recomendamos revisar la Guía de Estudio con detenimiento, especialmente los artículos y funciones del CTE. ¡Tú puedes!'; }
+  else { emoji = '🎯'; msg = 'No te desanimes. Cada intento es un paso hacia el dominio del tema. Consulta la Guía de Estudio y repite el simulador. ¡La práctica lleva al éxito!'; }
+
+  document.getElementById('motivational').innerHTML = `<span class="emoji">${emoji}</span>${msg}`;
+
+  if (pct >= 75) launchConfetti();
+}
+
+function retryQuiz() {
+  currentQ = 0; score = 0; wrongs = 0; answered = false;
+  showScreen('screen-welcome');
+}
+
+// ─────────────────────────────────────────────
+//  PDF GUIDE
+// ─────────────────────────────────────────────
+function showPDF() {
+  document.getElementById('pdfWrap').style.display = 'block';
+}
+function openNewTab() {
+  window.open('https://drive.google.com/file/d/1AMn6zBSo6Haj8EnVuxsZQrrLP32JqKpJ/view', '_blank');
+}
+
+// ─────────────────────────────────────────────
+//  CONFETTI
+// ─────────────────────────────────────────────
+function launchConfetti() {
+  const colors = ['#FF6B6B','#4ECDC4','#FFE66D','#A29BFE','#FD79A8','#00B894'];
+  for (let i = 0; i < 60; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.background = colors[Math.floor(Math.random() * colors.length)];
+      el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      el.style.width = el.style.height = (6 + Math.random() * 8) + 'px';
+      el.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }, i * 40);
+  }
+}
+
+// Enter key on name input
+document.getElementById('studentName').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startQuiz();
+});
+</script>
+</body>
+</html>

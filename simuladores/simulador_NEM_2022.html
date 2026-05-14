@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador NEM 2022 – Prof. Francisco De Jesús Luna Benítez</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: linear-gradient(160deg, #e0f2fe 0%, #f0fdf4 50%, #fdf4ff 100%);
+    --header: linear-gradient(135deg, #0c4a6e 0%, #0369a1 55%, #0891b2 100%);
+    --card: #ffffff;
+    --primary: #0369a1;
+    --primary-dark: #0c4a6e;
+    --accent: #0ea5e9;
+    --cq: #7c3aed;
+    --cm: #0369a1;
+    --or: #b45309;
+    --re: #065f46;
+    --ok: #16a34a;
+    --ok-bg: #dcfce7;
+    --ok-border: #86efac;
+    --err: #dc2626;
+    --err-bg: #fee2e2;
+    --err-border: #fca5a5;
+    --text: #1e293b;
+    --sub: #475569;
+    --border: #e2e8f0;
+    --radius: 18px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.10);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.14);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    background-attachment: fixed;
+    min-height: 100vh;
+    color: var(--text);
+  }
+
+  /* ────── TABS BAR ────── */
+  .tabs-bar {
+    background: var(--header);
+    padding: 0;
+    display: flex;
+    gap: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: rgba(255,255,255,0.7);
+    font-family: 'Sora', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    transition: all 0.25s;
+    border-bottom: 3px solid transparent;
+  }
+  .tab-btn:hover { color: #fff; background: rgba(255,255,255,0.08); }
+  .tab-btn.active {
+    color: #fff;
+    border-bottom: 3px solid #38bdf8;
+    background: rgba(255,255,255,0.12);
+  }
+
+  /* ────── HEADER ────── */
+  .main-header {
+    background: var(--header);
+    color: white;
+    text-align: center;
+    padding: 36px 24px 28px;
+  }
+  .main-header .shield {
+    font-size: 2.6rem;
+    margin-bottom: 10px;
+    display: block;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
+  }
+  .main-header h1 {
+    font-family: 'Sora', sans-serif;
+    font-size: clamp(1.2rem, 3.5vw, 1.75rem);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+  .main-header p {
+    margin-top: 6px;
+    font-size: 0.92rem;
+    opacity: 0.85;
+    font-weight: 500;
+  }
+  .main-header .sub-badge {
+    display: inline-block;
+    margin-top: 10px;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  /* ────── SCREENS ────── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ────── WELCOME SCREEN ────── */
+  .welcome-wrap {
+    max-width: 520px;
+    margin: 52px auto 40px;
+    padding: 0 20px;
+  }
+  .welcome-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 42px 36px;
+    text-align: center;
+    animation: fadeUp 0.5s ease both;
+  }
+  .welcome-card .icon-big { font-size: 3.4rem; margin-bottom: 16px; }
+  .welcome-card h2 {
+    font-family: 'Sora', sans-serif;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 8px;
+  }
+  .welcome-card p {
+    color: var(--sub);
+    font-size: 0.97rem;
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+  .info-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+  .chip {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    color: var(--primary-dark);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 0.83rem;
+    font-weight: 600;
+  }
+  .inp-label {
+    display: block;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    text-align: left;
+  }
+  .inp-name {
+    width: 100%;
+    padding: 13px 16px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    color: var(--text);
+    background: #f8fafc;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .inp-name:focus { border-color: var(--accent); background: #fff; }
+  .btn-start {
+    margin-top: 20px;
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    color: white;
+    font-family: 'Sora', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(3,105,161,0.35);
+    transition: transform 0.15s, box-shadow 0.15s;
+    letter-spacing: 0.01em;
+  }
+  .btn-start:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(3,105,161,0.45);
+  }
+  .btn-start:active { transform: translateY(0); }
+
+  /* ────── EXAM SCREEN ────── */
+  .exam-wrap {
+    max-width: 720px;
+    margin: 30px auto 50px;
+    padding: 0 20px;
+  }
+
+  .progress-area { margin-bottom: 20px; }
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .progress-meta span {
+    font-size: 0.87rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+  }
+  .prog-bar-bg {
+    width: 100%;
+    height: 10px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 99px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 4px rgba(0,0,0,0.1);
+  }
+  .prog-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  }
+
+  .question-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 34px 32px;
+    animation: fadeUp 0.38s ease both;
+  }
+  .question-card.exiting { animation: fadeDown 0.25s ease both; }
+
+  .q-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .q-num {
+    background: var(--primary-dark);
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .tipo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .tipo-cq { background: #f3e8ff; color: var(--cq); }
+  .tipo-cm { background: #e0f2fe; color: var(--cm); }
+  .tipo-or { background: #fef3c7; color: var(--or); }
+  .tipo-re { background: #d1fae5; color: var(--re); }
+
+  .q-base {
+    font-family: 'Sora', sans-serif;
+    font-size: 1.08rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.65;
+    margin-bottom: 22px;
+  }
+
+  .opciones { display: flex; flex-direction: column; gap: 11px; }
+
+  .opt-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
+    padding: 14px 16px;
+    background: #f8fafc;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.97rem;
+    color: var(--text);
+    transition: all 0.2s;
+    line-height: 1.55;
+  }
+  .opt-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: #f0f9ff;
+    transform: translateX(3px);
+  }
+  .opt-btn:disabled { cursor: default; }
+  .opt-btn.selected-correct {
+    background: var(--ok-bg);
+    border-color: var(--ok-border);
+    color: #14532d;
+  }
+  .opt-btn.selected-wrong {
+    background: var(--err-bg);
+    border-color: var(--err-border);
+    color: #7f1d1d;
+  }
+  .opt-btn.revealed-correct {
+    background: var(--ok-bg);
+    border-color: var(--ok-border);
+    color: #14532d;
+    font-weight: 700;
+  }
+  .opt-letter {
+    min-width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--sub);
+    flex-shrink: 0;
+    transition: all 0.2s;
+    margin-top: 1px;
+  }
+  .opt-btn.selected-correct .opt-letter { background: #16a34a; color: white; }
+  .opt-btn.selected-wrong .opt-letter { background: #dc2626; color: white; }
+  .opt-btn.revealed-correct .opt-letter { background: #16a34a; color: white; }
+
+  /* Feedback */
+  .feedback-box {
+    margin-top: 20px;
+    padding: 16px 18px;
+    border-radius: 12px;
+    font-size: 0.93rem;
+    line-height: 1.6;
+    display: none;
+    animation: fadeUp 0.3s ease both;
+  }
+  .feedback-box.ok {
+    background: var(--ok-bg);
+    border: 1.5px solid var(--ok-border);
+    color: #14532d;
+    display: block;
+  }
+  .feedback-box.err {
+    background: var(--err-bg);
+    border: 1.5px solid var(--err-border);
+    color: #7f1d1d;
+    display: block;
+  }
+  .feedback-box strong {
+    display: block;
+    font-size: 1rem;
+    margin-bottom: 6px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+  }
+
+  .btn-next {
+    margin-top: 22px;
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    color: white;
+    font-family: 'Sora', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(3,105,161,0.3);
+    transition: transform 0.15s, box-shadow 0.15s;
+    display: none;
+  }
+  .btn-next.visible { display: block; }
+  .btn-next:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(3,105,161,0.4); }
+  .btn-next:active { transform: translateY(0); }
+
+  /* ────── RESULTS SCREEN ────── */
+  .results-wrap {
+    max-width: 560px;
+    margin: 40px auto 60px;
+    padding: 0 20px;
+  }
+  .results-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 42px 36px;
+    text-align: center;
+    animation: fadeUp 0.5s ease both;
+  }
+  .trophy { font-size: 4rem; margin-bottom: 14px; }
+  .results-card h2 {
+    font-family: 'Sora', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--primary-dark);
+    margin-bottom: 6px;
+  }
+  .student-name-res {
+    font-size: 1.05rem;
+    color: var(--sub);
+    margin-bottom: 26px;
+    font-weight: 600;
+  }
+  .score-circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 28px;
+    box-shadow: 0 8px 28px rgba(3,105,161,0.35);
+  }
+  .score-pct {
+    font-family: 'Sora', sans-serif;
+    font-size: 2.3rem;
+    font-weight: 800;
+    color: white;
+    line-height: 1;
+  }
+  .score-pct-label {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.85);
+    font-weight: 600;
+    margin-top: 3px;
+  }
+  .stats-row {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    margin-bottom: 26px;
+    flex-wrap: wrap;
+  }
+  .stat-box {
+    flex: 1;
+    min-width: 100px;
+    padding: 14px 10px;
+    border-radius: 12px;
+    text-align: center;
+  }
+  .stat-box.ok { background: var(--ok-bg); border: 1.5px solid var(--ok-border); }
+  .stat-box.err { background: var(--err-bg); border: 1.5px solid var(--err-border); }
+  .stat-box.tot { background: #f0f9ff; border: 1.5px solid #bae6fd; }
+  .stat-num {
+    font-family: 'Sora', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 800;
+  }
+  .stat-box.ok .stat-num { color: var(--ok); }
+  .stat-box.err .stat-num { color: var(--err); }
+  .stat-box.tot .stat-num { color: var(--primary); }
+  .stat-lbl { font-size: 0.82rem; font-weight: 700; margin-top: 3px; color: var(--sub); }
+  .motivador {
+    background: linear-gradient(135deg, #f0f9ff 0%, #f0fdf4 100%);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    font-size: 0.97rem;
+    color: var(--primary-dark);
+    font-weight: 600;
+    line-height: 1.5;
+    border: 1.5px solid #bae6fd;
+  }
+  .btn-retry {
+    padding: 14px 32px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    color: white;
+    font-family: 'Sora', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(3,105,161,0.3);
+    transition: transform 0.15s;
+  }
+  .btn-retry:hover { transform: translateY(-2px); }
+
+  /* ────── GUÍA SCREEN ────── */
+  .guia-wrap {
+    max-width: 900px;
+    margin: 30px auto 50px;
+    padding: 0 20px;
+  }
+  .guia-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    animation: fadeUp 0.4s ease both;
+  }
+  .guia-header {
+    background: linear-gradient(135deg, #0c4a6e 0%, #0ea5e9 100%);
+    padding: 22px 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: white;
+  }
+  .guia-header .icon { font-size: 2rem; }
+  .guia-header h3 {
+    font-family: 'Sora', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  .guia-header p { font-size: 0.85rem; opacity: 0.85; margin-top: 2px; }
+  .guia-iframe-wrap {
+    width: 100%;
+    height: 70vh;
+    min-height: 400px;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .guia-iframe-wrap iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+  .guia-alt {
+    padding: 24px;
+    text-align: center;
+    background: #f8fafc;
+    border-top: 1px solid var(--border);
+  }
+  .guia-alt p {
+    font-size: 0.9rem;
+    color: var(--sub);
+    margin-bottom: 12px;
+  }
+  .btn-open-pdf {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 24px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    color: white;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    border-radius: 10px;
+    text-decoration: none;
+    box-shadow: 0 3px 12px rgba(3,105,161,0.3);
+    transition: transform 0.15s;
+  }
+  .btn-open-pdf:hover { transform: translateY(-2px); }
+
+  /* ────── ANIMATIONS ────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(22px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeDown {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(-16px); }
+  }
+
+  /* ────── RESPONSIVE ────── */
+  @media (max-width: 600px) {
+    .question-card { padding: 24px 18px; }
+    .welcome-card { padding: 30px 22px; }
+    .results-card { padding: 30px 20px; }
+    .q-base { font-size: 0.99rem; }
+    .opt-btn { font-size: 0.9rem; }
+    .main-header { padding: 28px 18px 22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TABS BAR -->
+<nav class="tabs-bar">
+  <button class="tab-btn active" onclick="switchTab('simulador')">📝 Simulador</button>
+  <button class="tab-btn" onclick="switchTab('guia')">📚 Guía de Estudio</button>
+</nav>
+
+<!-- ═══════════════ SIMULADOR TAB ═══════════════ -->
+<div id="tab-simulador" class="screen active">
+
+  <!-- HEADER -->
+  <header class="main-header">
+    <span class="shield">🎓</span>
+    <h1>Simulador Interactivo de Evaluación</h1>
+    <p>Plan de Estudio para la Educación Preescolar, Primaria y Secundaria 2022 · Nueva Escuela Mexicana</p>
+    <span class="sub-badge">Prof. Francisco De Jesús Luna Benítez</span>
+  </header>
+
+  <!-- WELCOME SCREEN -->
+  <div id="screen-welcome" class="screen active">
+    <div class="welcome-wrap">
+      <div class="welcome-card">
+        <div class="icon-big">✏️</div>
+        <h2>Bienvenido al Simulador</h2>
+        <p>Pon a prueba tu conocimiento del Plan de Estudio 2022 y los fundamentos de la Nueva Escuela Mexicana con 30 preguntas de opción múltiple en formato USICAMM.</p>
+        <div class="info-chips">
+          <span class="chip">📋 30 preguntas</span>
+          <span class="chip">🔠 3 opciones c/u</span>
+          <span class="chip">⚡ Retroalimentación inmediata</span>
+          <span class="chip">📊 Resultado final</span>
+        </div>
+        <label class="inp-label" for="inp-student">Ingresa tu nombre completo:</label>
+        <input class="inp-name" type="text" id="inp-student" placeholder="Ej. María González López" maxlength="80" />
+        <button class="btn-start" onclick="startExam()">Iniciar Simulador &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXAM SCREEN -->
+  <div id="screen-exam" class="screen">
+    <div class="exam-wrap">
+      <div class="progress-area">
+        <div class="progress-meta">
+          <span id="prog-label">Pregunta 1 de 30</span>
+          <span id="prog-score">✅ 0 &nbsp; ❌ 0</span>
+        </div>
+        <div class="prog-bar-bg">
+          <div class="prog-bar-fill" id="prog-fill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div class="question-card" id="q-card">
+        <div class="q-top">
+          <div class="q-num" id="q-num">1</div>
+          <span class="tipo-badge" id="tipo-badge"></span>
+        </div>
+        <p class="q-base" id="q-base"></p>
+        <div class="opciones" id="opciones"></div>
+        <div class="feedback-box" id="feedback-box"></div>
+        <button class="btn-next" id="btn-next" onclick="nextQuestion()">Siguiente pregunta &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div id="screen-results" class="screen">
+    <div class="results-wrap">
+      <div class="results-card">
+        <div class="trophy" id="trophy-icon">🏆</div>
+        <h2>Resultados del Simulador</h2>
+        <p class="student-name-res" id="res-name"></p>
+        <div class="score-circle">
+          <div class="score-pct" id="res-pct">0%</div>
+          <div class="score-pct-label">Desempeño</div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-box ok">
+            <div class="stat-num" id="res-ok">0</div>
+            <div class="stat-lbl">✅ Aciertos</div>
+          </div>
+          <div class="stat-box err">
+            <div class="stat-num" id="res-err">0</div>
+            <div class="stat-lbl">❌ Errores</div>
+          </div>
+          <div class="stat-box tot">
+            <div class="stat-num">30</div>
+            <div class="stat-lbl">📋 Total</div>
+          </div>
+        </div>
+        <div class="motivador" id="motivador"></div>
+        <button class="btn-retry" onclick="resetExam()">🔄 Reintentar simulador</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /tab-simulador -->
+
+<!-- ═══════════════ GUÍA TAB ═══════════════ -->
+<div id="tab-guia" class="screen">
+  <div class="guia-wrap">
+    <div class="guia-card">
+      <div class="guia-header">
+        <span class="icon">📖</span>
+        <div>
+          <h3>Guía de Estudio – Plan de Estudio 2022</h3>
+          <p>Consulta el material de referencia para reforzar tu preparación</p>
+        </div>
+      </div>
+      <div class="guia-iframe-wrap">
+        <iframe 
+          src="https://drive.google.com/file/d/1ou4JgAxmWjMGqdBYo8155-H20PlDHo7v/preview"
+          allow="autoplay"
+          title="Guía de Estudio PDF">
+        </iframe>
+      </div>
+      <div class="guia-alt">
+        <p>Si el visor no carga correctamente, abre el documento directamente en Google Drive:</p>
+        <a class="btn-open-pdf" 
+           href="https://drive.google.com/file/d/1ou4JgAxmWjMGqdBYo8155-H20PlDHo7v/view?usp=sharing" 
+           target="_blank" rel="noopener">
+          📄 Abrir PDF en nueva pestaña
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ JAVASCRIPT ═══════════════ -->
+<script>
+const QUESTIONS = [
+  {
+    id:1, tipo:"Cuestionamiento directo",
+    base:"¿Cuál es el fundamento constitucional de la Nueva Escuela Mexicana?",
+    opciones:{
+      A:"El artículo 11 de la LGE, que establece que el Estado buscará la equidad, la excelencia y la mejora continua en la educación a través de la Nueva Escuela Mexicana.",
+      B:"El artículo 3°, cuarto párrafo, de la CPEUM, que establece que la educación se basará en el respeto irrestricto de la dignidad de las personas, con un enfoque de derechos humanos y de igualdad sustantiva.",
+      C:"El artículo 14, fracción II de la LGE, que reconoce a niñas, niños, adolescentes, jóvenes y adultos como sujetos de la educación y prioridad del Sistema Educativo Nacional."
+    },
+    correcta:"B",
+    justif:'El Plan de Estudio 2022 señala que la NEM "tiene como fundamento el artículo 3o., cuarto párrafo, de la Constitución Política de los Estados Unidos Mexicanos", en el que se establece la educación basada en el respeto irrestricto a la dignidad humana, con enfoque de derechos humanos e igualdad sustantiva.'
+  },
+  {
+    id:2, tipo:"Completamiento",
+    base:"De acuerdo con la Nueva Escuela Mexicana, la tarea principal de la educación es…",
+    opciones:{
+      A:"…propiciar que niñez y juventud, junto con sus profesoras y profesores, vayan al encuentro de la humanidad de las otras y los otros, entendidos en su diversidad.",
+      B:"…garantizar la adquisición de competencias clave para el mercado laboral y el desarrollo económico y social del país.",
+      C:"…transmitir los conocimientos científicos universales necesarios para que los estudiantes alcancen los estándares internacionales de aprendizaje."
+    },
+    correcta:"A",
+    justif:'El Plan 2022 establece literalmente que "la tarea principal de la educación en la Nueva Escuela Mexicana, es propiciar que niñez y juventud, junto con sus profesoras y profesores, vayan al encuentro de la humanidad de las otras y los otros, entendidos en su diversidad."'
+  },
+  {
+    id:3, tipo:"Relación de elementos",
+    base:"Relacione cada concepto de la NEM con su descripción correcta.\n\n1. Dignidad humana\n2. Lo común\n3. Autonomía profesional del magisterio\n\na) Libertad de maestras y maestros para ejercer y reinventar la docencia, e intercambiar experiencias problematizando la realidad.\nb) Principio de corresponsabilidad y coparticipación entre miembros de la comunidad escolar comprometidos con la formación y emancipación de los estudiantes.\nc) Valor intrínseco, irrenunciable e inviolable que justifica el reconocimiento y ejercicio de los derechos humanos.",
+    opciones:{
+      A:"1b, 2c, 3a",
+      B:"1c, 2a, 3b",
+      C:"1c, 2b, 3a"
+    },
+    correcta:"C",
+    justif:"Dignidad humana = valor intrínseco (c); Lo común = corresponsabilidad y coparticipación (b); Autonomía profesional = libertad para ejercer y reinventar la docencia (a). Así lo define el Plan 2022 en sus secciones correspondientes."
+  },
+  {
+    id:4, tipo:"Cuestionamiento directo",
+    base:"¿Cuál de las siguientes características define correctamente a los estudiantes en el marco de la Nueva Escuela Mexicana?",
+    opciones:{
+      A:"Son sujetos de derechos con capacidad de reinterpretar, incidir y transformar el mundo que les rodea, como lo haría cualquier adulto.",
+      B:"Son destinatarios pasivos de la educación que necesitan la orientación constante de los adultos para comprender y participar en su entorno.",
+      C:"Son capital humano en proceso de formación cuyas competencias deben responder a los perfiles establecidos por el mercado laboral."
+    },
+    correcta:"A",
+    justif:'La NEM reconoce que los estudiantes "son sujetos de derechos dentro y fuera del espacio escolar, con necesidades, características propias y con la capacidad de reinterpretar, incidir y transformar el mundo que les rodea, como lo haría cualquier adulto."'
+  },
+  {
+    id:5, tipo:"Ordenamiento",
+    base:"Ordene las cuatro desigualdades digitales identificadas en la NEM en la secuencia en que se presentan en el Plan de Estudio 2022:\n\n1. Desigualdad entre quienes desarrollan un saber instrumental y quienes desarrollan un saber reflexivo y crítico.\n2. Desigualdad en el acceso a las tecnologías, la conectividad y los servicios digitales.\n3. Desigualdad relacionada con la territorialidad y el dominio contextualizado de las tecnologías.\n4. Desigualdad derivada de los contextos socioeconómicos que generan distintos niveles de alfabetización digital.",
+    opciones:{
+      A:"2, 3, 1, 4",
+      B:"2, 4, 1, 3",
+      C:"1, 2, 4, 3"
+    },
+    correcta:"B",
+    justif:"El Plan 2022 las presenta en este orden: primera (acceso a tecnologías), segunda (contextos y alfabetización digital), tercera (saber instrumental vs. reflexivo/crítico), cuarta (territorialidad). La secuencia correcta es 2, 4, 1, 3."
+  },
+  {
+    id:6, tipo:"Completamiento",
+    base:"Para la Nueva Escuela Mexicana, la evaluación del aprendizaje tiene como función principal…",
+    opciones:{
+      A:"…determinar numéricamente el nivel de cumplimiento de los objetivos de aprendizaje con el fin de acreditar o reprobar a los estudiantes al final del ciclo escolar.",
+      B:"…medir el desempeño comparativo de los estudiantes mediante pruebas estandarizadas que permitan clasificarlos en escalas nacionales e internacionales.",
+      C:"…retroalimentar el proceso educativo a través del diálogo entre el profesorado y los estudiantes para identificar logros, obstáculos y trazar acciones de mejoramiento."
+    },
+    correcta:"C",
+    justif:'El Plan 2022 establece que la evaluación "tiene como función principal retroalimentar el proceso educativo a través del diálogo entre el profesorado y las y los estudiantes que desencadene procesos de autorreflexión de ambas partes para identificar los logros y elementos por trabajar, los obstáculos que se han presentado y, en su caso, trazar acciones de mejoramiento."'
+  },
+  {
+    id:7, tipo:"Cuestionamiento directo",
+    base:"¿Cuál es el papel de la comunidad en la propuesta curricular de la Nueva Escuela Mexicana?",
+    opciones:{
+      A:"Es un contexto externo que puede enriquecer los contenidos curriculares, pero cuya participación queda a criterio exclusivo del docente.",
+      B:"Es el núcleo integrador de los procesos de enseñanza y aprendizaje, y el espacio en que se inscribe la escuela como red de relaciones pedagógicas.",
+      C:"Es el destinatario final de los proyectos educativos que elaboran los estudiantes al concluir su ciclo de formación básica."
+    },
+    correcta:"B",
+    justif:'La propuesta curricular "coloca a la comunidad como el espacio social, cultural, político, productivo y simbólico en el que se inscribe la escuela entendida como el núcleo de las relaciones pedagógicas, así como de los procesos de enseñanza y aprendizaje."'
+  },
+  {
+    id:8, tipo:"Relación de elementos",
+    base:"Relacione cada desigualdad digital con su descripción correspondiente según el Plan de Estudio 2022:\n\n1. Primera desigualdad\n2. Segunda desigualdad\n3. Cuarta desigualdad\n\na) Falta de acceso a las tecnologías, la conectividad y los servicios del mundo digital.\nb) Diferencias en el dominio de las tecnologías según territorialidad y contextos cultural y lingüísticamente situados.\nc) Diferencias en contextos socioeconómicos que generan distintos niveles de alfabetización digital entre estudiantes.",
+    opciones:{
+      A:"1a, 2c, 3b",
+      B:"1b, 2a, 3c",
+      C:"1c, 2b, 3a"
+    },
+    correcta:"A",
+    justif:"Primera desigualdad = falta de acceso a tecnologías y conectividad (a); Segunda desigualdad = diferencias en contextos y alfabetización digital (c); Cuarta desigualdad = territorialidad y dominio contextualizado (b). Orden definido en el Plan 2022."
+  },
+  {
+    id:9, tipo:"Completamiento",
+    base:"En el marco de la NEM, la formación en la cultura digital implica…",
+    opciones:{
+      A:"…la enseñanza instrumental de herramientas tecnológicas para preparar a los estudiantes en el uso eficiente de plataformas y redes sociales.",
+      B:"…la incorporación obligatoria de dispositivos electrónicos en todas las aulas para garantizar la igualdad de acceso a la información.",
+      C:"…la educación de sujetos con derechos y deberes que se extienden al uso de redes y plataformas digitales, estableciendo compromisos sociales basados en colaboración, respeto, bienestar y buen trato."
+    },
+    correcta:"C",
+    justif:'El Plan 2022 señala que la formación digital "implica la educación de sujetos con derechos y deberes que se extienden hasta el uso de las redes y plataformas digitales, en donde también se establecen compromisos sociales con los otros basados en la colaboración y el intercambio, en un marco de respeto, bienestar y buen trato."'
+  },
+  {
+    id:10, tipo:"Cuestionamiento directo",
+    base:"¿Cuál es la razón principal por la que la NEM rechaza que la función de la escuela sea la formación de \"capital humano\"?",
+    opciones:{
+      A:"Porque el mercado laboral genera condiciones de desigualdad que contradicen los principios de equidad establecidos en el artículo 3° constitucional.",
+      B:"Porque la escuela debe formar ciudadanos críticos, emancipados y capaces de tomar decisiones que beneficien sus vidas y las de los demás, no responder a perfiles del mercado laboral.",
+      C:"Porque la formación de capital humano reduce el tiempo disponible para el desarrollo artístico, físico y emocional de niñas, niños y adolescentes."
+    },
+    correcta:"B",
+    justif:'El Plan 2022 afirma: "tampoco es función de la escuela formar capital humano desde la educación preescolar, primaria y secundaria hasta la educación superior para responder a los perfiles que establece el mercado laboral. La escuela debe formar niñas, niños y adolescentes felices; ciudadanos críticos del mundo que les rodea, emancipados, capaces de tomar decisiones que beneficien sus vidas y las de los demás."'
+  },
+  {
+    id:11, tipo:"Ordenamiento",
+    base:"Ordene las tres razones por las que la NEM coloca a la comunidad como foco de los procesos educativos, en la secuencia en que aparecen en el Plan de Estudio 2022:\n\n1. La escuela debe considerar los saberes comunitarios de los estudiantes para problematizar los contenidos curriculares a la luz de su realidad concreta.\n2. La escuela no es un espacio aislado; su razón de ser está en relación con la vida de las personas que acuden a ella.\n3. Los conocimientos, saberes y valores solo pueden incorporarse de manera integral en la vida cotidiana de la comunidad en la que habitan los estudiantes.",
+    opciones:{
+      A:"2, 3, 1",
+      B:"1, 3, 2",
+      C:"3, 1, 2"
+    },
+    correcta:"A",
+    justif:"El Plan 2022 las presenta como: primera razón (la escuela no es un espacio aislado = enunciado 2), segunda razón (los aprendizajes se incorporan en la comunidad = enunciado 3), tercera razón (considerar los saberes comunitarios = enunciado 1). La secuencia es 2, 3, 1."
+  },
+  {
+    id:12, tipo:"Relación de elementos",
+    base:"Relacione cada elemento curricular con su función principal según la NEM:\n\n1. Comunidad\n2. Evaluación formativa\n3. Currículo integrado\n\na) Articula conocimientos de diversas disciplinas con situaciones de la realidad, organizados en campos formativos.\nb) Retroalimenta el proceso educativo mediante el diálogo y la autorreflexión entre docentes y estudiantes.\nc) Actúa como núcleo integrador de la enseñanza, el aprendizaje, la planeación, la evaluación y la gestión escolar.",
+    opciones:{
+      A:"1b, 2c, 3a",
+      B:"1a, 2b, 3c",
+      C:"1c, 2b, 3a"
+    },
+    correcta:"C",
+    justif:"Comunidad = núcleo integrador de la enseñanza, aprendizaje y gestión (c); Evaluación formativa = retroalimenta mediante el diálogo (b); Currículo integrado = articula disciplinas con la realidad en campos formativos (a). Según las definiciones del Plan 2022."
+  },
+  {
+    id:13, tipo:"Cuestionamiento directo",
+    base:"Según el Plan de Estudio 2022, ¿qué significa que el aprendizaje no sea un proceso individual ni resida en la mente de los estudiantes?",
+    opciones:{
+      A:"Que el aprendizaje es una acción que se ejerce en relación con otras personas, en contextos específicos y mediante el uso de diversos objetos y símbolos culturales.",
+      B:"Que el aprendizaje depende exclusivamente de los materiales didácticos y los recursos tecnológicos provistos por la escuela.",
+      C:"Que el aprendizaje ocurre principalmente en los espacios comunitarios y familiares, y la escuela solo refuerza lo que los estudiantes ya saben."
+    },
+    correcta:"A",
+    justif:'El Plan 2022 señala: "el aprendizaje no es un hecho que reside en la mente de las y los estudiantes, ni un proceso individual, sino que es una acción que se ejerce en relación con otras personas, en contextos específicos y mediante el uso de diversos objetos y símbolos culturales."'
+  },
+  {
+    id:14, tipo:"Completamiento",
+    base:"De acuerdo con la NEM, el buen trato y el bienestar en la escuela se basan en…",
+    opciones:{
+      A:"…la implementación de reglamentos escolares con sanciones claras para cualquier conducta que afecte la convivencia entre los miembros de la comunidad.",
+      B:"…una convivencia que tiene como principio ético la inclusión colectiva e institucional, entendida como la forma en que las escuelas atienden y cuidan a cualquier estudiante que requiera cobijo de la comunidad.",
+      C:"…la capacitación permanente del personal docente y directivo en estrategias de resolución de conflictos y manejo del estrés emocional."
+    },
+    correcta:"B",
+    justif:'El Plan 2022 establece: "el buen trato y el bienestar se basan en una convivencia que tiene como principio ético la inclusión colectiva e institucional entendida como la forma que tienen las escuelas de dar respuesta, responsabilizarse, cuidar y atender a cualquier niña, niño y adolescente que, por su condición... requiere cobijo de la comunidad escolar."'
+  },
+  {
+    id:15, tipo:"Ordenamiento",
+    base:"Una maestra planea una secuencia didáctica siguiendo el enfoque del aprendizaje como experiencia formativa de la NEM. Ordene los momentos de manera congruente con este enfoque:\n\n1. Los estudiantes construyen nuevos significados al relacionar los contenidos curriculares con su contexto real.\n2. La docente plantea un problema o fenómeno de la vida real como punto de partida de la secuencia.\n3. Los estudiantes reflexionan colectivamente, vinculando saberes comunitarios con los contenidos del programa.\n4. Se evalúa el proceso mediante el diálogo y la autorreflexión entre la docente y los estudiantes.",
+    opciones:{
+      A:"1, 3, 2, 4",
+      B:"4, 2, 1, 3",
+      C:"2, 3, 1, 4"
+    },
+    correcta:"C",
+    justif:"El enfoque NEM de aprendizaje como experiencia formativa plantea: partir de una situación real (2), vincular saberes comunitarios y del programa (3), construir nuevos significados (1) y evaluar formativamente el proceso (4). Secuencia: 2, 3, 1, 4."
+  },
+  {
+    id:16, tipo:"Cuestionamiento directo",
+    base:"¿Cuál es la visión de la Nueva Escuela Mexicana respecto al papel de las familias en la educación?",
+    opciones:{
+      A:"Las familias son corresponsables únicamente del desempeño académico; la formación ciudadana y valoral corresponde exclusivamente a la escuela.",
+      B:"Las familias participan activamente en el desarrollo y aprendizaje, reforzando conocimientos y hábitos, y constituyen un vínculo fundamental entre los saberes escolares y la vida cotidiana de los estudiantes.",
+      C:"Las familias deben adaptarse a los lineamientos de la escuela para garantizar la homogeneidad de los procesos de enseñanza y aprendizaje en todo el país."
+    },
+    correcta:"B",
+    justif:'La NEM "considera fundamental su participación en el desarrollo y aprendizaje de niñas, niños y adolescentes, ya que es en este ámbito donde se refuerzan los conocimientos y hábitos de salud que se aprenden en la escuela; el apoyo desde casa en procesos como la expresión oral y escrita, el desarrollo psicomotor, afectivo y cognitivo..."'
+  },
+  {
+    id:17, tipo:"Completamiento",
+    base:"La autonomía profesional del magisterio se entiende, en el marco de la NEM, como…",
+    opciones:{
+      A:"…la libertad que tienen las maestras y los maestros para ejercer y reinventar la docencia, y para intercambiar experiencias problematizando la realidad a través de los conocimientos y saberes que se enseñan.",
+      B:"…la potestad de los docentes para modificar o suprimir los contenidos del programa de estudio cuando consideren que no son pertinentes para el contexto de sus estudiantes.",
+      C:"…la independencia administrativa de las escuelas respecto a las autoridades educativas para tomar decisiones sobre la gestión curricular y la asignación de recursos."
+    },
+    correcta:"A",
+    justif:'El Plan 2022 define: "La autonomía profesional del magisterio representa la libertad que tienen las maestras y los maestros para ejercer y reinventar la docencia (ese encuentro con la diversidad y complejidad de sus estudiantes) y para intercambiar experiencias, problematizando la realidad a través de los conocimientos y saberes que se enseñan a lo largo del ciclo escolar, como condición para desarrollar sus aprendizajes."'
+  },
+  {
+    id:18, tipo:"Relación de elementos",
+    base:"Relacione cada tipo de familia con su definición en el marco de la NEM:\n\n1. Homoparental\n2. Monoparental\n3. Reconstituida\n\na) Familia formada por dos adultos del mismo sexo con sus hijos.\nb) Familia conformada por la unión de dos adultos previamente separados que forman un nuevo núcleo familiar.\nc) Familia integrada por un solo progenitor a cargo de los hijos.",
+    opciones:{
+      A:"1c, 2b, 3a",
+      B:"1a, 2b, 3c",
+      C:"1a, 2c, 3b"
+    },
+    correcta:"C",
+    justif:"Homoparental = familia de adultos del mismo sexo (a); monoparental = un solo progenitor (c); reconstituida = nueva unión de adultos previamente separados (b). El Plan 2022 reconoce esta diversidad de estructuras familiares."
+  },
+  {
+    id:19, tipo:"Cuestionamiento directo",
+    base:"¿Cuál es la crítica central del Plan de Estudio 2022 al modelo de evaluación predominante en las últimas décadas?",
+    opciones:{
+      A:"Ha reducido la evaluación a la cuantificación del conocimiento en calificaciones numéricas, separándola del proceso formativo y recayendo en instancias ajenas a la vida del aula y a la relación docente–estudiante.",
+      B:"Ha privilegiado la evaluación cualitativa sobre la cuantitativa, ignorando los estándares internacionales de aprendizaje que requiere la educación mexicana.",
+      C:"Ha otorgado excesiva autonomía a los docentes para diseñar sus propios instrumentos de evaluación, generando inconsistencias entre escuelas y regiones del país."
+    },
+    correcta:"A",
+    justif:'El Plan 2022 señala que "El Sistema Educativo Nacional ha dado prioridad a un modelo de evaluación de los aprendizajes que se basa en una supuesta cuantificación del conocimiento que es posible representar en calificaciones numéricas... ha generado que se separe la evaluación del proceso formativo y que esta tarea recaiga en otro tipo de instancias ajenas a lo que sucede tanto en el aula como en la vida de las y los estudiantes."'
+  },
+  {
+    id:20, tipo:"Ordenamiento",
+    base:"En un proyecto comunitario sobre el uso responsable del agua, ordene las etapas según el enfoque de la comunidad como núcleo integrador de la NEM:\n\n1. Los estudiantes comparten sus hallazgos con la comunidad y proponen soluciones colectivas.\n2. La docente y los estudiantes identifican la problemática del agua en su comunidad como punto de partida.\n3. Los estudiantes investigan en su entorno, vinculando saberes escolares y saberes locales.\n4. Se evalúa el proceso de manera formativa, reflexionando sobre los aprendizajes construidos.",
+    opciones:{
+      A:"2, 1, 3, 4",
+      B:"2, 3, 1, 4",
+      C:"3, 2, 4, 1"
+    },
+    correcta:"B",
+    justif:"El enfoque NEM de comunidad como núcleo integrador propone: identificar el problema comunitario (2), investigar vinculando saberes (3), socializar hallazgos y proponer soluciones (1), evaluar formativamente (4). Secuencia: 2, 3, 1, 4."
+  },
+  {
+    id:21, tipo:"Completamiento",
+    base:"En la NEM, el currículo integrado contribuye a dar sentido a la vida democrática de las escuelas porque…",
+    opciones:{
+      A:"…permite que los docentes seleccionen libremente los contenidos más relevantes para su contexto, eliminando los que no sean pertinentes para la realidad local de sus estudiantes.",
+      B:"…organiza los conocimientos en asignaturas bien delimitadas que facilitan la evaluación objetiva y uniforme del aprendizaje de todos los estudiantes.",
+      C:"…favorece una construcción de la realidad en la que estudiantes y adultos aparecen como sujetos históricos capaces de acercarse al mundo, interpretarlo y contribuir a transformarlo, propiciando una construcción democrática del conocimiento."
+    },
+    correcta:"C",
+    justif:'El Plan 2022 señala que la integración curricular "favorece una construcción de la realidad en la que niñas, niños, adolescentes y adultos aparecen como sujetos históricos, capaces de acercarse al mundo, interpretarlo y contribuir a transformarlo desde diferentes perspectivas. Con ello se favorece una construcción democrática del conocimiento."'
+  },
+  {
+    id:22, tipo:"Relación de elementos",
+    base:"Relacione el principio de la NEM con su fundamento normativo:\n\n1. Derecho humano a la educación\n2. Buen trato y bienestar\n3. Laicidad escolar\n\na) Artículo 3° de la CPEUM, principio fundamental de la política educativa nacional.\nb) Artículo 3°, fracción I de la CPEUM, que mantiene el currículo ajeno a cualquier doctrina religiosa.\nc) Derecho a estar bien corporal, mental, emocional, afectiva y espiritualmente en todos los espacios de convivencia.",
+    opciones:{
+      A:"1a, 2c, 3b",
+      B:"1b, 2a, 3c",
+      C:"1c, 2b, 3a"
+    },
+    correcta:"A",
+    justif:"Derecho a la educación = fundado en artículo 3° CPEUM (a); Buen trato y bienestar = derecho al bienestar integral en todos sus aspectos (c); Laicidad = artículo 3°, fracción I de la CPEUM, ajeno a doctrinas religiosas (b). Según el Plan 2022."
+  },
+  {
+    id:23, tipo:"Cuestionamiento directo",
+    base:"¿Qué entiende la Nueva Escuela Mexicana por \"lo común\" en el espacio escolar?",
+    opciones:{
+      A:"La uniformidad de contenidos, métodos y evaluaciones para garantizar que todos los estudiantes del país reciban exactamente la misma experiencia educativa.",
+      B:"Un principio de corresponsabilidad y coparticipación entre los miembros de la comunidad escolar comprometidos con la formación y emancipación de los estudiantes.",
+      C:"El conjunto de tradiciones, valores y costumbres compartidos por la comunidad local que deben incorporarse obligatoriamente al programa de estudio de cada escuela."
+    },
+    correcta:"B",
+    justif:'El Plan 2022 define: "lo común se entiende como un principio de corresponsabilidad y coparticipación entre aquellos miembros de la comunidad escolar que están comprometidos con la formación y emancipación de las y los estudiantes."'
+  },
+  {
+    id:24, tipo:"Ordenamiento",
+    base:"En el marco de la NEM, ordene los propósitos del perfil de egreso de acuerdo con la jerarquía que establece el Plan de Estudio 2022:\n\n1. Formación de una ciudadanía crítica, activa y solidaria que fortalece las formas de vida comunitaria.\n2. Construcción de identidad y vínculo con la comunidad desde la diversidad cultural, social y lingüística.\n3. Desarrollo de capacidades para participar en decisiones políticas y ejercer derechos civiles, políticos y sociales.\n4. Posicionamiento de la dignidad humana como núcleo fundante de otros derechos.",
+    opciones:{
+      A:"3, 1, 4, 2",
+      B:"2, 4, 1, 3",
+      C:"4, 2, 3, 1"
+    },
+    correcta:"C",
+    justif:"El Plan 2022 coloca la dignidad humana como fundamento de todos los demás (4), a partir del cual se construye identidad y vínculo comunitario (2), se desarrollan capacidades para el ejercicio ciudadano (3) y se forma la ciudadanía crítica y solidaria (1). Secuencia: 4, 2, 3, 1."
+  },
+  {
+    id:25, tipo:"Completamiento",
+    base:"Según el Plan de Estudio 2022, el aprendizaje verdaderamente significativo se realiza cuando…",
+    opciones:{
+      A:"…los estudiantes perciben información de su mundo inmediato en función de su proyecto personal y la interacción del contenido abstracto, simbólico, material y afectivo.",
+      B:"…los docentes utilizan estrategias didácticas variadas y diferenciadas que se adaptan a los distintos estilos y ritmos de aprendizaje de cada estudiante.",
+      C:"…la escuela garantiza las condiciones tecnológicas, bibliográficas y de infraestructura necesarias para que los estudiantes accedan a los contenidos del programa."
+    },
+    correcta:"A",
+    justif:'El Plan 2022 señala: "El aprendizaje verdaderamente significativo se realiza cuando las y los estudiantes perciben información de su mundo inmediato en función de su proyecto personal, y la interacción del contenido abstracto, simbólico, material y afectivo."'
+  },
+  {
+    id:26, tipo:"Cuestionamiento directo",
+    base:"¿Cuál es el sentido del principio de inclusión en la Nueva Escuela Mexicana?",
+    opciones:{
+      A:"Garantizar que todos los estudiantes con discapacidad reciban apoyos específicos dentro de aulas de educación especial integradas a la escuela regular.",
+      B:"Asegurar que la escuela dé respuesta, se responsabilice, cuide y atienda a cualquier estudiante que, por su condición, requiera cobijo de la comunidad escolar.",
+      C:"Implementar estrategias de atención diferenciada para grupos en situación de vulnerabilidad, atendidos de forma separada de los demás estudiantes."
+    },
+    correcta:"B",
+    justif:'La NEM define la inclusión como "la forma que tienen las escuelas de dar respuesta, responsabilizarse, cuidar y atender a cualquier niña, niño y adolescente que, por su condición de salud, género, capacidad, clase, etnia, lengua, nacionalidad, condición migratoria requiere cobijo de la comunidad escolar, así como una respuesta institucional (académica, jurídica o administrativa)."'
+  },
+  {
+    id:27, tipo:"Relación de elementos",
+    base:"Relacione cada concepto con su función según el Plan de Estudio 2022:\n\n1. Saberes\n2. Comunidad-territorio\n3. Currículo\n\na) Establece condiciones de libertad y autonomía para que docentes y estudiantes definan los problemas centrales a abordar en el ciclo escolar.\nb) Forma de apropiación de la realidad que constituye un lazo social que reconoce el lugar de los sujetos en su comunidad.\nc) Marco en el que la escuela encuentra múltiples estrategias de resolución de problemas generados en el territorio.",
+    opciones:{
+      A:"1c, 2b, 3a",
+      B:"1a, 2c, 3b",
+      C:"1b, 2c, 3a"
+    },
+    correcta:"C",
+    justif:"Saberes = forma de apropiación de la realidad como lazo social (b); Comunidad-territorio = marco para estrategias de resolución de problemas (c); Currículo = establece condiciones de libertad y autonomía docente (a). Así lo establece el Plan 2022."
+  },
+  {
+    id:28, tipo:"Completamiento",
+    base:"En el Plan de Estudio 2022, la escuela pública laica se define como un espacio en el que…",
+    opciones:{
+      A:"…se construyen relaciones pedagógicas que forman ciudadanas y ciudadanos desde el respeto a la diversidad, el pensamiento crítico, el diálogo de saberes y el ejercicio de los derechos humanos, ajena a todo credo religioso y dogmatismo ideológico.",
+      B:"…se imparten únicamente contenidos de carácter científico aprobados por la autoridad educativa, excluyendo cualquier referencia a valores, creencias o prácticas culturales de los estudiantes.",
+      C:"…se garantiza la neutralidad ideológica de los docentes para que las familias complementen libremente la formación de sus hijos con los valores de su preferencia."
+    },
+    correcta:"A",
+    justif:'El Plan 2022 define: "la escuela pública laica es un espacio en donde se construyen tanto relaciones sociales como pedagógicas que forman ciudadanas y ciudadanos partiendo del respeto a la diversidad, la conciencia ambiental, el pensamiento crítico, el diálogo de saberes... en una educación ajena a todo credo religioso, fundamentalismo y dogmatismo ideológico."'
+  },
+  {
+    id:29, tipo:"Cuestionamiento directo",
+    base:"¿Qué implica, para la NEM, que la escuela asuma su papel como institución democrática?",
+    opciones:{
+      A:"Que los docentes sometan a votación de los estudiantes las decisiones pedagógicas y la selección de los contenidos del programa de estudio.",
+      B:"Que la escuela rija su organización, políticas, prácticas, cultura y procesos mediante principios democráticos, respetando los derechos y la dignidad de todos sus miembros.",
+      C:"Que las autoridades educativas establezcan mecanismos de consulta periódica a las familias para validar los planes y programas de estudio vigentes."
+    },
+    correcta:"B",
+    justif:'El Plan 2022 establece que "la escuela misma debe regir su organización, políticas, prácticas, cultura y procesos mediante principios democráticos, sobre todo respetando los derechos de niñas, niños, adolescentes, maestras, maestros y la dignidad de cada una y uno de ellos, como núcleo fundante de otros derechos."'
+  },
+  {
+    id:30, tipo:"Ordenamiento",
+    base:"Ordene los pasos que un docente debe seguir para integrar la comunidad como núcleo del proceso educativo, según el Plan de Estudio 2022:\n\n1. Contextualizar los conocimientos y saberes curriculares de acuerdo con las condiciones del territorio y la diversidad estudiantil.\n2. Identificar las problemáticas y saberes presentes en la comunidad–territorio de la escuela.\n3. Propiciar que los estudiantes reflexionen y construyan significados vinculando el currículo con su realidad cotidiana.\n4. Promover la participación de familias y comunidad en las relaciones pedagógicas y el proceso formativo.",
+    opciones:{
+      A:"1, 3, 2, 4",
+      B:"1, 2, 4, 3",
+      C:"2, 1, 3, 4"
+    },
+    correcta:"C",
+    justif:"El Plan 2022 propone: reconocer saberes y problemáticas comunitarias (2), contextualizar el currículo al territorio y diversidad (1), propiciar reflexión y construcción de significados (3) e integrar a familias y comunidad en el proceso (4). Secuencia: 2, 1, 3, 4."
+  }
+];
+
+// ─── STATE ───
+let currentIdx = 0;
+let score = 0;
+let errors = 0;
+let studentName = "";
+let answered = false;
+
+// ─── TAB SWITCH ───
+function switchTab(tab) {
+  document.querySelectorAll('.tabs-bar .tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', (i===0 && tab==='simulador') || (i===1 && tab==='guia'));
+  });
+  document.getElementById('tab-simulador').classList.toggle('active', tab==='simulador');
+  document.getElementById('tab-guia').classList.toggle('active', tab==='guia');
+  document.getElementById('tab-simulador').style.display = tab==='simulador' ? 'block' : 'none';
+  document.getElementById('tab-guia').style.display = tab==='guia' ? 'block' : 'none';
+}
+
+// ─── SCREENS ───
+function showScreen(id) {
+  document.querySelectorAll('#tab-simulador .screen').forEach(s => {
+    s.classList.remove('active');
+    s.style.display = 'none';
+  });
+  const el = document.getElementById(id);
+  el.classList.add('active');
+  el.style.display = 'block';
+}
+
+// ─── START ───
+function startExam() {
+  const inp = document.getElementById('inp-student').value.trim();
+  if (!inp) {
+    document.getElementById('inp-student').style.borderColor = '#ef4444';
+    document.getElementById('inp-student').placeholder = '⚠️ Por favor, ingresa tu nombre';
+    document.getElementById('inp-student').focus();
+    return;
+  }
+  studentName = inp;
+  currentIdx = 0; score = 0; errors = 0;
+  showScreen('screen-exam');
+  loadQuestion();
+}
+
+// ─── LOAD QUESTION ───
+function loadQuestion() {
+  answered = false;
+  const q = QUESTIONS[currentIdx];
+  document.getElementById('q-num').textContent = q.id;
+
+  const tipoBadge = document.getElementById('tipo-badge');
+  tipoBadge.textContent = q.tipo;
+  tipoBadge.className = 'tipo-badge';
+  if (q.tipo === 'Cuestionamiento directo') tipoBadge.classList.add('tipo-cq');
+  else if (q.tipo === 'Completamiento') tipoBadge.classList.add('tipo-cm');
+  else if (q.tipo === 'Ordenamiento') tipoBadge.classList.add('tipo-or');
+  else tipoBadge.classList.add('tipo-re');
+
+  document.getElementById('q-base').innerHTML = q.base.replace(/\n/g,'<br>');
+
+  const opDiv = document.getElementById('opciones');
+  opDiv.innerHTML = '';
+  ['A','B','C'].forEach(letra => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.innerHTML = `<span class="opt-letter">${letra}</span><span>${q.opciones[letra]}</span>`;
+    btn.onclick = () => selectAnswer(letra);
+    opDiv.appendChild(btn);
+  });
+
+  document.getElementById('feedback-box').className = 'feedback-box';
+  document.getElementById('feedback-box').innerHTML = '';
+  document.getElementById('btn-next').classList.remove('visible');
+
+  updateProgress();
+
+  // animate card
+  const card = document.getElementById('q-card');
+  card.style.animation = 'none';
+  card.offsetHeight;
+  card.style.animation = 'fadeUp 0.38s ease both';
+}
+
+// ─── SELECT ANSWER ───
+function selectAnswer(letra) {
+  if (answered) return;
+  answered = true;
+  const q = QUESTIONS[currentIdx];
+  const btns = document.querySelectorAll('.opt-btn');
+  const letters = ['A','B','C'];
+
+  btns.forEach((btn, i) => {
+    btn.disabled = true;
+    const l = letters[i];
+    if (l === letra && l === q.correcta) btn.classList.add('selected-correct');
+    else if (l === letra && l !== q.correcta) btn.classList.add('selected-wrong');
+    else if (l === q.correcta) btn.classList.add('revealed-correct');
+  });
+
+  const fb = document.getElementById('feedback-box');
+  if (letra === q.correcta) {
+    score++;
+    fb.className = 'feedback-box ok';
+    fb.innerHTML = `<strong>✅ ¡Correcto!</strong>${q.justif}`;
+  } else {
+    errors++;
+    fb.className = 'feedback-box err';
+    fb.innerHTML = `<strong>❌ Respuesta incorrecta — La opción correcta es <u>${q.correcta}</u>.</strong>${q.justif}`;
+  }
+
+  updateProgress();
+
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.textContent = currentIdx === QUESTIONS.length - 1 ? 'Ver mis resultados 📊' : 'Siguiente pregunta →';
+  nextBtn.classList.add('visible');
+}
+
+// ─── NEXT QUESTION ───
+function nextQuestion() {
+  currentIdx++;
+  if (currentIdx >= QUESTIONS.length) {
+    showResults();
+  } else {
+    loadQuestion();
+  }
+}
+
+// ─── PROGRESS ───
+function updateProgress() {
+  const total = QUESTIONS.length;
+  const done = currentIdx + (answered ? 1 : 0);
+  document.getElementById('prog-label').textContent = `Pregunta ${currentIdx + 1} de ${total}`;
+  document.getElementById('prog-score').textContent = `✅ ${score}   ❌ ${errors}`;
+  document.getElementById('prog-fill').style.width = ((done / total) * 100) + '%';
+}
+
+// ─── RESULTS ───
+function showResults() {
+  const pct = Math.round((score / QUESTIONS.length) * 100);
+  document.getElementById('res-name').textContent = studentName;
+  document.getElementById('res-pct').textContent = pct + '%';
+  document.getElementById('res-ok').textContent = score;
+  document.getElementById('res-err').textContent = errors;
+
+  let trophy = '🏆'; let msg = '';
+  if (pct >= 90) { trophy = '🥇'; msg = '¡Excelente desempeño! Demuestras un dominio sólido del Plan de Estudio 2022 y los fundamentos de la Nueva Escuela Mexicana. ¡Sigue así!'; }
+  else if (pct >= 70) { trophy = '🥈'; msg = 'Buen trabajo. Tienes una comprensión adecuada de los contenidos. Revisa los reactivos incorrectos para fortalecer tu preparación.'; }
+  else if (pct >= 50) { trophy = '📚'; msg = 'Vas por buen camino. Te recomendamos repasar la Guía de Estudio y practicar nuevamente para consolidar tus conocimientos.'; }
+  else { trophy = '💪'; msg = 'No te desanimes. Consulta la Guía de Estudio disponible en este simulador y vuelve a intentarlo. ¡La constancia es la clave del aprendizaje!'; }
+
+  document.getElementById('trophy-icon').textContent = trophy;
+  document.getElementById('motivador').textContent = msg;
+  showScreen('screen-results');
+}
+
+// ─── RESET ───
+function resetExam() {
+  currentIdx = 0; score = 0; errors = 0; answered = false;
+  document.getElementById('inp-student').value = '';
+  document.getElementById('inp-student').style.borderColor = '';
+  document.getElementById('inp-student').placeholder = 'Ej. María González López';
+  showScreen('screen-welcome');
+}
+
+// ─── INIT ───
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('tab-guia').style.display = 'none';
+  document.getElementById('screen-exam').style.display = 'none';
+  document.getElementById('screen-results').style.display = 'none';
+  document.getElementById('screen-welcome').style.display = 'block';
+  document.getElementById('inp-student').addEventListener('keydown', e => {
+    if (e.key === 'Enter') startExam();
+  });
+});
+</script>
+</body>
+</html>

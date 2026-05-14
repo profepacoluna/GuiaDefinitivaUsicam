@@ -1,0 +1,1926 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador Interactivo — Ecosistema Escolar Saludable</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde1: #2d8a4e;
+    --verde2: #4caf73;
+    --verde3: #a8e6bb;
+    --verde4: #e6f7ec;
+    --naranja1: #e07b2a;
+    --naranja2: #f5a84b;
+    --naranja3: #fde8c8;
+    --azul1: #2176ae;
+    --azul2: #4da8da;
+    --azul3: #d0eaf8;
+    --rojo: #e84040;
+    --rojo-light: #fde8e8;
+    --dorado: #f5c842;
+    --blanco: #ffffff;
+    --gris-claro: #f4f7f4;
+    --gris-texto: #3a4a3a;
+    --sombra: 0 8px 32px rgba(45,138,78,0.13);
+    --sombra2: 0 4px 16px rgba(0,0,0,0.10);
+    --radio: 20px;
+    --radio-sm: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #e6f7ec 0%, #f0faf4 40%, #fffbe6 70%, #e8f4fd 100%);
+    min-height: 100vh;
+    color: var(--gris-texto);
+    overflow-x: hidden;
+  }
+
+  /* ====== DECORATIVE BACKGROUND ====== */
+  body::before {
+    content: '';
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: 
+      radial-gradient(ellipse 600px 400px at 10% 20%, rgba(76,175,115,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 400px 500px at 90% 80%, rgba(245,168,75,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 300px 300px at 50% 50%, rgba(33,118,174,0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 0 16px 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ====== HEADER ====== */
+  .header {
+    text-align: center;
+    padding: 32px 20px 24px;
+    position: relative;
+  }
+
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--verde1), var(--verde2));
+    color: white;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 6px 18px;
+    border-radius: 50px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 14px rgba(45,138,78,0.3);
+  }
+
+  .header-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(22px, 5vw, 34px);
+    font-weight: 800;
+    line-height: 1.2;
+    background: linear-gradient(135deg, var(--verde1) 0%, #1a6b38 50%, var(--naranja1) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+  }
+
+  .header-subtitle {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(13px, 2.5vw, 16px);
+    font-weight: 600;
+    color: var(--naranja1);
+    letter-spacing: 0.3px;
+  }
+
+  .header-deco {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 14px;
+  }
+
+  .header-deco span {
+    display: block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--verde2);
+  }
+  .header-deco span:nth-child(2) { width: 24px; border-radius: 4px; background: var(--naranja2); }
+  .header-deco span:nth-child(3) { background: var(--azul2); }
+
+  /* ====== LEAF DECORATIONS ====== */
+  .leaf-deco {
+    position: absolute;
+    opacity: 0.12;
+    font-size: 48px;
+    pointer-events: none;
+    animation: floatLeaf 6s ease-in-out infinite;
+  }
+  .leaf-deco.l1 { top: 10px; left: 5%; animation-delay: 0s; }
+  .leaf-deco.l2 { top: 30px; right: 6%; animation-delay: 2s; font-size: 36px; }
+  @keyframes floatLeaf {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(8deg); }
+  }
+
+  /* ====== CARDS ====== */
+  .card {
+    background: rgba(255,255,255,0.92);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra);
+    border: 1.5px solid rgba(76,175,115,0.15);
+    overflow: hidden;
+    backdrop-filter: blur(8px);
+  }
+
+  /* ====== SCREEN MANAGEMENT ====== */
+  .screen { display: none; animation: fadeSlideIn 0.5s ease forwards; }
+  .screen.active { display: block; }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ====== START SCREEN ====== */
+  #screen-start .card {
+    padding: 40px 36px;
+    text-align: center;
+  }
+
+  .start-icon {
+    width: 90px; height: 90px;
+    background: linear-gradient(135deg, var(--verde2), var(--verde1));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 42px;
+    margin: 0 auto 20px;
+    box-shadow: 0 8px 24px rgba(45,138,78,0.25);
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 8px 24px rgba(45,138,78,0.25); }
+    50% { box-shadow: 0 12px 36px rgba(45,138,78,0.4), 0 0 0 8px rgba(76,175,115,0.1); }
+  }
+
+  .start-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(18px, 4vw, 26px);
+    font-weight: 700;
+    color: var(--verde1);
+    margin-bottom: 8px;
+  }
+
+  .start-desc {
+    font-size: 14px;
+    color: #6b8a6b;
+    max-width: 480px;
+    margin: 0 auto 28px;
+    line-height: 1.6;
+  }
+
+  .info-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .pill-green { background: var(--verde4); color: var(--verde1); border: 1.5px solid var(--verde3); }
+  .pill-orange { background: var(--naranja3); color: var(--naranja1); border: 1.5px solid #f5c8a0; }
+  .pill-blue { background: var(--azul3); color: var(--azul1); border: 1.5px solid #a8d4ef; }
+
+  .input-group {
+    max-width: 380px;
+    margin: 0 auto 24px;
+    text-align: left;
+  }
+
+  .input-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--verde1);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .input-field {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid var(--verde3);
+    border-radius: var(--radio-sm);
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--gris-texto);
+    background: var(--verde4);
+    transition: all 0.3s;
+    outline: none;
+  }
+
+  .input-field:focus {
+    border-color: var(--verde2);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(76,175,115,0.12);
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 15px 38px;
+    background: linear-gradient(135deg, var(--verde2), var(--verde1));
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 6px 20px rgba(45,138,78,0.3);
+    text-decoration: none;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(45,138,78,0.4);
+  }
+
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 28px;
+    background: white;
+    color: var(--verde1);
+    border: 2px solid var(--verde2);
+    border-radius: 50px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .btn-secondary:hover {
+    background: var(--verde4);
+    transform: translateY(-1px);
+  }
+
+  /* ====== EXAM SCREEN ====== */
+  .exam-header {
+    padding: 20px 28px 0;
+  }
+
+  .progress-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 10px;
+  }
+
+  .progress-label {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--verde1);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  .progress-track {
+    flex: 1;
+    height: 10px;
+    background: var(--verde4);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--verde3);
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--verde2), var(--naranja2));
+    border-radius: 10px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .exam-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 0 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .question-counter {
+    font-size: 13px;
+    font-weight: 700;
+    color: #7a9a7a;
+  }
+
+  .score-live {
+    display: flex;
+    gap: 12px;
+  }
+
+  .score-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .chip-ok { background: #e6f7ec; color: var(--verde1); }
+  .chip-err { background: var(--rojo-light); color: var(--rojo); }
+
+  /* Format badge */
+  .format-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+  }
+
+  .fmt-cd { background: #e8f4fd; color: var(--azul1); }
+  .fmt-comp { background: var(--naranja3); color: var(--naranja1); }
+  .fmt-ord { background: #f0e6fd; color: #7b2dd4; }
+  .fmt-rel { background: #e6f7ec; color: var(--verde1); }
+
+  .question-body {
+    padding: 0 28px 24px;
+  }
+
+  .question-text {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(14px, 3vw, 16px);
+    font-weight: 600;
+    color: var(--gris-texto);
+    line-height: 1.65;
+    margin-bottom: 20px;
+  }
+
+  /* Relation/Order table */
+  .rel-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 0 18px;
+    font-size: 13px;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .rel-table th {
+    background: linear-gradient(135deg, var(--verde1), var(--verde2));
+    color: white;
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .rel-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--verde4);
+    background: white;
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  .rel-table tr:nth-child(even) td { background: #f8fcf9; }
+  .rel-table tr:last-child td { border-bottom: none; }
+
+  .options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .option-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 18px;
+    background: white;
+    border: 2px solid var(--verde3);
+    border-radius: var(--radio-sm);
+    cursor: pointer;
+    transition: all 0.25s;
+    text-align: left;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gris-texto);
+    line-height: 1.5;
+    width: 100%;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--verde2);
+    background: var(--verde4);
+    transform: translateX(4px);
+    box-shadow: 0 4px 14px rgba(76,175,115,0.15);
+  }
+
+  .option-letter {
+    min-width: 30px;
+    height: 30px;
+    background: linear-gradient(135deg, var(--verde3), var(--verde4));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--verde1);
+    flex-shrink: 0;
+    transition: all 0.25s;
+  }
+
+  .option-btn.correct {
+    border-color: var(--verde2);
+    background: var(--verde4);
+    animation: correctPop 0.4s ease;
+  }
+
+  .option-btn.correct .option-letter {
+    background: linear-gradient(135deg, var(--verde2), var(--verde1));
+    color: white;
+  }
+
+  .option-btn.incorrect {
+    border-color: var(--rojo);
+    background: var(--rojo-light);
+    animation: shakeBrief 0.4s ease;
+  }
+
+  .option-btn.incorrect .option-letter {
+    background: var(--rojo);
+    color: white;
+  }
+
+  .option-btn.disabled-show {
+    opacity: 0.55;
+    cursor: default;
+  }
+
+  @keyframes correctPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes shakeBrief {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  /* ====== FEEDBACK ====== */
+  .feedback-box {
+    margin: 16px 0;
+    padding: 16px 18px;
+    border-radius: var(--radio-sm);
+    animation: feedbackSlide 0.4s ease;
+    display: none;
+  }
+
+  .feedback-box.visible { display: flex; gap: 12px; align-items: flex-start; }
+
+  @keyframes feedbackSlide {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .feedback-box.ok {
+    background: linear-gradient(135deg, #e6f7ec, #d0f0dd);
+    border: 1.5px solid var(--verde2);
+  }
+
+  .feedback-box.fail {
+    background: linear-gradient(135deg, #fde8e8, #fad0d0);
+    border: 1.5px solid #e8a0a0;
+  }
+
+  .feedback-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .feedback-text {
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+
+  .feedback-title {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+
+  .feedback-box.ok .feedback-title { color: var(--verde1); }
+  .feedback-box.fail .feedback-title { color: var(--rojo); }
+
+  .feedback-box.ok .feedback-text { color: #2a6a3a; }
+  .feedback-box.fail .feedback-text { color: #8a2020; }
+
+  /* ====== NEXT BUTTON AREA ====== */
+  .exam-footer {
+    padding: 0 28px 24px;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  #btn-next {
+    display: none;
+    animation: fadeSlideIn 0.3s ease;
+  }
+
+  /* ====== RESULTS SCREEN ====== */
+  #screen-results .card {
+    padding: 40px 36px;
+    text-align: center;
+  }
+
+  .results-avatar {
+    width: 100px; height: 100px;
+    background: linear-gradient(135deg, var(--verde2), var(--verde1));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px;
+    margin: 0 auto 16px;
+    box-shadow: 0 10px 28px rgba(45,138,78,0.3);
+  }
+
+  .results-name {
+    font-family: 'Poppins', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--verde1);
+    margin-bottom: 4px;
+  }
+
+  .results-label {
+    font-size: 13px;
+    color: #7a9a7a;
+    margin-bottom: 28px;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--gris-claro);
+    border-radius: var(--radio-sm);
+    padding: 18px 12px;
+    border: 1.5px solid rgba(76,175,115,0.15);
+  }
+
+  .stat-num {
+    font-family: 'Poppins', sans-serif;
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-lbl {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .stat-ok .stat-num { color: var(--verde1); }
+  .stat-ok .stat-lbl { color: var(--verde2); }
+  .stat-err .stat-num { color: var(--rojo); }
+  .stat-err .stat-lbl { color: #d06060; }
+  .stat-pct .stat-num { color: var(--azul1); }
+  .stat-pct .stat-lbl { color: var(--azul2); }
+
+  .perf-bar-wrap {
+    margin: 0 auto 20px;
+    max-width: 320px;
+  }
+
+  .perf-bar-track {
+    height: 18px;
+    background: var(--verde4);
+    border-radius: 50px;
+    overflow: hidden;
+    border: 1px solid var(--verde3);
+  }
+
+  .perf-bar-fill {
+    height: 100%;
+    border-radius: 50px;
+    background: linear-gradient(90deg, var(--verde2), var(--naranja2));
+    transition: width 1.5s cubic-bezier(0.4,0,0.2,1);
+    width: 0%;
+  }
+
+  .motivational-msg {
+    background: linear-gradient(135deg, var(--verde4), var(--naranja3));
+    border-radius: var(--radio-sm);
+    padding: 18px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gris-texto);
+    line-height: 1.6;
+    border: 1.5px solid var(--verde3);
+    margin-bottom: 24px;
+    font-style: italic;
+  }
+
+  .results-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* ====== STUDY GUIDE SECTION ====== */
+  #screen-guide .card {
+    padding: 32px 28px;
+  }
+
+  .guide-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px dashed var(--verde3);
+  }
+
+  .guide-icon {
+    width: 56px; height: 56px;
+    background: linear-gradient(135deg, var(--naranja2), var(--naranja1));
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(224,123,42,0.3);
+  }
+
+  .guide-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--verde1);
+  }
+
+  .guide-sub {
+    font-size: 13px;
+    color: #7a9a7a;
+    margin-top: 2px;
+  }
+
+  .pdf-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .btn-pdf {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+    text-decoration: none;
+  }
+
+  .btn-pdf-view {
+    background: linear-gradient(135deg, var(--naranja2), var(--naranja1));
+    color: white;
+    box-shadow: 0 4px 14px rgba(224,123,42,0.3);
+  }
+
+  .btn-pdf-view:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(224,123,42,0.4); }
+
+  .btn-pdf-open {
+    background: white;
+    color: var(--naranja1);
+    border: 2px solid var(--naranja2);
+  }
+
+  .btn-pdf-open:hover { background: var(--naranja3); transform: translateY(-1px); }
+
+  .pdf-frame-wrap {
+    border-radius: var(--radio-sm);
+    overflow: hidden;
+    border: 2px solid var(--verde3);
+    background: var(--gris-claro);
+    display: none;
+  }
+
+  .pdf-frame-wrap.visible { display: block; animation: fadeSlideIn 0.4s ease; }
+
+  .pdf-frame-wrap iframe {
+    width: 100%;
+    height: 520px;
+    border: none;
+    display: block;
+  }
+
+  .pdf-topics {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .topic-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: white;
+    border: 1.5px solid var(--verde3);
+    border-radius: var(--radio-sm);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--gris-texto);
+  }
+
+  .topic-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ====== NAV TABS ====== */
+  .tab-bar {
+    display: flex;
+    background: white;
+    border-radius: 50px;
+    padding: 5px;
+    gap: 4px;
+    margin-bottom: 24px;
+    box-shadow: var(--sombra2);
+    border: 1.5px solid var(--verde3);
+    flex-wrap: wrap;
+  }
+
+  .tab-btn {
+    flex: 1;
+    min-width: 100px;
+    padding: 10px 16px;
+    border-radius: 50px;
+    border: none;
+    background: transparent;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #7a9a7a;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .tab-btn.active {
+    background: linear-gradient(135deg, var(--verde2), var(--verde1));
+    color: white;
+    box-shadow: 0 4px 12px rgba(45,138,78,0.25);
+  }
+
+  .tab-btn:hover:not(.active) { background: var(--verde4); color: var(--verde1); }
+
+  /* ====== REVIEW SECTION ====== */
+  #review-list { margin-top: 8px; }
+
+  .review-item {
+    background: white;
+    border-radius: var(--radio-sm);
+    border: 1.5px solid var(--verde3);
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+
+  .review-item:hover { box-shadow: var(--sombra2); }
+
+  .review-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .review-num {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  .review-item.r-ok .review-num { background: var(--verde4); color: var(--verde1); }
+  .review-item.r-err .review-num { background: var(--rojo-light); color: var(--rojo); }
+
+  .review-q-text {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--gris-texto);
+  }
+
+  .review-result-icon { font-size: 18px; flex-shrink: 0; }
+
+  .review-detail {
+    display: none;
+    padding: 0 16px 14px;
+    font-size: 12.5px;
+    color: #5a7a5a;
+    line-height: 1.6;
+    border-top: 1px solid var(--verde4);
+    padding-top: 12px;
+    margin-top: 0;
+  }
+
+  .review-detail.open { display: block; animation: feedbackSlide 0.3s ease; }
+
+  .review-answer-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+
+  .ans-badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .ans-ok-badge { background: var(--verde4); color: var(--verde1); }
+  .ans-err-badge { background: var(--rojo-light); color: var(--rojo); }
+
+  /* ====== RESPONSIVE ====== */
+  @media (max-width: 580px) {
+    #screen-start .card, #screen-results .card { padding: 28px 20px; }
+    .question-body { padding: 0 18px 20px; }
+    .exam-header { padding: 16px 18px 0; }
+    .exam-footer { padding: 0 18px 20px; }
+    .stats-grid { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .stat-num { font-size: 26px; }
+    .tab-btn { font-size: 12px; padding: 8px 10px; min-width: 80px; }
+    #screen-guide .card { padding: 22px 16px; }
+    .rel-table { font-size: 12px; }
+    .rel-table th, .rel-table td { padding: 8px 10px; }
+    .results-actions { flex-direction: column; align-items: center; }
+  }
+
+  @media (max-width: 380px) {
+    .header-title { font-size: 19px; }
+    .stats-grid { grid-template-columns: 1fr; gap: 8px; }
+  }
+
+  /* ====== CONFETTI ANIMATION ====== */
+  .confetti-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 999;
+    overflow: hidden;
+  }
+
+  .confetti-piece {
+    position: absolute;
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    animation: confettiFall linear forwards;
+    opacity: 0;
+  }
+
+  @keyframes confettiFall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* scroll */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--verde4); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb { background: var(--verde2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- CONFETTI -->
+<div class="confetti-container" id="confetti"></div>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <span class="leaf-deco l1">🍃</span>
+    <span class="leaf-deco l2">🌿</span>
+    <div class="header-badge">🌱 Evaluación Interactiva</div>
+    <h1 class="header-title">Simulador Interactivo de Evaluación</h1>
+    <p class="header-subtitle">Prof. Francisco De Jesus Luna Benitez</p>
+    <div class="header-deco">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="tab-bar" id="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('exam')" id="tab-exam">📝 Simulador</button>
+    <button class="tab-btn" onclick="switchTab('guide')" id="tab-guide">📖 Guía de Estudio</button>
+  </div>
+
+  <!-- ============ EXAM TAB ============ -->
+  <div id="tab-content-exam">
+
+    <!-- START SCREEN -->
+    <div class="screen active" id="screen-start">
+      <div class="card">
+        <div class="start-icon">🌿</div>
+        <h2 class="start-title">Ecosistema Escolar Saludable</h2>
+        <p class="start-desc">Lineamientos de Alimentación Saludable en el Sistema Educativo Nacional. Demuestra tus conocimientos respondiendo 30 reactivos de opción múltiple.</p>
+        <div class="info-pills">
+          <span class="pill pill-green">📋 30 Reactivos</span>
+          <span class="pill pill-orange">🎯 3 Opciones por pregunta</span>
+          <span class="pill pill-blue">💡 Retroalimentación inmediata</span>
+        </div>
+        <div class="input-group">
+          <label class="input-label" for="student-name">👤 Nombre del estudiante</label>
+          <input class="input-field" id="student-name" type="text" placeholder="Escribe tu nombre completo..." autocomplete="off" onkeydown="if(event.key==='Enter') startExam()">
+        </div>
+        <button class="btn-primary" onclick="startExam()">🚀 Iniciar Simulador</button>
+      </div>
+    </div>
+
+    <!-- EXAM SCREEN -->
+    <div class="screen" id="screen-exam">
+      <div class="card">
+        <div class="exam-header">
+          <div class="progress-bar-wrap">
+            <span class="progress-label" id="progress-text">1 / 30</span>
+            <div class="progress-track">
+              <div class="progress-fill" id="progress-fill" style="width:3.3%"></div>
+            </div>
+          </div>
+          <div class="exam-meta">
+            <span class="question-counter" id="question-counter">Pregunta 1 de 30</span>
+            <div class="score-live">
+              <span class="score-chip chip-ok">✅ <span id="live-ok">0</span></span>
+              <span class="score-chip chip-err">❌ <span id="live-err">0</span></span>
+            </div>
+          </div>
+        </div>
+        <div class="question-body">
+          <div id="format-badge"></div>
+          <div class="question-text" id="question-text"></div>
+          <div id="question-table"></div>
+          <div class="options-list" id="options-list"></div>
+          <div class="feedback-box" id="feedback-box">
+            <div class="feedback-icon" id="feedback-icon"></div>
+            <div class="feedback-text">
+              <div class="feedback-title" id="feedback-title"></div>
+              <div id="feedback-body"></div>
+            </div>
+          </div>
+        </div>
+        <div class="exam-footer">
+          <button class="btn-primary" id="btn-next" onclick="nextQuestion()">Siguiente pregunta →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTS SCREEN -->
+    <div class="screen" id="screen-results">
+      <div class="card">
+        <div class="results-avatar" id="results-emoji">🏆</div>
+        <div class="results-name" id="results-name">Estudiante</div>
+        <div class="results-label">Resultado del Simulador — Ecosistema Escolar Saludable</div>
+        <div class="stats-grid">
+          <div class="stat-card stat-ok">
+            <div class="stat-num" id="r-ok">0</div>
+            <div class="stat-lbl">Aciertos</div>
+          </div>
+          <div class="stat-card stat-err">
+            <div class="stat-num" id="r-err">0</div>
+            <div class="stat-lbl">Errores</div>
+          </div>
+          <div class="stat-card stat-pct">
+            <div class="stat-num" id="r-pct">0%</div>
+            <div class="stat-lbl">Desempeño</div>
+          </div>
+        </div>
+        <div class="perf-bar-wrap">
+          <div class="perf-bar-track">
+            <div class="perf-bar-fill" id="perf-bar"></div>
+          </div>
+        </div>
+        <div class="motivational-msg" id="motivational-msg"></div>
+        <div class="results-actions">
+          <button class="btn-primary" onclick="showReview()">📋 Revisar respuestas</button>
+          <button class="btn-secondary" onclick="restartExam()">🔄 Reiniciar simulador</button>
+        </div>
+      </div>
+
+      <!-- REVIEW -->
+      <div id="review-section" style="display:none; margin-top:20px;">
+        <div class="card" style="padding:24px 24px;">
+          <h3 style="font-family:'Poppins',sans-serif;color:var(--verde1);font-size:16px;font-weight:700;margin-bottom:16px;">📋 Revisión de Respuestas</h3>
+          <div id="review-list"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end exam tab -->
+
+  <!-- ============ GUIDE TAB ============ -->
+  <div id="tab-content-guide" style="display:none;">
+    <div class="screen active" id="screen-guide">
+      <div class="card">
+        <div class="guide-header">
+          <div class="guide-icon">📘</div>
+          <div>
+            <div class="guide-title">Guía de Estudio y Operación</div>
+            <div class="guide-sub">Lineamientos de Alimentación Saludable en el SEN · Prof. Francisco De Jesus Luna Benitez</div>
+          </div>
+        </div>
+        <div class="pdf-actions">
+          <button class="btn-pdf btn-pdf-view" onclick="togglePDF()">👁️ Ver PDF en el simulador</button>
+          <a class="btn-pdf btn-pdf-open" href="https://drive.google.com/file/d/1WI7qs0bHyxLeKmLLZJPf1z9s4Iy0U66N/view?usp=sharing" target="_blank">↗️ Abrir en nueva pestaña</a>
+        </div>
+        <div class="pdf-frame-wrap" id="pdf-frame-wrap">
+          <iframe id="pdf-iframe" src="" allowfullscreen loading="lazy" title="Guía de Estudio PDF"></iframe>
+        </div>
+        <div style="margin-top:20px;">
+          <p style="font-size:13px;font-weight:700;color:var(--verde1);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">📌 Temas incluidos en la guía</p>
+          <div class="pdf-topics">
+            <div class="topic-chip"><span class="topic-dot" style="background:#e07b2a"></span>ENSANUT 2022 y contexto</div>
+            <div class="topic-chip"><span class="topic-dot" style="background:#2d8a4e"></span>4 Pilares del Ecosistema</div>
+            <div class="topic-chip"><span class="topic-dot" style="background:#4da8da"></span>Zona Verde y Zona Negra</div>
+            <div class="topic-chip"><span class="topic-dot" style="background:#7b2dd4"></span>Enemigos de la nutrición</div>
+            <div class="topic-chip"><span class="topic-dot" style="background:#2176ae"></span>Hidratación Inteligente</div>
+            <div class="topic-chip"><span class="topic-dot" style="background:#4caf73"></span>Plato del Bien Comer</div>
+            <div class="topic-chip"><span class="topic-dot" style="background:#f5c842"></span>Distribución calórica diaria</div>
+            <div class="topic-chip"><span class="topic-dot" style="background:#e84040"></span>Higiene Térmica NOM-251</div>
+            <div class="topic-chip"><span class="topic-dot" style="background:#e07b2a"></span>Cocina Segura (4 estándares)</div>
+            <div class="topic-chip"><span class="topic-dot" style="background:#2d8a4e"></span>Corresponsabilidad institucional</div>
+            <div class="topic-chip"><span class="topic-dot" style="background:#4da8da"></span>Ruta de implementación 180 días</div>
+            <div class="topic-chip"><span class="topic-dot" style="background:#7b2dd4"></span>Beneficios del ecosistema</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end container -->
+
+<script>
+// ============================================================
+// DATA: 30 QUESTIONS
+// ============================================================
+const QUESTIONS = [
+  {
+    id: 1,
+    format: 'cd',
+    formatLabel: '📋 Cuestionamiento directo',
+    text: '¿Qué porcentaje de la población escolar de 5 a 11 años vive con sobrepeso u obesidad, según la ENSANUT 2022?',
+    table: null,
+    options: [
+      { letter: 'A', text: '27.3% de la población escolar en ese rango de edad.' },
+      { letter: 'B', text: '43.7% de la población escolar en ese rango de edad.' },
+      { letter: 'C', text: '37.3% de la población escolar en ese rango de edad.' }
+    ],
+    correct: 'C',
+    feedback: 'La ENSANUT 2022 reporta que el 37.3% de la población escolar de 5 a 11 años vive con sobrepeso u obesidad, lo que representa casi 4 millones de educandos cuyo desarrollo integral está en riesgo.'
+  },
+  {
+    id: 2,
+    format: 'cd',
+    formatLabel: '📋 Cuestionamiento directo',
+    text: '¿Cuál es el pilar del ecosistema alimentario escolar que establece que la salud y nutrición del estudiante están por encima de cualquier interés comercial, garantizando ausencia total de conflicto de intereses?',
+    table: null,
+    options: [
+      { letter: 'A', text: 'Interés Superior de la Niñez.' },
+      { letter: 'B', text: 'Inclusión y Cultura.' },
+      { letter: 'C', text: 'Pedagogía Activa.' }
+    ],
+    correct: 'A',
+    feedback: 'El pilar "Interés Superior de la Niñez" es el que garantiza que la salud y nutrición del estudiante estén por encima de cualquier interés comercial o negocio privado, estableciendo ausencia total de conflicto de intereses.'
+  },
+  {
+    id: 3,
+    format: 'comp',
+    formatLabel: '✏️ Completamiento',
+    text: 'El pilar de Sostenibilidad y Entorno establece que se deben priorizar alimentos naturales, frescos y de temporada, reducir el impacto ambiental, minimizar el desperdicio y…',
+    table: null,
+    options: [
+      { letter: 'A', text: '…fomentar el consumo de productos industrializados de bajo costo para beneficiar a las familias.' },
+      { letter: 'B', text: '…comprar a productores locales de pequeña y mediana escala.' },
+      { letter: 'C', text: '…importar insumos certificados de origen internacional que garanticen estándares de calidad.' }
+    ],
+    correct: 'B',
+    feedback: 'El pilar de Sostenibilidad y Entorno incluye explícitamente la compra a productores locales de pequeña y mediana escala, como parte de su estrategia de reducción de impacto ambiental y fortalecimiento comunitario.'
+  },
+  {
+    id: 4,
+    format: 'cd',
+    formatLabel: '📋 Cuestionamiento directo',
+    text: '¿Cuál de los siguientes alimentos pertenece a la Zona Verde y puede ofrecerse en los espacios escolares según los lineamientos de alimentación saludable?',
+    table: null,
+    options: [
+      { letter: 'A', text: 'Fruta en almíbar con azúcar añadida y conservadores.' },
+      { letter: 'B', text: 'Bebida con edulcorante natural para reducir calorías.' },
+      { letter: 'C', text: 'Frutas y verduras crudas, con cáscara y de temporada.' }
+    ],
+    correct: 'C',
+    feedback: 'La Zona Verde permite frutas y verduras crudas, con cáscara y de temporada, pues son ingredientes naturales o mínimamente procesados, sin azúcares añadidos ni aditivos. Las opciones A y B contienen elementos prohibidos (almíbar/azúcar y edulcorantes).'
+  },
+  {
+    id: 5,
+    format: 'cd',
+    formatLabel: '📋 Cuestionamiento directo',
+    text: 'De acuerdo con los lineamientos de alimentación saludable, ¿qué tipo de alimentos quedan estrictamente prohibidos en los espacios escolares según la Zona Negra?',
+    table: null,
+    options: [
+      { letter: 'A', text: 'Alimentos preenvasados con sellos o leyendas del etiquetado frontal de advertencia.' },
+      { letter: 'B', text: 'Cereales integrales como avena y amaranto.' },
+      { letter: 'C', text: 'Leguminosas secas sin freír como frijol y lenteja.' }
+    ],
+    correct: 'A',
+    feedback: 'La Zona Negra prohíbe explícitamente los alimentos preenvasados con sellos o leyendas del etiquetado frontal (octágonos de advertencia), que indican exceso de azúcares, grasas, sodio u otros nutrientes críticos. Los cereales integrales y leguminosas son Zona Verde.'
+  },
+  {
+    id: 6,
+    format: 'rel',
+    formatLabel: '🔗 Relación de elementos',
+    text: 'Seleccione la opción que relacione correctamente el pilar del ecosistema alimentario escolar con su descripción.',
+    table: {
+      cols: ['Pilar', 'Descripción'],
+      rows: [
+        ['1. Inclusión y Cultura', 'a) Integrar la nutrición mediante huertos pedagógicos, involucrando a maestros, padres y alumnos.'],
+        ['2. Pedagogía Activa', 'b) Respetar tradiciones culinarias y garantizar opciones para estudiantes con alergias o necesidades dietéticas específicas.'],
+        ['3. Sostenibilidad y Entorno', 'c) Priorizar alimentos frescos, reducir el impacto ambiental y comprar a productores locales.']
+      ]
+    },
+    options: [
+      { letter: 'A', text: '1c, 2a, 3b' },
+      { letter: 'B', text: '1b, 2a, 3c' },
+      { letter: 'C', text: '1a, 2c, 3b' }
+    ],
+    correct: 'B',
+    feedback: 'La relación correcta es: Inclusión y Cultura → respetar tradiciones y atender necesidades específicas (1b); Pedagogía Activa → huertos pedagógicos con toda la comunidad educativa (2a); Sostenibilidad → alimentos frescos y productores locales (3c).'
+  },
+  {
+    id: 7,
+    format: 'cd',
+    formatLabel: '📋 Cuestionamiento directo',
+    text: 'Según los lineamientos de hidratación inteligente, ¿cómo debe ofrecerse el agua simple potable en los planteles educativos?',
+    table: null,
+    options: [
+      { letter: 'A', text: 'A libre demanda, sin saborizantes, fomentando el uso de bebederos escolares seguros.' },
+      { letter: 'B', text: 'En presentaciones individuales envasadas por cuestiones de higiene y control.' },
+      { letter: 'C', text: 'Con un máximo de dos raciones diarias para evitar el desperdicio de agua.' }
+    ],
+    correct: 'A',
+    feedback: 'El agua simple potable es la fuente de hidratación universal y obligatoria. Debe ofrecerse a libre demanda, sin saborizantes ni aditivos, fomentando el uso de bebederos escolares seguros como vehículo principal de una vida saludable.'
+  },
+  {
+    id: 8,
+    format: 'comp',
+    formatLabel: '✏️ Completamiento',
+    text: 'El "agua de fruta natural" se considera una excepción controlada en los lineamientos de hidratación. Solo se permite un máximo de dos veces por semana, preparada exclusivamente con fruta fresca local y…',
+    table: null,
+    options: [
+      { letter: 'A', text: '…con una cucharada de azúcar mascabado para mejorar el sabor.' },
+      { letter: 'B', text: '…diluida con bebida isotónica para reforzar electrolitos minerales.' },
+      { letter: 'C', text: '…estrictamente sin azúcar añadida de ningún tipo.' }
+    ],
+    correct: 'C',
+    feedback: 'El agua de fruta natural es la única excepción a la regla del agua simple, pero está estrictamente condicionada: máximo dos veces por semana, con fruta fresca local y absolutamente sin ningún tipo de azúcar añadida.'
+  },
+  {
+    id: 9,
+    format: 'cd',
+    formatLabel: '📋 Cuestionamiento directo',
+    text: 'De acuerdo con el Plato del Bien Comer Escolar, ¿qué proporción debe ocupar el grupo de verduras y frutas para asegurar saciedad sin excesos calóricos?',
+    table: null,
+    options: [
+      { letter: 'A', text: '25% del plato, combinadas con cereales integrales.' },
+      { letter: 'B', text: '50% del plato, libres, frescas, crudas y variadas.' },
+      { letter: 'C', text: '30% del plato, preferentemente cocidas al vapor.' }
+    ],
+    correct: 'B',
+    feedback: 'El Plato del Bien Comer Escolar establece que el 50% debe ser verduras y frutas: libres, frescas, crudas y variadas, ya que dan color, fibra y vitaminas. Los otros dos grupos (cereales integrales y proteína) ocupan 25% cada uno.'
+  },
+  {
+    id: 10,
+    format: 'comp',
+    formatLabel: '✏️ Completamiento',
+    text: 'En el Plato del Bien Comer Escolar, el 25% correspondiente a cereales integrales incluye avena, arroz, pasta integral o tortilla de maíz nixtamalizado. Esta última es considerada…',
+    table: null,
+    options: [
+      { letter: 'A', text: '…una excelente fuente de calcio y fibra para los educandos.' },
+      { letter: 'B', text: '…recomendable únicamente para educandos con intolerancia al gluten.' },
+      { letter: 'C', text: '…un alimento de zona negra cuando se combina con frijoles en el menú.' }
+    ],
+    correct: 'A',
+    feedback: 'La tortilla de maíz nixtamalizado es señalada expresamente en los lineamientos como una excelente fuente de calcio y fibra, lo que la convierte en un cereal integral altamente recomendado dentro del Plato del Bien Comer Escolar.'
+  },
+  {
+    id: 11,
+    format: 'cd',
+    formatLabel: '📋 Cuestionamiento directo',
+    text: 'Según la distribución calórica diaria establecida en los lineamientos, ¿qué porcentaje del valor calórico total debe aportar el refrigerio escolar?',
+    table: null,
+    options: [
+      { letter: 'A', text: '25%, para equipararse con el desayuno en valor energético.' },
+      { letter: 'B', text: '30%, siendo la toma de mayor energía del día escolar.' },
+      { letter: 'C', text: '15%, manteniendo la alerta sin causar picos de glucosa.' }
+    ],
+    correct: 'C',
+    feedback: 'El refrigerio escolar debe aportar el 15% del valor calórico total. Su función específica es mantener la alerta y la saciedad durante la jornada, sin causar picos de glucosa. El desayuno aporta 25% y la comida escolar 30%.'
+  },
+  {
+    id: 12,
+    format: 'cd',
+    formatLabel: '📋 Cuestionamiento directo',
+    text: 'Los lineamientos establecen que los educandos no deben pasar más de cuatro horas en ayuno. ¿Cuál es el propósito central de esta disposición?',
+    table: null,
+    options: [
+      { letter: 'A', text: 'Reducir el ausentismo escolar causado por enfermedades gastrointestinales.' },
+      { letter: 'B', text: 'Garantizar que el cerebro del estudiante cuente con combustible constante para su rendimiento cognitivo.' },
+      { letter: 'C', text: 'Cumplir con los tiempos de servicio establecidos para el personal de cocina.' }
+    ],
+    correct: 'B',
+    feedback: 'El cerebro de un estudiante requiere combustible constante. La regla de las 4 horas sin ayuno busca mantener el rendimiento cognitivo, la concentración y la alerta durante toda la jornada escolar, pues el hambre impacta directamente el aprendizaje.'
+  },
+  {
+    id: 13,
+    format: 'cd',
+    formatLabel: '📋 Cuestionamiento directo',
+    text: '¿Qué porcentaje del valor calórico total debe representar la comida escolar, siendo la carga principal para el turno vespertino y las escuelas de tiempo completo?',
+    table: null,
+    options: [
+      { letter: 'A', text: '30% del valor calórico total diario.' },
+      { letter: 'B', text: '15% del valor calórico total diario.' },
+      { letter: 'C', text: '25% del valor calórico total diario.' }
+    ],
+    correct: 'A',
+    feedback: 'La comida escolar debe representar el 30% del valor calórico total diario. Es la carga energética principal, diseñada para sostener el turno vespertino y las escuelas de tiempo completo, superando al desayuno (25%) y al refrigerio (15%).'
+  },
+  {
+    id: 14,
+    format: 'cd',
+    formatLabel: '📋 Cuestionamiento directo',
+    text: 'Según la NOM-251-SSA1-2009, ¿cuál es la temperatura mínima de cocción interna requerida para aves, embutidos, carne rellena y cualquier proceso de recalentado?',
+    table: null,
+    options: [
+      { letter: 'A', text: '63°C (145°F), temperatura para pescado y carne de res en trozo.' },
+      { letter: 'B', text: '68°C (154°F), temperatura para cerdo y carnes molidas.' },
+      { letter: 'C', text: '74°C (165°F), temperatura mínima para aves, embutidos y recalentados.' }
+    ],
+    correct: 'C',
+    feedback: 'La NOM-251-SSA1-2009 establece 74°C (165°F) como temperatura mínima de cocción interna para aves, embutidos, carne rellena y cualquier recalentado. Es la temperatura más alta del protocolo térmico, que garantiza la eliminación de patógenos.'
+  },
+  {
+    id: 15,
+    format: 'cd',
+    formatLabel: '📋 Cuestionamiento directo',
+    text: 'De acuerdo con los criterios térmicos de la NOM-251-SSA1-2009, ¿cuál es la temperatura máxima de la Zona Segura Fría para el mantenimiento correcto en barras frías escolares?',
+    table: null,
+    options: [
+      { letter: 'A', text: 'Menor a 4°C (39°F).' },
+      { letter: 'B', text: 'Menor a 7°C (45°F).' },
+      { letter: 'C', text: 'Menor a 10°C (50°F).' }
+    ],
+    correct: 'B',
+    feedback: 'La Zona Segura Fría se define como temperaturas menores a 7°C (45°F). Este es el límite máximo establecido por la NOM-251-SSA1-2009 para el mantenimiento correcto de alimentos en barras frías dentro de los planteles educativos.'
+  },
+  {
+    id: 16,
+    format: 'rel',
+    formatLabel: '🔗 Relación de elementos',
+    text: 'Seleccione la opción que relacione correctamente la temperatura de cocción con el tipo de alimento, según la NOM-251-SSA1-2009.',
+    table: {
+      cols: ['Temperatura', 'Tipo de alimento'],
+      rows: [
+        ['1. 63°C (145°F)', 'a) Cocción de aves, embutidos y cualquier recalentado.'],
+        ['2. 68°C (154°F)', 'b) Cocción interna de pescado, carne de res en trozo y huevo de consumo inmediato.'],
+        ['3. 74°C (165°F)', 'c) Cocción interna de cerdo y carnes molidas.']
+      ]
+    },
+    options: [
+      { letter: 'A', text: '1b, 2c, 3a' },
+      { letter: 'B', text: '1a, 2b, 3c' },
+      { letter: 'C', text: '1c, 2a, 3b' }
+    ],
+    correct: 'A',
+    feedback: 'La NOM-251-SSA1-2009 establece: 63°C para pescado, carne de res en trozo y huevo (1b); 68°C para cerdo y carnes molidas (2c); y 74°C para aves, embutidos y recalentados (3a). Mayor riesgo de patógenos = mayor temperatura requerida.'
+  },
+  {
+    id: 17,
+    format: 'cd',
+    formatLabel: '📋 Cuestionamiento directo',
+    text: '¿Qué medida específica establece el estándar de cocina segura escolar para prevenir la contaminación cruzada entre alimentos crudos y cocidos?',
+    table: null,
+    options: [
+      { letter: 'A', text: 'Refrigerar todos los alimentos crudos y cocidos juntos para optimizar el espacio disponible.' },
+      { letter: 'B', text: 'Lavar todos los utensilios únicamente al finalizar la jornada completa de servicio.' },
+      { letter: 'C', text: 'Usar trapos de uso exclusivo diferenciados (uno para mesas, uno para pisos, uno para contacto directo) y separar estrictamente utensilios para crudos y cocidos.' }
+    ],
+    correct: 'C',
+    feedback: 'La barrera contra la contaminación cruzada exige trapos de uso exclusivo y diferenciado según su función, además de separación estricta de utensilios para alimentos crudos y cocidos. Esta práctica evita la transferencia de microorganismos patógenos entre alimentos.'
+  },
+  {
+    id: 18,
+    format: 'ord',
+    formatLabel: '🔢 Ordenamiento',
+    text: 'Ordene los cuatro estándares de cocina segura escolar en la secuencia lógica correcta según los lineamientos, del proceso inicial al control institucional final.',
+    table: {
+      cols: ['Núm.', 'Estándar'],
+      rows: [
+        ['1.', 'Regla del descarte: prohibido usar alimentos con fecha de caducidad vencida o latas abombadas.'],
+        ['2.', 'Desinfección rigurosa: lavar vegetales a chorro de agua con estropajo y desinfectante alimenticio.'],
+        ['3.', 'Personal calificado: todos los encargados deben estar certificados en manejo higiénico.'],
+        ['4.', 'Barrera contra contaminación cruzada: trapos exclusivos y separar utensilios para crudos y cocidos.']
+      ]
+    },
+    options: [
+      { letter: 'A', text: '3, 1, 4, 2' },
+      { letter: 'B', text: '2, 4, 1, 3' },
+      { letter: 'C', text: '1, 2, 3, 4' }
+    ],
+    correct: 'B',
+    feedback: 'La secuencia lógica es: primero la desinfección rigurosa (base del proceso limpio), luego la barrera contra contaminación cruzada (separación de utensilios), después la regla del descarte (control de insumos) y finalmente el personal calificado (garantía institucional permanente).'
+  },
+  {
+    id: 19,
+    format: 'cd',
+    formatLabel: '📋 Cuestionamiento directo',
+    text: 'De acuerdo con el principio de corresponsabilidad institucional, ¿cuál es la función específica de los Comités de Alimentación, integrados por madres, padres y alumnos?',
+    table: null,
+    options: [
+      { letter: 'A', text: 'Ejercer la contraloría social, proponer mejoras continuas y organizar huertos pedagógicos.' },
+      { letter: 'B', text: 'Aplicar sanciones directas a los proveedores que incumplan los lineamientos alimentarios.' },
+      { letter: 'C', text: 'Emitir las certificaciones de manejo higiénico para el personal del expendio escolar.' }
+    ],
+    correct: 'A',
+    feedback: 'Los Comités de Alimentación tienen un rol participativo y comunitario: ejercen la contraloría social (vigilancia ciudadana), proponen mejoras continuas al servicio y organizan huertos pedagógicos. La aplicación de sanciones corresponde a las autoridades, no a los comités.'
+  },
+  {
+    id: 20,
+    format: 'cd',
+    formatLabel: '📋 Cuestionamiento directo',
+    text: 'Según el modelo de corresponsabilidad institucional del ecosistema escolar saludable, ¿cuál es la responsabilidad principal de las Secretarías (SEP, Salud y COFEPRIS)?',
+    table: null,
+    options: [
+      { letter: 'A', text: 'Rescindir directamente los contratos de proveedores incumplidos dentro de los planteles.' },
+      { letter: 'B', text: 'Organizar los huertos pedagógicos en coordinación con los comités de padres de familia.' },
+      { letter: 'C', text: 'Generar campañas, inspeccionar planteles y aplicar sanciones ante infracciones a la Ley General de Salud.' }
+    ],
+    correct: 'C',
+    feedback: 'Las Secretarías (SEP, Salud, COFEPRIS) tienen la función de supervisión y sanción a nivel sistémico: generan campañas de difusión, inspeccionan los planteles a nivel nacional y aplican sanciones ante infracciones a la Ley General de Salud.'
+  },
+  {
+    id: 21,
+    format: 'cd',
+    formatLabel: '📋 Cuestionamiento directo',
+    text: 'Los lineamientos de alimentación saludable constituyen un mandato federal simultáneo para todo el Sistema Educativo Nacional. ¿En cuántos días naturales debe completarse su implementación a partir de la publicación en el DOF?',
+    table: null,
+    options: [
+      { letter: 'A', text: '90 días naturales a partir de la publicación.' },
+      { letter: 'B', text: '180 días naturales a partir de la publicación.' },
+      { letter: 'C', text: '365 días naturales a partir de la publicación.' }
+    ],
+    correct: 'B',
+    feedback: 'El plazo de implementación es de 180 días naturales a partir de la publicación en el Diario Oficial de la Federación (DOF). Este mandato es simultáneo para todos los niveles: educación básica, media superior, formación para el trabajo e instituciones de educación superior.'
+  },
+  {
+    id: 22,
+    format: 'cd',
+    formatLabel: '📋 Cuestionamiento directo',
+    text: '¿Por qué están prohibidos los edulcorantes —tanto sintéticos como naturales— en las preparaciones escolares, según los lineamientos de tolerancia cero?',
+    table: null,
+    options: [
+      { letter: 'A', text: 'Porque acostumbran a los niños a sabores hiperdulces y fomentan el posterior consumo de azúcares.' },
+      { letter: 'B', text: 'Porque su precio elevado los hace inaccesibles para los comedores escolares de bajos recursos.' },
+      { letter: 'C', text: 'Porque la NOM-251-SSA1-2009 los clasifica como aditivos de riesgo biológico para menores.' }
+    ],
+    correct: 'A',
+    feedback: 'Los edulcorantes están prohibidos porque —ya sean sintéticos o naturales— acostumbran a los niños a sabores hiperdulces, lo que fomenta el consumo de azúcares y dificulta la adopción de hábitos alimentarios saludables a largo plazo. La escuela no debe condicionar el paladar.'
+  },
+  {
+    id: 23,
+    format: 'cd',
+    formatLabel: '📋 Cuestionamiento directo',
+    text: '¿Por qué están prohibidos los jugos y néctares, incluso los elaborados con fruta "natural", en los espacios escolares según los lineamientos?',
+    table: null,
+    options: [
+      { letter: 'A', text: 'Porque su costo de producción los convierte en productos de alto valor comercial no accesible.' },
+      { letter: 'B', text: 'Porque contienen conservadores artificiales que afectan el sistema nervioso infantil.' },
+      { letter: 'C', text: 'Porque carecen de la fibra original de la fruta y concentran los azúcares; la fruta se mastica, no se bebe.' }
+    ],
+    correct: 'C',
+    feedback: 'Incluso los jugos naturales son problemáticos porque al licuar o exprimir la fruta se pierde su fibra original y se concentran los azúcares. El principio es claro según los lineamientos: la fruta se mastica, no se bebe, para aprovechar todos sus nutrientes y fibra.'
+  },
+  {
+    id: 24,
+    format: 'cd',
+    formatLabel: '📋 Cuestionamiento directo',
+    text: 'La maestra detecta que un grupo del turno vespertino lleva más de cinco horas sin comer desde el refrigerio de la mañana. Según los lineamientos, ¿qué principio está siendo vulnerado en esta situación?',
+    table: null,
+    options: [
+      { letter: 'A', text: 'La regla de hidratación inteligente que exige acceso continuo al agua simple.' },
+      { letter: 'B', text: 'El lineamiento que establece que los educandos no deben pasar más de 4 horas en ayuno.' },
+      { letter: 'C', text: 'El protocolo de desinfección rigurosa de los espacios de preparación de alimentos.' }
+    ],
+    correct: 'B',
+    feedback: 'Los lineamientos establecen que los educandos no deben pasar más de 4 horas en ayuno, pues el cerebro requiere combustible constante. Al superar las 5 horas sin alimento, se vulnera directamente este principio que protege el rendimiento cognitivo y la salud escolar.'
+  },
+  {
+    id: 25,
+    format: 'cd',
+    formatLabel: '📋 Cuestionamiento directo',
+    text: 'De acuerdo con los nuevos lineamientos de alimentación en el Sistema Educativo Nacional, ¿cuál es el objetivo central que fundamenta toda la estrategia del ecosistema escolar saludable?',
+    table: null,
+    options: [
+      { letter: 'A', text: 'Garantizar el derecho constitucional a una alimentación nutritiva, suficiente y de calidad.' },
+      { letter: 'B', text: 'Incrementar los ingresos económicos del personal que opera los comedores escolares.' },
+      { letter: 'C', text: 'Reducir el tiempo dedicado a la preparación de alimentos durante la jornada escolar.' }
+    ],
+    correct: 'A',
+    feedback: 'El objetivo central es garantizar el derecho constitucional a una alimentación nutritiva, suficiente y de calidad. Los lineamientos reconocen que la escuela no solo es un centro académico: es el entorno protector primario donde se moldean los hábitos para toda la vida.'
+  },
+  {
+    id: 26,
+    format: 'rel',
+    formatLabel: '🔗 Relación de elementos',
+    text: 'Seleccione la opción que relacione correctamente el actor institucional con su responsabilidad dentro del modelo de corresponsabilidad del ecosistema escolar saludable.',
+    table: {
+      cols: ['Actor institucional', 'Responsabilidad'],
+      rows: [
+        ['1. Autoridades Escolares', 'a) Cumplir lineamientos, ofrecer insumos permitidos a precios accesibles y contar con personal certificado.'],
+        ['2. Proveedores', 'b) Generar campañas, inspeccionar planteles y aplicar sanciones ante infracciones.'],
+        ['3. Secretarías (SEP, Salud, COFEPRIS)', 'c) Vigilar capacitación del personal, rescindir contratos a proveedores incumplidos y denunciar ventas ilícitas.']
+      ]
+    },
+    options: [
+      { letter: 'A', text: '1a, 2c, 3b' },
+      { letter: 'B', text: '1b, 2a, 3c' },
+      { letter: 'C', text: '1c, 2a, 3b' }
+    ],
+    correct: 'C',
+    feedback: 'La relación correcta es: Autoridades Escolares → vigilar, rescindir contratos y denunciar ventas ilícitas (gestión interna) (1c); Proveedores → cumplir lineamientos con insumos permitidos y personal certificado (2a); Secretarías → campañas, inspección y sanciones sistémicas (3b).'
+  },
+  {
+    id: 27,
+    format: 'ord',
+    formatLabel: '🔢 Ordenamiento',
+    text: 'Ordene las tres tomas de alimentación del día escolar de mayor a menor porcentaje del valor calórico total, según los lineamientos de distribución calórica diaria.',
+    table: {
+      cols: ['Toma', 'Porcentaje calórico'],
+      rows: [
+        ['Desayuno', '25%'],
+        ['Refrigerio escolar', '15%'],
+        ['Comida escolar', '30%']
+      ]
+    },
+    options: [
+      { letter: 'A', text: 'Desayuno (25%), Comida escolar (30%), Refrigerio (15%)' },
+      { letter: 'B', text: 'Comida escolar (30%), Desayuno (25%), Refrigerio escolar (15%)' },
+      { letter: 'C', text: 'Refrigerio escolar (15%), Desayuno (25%), Comida escolar (30%)' }
+    ],
+    correct: 'B',
+    feedback: 'El orden correcto de mayor a menor porcentaje calórico es: Comida escolar (30%) → Desayuno (25%) → Refrigerio escolar (15%). La comida escolar representa la mayor carga energética del día, siendo la principal fuente de combustible para el turno vespertino.'
+  },
+  {
+    id: 28,
+    format: 'cd',
+    formatLabel: '📋 Cuestionamiento directo',
+    text: '¿Cuál es la norma oficial mexicana que establece los criterios térmicos obligatorios para garantizar la inocuidad en la preparación y mantenimiento de alimentos dentro de los espacios escolares?',
+    table: null,
+    options: [
+      { letter: 'A', text: 'NOM-251-SSA1-2009, sobre prácticas de higiene para el proceso de alimentos.' },
+      { letter: 'B', text: 'NOM-043-SSA2-2012, sobre servicios básicos de salud en materia alimentaria.' },
+      { letter: 'C', text: 'NOM-051-SCFI/SSA1-2010, sobre etiquetado de alimentos y bebidas.' }
+    ],
+    correct: 'A',
+    feedback: 'La NOM-251-SSA1-2009 establece las prácticas de higiene para el proceso de alimentos, bebidas no alcohólicas y suplementos alimenticios. Es la norma que define los criterios térmicos (temperaturas de cocción y mantenimiento) aplicables en los comedores escolares.'
+  },
+  {
+    id: 29,
+    format: 'cd',
+    formatLabel: '📋 Cuestionamiento directo',
+    text: 'Un proveedor del expendio escolar ofrece una bebida energizante argumentando que su cafeína es de origen natural (extracto de café). De acuerdo con los lineamientos de tolerancia cero, ¿cuál es la decisión correcta?',
+    table: null,
+    options: [
+      { letter: 'A', text: 'Aceptarla si la concentración de cafeína es menor al 0.5% del volumen total del producto.' },
+      { letter: 'B', text: 'Autorizarla únicamente para estudiantes de secundaria mayores de 12 años con autorización paterna.' },
+      { letter: 'C', text: 'Rechazarla, pues las fuentes de cafeína están totalmente prohibidas en alimentos y bebidas para estudiantes, sin importar su origen.' }
+    ],
+    correct: 'C',
+    feedback: 'Los lineamientos son categóricos: las fuentes de cafeína están totalmente prohibidas en alimentos y bebidas para estudiantes, sin importar si son de origen natural o sintético, ni la concentración ni el nivel educativo del estudiante. No hay excepciones.'
+  },
+  {
+    id: 30,
+    format: 'comp',
+    formatLabel: '✏️ Completamiento',
+    text: 'La implementación de los lineamientos de alimentación saludable en el Sistema Educativo Nacional es un mandato federal simultáneo e irrenunciable, por lo que los contratos con proveedores previos que excedan el plazo de 180 días…',
+    table: null,
+    options: [
+      { letter: 'A', text: '…podrán renovarse con cláusulas de excepción firmadas por la autoridad educativa estatal.' },
+      { letter: 'B', text: '…deberán adecuarse inmediatamente a las nuevas reglas sanitarias establecidas.' },
+      { letter: 'C', text: '…quedarán vigentes hasta el siguiente ciclo escolar como período oficial de transición.' }
+    ],
+    correct: 'B',
+    feedback: 'Los lineamientos no contemplan excepciones ni períodos de gracia: cualquier contrato previo con proveedores que exceda el plazo de 180 días naturales deberá adecuarse inmediatamente a las nuevas reglas sanitarias. La implementación es obligatoria y simultánea en todo el Sistema Educativo Nacional.'
+  }
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let currentQ = 0;
+let score = 0;
+let errors = 0;
+let answered = false;
+let studentName = '';
+let userAnswers = [];
+
+// ============================================================
+// UTILS
+// ============================================================
+function $(id) { return document.getElementById(id); }
+
+function switchTab(tab) {
+  $('tab-content-exam').style.display = tab === 'exam' ? '' : 'none';
+  $('tab-content-guide').style.display = tab === 'guide' ? '' : 'none';
+  $('tab-exam').classList.toggle('active', tab === 'exam');
+  $('tab-guide').classList.toggle('active', tab === 'guide');
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+
+// ============================================================
+// START
+// ============================================================
+function startExam() {
+  const name = $('student-name').value.trim();
+  if (!name) {
+    $('student-name').focus();
+    $('student-name').style.borderColor = 'var(--rojo)';
+    $('student-name').placeholder = '⚠️ Por favor ingresa tu nombre...';
+    setTimeout(() => {
+      $('student-name').style.borderColor = 'var(--verde3)';
+      $('student-name').placeholder = 'Escribe tu nombre completo...';
+    }, 2000);
+    return;
+  }
+  studentName = name;
+  currentQ = 0; score = 0; errors = 0;
+  userAnswers = [];
+  answered = false;
+  showScreen('screen-exam');
+  renderQuestion();
+}
+
+// ============================================================
+// RENDER QUESTION
+// ============================================================
+function renderQuestion() {
+  const q = QUESTIONS[currentQ];
+  answered = false;
+
+  // Progress
+  const pct = ((currentQ) / 30) * 100;
+  $('progress-fill').style.width = pct + '%';
+  $('progress-text').textContent = (currentQ + 1) + ' / 30';
+  $('question-counter').textContent = 'Pregunta ' + (currentQ + 1) + ' de 30';
+  $('live-ok').textContent = score;
+  $('live-err').textContent = errors;
+
+  // Format badge
+  const fmtClass = { cd: 'fmt-cd', comp: 'fmt-comp', ord: 'fmt-ord', rel: 'fmt-rel' }[q.format] || 'fmt-cd';
+  $('format-badge').innerHTML = `<span class="format-badge ${fmtClass}">${q.formatLabel}</span>`;
+
+  // Question text
+  $('question-text').textContent = q.text;
+
+  // Table
+  if (q.table) {
+    let html = `<table class="rel-table"><thead><tr>`;
+    q.table.cols.forEach(c => html += `<th>${c}</th>`);
+    html += '</tr></thead><tbody>';
+    q.table.rows.forEach(r => {
+      html += '<tr>';
+      r.forEach(cell => html += `<td>${cell}</td>`);
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    $('question-table').innerHTML = html;
+  } else {
+    $('question-table').innerHTML = '';
+  }
+
+  // Options
+  const ol = $('options-list');
+  ol.innerHTML = '';
+  q.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.setAttribute('data-letter', opt.letter);
+    btn.innerHTML = `<span class="option-letter">${opt.letter}</span><span>${opt.text}</span>`;
+    btn.onclick = () => selectAnswer(opt.letter);
+    ol.appendChild(btn);
+  });
+
+  // Feedback
+  const fb = $('feedback-box');
+  fb.className = 'feedback-box';
+  fb.style.display = 'none';
+
+  // Next btn
+  $('btn-next').style.display = 'none';
+
+  // Scroll top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============================================================
+// SELECT ANSWER
+// ============================================================
+function selectAnswer(letter) {
+  if (answered) return;
+  answered = true;
+
+  const q = QUESTIONS[currentQ];
+  const isCorrect = letter === q.correct;
+  const btns = document.querySelectorAll('.option-btn');
+
+  btns.forEach(btn => {
+    const bl = btn.getAttribute('data-letter');
+    btn.disabled = true;
+    if (bl === q.correct) {
+      btn.classList.add('correct');
+    } else if (bl === letter && !isCorrect) {
+      btn.classList.add('incorrect');
+    } else {
+      btn.classList.add('disabled-show');
+    }
+  });
+
+  // Record
+  userAnswers.push({ q, chosen: letter, correct: isCorrect });
+
+  // Score
+  if (isCorrect) score++;
+  else errors++;
+  $('live-ok').textContent = score;
+  $('live-err').textContent = errors;
+
+  // Feedback
+  const fb = $('feedback-box');
+  const fbIcon = $('feedback-icon');
+  const fbTitle = $('feedback-title');
+  const fbBody = $('feedback-body');
+
+  if (isCorrect) {
+    fb.className = 'feedback-box ok visible';
+    fbIcon.textContent = '✅';
+    fbTitle.textContent = '¡Correcto! Muy bien.';
+    fbBody.textContent = q.feedback;
+  } else {
+    fb.className = 'feedback-box fail visible';
+    fbIcon.textContent = '❌';
+    fbTitle.textContent = `Respuesta incorrecta. La opción correcta es ${q.correct}.`;
+    fbBody.textContent = q.feedback;
+  }
+
+  fb.style.display = '';
+  $('btn-next').style.display = 'inline-flex';
+}
+
+// ============================================================
+// NEXT QUESTION
+// ============================================================
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= 30) {
+    showResults();
+  } else {
+    // Transition
+    const card = document.querySelector('#screen-exam .card');
+    card.style.opacity = '0';
+    card.style.transform = 'translateX(20px)';
+    card.style.transition = 'all 0.25s ease';
+    setTimeout(() => {
+      renderQuestion();
+      card.style.opacity = '1';
+      card.style.transform = 'translateX(0)';
+    }, 250);
+  }
+}
+
+// ============================================================
+// RESULTS
+// ============================================================
+function showResults() {
+  showScreen('screen-results');
+  const pct = Math.round((score / 30) * 100);
+
+  $('results-name').textContent = studentName;
+  $('r-ok').textContent = score;
+  $('r-err').textContent = errors;
+  $('r-pct').textContent = pct + '%';
+
+  // Emoji & message
+  let emoji, msg;
+  if (pct >= 90) {
+    emoji = '🏆';
+    msg = `¡Excelente desempeño, ${studentName}! Dominás los lineamientos del ecosistema escolar saludable. Eres un referente para tu comunidad educativa.`;
+    launchConfetti();
+  } else if (pct >= 70) {
+    emoji = '⭐';
+    msg = `Buen trabajo, ${studentName}. Tu conocimiento sobre los lineamientos de alimentación es sólido. Repasa los temas donde tuviste dificultades para fortalecer tu dominio.`;
+  } else if (pct >= 50) {
+    emoji = '📘';
+    msg = `Sigue practicando, ${studentName}. Tienes una base de conocimientos. Revisa la Guía de Estudio con atención y vuelve a intentarlo para mejorar tu desempeño.`;
+  } else {
+    emoji = '🌱';
+    msg = `No te desanimes, ${studentName}. Todo aprendizaje comienza con el primer paso. Consulta la Guía de Estudio detenidamente y realiza el simulador nuevamente. ¡Tú puedes!`;
+  }
+
+  $('results-emoji').textContent = emoji;
+  $('motivational-msg').textContent = msg;
+
+  // Animated bar
+  setTimeout(() => {
+    $('perf-bar').style.width = pct + '%';
+  }, 300);
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============================================================
+// REVIEW
+// ============================================================
+function showReview() {
+  const rev = $('review-section');
+  if (rev.style.display === 'block') { rev.style.display = 'none'; return; }
+  rev.style.display = 'block';
+
+  const list = $('review-list');
+  list.innerHTML = '';
+
+  userAnswers.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.className = `review-item ${item.correct ? 'r-ok' : 'r-err'}`;
+
+    const qtextShort = item.q.text.length > 80 ? item.q.text.slice(0, 80) + '…' : item.q.text;
+    const chosenOpt = item.q.options.find(o => o.letter === item.chosen);
+    const correctOpt = item.q.options.find(o => o.letter === item.q.correct);
+
+    div.innerHTML = `
+      <div class="review-header" onclick="toggleReviewDetail(this)">
+        <div class="review-num">${idx + 1}</div>
+        <div class="review-q-text">${qtextShort}</div>
+        <div class="review-result-icon">${item.correct ? '✅' : '❌'}</div>
+      </div>
+      <div class="review-detail">
+        <div class="review-answer-row">
+          <span style="font-size:12px;font-weight:700;color:#6a8a6a;">Tu respuesta:</span>
+          <span class="ans-badge ${item.correct ? 'ans-ok-badge' : 'ans-err-badge'}">${item.chosen}: ${chosenOpt ? chosenOpt.text : ''}</span>
+        </div>
+        ${!item.correct ? `<div class="review-answer-row"><span style="font-size:12px;font-weight:700;color:#2d8a4e;">Respuesta correcta:</span><span class="ans-badge ans-ok-badge">${item.q.correct}: ${correctOpt ? correctOpt.text : ''}</span></div>` : ''}
+        <div style="margin-top:8px;padding:10px 12px;background:rgba(76,175,115,0.07);border-radius:8px;font-size:12.5px;color:#3a5a3a;line-height:1.6;">💡 ${item.q.feedback}</div>
+      </div>`;
+    list.appendChild(div);
+  });
+
+  setTimeout(() => rev.scrollIntoView({ behavior: 'smooth' }), 100);
+}
+
+function toggleReviewDetail(header) {
+  const detail = header.nextElementSibling;
+  detail.classList.toggle('open');
+}
+
+// ============================================================
+// RESTART
+// ============================================================
+function restartExam() {
+  $('review-section').style.display = 'none';
+  currentQ = 0; score = 0; errors = 0;
+  answered = false; userAnswers = [];
+  $('student-name').value = '';
+  showScreen('screen-start');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============================================================
+// PDF GUIDE
+// ============================================================
+let pdfLoaded = false;
+function togglePDF() {
+  const wrap = $('pdf-frame-wrap');
+  if (wrap.classList.contains('visible')) {
+    wrap.classList.remove('visible');
+    return;
+  }
+  if (!pdfLoaded) {
+    $('pdf-iframe').src = 'https://drive.google.com/file/d/1WI7qs0bHyxLeKmLLZJPf1z9s4Iy0U66N/preview';
+    pdfLoaded = true;
+  }
+  wrap.classList.add('visible');
+}
+
+// ============================================================
+// CONFETTI
+// ============================================================
+function launchConfetti() {
+  const colors = ['#4caf73','#f5a84b','#4da8da','#f5c842','#e84040','#2d8a4e','#e07b2a'];
+  const container = $('confetti');
+  container.innerHTML = '';
+  for (let i = 0; i < 60; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.width = (6 + Math.random() * 8) + 'px';
+    piece.style.height = (6 + Math.random() * 8) + 'px';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    piece.style.animationDuration = (2 + Math.random() * 3) + 's';
+    piece.style.animationDelay = Math.random() * 1.5 + 's';
+    container.appendChild(piece);
+  }
+  setTimeout(() => container.innerHTML = '', 6000);
+}
+</script>
+</body>
+</html>

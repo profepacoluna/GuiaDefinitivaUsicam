@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador · Evaluación Formativa · Prof. Francisco De Jesus Luna Benitez</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#2563EB;--blue-d:#1D4ED8;--blue-l:#3B82F6;--blue-xl:#DBEAFE;--blue-xxl:#EFF6FF;
+  --amber:#F59E0B;--amber-d:#D97706;--amber-l:#FDE68A;
+  --green:#10B981;--green-l:#D1FAE5;--green-d:#065F46;
+  --red:#EF4444;--red-l:#FEE2E2;--red-d:#991B1B;
+  --bg:#F0F6FF;--card:#FFFFFF;--txt:#1E293B;--muted:#64748B;--border:#E2E8F0;
+  --r:18px;--sh:0 4px 28px rgba(37,99,235,0.11);--sh2:0 8px 44px rgba(37,99,235,0.17);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh}
+
+/* ── HEADER ───────────────────────────────── */
+.hdr{
+  background:linear-gradient(140deg,#0F2C72 0%,#1E3FAA 40%,#2563EB 72%,#06B6D4 100%);
+  padding:30px 20px 26px;text-align:center;position:relative;overflow:hidden
+}
+.hdr::before,.hdr::after{
+  content:'';position:absolute;border-radius:50%;pointer-events:none
+}
+.hdr::before{width:340px;height:340px;top:-120px;left:-80px;background:rgba(255,255,255,.06)}
+.hdr::after{width:260px;height:260px;bottom:-100px;right:-60px;background:rgba(255,255,255,.05)}
+.hdr-chip{
+  display:inline-block;border:1.5px solid rgba(255,255,255,.35);
+  background:rgba(255,255,255,.12);color:#fff;font-size:10.5px;font-weight:800;
+  letter-spacing:2px;text-transform:uppercase;padding:5px 16px;border-radius:50px;margin-bottom:12px
+}
+.hdr h1{
+  font-family:'Poppins',sans-serif;font-size:clamp(17px,4.2vw,27px);font-weight:900;
+  color:#fff;line-height:1.2;margin-bottom:6px;position:relative;z-index:1
+}
+.hdr h1 em{color:#FDE68A;font-style:normal}
+.hdr-line{width:56px;height:3.5px;background:linear-gradient(90deg,#FDE68A,#FBBF24);border-radius:4px;margin:10px auto 8px}
+.hdr p{font-size:clamp(12px,2.6vw,14px);color:rgba(255,255,255,.88);font-weight:700;position:relative;z-index:1}
+
+/* ── LAYOUT ───────────────────────────────── */
+.wrap{max-width:780px;margin:0 auto;padding:26px 15px 48px}
+.screen{display:none;animation:fadeUp .4s ease both}
+.screen.on{display:block}
+
+/* ── WELCOME ──────────────────────────────── */
+.wcard{
+  background:var(--card);border-radius:var(--r);box-shadow:var(--sh2);
+  padding:38px 30px;text-align:center
+}
+.wico{
+  width:78px;height:78px;background:linear-gradient(135deg,#EFF6FF,#DBEAFE);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  margin:0 auto 18px;font-size:34px;box-shadow:0 4px 16px rgba(37,99,235,.15)
+}
+.wcard h2{
+  font-family:'Poppins',sans-serif;font-size:clamp(17px,3.8vw,23px);font-weight:800;
+  color:var(--blue-d);margin-bottom:8px
+}
+.wsub{color:var(--muted);font-size:14px;line-height:1.65;margin-bottom:26px}
+.wsub strong{color:var(--blue-d)}
+.igrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:26px}
+.iitem{background:#F8FAFF;border:1px solid #DAE5FF;border-radius:13px;padding:14px 8px}
+.iitem .n{font-family:'Poppins',sans-serif;font-size:24px;font-weight:900;color:var(--blue)}
+.iitem .l{font-size:11px;color:var(--muted);font-weight:700;margin-top:2px}
+.fld{text-align:left;margin-bottom:22px}
+.fld label{display:block;font-weight:800;font-size:13.5px;color:var(--txt);margin-bottom:7px}
+.fld label span{color:var(--red)}
+.fld input{
+  width:100%;padding:13px 17px;border:2px solid var(--border);border-radius:13px;
+  font-family:'Nunito',sans-serif;font-size:15px;color:var(--txt);outline:none;
+  transition:border-color .2s,box-shadow .2s
+}
+.fld input:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(37,99,235,.1)}
+.fld input.err{border-color:var(--red);animation:shake .3s ease}
+.btnp{
+  display:block;width:100%;padding:15px;
+  background:linear-gradient(135deg,var(--blue-d),var(--blue-l));
+  color:#fff;border:none;border-radius:13px;font-family:'Poppins',sans-serif;
+  font-size:16px;font-weight:800;cursor:pointer;
+  box-shadow:0 5px 18px rgba(37,99,235,.38);transition:transform .2s,box-shadow .2s
+}
+.btnp:hover{transform:translateY(-2px);box-shadow:0 9px 26px rgba(37,99,235,.48)}
+.btnp:active{transform:translateY(0)}
+
+/* ── STUDY GUIDE ──────────────────────────── */
+.sguide{
+  background:var(--card);border-radius:var(--r);box-shadow:var(--sh);
+  padding:22px 24px;margin-top:18px
+}
+.sguide h3{
+  font-family:'Poppins',sans-serif;font-size:15px;font-weight:800;
+  color:var(--blue-d);margin-bottom:5px
+}
+.sguide p{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px}
+.btng{
+  display:inline-flex;align-items:center;gap:9px;padding:12px 20px;
+  background:linear-gradient(135deg,#F59E0B,#EF6C00);color:#fff;
+  border:none;border-radius:12px;font-family:'Poppins',sans-serif;
+  font-size:13.5px;font-weight:800;cursor:pointer;text-decoration:none;
+  box-shadow:0 4px 14px rgba(245,158,11,.42);transition:transform .2s,box-shadow .2s
+}
+.btng:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(245,158,11,.55)}
+
+/* ── QUIZ ─────────────────────────────────── */
+.qhdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+.qprog{font-family:'Poppins',sans-serif;font-size:13px;font-weight:800;color:var(--blue)}
+.sbadges{display:flex;gap:9px}
+.sb{padding:5px 13px;border-radius:50px;font-size:12px;font-weight:800}
+.sb.ok{background:var(--green-l);color:var(--green-d)}
+.sb.ko{background:var(--red-l);color:var(--red-d)}
+.pbar-wrap{background:#DBE8FF;border-radius:50px;height:9px;margin-bottom:20px;overflow:hidden}
+.pbar{height:100%;background:linear-gradient(90deg,var(--blue-d),#06B6D4);border-radius:50px;transition:width .45s ease}
+
+.qcard{
+  background:var(--card);border-radius:var(--r);box-shadow:var(--sh);
+  padding:26px 22px;margin-bottom:14px;animation:fadeUp .35s ease both
+}
+.qtag{
+  display:inline-block;background:var(--blue-xxl);color:var(--blue);
+  border:1px solid #BFDBFE;font-size:11px;font-weight:800;letter-spacing:.8px;
+  text-transform:uppercase;padding:4px 13px;border-radius:50px;margin-bottom:13px
+}
+.qtxt{font-size:clamp(13.5px,2.8vw,15.5px);line-height:1.7;font-weight:700;color:var(--txt);margin-bottom:18px}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{
+  display:flex;align-items:flex-start;gap:13px;padding:13px 16px;
+  border:2px solid var(--border);border-radius:13px;background:#FAFBFF;
+  cursor:pointer;text-align:left;font-family:'Nunito',sans-serif;
+  font-size:13.5px;color:var(--txt);line-height:1.55;transition:all .18s ease
+}
+.opt:hover:not(:disabled){border-color:var(--blue-l);background:var(--blue-xxl);transform:translateX(4px)}
+.oltr{
+  display:flex;align-items:center;justify-content:center;
+  width:29px;height:29px;min-width:29px;border-radius:9px;
+  background:#E0EAFF;color:var(--blue);
+  font-family:'Poppins',sans-serif;font-size:13px;font-weight:900;transition:all .18s
+}
+.opt.sel{border-color:var(--blue);background:var(--blue-xxl)}
+.opt.sel .oltr{background:var(--blue);color:#fff}
+.opt.cor{border-color:var(--green);background:var(--green-l)}
+.opt.cor .oltr{background:var(--green);color:#fff}
+.opt.wrg{border-color:var(--red);background:var(--red-l)}
+.opt.wrg .oltr{background:var(--red);color:#fff}
+.opt:disabled{cursor:default}
+
+/* ── FEEDBACK ─────────────────────────────── */
+.fb{border-radius:13px;padding:15px 17px;margin-bottom:14px;display:none;animation:fadeUp .3s ease}
+.fb.show{display:block}
+.fb.ok{background:var(--green-l);border:1px solid #6EE7B7}
+.fb.ko{background:var(--red-l);border:1px solid #FCA5A5}
+.fbtit{
+  display:flex;align-items:center;gap:8px;
+  font-family:'Poppins',sans-serif;font-weight:800;font-size:13.5px;margin-bottom:5px
+}
+.fb.ok .fbtit{color:#064E3B}
+.fb.ko .fbtit{color:#7F1D1D}
+.fbmsg{font-size:13px;line-height:1.65}
+.fb.ok .fbmsg{color:#065F46}
+.fb.ko .fbmsg{color:#991B1B}
+
+.btnn{
+  display:none;width:100%;padding:14px;
+  background:linear-gradient(135deg,var(--blue-d),var(--blue));color:#fff;
+  border:none;border-radius:13px;font-family:'Poppins',sans-serif;
+  font-size:15px;font-weight:800;cursor:pointer;
+  box-shadow:0 4px 16px rgba(37,99,235,.36);transition:transform .2s,box-shadow .2s;
+  margin-bottom:14px
+}
+.btnn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(37,99,235,.46)}
+.btnn.show{display:block}
+
+/* ── RESULTS ──────────────────────────────── */
+.rcard{background:var(--card);border-radius:var(--r);box-shadow:var(--sh2);overflow:hidden;animation:fadeUp .5s ease both}
+.rhdr{
+  background:linear-gradient(140deg,#0F2C72 0%,#1D4ED8 50%,#06B6D4 100%);
+  padding:32px 22px;text-align:center;color:#fff
+}
+.rbig{font-size:60px;display:block;margin-bottom:10px}
+.rhdr h2{
+  font-family:'Poppins',sans-serif;font-size:clamp(18px,4vw,24px);
+  font-weight:900;margin-bottom:6px
+}
+.rhdr .sname{font-size:14.5px;opacity:.9;font-weight:700}
+.rbdy{padding:28px 22px}
+.rcircle{
+  width:124px;height:124px;border-radius:50%;
+  background:linear-gradient(135deg,var(--blue-d),#06B6D4);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  margin:0 auto 22px;box-shadow:0 8px 30px rgba(37,99,235,.38)
+}
+.rcircle .pct{font-family:'Poppins',sans-serif;font-size:30px;font-weight:900;color:#fff;line-height:1}
+.rcircle .plbl{font-size:11px;color:rgba(255,255,255,.8);font-weight:700}
+.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-bottom:22px}
+.si{text-align:center;padding:15px 8px;border-radius:13px}
+.si.tot{background:var(--blue-xxl)}
+.si.rt{background:var(--green-l)}
+.si.wr{background:var(--red-l)}
+.si .sn{font-family:'Poppins',sans-serif;font-size:30px;font-weight:900}
+.si.tot .sn{color:var(--blue)}
+.si.rt .sn{color:#059669}
+.si.wr .sn{color:var(--red)}
+.si .sl{font-size:12px;font-weight:800;margin-top:2px}
+.si.tot .sl{color:var(--blue-l)}
+.si.rt .sl{color:var(--green-d)}
+.si.wr .sl{color:var(--red-d)}
+.mmsg{
+  background:#FFFBEB;border:1px solid #FDE68A;border-radius:13px;
+  padding:16px 17px;text-align:center;margin-bottom:22px
+}
+.mmsg .mic{font-size:26px;margin-bottom:5px}
+.mmsg p{font-size:13.5px;color:#78350F;line-height:1.65;font-weight:700}
+.btnr{
+  display:block;width:100%;padding:14px;
+  background:linear-gradient(135deg,var(--blue-d),var(--blue-l));color:#fff;
+  border:none;border-radius:13px;font-family:'Poppins',sans-serif;
+  font-size:15px;font-weight:800;cursor:pointer;
+  box-shadow:0 4px 16px rgba(37,99,235,.36);transition:transform .2s,box-shadow .2s;margin-bottom:10px
+}
+.btnr:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(37,99,235,.46)}
+
+/* ── FOOTER ───────────────────────────────── */
+footer{text-align:center;padding:18px 16px 28px;font-size:12px;color:var(--muted)}
+footer strong{color:var(--blue)}
+
+/* ── ANIMATIONS ───────────────────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+
+/* ── RESPONSIVE ───────────────────────────── */
+@media(max-width:480px){
+  .wcard,.rbdy{padding:24px 16px}
+  .qcard{padding:18px 14px}
+  .opt{font-size:13px;padding:11px 13px;gap:10px}
+  .igrid,.sgrid{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ HEADER ══════════════ -->
+<header class="hdr">
+  <div class="hdr-chip">Evaluación Formativa · Díaz-Barriga</div>
+  <h1>Simulador Interactivo de <em>Evaluación</em></h1>
+  <div class="hdr-line"></div>
+  <p>Prof. Francisco De Jesus Luna Benitez</p>
+</header>
+
+<div class="wrap">
+
+  <!-- ══════════ WELCOME SCREEN ══════════ -->
+  <div id="sw" class="screen on">
+    <div class="wcard">
+      <div class="wico">📝</div>
+      <h2>¡Bienvenido al Simulador!</h2>
+      <p class="wsub">
+        Evalúa tu comprensión de <strong>La evaluación formativa como reto pedagógico-didáctico</strong>
+        basada en los planteamientos de <strong>Ángel Díaz-Barriga</strong>.
+      </p>
+      <div class="igrid">
+        <div class="iitem"><div class="n">30</div><div class="l">Preguntas</div></div>
+        <div class="iitem"><div class="n">3</div><div class="l">Opciones</div></div>
+        <div class="iitem"><div class="n">4</div><div class="l">Formatos</div></div>
+      </div>
+      <div class="fld">
+        <label>Nombre del estudiante <span>*</span></label>
+        <input type="text" id="sname" placeholder="Escribe tu nombre completo..." maxlength="90" autocomplete="off">
+      </div>
+      <button class="btnp" onclick="startQuiz()">🚀 Iniciar Simulador</button>
+    </div>
+
+    <div class="sguide">
+      <h3>📚 Guía de Estudio en PDF</h3>
+      <p>Consulta el material teórico completo: <em>La evaluación formativa como reto pedagógico-didáctico</em> de Ángel Díaz-Barriga, elaborada por el Prof. Francisco De Jesus Luna Benitez.</p>
+      <a href="https://drive.google.com/file/d/10fmMPP4oqOaBv1P5kthQkDL0hYYwPIx2/view?usp=sharing" target="_blank" class="btng">📄 Abrir Guía de Estudio</a>
+    </div>
+  </div>
+
+  <!-- ══════════ QUIZ SCREEN ══════════ -->
+  <div id="sq" class="screen">
+    <div class="qhdr">
+      <span class="qprog" id="qlbl">Pregunta 1 de 30</span>
+      <div class="sbadges">
+        <span class="sb ok" id="lc">✓ 0</span>
+        <span class="sb ko" id="lw">✗ 0</span>
+      </div>
+    </div>
+    <div class="pbar-wrap"><div class="pbar" id="pb" style="width:0%"></div></div>
+    <div class="qcard" id="qcard"></div>
+    <div class="fb" id="fb">
+      <div class="fbtit" id="fbtit"></div>
+      <div class="fbmsg" id="fbmsg"></div>
+    </div>
+    <button class="btnn" id="btnn" onclick="nextQ()">Siguiente pregunta →</button>
+  </div>
+
+  <!-- ══════════ RESULTS SCREEN ══════════ -->
+  <div id="sr" class="screen">
+    <div class="rcard">
+      <div class="rhdr">
+        <span class="rbig" id="remi">🎓</span>
+        <h2>¡Simulador Completado!</h2>
+        <p class="sname" id="rname"></p>
+      </div>
+      <div class="rbdy">
+        <div class="rcircle">
+          <span class="pct" id="rpct">0%</span>
+          <span class="plbl">Desempeño</span>
+        </div>
+        <div class="sgrid">
+          <div class="si tot"><div class="sn">30</div><div class="sl">Total</div></div>
+          <div class="si rt"><div class="sn" id="rok">0</div><div class="sl">Aciertos ✓</div></div>
+          <div class="si wr"><div class="sn" id="rko">0</div><div class="sl">Errores ✗</div></div>
+        </div>
+        <div class="mmsg">
+          <div class="mic">💡</div>
+          <p id="rmsg">Buen trabajo. Sigue practicando para fortalecer tus conocimientos.</p>
+        </div>
+        <button class="btnr" onclick="retry()">🔄 Volver a intentarlo</button>
+      </div>
+    </div>
+
+    <div class="sguide" style="margin-top:18px">
+      <h3>📚 Guía de Estudio en PDF</h3>
+      <p>Refuerza tus conocimientos revisando el material teórico completo sobre evaluación formativa.</p>
+      <a href="https://drive.google.com/file/d/10fmMPP4oqOaBv1P5kthQkDL0hYYwPIx2/view?usp=sharing" target="_blank" class="btng">📄 Abrir Guía de Estudio</a>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<footer>
+  <strong>Simulador Interactivo de Evaluación Formativa</strong> &nbsp;·&nbsp;
+  Prof. Francisco De Jesus Luna Benitez &nbsp;·&nbsp; 2025
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   BANCO DE 30 PREGUNTAS
+   Distribución de respuestas correctas:
+   A (idx 0): preguntas 2,5,8,11,13,16,19,22,25,27  → 10
+   B (idx 1): preguntas 1,4,7,10,14,17,20,23,26,29  → 10
+   C (idx 2): preguntas 3,6,9,12,15,18,21,24,28,30  → 10
+═══════════════════════════════════════════════════════ */
+const QS=[
+  // 1 – Cuestionamiento directo · correct: B (idx 1)
+  {
+    tipo:"Cuestionamiento directo",
+    txt:"¿Cuál es el principal objetivo del nuevo paradigma de evaluación formativa según Díaz-Barriga?",
+    ops:[
+      "Obtener calificaciones altas para demostrar el nivel académico del grupo.",
+      "Centrar el proceso educativo en el deseo de aprender y en el proceso de aprendizaje.",
+      "Diseñar exámenes que midan con precisión los conocimientos memorísticos del alumno."
+    ],
+    ok:1,
+    exp:"El nuevo paradigma propone recuperar el sentido pedagógico de la evaluación, centrándose en el proceso y el deseo de aprender —no en el puntaje—, y fomentando el compromiso intrínseco del estudiante."
+  },
+  // 2 – Completamiento · correct: A (idx 0)
+  {
+    tipo:"Completamiento",
+    txt:"Según Díaz-Barriga, la evaluación formativa no es sinónimo de una suma permanente de calificaciones, sino que…",
+    ops:[
+      "…es una actividad compleja que vincula aprendizaje y evaluación en diversas etapas del proceso educativo.",
+      "…es una herramienta para clasificar a los estudiantes según su rendimiento final.",
+      "…es un procedimiento administrativo centrado en registrar evidencias de logro."
+    ],
+    ok:0,
+    exp:"La evaluación formativa es concebida como un continuum ininterrumpido: una actividad compleja que vincula permanentemente el aprendizaje y la evaluación en distintas etapas, no un evento de medición aislado."
+  },
+  // 3 – Cuestionamiento directo · correct: C (idx 2)
+  {
+    tipo:"Cuestionamiento directo",
+    txt:"¿Qué caracteriza al paradigma histórico de la evaluación que Díaz-Barriga critica?",
+    ops:[
+      "Se enfoca en desarrollar el compromiso intrínseco del estudiante hacia el aprendizaje.",
+      "Recupera el sentido pedagógico de la evaluación formativa en cada etapa.",
+      "Genera estrés y cumplimiento rutinario al centrarse en la obtención de un puntaje o calificación."
+    ],
+    ok:2,
+    exp:"El paradigma histórico desplaza el valor real del aprendizaje porque centra toda la atención en la calificación, lo que genera estrés en el estudiante y un cumplimiento rutinario sin verdadero compromiso con el saber."
+  },
+  // 4 – Relación de elementos · correct: B (idx 1)
+  {
+    tipo:"Relación de elementos",
+    txt:"Relacione cada dimensión del continuum evaluativo con su descripción:\n\n1. Dimensión del estudiante\n2. Dimensión del docente\n\na) Proceso externo: observación, recalibración didáctica y retroalimentación.\nb) Proceso interno: autorreflexión y responsabilidad sobre el propio aprendizaje.",
+    ops:[
+      "1a, 2b",
+      "1b, 2a",
+      "1a, 2a"
+    ],
+    ok:1,
+    exp:"La dimensión del estudiante es interna: implica autorreflexión y responsabilidad sobre su aprendizaje (b). La dimensión del docente es externa: se basa en observación sistemática, recalibración didáctica y retroalimentación (a)."
+  },
+  // 5 – Ordenamiento · correct: A (idx 0)
+  {
+    tipo:"Ordenamiento",
+    txt:"Ordene correctamente los tres principios del continuum evaluación-aprendizaje según Díaz-Barriga:\n\n1. Responde a la complejidad de planear situaciones didácticas en distintos contextos.\n2. No es sinónimo de una suma permanente de calificaciones.\n3. Es una actividad compleja que vincula aprendizaje y evaluación en diversas etapas.",
+    ops:[
+      "2, 3, 1",
+      "1, 3, 2",
+      "3, 2, 1"
+    ],
+    ok:0,
+    exp:"El orden lógico parte de lo que la evaluación NO es (2), establece su naturaleza compleja (3) y finalmente señala su relación con la planeación contextualizada (1)."
+  },
+  // 6 – Cuestionamiento directo · correct: C (idx 2)
+  {
+    tipo:"Cuestionamiento directo",
+    txt:"Un docente observa que su grupo trabaja de forma rutinaria y sin motivación durante una actividad. Conforme al planteamiento de Díaz-Barriga, ¿cuál sería la acción más pertinente?",
+    ops:[
+      "Llamar la atención del grupo y continuar con la planeación original sin modificarla.",
+      "Solicitar que entreguen el trabajo al finalizar la sesión para verificar resultados.",
+      "Aplicar el timing pedagógico: suspender la actividad y reflexionar con el grupo sobre lo que está sucediendo."
+    ],
+    ok:2,
+    exp:"El timing pedagógico consiste en que el docente detecte situaciones de desinterés o dispersión y suspenda temporalmente la actividad para analizar en equipo las causas y asumir compromisos colectivos de mejora."
+  },
+  // 7 – Completamiento · correct: B (idx 1)
+  {
+    tipo:"Completamiento",
+    txt:"Según Díaz-Barriga, la retroalimentación eficaz debe detonar la autorreflexión y no el malestar. Para lograrlo, el primer paso consiste en…",
+    ops:[
+      "…señalar los errores con precisión para que el alumno conozca sus fallas de inmediato.",
+      "…visibilizar los aciertos del estudiante, pues la experiencia de éxito genera el deseo de seguir esforzándose.",
+      "…comparar el desempeño del alumno con los estándares nacionales establecidos."
+    ],
+    ok:1,
+    exp:"Retomando a Freinet, Díaz-Barriga propone iniciar siempre señalando los aciertos. La experiencia de éxito es el motor que genera en el alumno el deseo de continuar esforzándose y aprendiendo."
+  },
+  // 8 – Cuestionamiento directo · correct: A (idx 0)
+  {
+    tipo:"Cuestionamiento directo",
+    txt:"¿Cuál es la diferencia fundamental entre 'describir' y 'juzgar' en el proceso de retroalimentación formativa?",
+    ops:[
+      "Describir señala con claridad los puntos de mejora evitando expresiones de rechazo; juzgar desalienta y genera malestar en el estudiante.",
+      "Describir permite asignar una calificación objetiva; juzgar identifica si el alumno cumplió los estándares.",
+      "Describir se hace de forma escrita; juzgar se hace de forma oral durante la clase."
+    ],
+    ok:0,
+    exp:"Díaz-Barriga distingue describir —señalar objetivamente aspectos a mejorar sin emitir juicios— de juzgar, que utiliza expresiones que desalientan al estudiante y generan malestar en lugar de motivar la mejora."
+  },
+  // 9 – Relación de elementos · correct: C (idx 2)
+  {
+    tipo:"Relación de elementos",
+    txt:"Relacione cada estrategia práctica con su descripción:\n\n1. Completar frases (Steiman)\n2. Timing pedagógico\n\na) Sensibilidad docente para detectar desinterés grupal y suspender la actividad para analizar la situación.\nb) Ejercicios breves que detonan la reflexión metacognitiva con frases incompletas.",
+    ops:[
+      "1a, 2b",
+      "1b, 2b",
+      "1b, 2a"
+    ],
+    ok:2,
+    exp:"Los ejercicios de completar frases (Steiman) detonan la reflexión metacognitiva mediante oraciones incompletas (b). El timing pedagógico es la sensibilidad docente para detectar situaciones grupales críticas y suspender la actividad (a)."
+  },
+  // 10 – Cuestionamiento directo · correct: B (idx 1)
+  {
+    tipo:"Cuestionamiento directo",
+    txt:"Un estudiante comete un error al resolver un problema. Desde la perspectiva de Díaz-Barriga, ¿cómo debe interpretarse ese error?",
+    ops:[
+      "Como una señal de que el alumno no prestó la atención suficiente durante las clases.",
+      "Como un elemento de diagnóstico vital que debe interpretarse junto con el estudiante para acordar una estrategia conjunta.",
+      "Como un indicador para reasignar al alumno al grupo con menor nivel académico."
+    ],
+    ok:1,
+    exp:"Los errores no son fracasos; son elementos de diagnóstico vitales. Deben interpretarse con el estudiante —no sobre él— para erradicar el estigma del error y acordar conjuntamente estrategias de mejora."
+  },
+  // 11 – Completamiento · correct: A (idx 0)
+  {
+    tipo:"Completamiento",
+    txt:"Según Díaz-Barriga, la evaluación formativa es un proceso inacabado porque…",
+    ops:[
+      "…requiere la participación de toda la comunidad: docentes, directores, familias y sociedad, para transformar la visión sobre el aprendizaje.",
+      "…depende exclusivamente de los instrumentos de medición diseñados por los docentes.",
+      "…se limita a las actividades realizadas dentro del aula durante el horario escolar."
+    ],
+    ok:0,
+    exp:"La evaluación formativa es un proceso que exige un cambio sistémico: directores, familias y sociedad también deben transformar su visión para dejar de centrar la atención en el puntaje y devolver el protagonismo al aprendizaje."
+  },
+  // 12 – Ordenamiento · correct: C (idx 2)
+  {
+    tipo:"Ordenamiento",
+    txt:"Ordene las tres acciones que caracterizan la dimensión docente en el continuum evaluativo:\n\n1. Retroalimentar con base en la información observada.\n2. Observar sistemáticamente lenguaje corporal, preguntas y cuadernos de los alumnos.\n3. Recalibrar la estrategia didáctica según las reacciones del grupo.",
+    ops:[
+      "1, 3, 2",
+      "3, 1, 2",
+      "2, 3, 1"
+    ],
+    ok:2,
+    exp:"El proceso inicia con la observación (2), que informa la recalibración didáctica (3) y culmina con la retroalimentación (1). Este orden refleja la secuencia lógica del ajuste docente en tiempo real."
+  },
+  // 13 – Cuestionamiento directo · correct: A (idx 0)
+  {
+    tipo:"Cuestionamiento directo",
+    txt:"¿Qué significa para Díaz-Barriga que la evaluación sea un 'continuum ininterrumpido'?",
+    ops:[
+      "Que aprendizaje y evaluación están permanentemente vinculados en diversas etapas del proceso educativo, sin reducirse a un evento final.",
+      "Que el docente debe aplicar exámenes frecuentes para registrar el avance de cada alumno.",
+      "Que la evaluación debe realizarse al inicio, durante y al final de cada sesión mediante instrumentos formales."
+    ],
+    ok:0,
+    exp:"El continuum ininterrumpido significa que aprendizaje y evaluación son inseparables: no hay un punto final evaluativo, sino una vinculación permanente que responde a la complejidad de las situaciones didácticas en distintos contextos."
+  },
+  // 14 – Completamiento · correct: B (idx 1)
+  {
+    tipo:"Completamiento",
+    txt:"En la retroalimentación formativa, 'trazar la ruta' consiste en ayudar al estudiante a formarse una imagen clara respondiendo a tres preguntas: ¿Hacia dónde vamos?…",
+    ops:[
+      "…¿Cuánto aprendiste? y ¿Qué nota mereces?",
+      "…¿Dónde estamos? y ¿Cómo avanzamos?",
+      "…¿Qué errores cometiste? y ¿Cómo los corregirás?"
+    ],
+    ok:1,
+    exp:"Las tres preguntas orientadoras son: ¿Hacia dónde vamos? (meta), ¿Dónde estamos? (diagnóstico actual) y ¿Cómo avanzamos? (estrategia). Estas guían al estudiante hacia la autorreflexión productiva sobre su proceso."
+  },
+  // 15 – Cuestionamiento directo · correct: C (idx 2)
+  {
+    tipo:"Cuestionamiento directo",
+    txt:"¿Cuál es la condición indispensable para que el estudiante asuma con responsabilidad la autorreflexión sobre su propio aprendizaje?",
+    ops:[
+      "Que el docente establezca criterios claros de calificación al inicio del curso.",
+      "Que existan instrumentos de autoevaluación que el alumno complete de forma individual.",
+      "Que exista un clima de confianza absoluta donde el estudiante pueda involucrarse sin miedo al rechazo."
+    ],
+    ok:2,
+    exp:"Díaz-Barriga subraya que la autorreflexión genuina requiere un entorno seguro: un clima de confianza absoluta donde el alumno se sienta libre de reflexionar y expresarse sin temor al rechazo o la burla."
+  },
+  // 16 – Relación de elementos · correct: A (idx 0)
+  {
+    tipo:"Relación de elementos",
+    txt:"Relacione cada paradigma evaluativo con la afirmación que le corresponde según Díaz-Barriga:\n\n1. Nuevo paradigma evaluativo\n2. Paradigma histórico\n\na) Fomenta el compromiso intrínseco del estudiante y recupera el sentido pedagógico.\nb) Desplaza el valor real del aprendizaje al centrarse en obtener un puntaje.",
+    ops:[
+      "1a, 2b",
+      "1b, 2a",
+      "1b, 2b"
+    ],
+    ok:0,
+    exp:"El nuevo paradigma recupera el sentido pedagógico y fomenta el compromiso intrínseco (1a). El paradigma histórico desplaza el valor del aprendizaje al priorizar el puntaje (2b)."
+  },
+  // 17 – Cuestionamiento directo · correct: B (idx 1)
+  {
+    tipo:"Cuestionamiento directo",
+    txt:"Según Díaz-Barriga, ¿qué papel cumple la planificación futura en la dimensión docente del continuum evaluativo?",
+    ops:[
+      "Permite diseñar exámenes más rigurosos para los grupos con menor rendimiento académico.",
+      "La experiencia vivida en el aula reorganiza y mejora la planeación de las siguientes sesiones o proyectos futuros.",
+      "Asegura que el docente cumpla con los contenidos programáticos establecidos en el plan de estudios."
+    ],
+    ok:1,
+    exp:"En la dimensión docente, la experiencia vivida en el aula no solo sirve para ajustes inmediatos: alimenta y reorganiza la planeación de sesiones y proyectos futuros. La práctica nutre y mejora la práctica siguiente."
+  },
+  // 18 – Completamiento · correct: C (idx 2)
+  {
+    tipo:"Completamiento",
+    txt:"La estrategia 'completar frases para verbalizar el proceso interno', basada en el pensamiento de Steiman, tiene como objetivo principal…",
+    ops:[
+      "…evaluar el nivel de comprensión lectora de los estudiantes mediante enunciados incompletos.",
+      "…registrar el avance de los alumnos para comunicarlo a las familias en reuniones escolares.",
+      "…detonar la reflexión metacognitiva a través de ejercicios breves, individuales o grupales, adaptables a distintas fases del aprendizaje."
+    ],
+    ok:2,
+    exp:"Los ejercicios de completar frases (Steiman) buscan detonar la reflexión metacognitiva. Son breves y adaptativos: en fases tempranas pueden realizarse mediante dibujos o de forma oral, según la edad y el contexto del grupo."
+  },
+  // 19 – Cuestionamiento directo · correct: A (idx 0)
+  {
+    tipo:"Cuestionamiento directo",
+    txt:"Un director deja de publicar rankings de puntajes y reorienta la cultura institucional hacia el proceso de aprendizaje. Según Díaz-Barriga, esta acción representa…",
+    ops:[
+      "…un cambio sistémico que contribuye a recuperar el sentido pedagógico de la evaluación formativa.",
+      "…una medida administrativa para reducir la competencia entre estudiantes de diferentes grados.",
+      "…una estrategia de gestión para mejorar los indicadores de eficiencia terminal de la institución."
+    ],
+    ok:0,
+    exp:"Revalorar el proceso en lugar del puntaje es un ejemplo de cambio sistémico. Díaz-Barriga afirma que no es tarea solo de docentes: directores, familias y sociedad deben transformar su visión para resignificar la escuela."
+  },
+  // 20 – Ordenamiento · correct: B (idx 1)
+  {
+    tipo:"Ordenamiento",
+    txt:"Ordene los tres pasos de la retroalimentación formativa eficaz según Díaz-Barriga:\n\n1. Describir sin juzgar los puntos de mejora del estudiante.\n2. Trazar la ruta: ¿Dónde estamos?, ¿Hacia dónde vamos?, ¿Cómo avanzamos?\n3. Visibilizar el éxito (Freinet): señalar siempre los aciertos del estudiante.",
+    ops:[
+      "2, 1, 3",
+      "3, 1, 2",
+      "1, 3, 2"
+    ],
+    ok:1,
+    exp:"La secuencia correcta es: visibilizar el éxito (3) para motivar, describir sin juzgar los aspectos a mejorar (1) y finalmente trazar la ruta que orienta al alumno hacia adelante (2)."
+  },
+  // 21 – Cuestionamiento directo · correct: C (idx 2)
+  {
+    tipo:"Cuestionamiento directo",
+    txt:"¿Por qué Díaz-Barriga, parafraseando a Comenio, afirma que 'nada quede de error en los alumnos'?",
+    ops:[
+      "Porque los errores reflejan únicamente deficiencias en la planeación docente que deben corregirse.",
+      "Porque el error indica que el alumno no sigue correctamente las instrucciones del maestro.",
+      "Porque los errores son elementos de diagnóstico vitales que deben interpretarse con el estudiante para acordar una estrategia de mejora, no ignorarse ni estigmatizarse."
+    ],
+    ok:2,
+    exp:"La frase se resignifica: el error no debe 'quedarse' como estigma ni ser ignorado, sino transformarse en un escalón. Es un elemento diagnóstico vital que el docente interpreta junto con el alumno para acordar la estrategia a seguir."
+  },
+  // 22 – Completamiento · correct: A (idx 0)
+  {
+    tipo:"Completamiento",
+    txt:"Según Díaz-Barriga, reconstruir el sentido de la evaluación significa…",
+    ops:[
+      "…despertar el deseo de aprender, recuperando el valor pedagógico por encima del valor administrativo de la calificación.",
+      "…diseñar mejores instrumentos de medición que reflejen con precisión los logros académicos de los estudiantes.",
+      "…homologar los criterios de evaluación en todas las asignaturas para garantizar la equidad educativa."
+    ],
+    ok:0,
+    exp:"Reconstruir el sentido de la evaluación implica un cambio profundo: pasar del paradigma centrado en la calificación al paradigma centrado en el deseo de aprender, recuperando el valor pedagógico genuino."
+  },
+  // 23 – Cuestionamiento directo · correct: B (idx 1)
+  {
+    tipo:"Cuestionamiento directo",
+    txt:"Una maestra detecta que varios alumnos presentan el mismo error al argumentar por escrito y decide analizarlo colectivamente en clase. Esta acción es coherente con Díaz-Barriga porque…",
+    ops:[
+      "…permite al docente ahorrar tiempo al revisar todos los trabajos en una sola sesión.",
+      "…convierte el error en un escalón de aprendizaje compartido, erradicando su estigma al interpretarlo junto con los estudiantes.",
+      "…cumple con los criterios de evaluación formativa establecidos en el programa de estudios oficial."
+    ],
+    ok:1,
+    exp:"Al analizar el error colectivamente, el docente lo convierte en un escalón de aprendizaje compartido, erradicando su estigma. Esta práctica concreta la propuesta de interpretar el error junto con el estudiante."
+  },
+  // 24 – Relación de elementos · correct: C (idx 2)
+  {
+    tipo:"Relación de elementos",
+    txt:"Relacione cada actor comunitario con su papel en la evaluación formativa:\n\n1. Directores\n2. Sociedad\n\na) Resignificar la escuela para recuperar el sentido pedagógico de aprender a aprender.\nb) Revalorar el proceso dejando de centrar la atención en el puntaje.",
+    ops:[
+      "1a, 2b",
+      "1b, 2b",
+      "1b, 2a"
+    ],
+    ok:2,
+    exp:"Los directores deben revalorar el proceso por encima del puntaje (1b). La sociedad debe resignificar el propósito de la escuela: recuperar el sentido pedagógico de aprender a aprender (2a)."
+  },
+  // 25 – Cuestionamiento directo · correct: A (idx 0)
+  {
+    tipo:"Cuestionamiento directo",
+    txt:"¿Cuál es el propósito central del timing pedagógico descrito por Díaz-Barriga?",
+    ops:[
+      "Que el docente detecte situaciones de desinterés o dispersión grupal, suspenda la actividad y facilite un análisis colectivo para asumir compromisos de mejora.",
+      "Que el docente administre eficientemente el tiempo de clase para cubrir todos los contenidos programados.",
+      "Que el estudiante gestione sus tiempos de estudio fuera del aula para optimizar su aprendizaje autónomo."
+    ],
+    ok:0,
+    exp:"El timing pedagógico es la sensibilidad docente para 'leer' el momento grupal: detectar desinterés, rutina o dispersión, suspender la actividad y propiciar un análisis colectivo sobre las causas y los compromisos a asumir."
+  },
+  // 26 – Completamiento · correct: B (idx 1)
+  {
+    tipo:"Completamiento",
+    txt:"Según Díaz-Barriga, la adecuación constante en la dimensión docente implica que…",
+    ops:[
+      "…el docente debe seguir fielmente las actividades planeadas para garantizar coherencia didáctica.",
+      "…la realidad del aula obliga a modificar la estrategia inicialmente pensada según las reacciones observadas en el grupo.",
+      "…el docente registra las observaciones del grupo para reportarlas al área de orientación escolar."
+    ],
+    ok:1,
+    exp:"La adecuación constante reconoce que el aula es dinámica: la realidad del grupo exige que el docente modifique su estrategia original según lo observado. Esto es parte esencial de la recalibración didáctica continua."
+  },
+  // 27 – Ordenamiento · correct: A (idx 0)
+  {
+    tipo:"Ordenamiento",
+    txt:"Ordene correctamente las etapas del proceso de resignificación del error según Díaz-Barriga:\n\n1. Interpretar el error junto con el estudiante para acordar una estrategia de mejora conjunta.\n2. Reconocer que los errores son elementos de diagnóstico vitales, no fracasos.\n3. Erradicar el estigma asociado al error como señal de incompetencia.",
+    ops:[
+      "2, 3, 1",
+      "1, 2, 3",
+      "3, 2, 1"
+    ],
+    ok:0,
+    exp:"El proceso lógico inicia reconociendo el valor diagnóstico del error (2), luego erradicando el estigma que lo rodea (3) y finalmente interpretándolo con el alumno para acordar estrategias conjuntas (1)."
+  },
+  // 28 – Cuestionamiento directo · correct: C (idx 2)
+  {
+    tipo:"Cuestionamiento directo",
+    txt:"Según Díaz-Barriga, la reflexión personal y colectiva del estudiante sobre su aprendizaje implica discutir…",
+    ops:[
+      "…los contenidos más difíciles del programa para solicitar más tiempo al docente.",
+      "…las calificaciones obtenidas para negociar una mejora con el profesor.",
+      "…qué hicieron para aprender, qué significó el trabajo realizado y qué dificultades superaron."
+    ],
+    ok:2,
+    exp:"La reflexión propuesta por Díaz-Barriga se centra en el proceso, no en las notas: qué se hizo para aprender, qué significó ese proceso y qué obstáculos se lograron superar. Esto activa la metacognición del estudiante."
+  },
+  // 29 – Cuestionamiento directo · correct: B (idx 1)
+  {
+    tipo:"Cuestionamiento directo",
+    txt:"¿Cuál es la principal diferencia entre las 'decisiones en tiempo real' y la 'planificación futura' en la dimensión docente del continuum?",
+    ops:[
+      "Las decisiones en tiempo real corresponden al director; la planificación futura es responsabilidad del docente.",
+      "Las decisiones en tiempo real redirigen el aprendizaje durante la sesión en curso; la planificación futura reorganiza las sesiones siguientes con base en la experiencia vivida.",
+      "Las decisiones en tiempo real se basan en exámenes; la planificación futura, en sugerencias del supervisor escolar."
+    ],
+    ok:1,
+    exp:"Las decisiones en tiempo real son intervenciones inmediatas: el docente observa y reorienta durante la sesión. La planificación futura es diferida: la experiencia vivida informa y reorganiza las sesiones o proyectos siguientes."
+  },
+  // 30 – Relación de elementos · correct: C (idx 2)
+  {
+    tipo:"Relación de elementos",
+    txt:"Relacione cada fase de la retroalimentación formativa con la acción que le corresponde:\n\n1. Visibilizar el éxito (Freinet)\n2. Trazar la ruta\n\na) Describir sin juzgar los puntos de mejora, evitando expresiones que desalienten.\nb) Iniciar señalando los aciertos, pues la experiencia de éxito genera el deseo de seguir esforzándose.\nc) Ayudar al estudiante a responder: ¿Hacia dónde vamos?, ¿Dónde estamos?, ¿Cómo avanzamos?",
+    ops:[
+      "1c, 2a",
+      "1b, 2a",
+      "1b, 2c"
+    ],
+    ok:2,
+    exp:"Visibilizar el éxito (Freinet) consiste en iniciar señalando los aciertos para motivar al alumno (b). Trazar la ruta implica ayudarle a responder las tres preguntas orientadoras de su proceso de mejora (c)."
+  }
+];
+
+/* ═══════════ STATE ═══════════ */
+let cur=0,sc=0,wc=0,name="",done=false;
+
+/* ═══════════ UTILS ═══════════ */
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+}
+function $(id){return document.getElementById(id)}
+
+/* ═══════════ START ═══════════ */
+function startQuiz(){
+  const inp=$('sname');
+  const v=inp.value.trim();
+  if(!v){
+    inp.classList.add('err');inp.focus();
+    inp.placeholder='⚠ Por favor ingresa tu nombre';
+    setTimeout(()=>{inp.classList.remove('err');inp.placeholder='Escribe tu nombre completo...'},2000);
+    return;
+  }
+  name=v;cur=0;sc=0;wc=0;done=false;
+  show('sq');render();
+}
+
+/* ═══════════ RENDER ═══════════ */
+function render(){
+  const q=QS[cur];done=false;
+  $('qlbl').textContent=`Pregunta ${cur+1} de ${QS.length}`;
+  $('lc').textContent=`✓ ${sc}`;
+  $('lw').textContent=`✗ ${wc}`;
+  $('pb').style.width=`${(cur/QS.length)*100}%`;
+
+  const LTS=['A','B','C'];
+  const optsHTML=q.ops.map((o,i)=>`
+    <button class="opt" id="o${i}" onclick="pick(${i})">
+      <span class="oltr">${LTS[i]}</span><span>${o}</span>
+    </button>`).join('');
+
+  $('qcard').innerHTML=`
+    <div class="qtag">${q.tipo}</div>
+    <div class="qtxt">${q.txt.replace(/\n/g,'<br>')}</div>
+    <div class="opts">${optsHTML}</div>`;
+
+  const fb=$('fb');fb.className='fb';
+  const bn=$('btnn');bn.classList.remove('show');bn.textContent='Siguiente pregunta →';
+}
+
+/* ═══════════ PICK ═══════════ */
+function pick(i){
+  if(done)return;done=true;
+  const q=QS[cur];const ok=i===q.ok;
+  document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+  $(`o${i}`).classList.add(ok?'cor':'wrg');
+  if(!ok)$(`o${q.ok}`).classList.add('cor');
+  ok?sc++:wc++;
+  $('lc').textContent=`✓ ${sc}`;$('lw').textContent=`✗ ${wc}`;
+
+  const LTS=['A','B','C'];
+  const fb=$('fb');const tit=$('fbtit');const msg=$('fbmsg');
+  if(ok){
+    fb.className='fb ok show';
+    tit.innerHTML='✅ ¡Respuesta correcta!';
+  } else {
+    fb.className='fb ko show';
+    tit.innerHTML=`❌ Incorrecto · La respuesta correcta es: <strong>${LTS[q.ok]}</strong>`;
+  }
+  msg.textContent=q.exp;
+
+  const bn=$('btnn');bn.classList.add('show');
+  if(cur===QS.length-1)bn.textContent='📊 Ver mis resultados';
+}
+
+/* ═══════════ NEXT ═══════════ */
+function nextQ(){
+  cur++;
+  if(cur>=QS.length){results();return;}
+  window.scrollTo({top:0,behavior:'smooth'});
+  render();
+}
+
+/* ═══════════ RESULTS ═══════════ */
+function results(){
+  const pct=Math.round((sc/QS.length)*100);
+  $('rname').textContent=name;
+  $('rpct').textContent=pct+'%';
+  $('rok').textContent=sc;
+  $('rko').textContent=wc;
+
+  let e,m;
+  if(pct>=90){e='🏆';m='¡Desempeño sobresaliente! Dominas los planteamientos de Díaz-Barriga sobre la evaluación formativa. ¡Excelente trabajo!';}
+  else if(pct>=75){e='🌟';m='¡Muy bien! Tienes una sólida comprensión del tema. Revisa los reactivos con error para alcanzar la excelencia.';}
+  else if(pct>=60){e='📚';m='Buen esfuerzo. Estás en proceso de consolidar tu comprensión. Consulta la guía de estudio y vuelve a intentarlo.';}
+  else{e='💪';m='Sigue practicando. Cada intento es un paso de aprendizaje. Revisa el material teórico de la guía y vuelve a intentarlo.';}
+
+  $('remi').textContent=e;$('rmsg').textContent=m;
+  $('pb').style.width='100%';
+  show('sr');window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ═══════════ RETRY ═══════════ */
+function retry(){
+  cur=0;sc=0;wc=0;done=false;
+  show('sq');render();window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador – Arquitectura de la Planificación Didáctica</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary:    #4361ee;
+    --secondary:  #f72585;
+    --accent:     #f4a261;
+    --success:    #06d6a0;
+    --danger:     #ef233c;
+    --light-bg:   #f0f4ff;
+    --card-bg:    #ffffff;
+    --text-dark:  #1a1a2e;
+    --text-mid:   #444466;
+    --text-light: #7777aa;
+    --shadow:     0 8px 32px rgba(67,97,238,0.12);
+    --shadow-lg:  0 16px 48px rgba(67,97,238,0.18);
+    --radius:     20px;
+    --radius-sm:  12px;
+    --transition: all 0.35s cubic-bezier(.4,0,.2,1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #e8eeff 0%, #f9f0ff 40%, #fff5e8 100%);
+    min-height: 100vh;
+    color: var(--text-dark);
+    overflow-x: hidden;
+  }
+
+  /* ─── HEADER ─── */
+  .site-header {
+    background: linear-gradient(135deg, #4361ee 0%, #7209b7 55%, #f72585 100%);
+    padding: 28px 20px 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(67,97,238,0.3);
+  }
+  .site-header::before {
+    content:'';
+    position:absolute;
+    top:-60px; left:-60px;
+    width:220px; height:220px;
+    background: rgba(255,255,255,0.07);
+    border-radius:50%;
+  }
+  .site-header::after {
+    content:'';
+    position:absolute;
+    bottom:-80px; right:-40px;
+    width:280px; height:280px;
+    background: rgba(255,255,255,0.05);
+    border-radius:50%;
+  }
+  .header-badge {
+    display:inline-block;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.35);
+    color:#fff;
+    font-size:0.75rem;
+    font-weight:700;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    padding:5px 16px;
+    border-radius:50px;
+    margin-bottom:12px;
+    backdrop-filter:blur(8px);
+  }
+  .header-title {
+    font-family:'Poppins',sans-serif;
+    font-size:clamp(1.4rem,4vw,2.2rem);
+    font-weight:800;
+    color:#fff;
+    line-height:1.25;
+    margin-bottom:6px;
+  }
+  .header-subtitle {
+    font-size:clamp(0.85rem,2.5vw,1.05rem);
+    color:rgba(255,255,255,0.85);
+    font-weight:600;
+    margin-bottom:4px;
+  }
+  .header-author {
+    font-size:0.82rem;
+    color:rgba(255,255,255,0.7);
+    font-style:italic;
+  }
+
+  /* ─── NAV TABS ─── */
+  .nav-tabs {
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    padding:18px 20px 0;
+    flex-wrap:wrap;
+  }
+  .nav-btn {
+    background:#fff;
+    border:2px solid rgba(67,97,238,0.15);
+    color:var(--primary);
+    font-family:'Nunito',sans-serif;
+    font-size:0.88rem;
+    font-weight:700;
+    padding:9px 22px;
+    border-radius:50px;
+    cursor:pointer;
+    transition:var(--transition);
+    box-shadow: 0 2px 10px rgba(67,97,238,0.08);
+  }
+  .nav-btn:hover { background:var(--primary); color:#fff; transform:translateY(-2px); }
+  .nav-btn.active { background:var(--primary); color:#fff; box-shadow:0 4px 16px rgba(67,97,238,0.3); }
+
+  /* ─── SCREENS ─── */
+  .screen { display:none; animation: fadeUp 0.5s ease both; }
+  .screen.active { display:block; }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(24px); }
+    to   { opacity:1; transform:translateY(0);    }
+  }
+
+  .container {
+    max-width:780px;
+    margin:0 auto;
+    padding:28px 20px 60px;
+  }
+
+  /* ─── START SCREEN ─── */
+  .start-card {
+    background:var(--card-bg);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-lg);
+    padding:clamp(28px,6vw,52px);
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+    margin-top:8px;
+  }
+  .start-card::before {
+    content:'';
+    position:absolute;
+    top:0;left:0;right:0;
+    height:5px;
+    background: linear-gradient(90deg,#4361ee,#7209b7,#f72585,#f4a261);
+  }
+  .start-icon {
+    font-size:3.8rem;
+    margin-bottom:14px;
+    display:block;
+    animation: bounce 2s ease-in-out infinite;
+  }
+  @keyframes bounce {
+    0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)}
+  }
+  .start-title {
+    font-family:'Poppins',sans-serif;
+    font-size:clamp(1.3rem,3.5vw,1.9rem);
+    font-weight:800;
+    color:var(--text-dark);
+    margin-bottom:10px;
+  }
+  .start-desc {
+    color:var(--text-mid);
+    font-size:0.95rem;
+    line-height:1.7;
+    max-width:500px;
+    margin:0 auto 28px;
+  }
+  .info-pills {
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:30px;
+  }
+  .pill {
+    background:var(--light-bg);
+    color:var(--primary);
+    font-size:0.8rem;
+    font-weight:700;
+    padding:6px 14px;
+    border-radius:50px;
+    display:flex;
+    align-items:center;
+    gap:5px;
+  }
+  .input-group {
+    max-width:380px;
+    margin:0 auto 24px;
+    text-align:left;
+  }
+  .input-group label {
+    display:block;
+    font-weight:700;
+    font-size:0.88rem;
+    color:var(--text-mid);
+    margin-bottom:8px;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+  }
+  .input-group input {
+    width:100%;
+    padding:14px 18px;
+    border:2px solid rgba(67,97,238,0.2);
+    border-radius:var(--radius-sm);
+    font-family:'Nunito',sans-serif;
+    font-size:1rem;
+    font-weight:600;
+    color:var(--text-dark);
+    background:#f7f9ff;
+    transition:var(--transition);
+    outline:none;
+  }
+  .input-group input:focus {
+    border-color:var(--primary);
+    background:#fff;
+    box-shadow:0 0 0 4px rgba(67,97,238,0.1);
+  }
+  .btn-primary {
+    background: linear-gradient(135deg,#4361ee,#7209b7);
+    color:#fff;
+    border:none;
+    border-radius:50px;
+    padding:15px 40px;
+    font-family:'Poppins',sans-serif;
+    font-size:1rem;
+    font-weight:700;
+    cursor:pointer;
+    transition:var(--transition);
+    box-shadow:0 6px 20px rgba(67,97,238,0.35);
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .btn-primary:hover {
+    transform:translateY(-3px);
+    box-shadow:0 10px 28px rgba(67,97,238,0.45);
+  }
+  .btn-primary:active { transform:translateY(0); }
+
+  /* ─── QUIZ SCREEN ─── */
+  .quiz-header {
+    background:var(--card-bg);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:20px 24px;
+    margin-bottom:20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .quiz-progress-wrap { flex:1; min-width:160px; }
+  .quiz-progress-label {
+    font-size:0.8rem;
+    font-weight:700;
+    color:var(--text-light);
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+    margin-bottom:6px;
+  }
+  .progress-bar-track {
+    background:#e8eeff;
+    border-radius:50px;
+    height:10px;
+    overflow:hidden;
+  }
+  .progress-bar-fill {
+    height:100%;
+    border-radius:50px;
+    background: linear-gradient(90deg,#4361ee,#f72585);
+    transition: width 0.6s cubic-bezier(.4,0,.2,1);
+  }
+  .quiz-counter {
+    font-family:'Poppins',sans-serif;
+    font-size:1.6rem;
+    font-weight:800;
+    color:var(--primary);
+    white-space:nowrap;
+  }
+  .quiz-counter span { font-size:1rem; color:var(--text-light); font-weight:600; }
+  .quiz-score-badge {
+    background: linear-gradient(135deg,#e8fff6,#d0fff0);
+    border:2px solid var(--success);
+    color:#00895e;
+    font-size:0.82rem;
+    font-weight:700;
+    padding:6px 14px;
+    border-radius:50px;
+  }
+  .question-type-badge {
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background: linear-gradient(135deg,#f0f4ff,#e8eeff);
+    color:var(--primary);
+    font-size:0.75rem;
+    font-weight:700;
+    padding:5px 13px;
+    border-radius:50px;
+    border:1px solid rgba(67,97,238,0.2);
+    margin-bottom:14px;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+  }
+
+  .question-card {
+    background:var(--card-bg);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-lg);
+    padding:clamp(22px,5vw,40px);
+    margin-bottom:18px;
+    position:relative;
+    overflow:hidden;
+    transition: var(--transition);
+  }
+  .question-card::before {
+    content:'';
+    position:absolute;
+    top:0;left:0;right:0;
+    height:4px;
+    background: linear-gradient(90deg,#4361ee,#7209b7,#f72585);
+  }
+  .question-number {
+    font-family:'Poppins',sans-serif;
+    font-size:0.72rem;
+    font-weight:700;
+    color:var(--text-light);
+    text-transform:uppercase;
+    letter-spacing:1px;
+    margin-bottom:10px;
+  }
+  .question-text {
+    font-family:'Poppins',sans-serif;
+    font-size:clamp(0.95rem,2.5vw,1.12rem);
+    font-weight:600;
+    color:var(--text-dark);
+    line-height:1.65;
+    margin-bottom:24px;
+  }
+
+  /* Table for relación de elementos */
+  .rel-table {
+    width:100%;
+    border-collapse:collapse;
+    margin-bottom:20px;
+    font-size:0.88rem;
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .rel-table th {
+    background: linear-gradient(135deg,#4361ee,#7209b7);
+    color:#fff;
+    padding:10px 14px;
+    font-weight:700;
+    text-align:left;
+  }
+  .rel-table td {
+    padding:9px 14px;
+    border-bottom:1px solid #e8eeff;
+    color:var(--text-mid);
+    vertical-align:top;
+  }
+  .rel-table tr:last-child td { border-bottom:none; }
+  .rel-table tr:nth-child(even) td { background:#f7f9ff; }
+
+  .options-list {
+    display:flex;
+    flex-direction:column;
+    gap:11px;
+  }
+  .option-btn {
+    display:flex;
+    align-items:flex-start;
+    gap:13px;
+    padding:14px 18px;
+    border:2.5px solid rgba(67,97,238,0.15);
+    border-radius:var(--radius-sm);
+    background:#fafbff;
+    cursor:pointer;
+    text-align:left;
+    font-family:'Nunito',sans-serif;
+    font-size:0.95rem;
+    font-weight:600;
+    color:var(--text-mid);
+    transition:var(--transition);
+    width:100%;
+    position:relative;
+    overflow:hidden;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color:var(--primary);
+    background:#f0f4ff;
+    color:var(--primary);
+    transform:translateX(4px);
+    box-shadow:0 4px 16px rgba(67,97,238,0.12);
+  }
+  .option-btn.selected {
+    border-color:var(--primary);
+    background: linear-gradient(135deg,#f0f4ff,#e8eeff);
+    color:var(--primary);
+    box-shadow:0 4px 16px rgba(67,97,238,0.18);
+  }
+  .option-btn.correct {
+    border-color:var(--success);
+    background: linear-gradient(135deg,#e8fff6,#d0fff0);
+    color:#006b50;
+    animation: pulseGreen 0.4s ease;
+  }
+  .option-btn.incorrect {
+    border-color:var(--danger);
+    background: linear-gradient(135deg,#fff0f2,#ffe0e4);
+    color:#a00020;
+    animation: shakeRed 0.4s ease;
+  }
+  .option-btn:disabled { cursor:not-allowed; }
+
+  @keyframes pulseGreen {
+    0%{transform:scale(1)} 50%{transform:scale(1.025)} 100%{transform:scale(1)}
+  }
+  @keyframes shakeRed {
+    0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)}
+  }
+
+  .option-letter {
+    min-width:32px; height:32px;
+    border-radius:50%;
+    background: linear-gradient(135deg,#4361ee,#7209b7);
+    color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Poppins',sans-serif;
+    font-size:0.82rem;
+    font-weight:800;
+    flex-shrink:0;
+    margin-top:1px;
+    transition:var(--transition);
+  }
+  .option-btn.correct .option-letter { background: linear-gradient(135deg,#06d6a0,#00b382); }
+  .option-btn.incorrect .option-letter { background: linear-gradient(135deg,#ef233c,#c0001a); }
+  .option-btn.selected .option-letter { transform:scale(1.1); }
+
+  /* ─── FEEDBACK ─── */
+  .feedback-card {
+    border-radius:var(--radius-sm);
+    padding:16px 20px;
+    margin-top:4px;
+    font-size:0.92rem;
+    font-weight:600;
+    line-height:1.6;
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    animation:fadeUp 0.35s ease both;
+  }
+  .feedback-card.correct-fb {
+    background: linear-gradient(135deg,#e8fff6,#d0ffe8);
+    border-left:4px solid var(--success);
+    color:#005b42;
+  }
+  .feedback-card.incorrect-fb {
+    background: linear-gradient(135deg,#fff0f2,#ffdde1);
+    border-left:4px solid var(--danger);
+    color:#7a0020;
+  }
+  .feedback-icon { font-size:1.5rem; flex-shrink:0; margin-top:1px; }
+
+  .btn-next {
+    background: linear-gradient(135deg,#4361ee,#7209b7);
+    color:#fff;
+    border:none;
+    border-radius:50px;
+    padding:14px 36px;
+    font-family:'Poppins',sans-serif;
+    font-size:0.95rem;
+    font-weight:700;
+    cursor:pointer;
+    transition:var(--transition);
+    box-shadow:0 6px 20px rgba(67,97,238,0.3);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:18px;
+    margin-left:auto;
+  }
+  .btn-next:hover { transform:translateY(-3px); box-shadow:0 10px 28px rgba(67,97,238,0.4); }
+  .btn-next:disabled { opacity:0.45; cursor:not-allowed; transform:none; }
+
+  /* ─── RESULTS SCREEN ─── */
+  .results-card {
+    background:var(--card-bg);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-lg);
+    padding:clamp(28px,6vw,52px);
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .results-card::before {
+    content:'';
+    position:absolute;
+    top:0;left:0;right:0;
+    height:5px;
+    background: linear-gradient(90deg,#4361ee,#7209b7,#f72585,#f4a261);
+  }
+  .trophy { font-size:4rem; display:block; margin-bottom:12px; animation:bounce 2s ease-in-out infinite; }
+  .results-name {
+    font-family:'Poppins',sans-serif;
+    font-size:clamp(1.2rem,3vw,1.7rem);
+    font-weight:800;
+    color:var(--text-dark);
+    margin-bottom:6px;
+  }
+  .results-subtitle {
+    font-size:0.92rem;
+    color:var(--text-light);
+    margin-bottom:28px;
+  }
+  .results-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+    gap:14px;
+    margin-bottom:28px;
+  }
+  .result-stat {
+    padding:18px 14px;
+    border-radius:var(--radius-sm);
+    text-align:center;
+  }
+  .result-stat.total { background: linear-gradient(135deg,#f0f4ff,#e8eeff); }
+  .result-stat.correct { background: linear-gradient(135deg,#e8fff6,#d0ffe8); }
+  .result-stat.incorrect { background: linear-gradient(135deg,#fff0f2,#ffdde1); }
+  .result-stat.percent { background: linear-gradient(135deg,#fff8e8,#fff0cc); }
+  .stat-value {
+    font-family:'Poppins',sans-serif;
+    font-size:2.2rem;
+    font-weight:900;
+    line-height:1;
+    margin-bottom:4px;
+  }
+  .result-stat.total .stat-value { color:var(--primary); }
+  .result-stat.correct .stat-value { color:#00895e; }
+  .result-stat.incorrect .stat-value { color:var(--danger); }
+  .result-stat.percent .stat-value { color:#d97706; }
+  .stat-label {
+    font-size:0.78rem;
+    font-weight:700;
+    color:var(--text-light);
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+  }
+
+  .perf-bar-wrap { margin-bottom:24px; }
+  .perf-bar-track {
+    background:#e8eeff;
+    border-radius:50px;
+    height:18px;
+    overflow:hidden;
+    margin-bottom:8px;
+  }
+  .perf-bar-fill {
+    height:100%;
+    border-radius:50px;
+    background: linear-gradient(90deg,#4361ee,#7209b7,#f72585);
+    transition: width 1.2s cubic-bezier(.4,0,.2,1);
+  }
+  .perf-label {
+    font-size:0.82rem;
+    color:var(--text-light);
+    font-weight:600;
+  }
+
+  .motivation-msg {
+    background: linear-gradient(135deg,#f7f9ff,#f0f4ff);
+    border:2px solid rgba(67,97,238,0.15);
+    border-radius:var(--radius-sm);
+    padding:16px 20px;
+    font-size:0.95rem;
+    font-weight:600;
+    color:var(--text-mid);
+    line-height:1.6;
+    margin-bottom:24px;
+  }
+  .btn-retry {
+    background: linear-gradient(135deg,#f72585,#7209b7);
+    color:#fff;
+    border:none;
+    border-radius:50px;
+    padding:14px 34px;
+    font-family:'Poppins',sans-serif;
+    font-size:0.95rem;
+    font-weight:700;
+    cursor:pointer;
+    transition:var(--transition);
+    box-shadow:0 6px 20px rgba(247,37,133,0.3);
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .btn-retry:hover { transform:translateY(-3px); box-shadow:0 10px 28px rgba(247,37,133,0.4); }
+
+  /* ─── STUDY GUIDE SCREEN ─── */
+  .guide-card {
+    background:var(--card-bg);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-lg);
+    padding:clamp(22px,5vw,40px);
+    position:relative;
+    overflow:hidden;
+    margin-top:8px;
+  }
+  .guide-card::before {
+    content:'';
+    position:absolute;
+    top:0;left:0;right:0;
+    height:5px;
+    background: linear-gradient(90deg,#f4a261,#f72585,#7209b7);
+  }
+  .guide-title {
+    font-family:'Poppins',sans-serif;
+    font-size:clamp(1.1rem,3vw,1.5rem);
+    font-weight:800;
+    color:var(--text-dark);
+    margin-bottom:8px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .guide-desc {
+    font-size:0.92rem;
+    color:var(--text-mid);
+    line-height:1.7;
+    margin-bottom:24px;
+  }
+  .pdf-actions {
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:24px;
+  }
+  .btn-pdf {
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:12px 26px;
+    border-radius:50px;
+    font-family:'Poppins',sans-serif;
+    font-size:0.9rem;
+    font-weight:700;
+    text-decoration:none;
+    cursor:pointer;
+    transition:var(--transition);
+    border:none;
+  }
+  .btn-pdf-view {
+    background: linear-gradient(135deg,#f4a261,#f72585);
+    color:#fff;
+    box-shadow:0 5px 18px rgba(244,162,97,0.35);
+  }
+  .btn-pdf-view:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(244,162,97,0.45); }
+  .btn-pdf-open {
+    background:#fff;
+    color:var(--primary);
+    border:2px solid rgba(67,97,238,0.25);
+    box-shadow:0 2px 10px rgba(67,97,238,0.08);
+  }
+  .btn-pdf-open:hover { background:var(--primary); color:#fff; transform:translateY(-3px); }
+  .pdf-viewer-wrap {
+    border-radius:var(--radius-sm);
+    overflow:hidden;
+    box-shadow:var(--shadow);
+    display:none;
+  }
+  .pdf-viewer-wrap.show { display:block; }
+  .pdf-viewer-wrap iframe {
+    width:100%;
+    height:600px;
+    border:none;
+    display:block;
+  }
+  .topic-list {
+    list-style:none;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:10px;
+    margin-bottom:24px;
+  }
+  .topic-item {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:var(--light-bg);
+    padding:10px 14px;
+    border-radius:var(--radius-sm);
+    font-size:0.88rem;
+    font-weight:600;
+    color:var(--text-mid);
+  }
+  .topic-dot {
+    width:10px; height:10px;
+    border-radius:50%;
+    background: linear-gradient(135deg,#4361ee,#7209b7);
+    flex-shrink:0;
+  }
+
+  /* ─── TRANSITIONS ─── */
+  .slide-out {
+    animation: slideOut 0.3s ease both;
+  }
+  .slide-in {
+    animation: slideIn 0.4s ease both;
+  }
+  @keyframes slideOut {
+    to { opacity:0; transform:translateX(-30px); }
+  }
+  @keyframes slideIn {
+    from { opacity:0; transform:translateX(30px); }
+    to   { opacity:1; transform:translateX(0);    }
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media(max-width:600px){
+    .quiz-header { flex-direction:column; align-items:flex-start; }
+    .quiz-counter { font-size:1.3rem; }
+    .btn-next { width:100%; justify-content:center; }
+    .pdf-actions { flex-direction:column; }
+    .btn-pdf { justify-content:center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── HEADER ─── -->
+<header class="site-header">
+  <div class="header-badge">📚 Evaluación Formativa</div>
+  <h1 class="header-title">Simulador Interactivo de Evaluación</h1>
+  <p class="header-subtitle">Arquitectura de la Planificación Didáctica</p>
+  <p class="header-author">Prof. Francisco De Jesús Luna Benítez</p>
+</header>
+
+<!-- ─── NAV ─── -->
+<div class="nav-tabs">
+  <button class="nav-btn active" onclick="showTab('start')">🏠 Inicio</button>
+  <button class="nav-btn" id="nav-quiz" onclick="showTab('quiz')" style="display:none">📝 Examen</button>
+  <button class="nav-btn" id="nav-results" onclick="showTab('results')" style="display:none">🏆 Resultados</button>
+  <button class="nav-btn" onclick="showTab('guide')">📖 Guía de Estudio</button>
+</div>
+
+<!-- ─── SCREEN: START ─── -->
+<div id="screen-start" class="screen active">
+  <div class="container">
+    <div class="start-card">
+      <span class="start-icon">🎯</span>
+      <h2 class="start-title">Bienvenido al Simulador</h2>
+      <p class="start-desc">Pon a prueba tus conocimientos sobre la Arquitectura de la Planificación Didáctica. Responde 30 preguntas de opción múltiple con retroalimentación inmediata.</p>
+      <div class="info-pills">
+        <div class="pill">📋 30 preguntas</div>
+        <div class="pill">🔤 3 opciones (A, B, C)</div>
+        <div class="pill">💬 Retroalimentación inmediata</div>
+        <div class="pill">📊 Resultados detallados</div>
+      </div>
+      <div class="input-group">
+        <label for="student-name">Nombre del estudiante</label>
+        <input type="text" id="student-name" placeholder="Escribe tu nombre completo..." autocomplete="off">
+      </div>
+      <button class="btn-primary" onclick="startQuiz()">
+        ▶ Iniciar simulador
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── SCREEN: QUIZ ─── -->
+<div id="screen-quiz" class="screen">
+  <div class="container">
+    <div class="quiz-header">
+      <div class="quiz-progress-wrap">
+        <div class="quiz-progress-label">Progreso del examen</div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="quiz-counter" id="quiz-counter">1 <span>/ 30</span></div>
+      <div class="quiz-score-badge" id="score-badge">✅ Aciertos: 0</div>
+    </div>
+
+    <div id="question-area">
+      <!-- Dynamically rendered -->
+    </div>
+
+    <button class="btn-next" id="btn-next" onclick="nextQuestion()" disabled>
+      Siguiente pregunta →
+    </button>
+  </div>
+</div>
+
+<!-- ─── SCREEN: RESULTS ─── -->
+<div id="screen-results" class="screen">
+  <div class="container">
+    <div class="results-card">
+      <span class="trophy" id="trophy-icon">🏆</span>
+      <h2 class="results-name" id="results-name">¡Excelente desempeño!</h2>
+      <p class="results-subtitle" id="results-subtitle">Simulador completado</p>
+
+      <div class="results-grid">
+        <div class="result-stat total">
+          <div class="stat-value">30</div>
+          <div class="stat-label">Total de preguntas</div>
+        </div>
+        <div class="result-stat correct">
+          <div class="stat-value" id="res-correct">0</div>
+          <div class="stat-label">Aciertos</div>
+        </div>
+        <div class="result-stat incorrect">
+          <div class="stat-value" id="res-incorrect">0</div>
+          <div class="stat-label">Errores</div>
+        </div>
+        <div class="result-stat percent">
+          <div class="stat-value" id="res-percent">0%</div>
+          <div class="stat-label">Desempeño</div>
+        </div>
+      </div>
+
+      <div class="perf-bar-wrap">
+        <div class="perf-bar-track">
+          <div class="perf-bar-fill" id="perf-bar" style="width:0%"></div>
+        </div>
+        <div class="perf-label" id="perf-label">Calculando desempeño…</div>
+      </div>
+
+      <div class="motivation-msg" id="motivation-msg"></div>
+
+      <button class="btn-retry" onclick="restartQuiz()">
+        🔄 Intentar de nuevo
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── SCREEN: STUDY GUIDE ─── -->
+<div id="screen-guide" class="screen">
+  <div class="container">
+    <div class="guide-card">
+      <h2 class="guide-title">📖 Guía de Estudio</h2>
+      <p class="guide-desc">Material de apoyo completo sobre la Arquitectura de la Planificación Didáctica, elaborado por el Prof. Francisco De Jesús Luna Benítez. Consulta los temas del simulador y profundiza tu comprensión.</p>
+
+      <div class="pdf-actions">
+        <button class="btn-pdf btn-pdf-view" onclick="togglePDF()">
+          👁 Ver PDF aquí
+        </button>
+        <a class="btn-pdf btn-pdf-open"
+           href="https://drive.google.com/file/d/134U6ezyet0lU0P1NZBYq5tNOwBaqmV1N/view?usp=sharing"
+           target="_blank" rel="noopener">
+          🔗 Abrir en Drive
+        </a>
+      </div>
+
+      <div class="pdf-viewer-wrap" id="pdf-viewer-wrap">
+        <iframe
+          src="https://drive.google.com/file/d/134U6ezyet0lU0P1NZBYq5tNOwBaqmV1N/preview"
+          allow="autoplay"
+          loading="lazy">
+        </iframe>
+      </div>
+
+      <p style="font-size:0.88rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">Temas cubiertos en el simulador</p>
+      <ul class="topic-list">
+        <li class="topic-item"><div class="topic-dot"></div>¿Qué es realmente planificar? (Jackson)</li>
+        <li class="topic-item"><div class="topic-dot"></div>Planificación como espacio transicional (Winnicott)</li>
+        <li class="topic-item"><div class="topic-dot"></div>La metáfora del entramado complejo (Morin)</li>
+        <li class="topic-item"><div class="topic-dot"></div>Los 8 rasgos fundamentales de la práctica</li>
+        <li class="topic-item"><div class="topic-dot"></div>Rasgos 1-4: Competencia, Anticipación, Representación, Práctica Social</li>
+        <li class="topic-item"><div class="topic-dot"></div>Rasgos 5-8: Saberes, Haceres Heterogéneos, Proceso y Producto, Múltiples Funciones</li>
+        <li class="topic-item"><div class="topic-dot"></div>Los tres tipos de saberes docentes</li>
+        <li class="topic-item"><div class="topic-dot"></div>Dualidad: planificación como producto y proceso</li>
+        <li class="topic-item"><div class="topic-dot"></div>Las 6 funciones de la planificación</li>
+        <li class="topic-item"><div class="topic-dot"></div>La función epistémica como motor de mejora</li>
+        <li class="topic-item"><div class="topic-dot"></div>Reto en la formación docente (in abstracto vs. situado)</li>
+        <li class="topic-item"><div class="topic-dot"></div>Evolución del paradigma: racionalidad técnica vs. práctica</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── QUIZ DATA ───
+const questions = [
+  {
+    type: "Cuestionamiento directo",
+    text: "¿Cómo se denomina la fase de la enseñanza en la que el docente lleva a cabo la planificación, según Philip Jackson?",
+    options: [
+      "Enseñanza preactiva",
+      "Enseñanza reactiva",
+      "Enseñanza interactiva"
+    ],
+    correct: 0,
+    feedback: "Jackson ubicó la planificación en la fase 'preactiva' de la enseñanza, es decir, todo lo que el docente piensa, diseña y prevé antes del acto de enseñar. No es una fase reactiva ni interactiva, sino anterior al evento educativo."
+  },
+  {
+    type: "Cuestionamiento directo",
+    text: "¿Qué función cumple la planificación cuando actúa como 'espacio transicional', según Winnicott?",
+    options: [
+      "Elimina por completo la incertidumbre del aula",
+      "Hace que lo desconocido se vuelva familiar, transformando la incertidumbre en un territorio prefigurado y menos amenazador",
+      "Convierte la enseñanza en una actividad mecánica y totalmente predecible"
+    ],
+    correct: 1,
+    feedback: "Winnicott define la planificación como un espacio transicional que no elimina la incertidumbre, sino que la hace manejable: transforma lo desconocido en familiar, convirtiendo la imprevisibilidad del aula en un territorio prefigurado y menos amenazante para el docente."
+  },
+  {
+    type: "Cuestionamiento directo",
+    text: "Según la metáfora central del entramado complejo, ¿cómo debe entenderse la planificación didáctica?",
+    options: [
+      "Como una lista lineal de pasos secuenciales que el docente debe seguir rigurosamente",
+      "Como un documento burocrático que responde exclusivamente a los requerimientos institucionales",
+      "Como un tejido dinámico de constituyentes heterogéneos inseparablemente asociados"
+    ],
+    correct: 2,
+    feedback: "La metáfora del entramado (Morin) describe la planificación como un tejido dinámico de elementos heterogéneos —sentidos, representaciones, prácticas y biografía docente— que están inseparablemente asociados. No es lineal ni exclusivamente burocrática."
+  },
+  {
+    type: "Cuestionamiento directo",
+    text: "¿Cuál es el rasgo de la práctica de planificar que se define como el núcleo del perfil profesional docente, al exigir conocer currículos, establecer prioridades y diseñar proyectos acordes al contexto?",
+    options: [
+      "Competencia",
+      "Anticipación",
+      "Práctica Social"
+    ],
+    correct: 0,
+    feedback: "El Rasgo 1, denominado 'Competencia', es el núcleo del perfil profesional docente. Exige que el docente conozca el currículo, establezca prioridades pedagógicas y diseñe proyectos pertinentes al contexto específico de sus estudiantes."
+  },
+  {
+    type: "Cuestionamiento directo",
+    text: "¿Qué rasgo de la planificación describe la acción del docente de proyectar la modificación de la realidad, definiendo la naturaleza de los objetos y las respuestas adecuadas antes del acto educativo?",
+    options: [
+      "Representación",
+      "Anticipación",
+      "Haceres Heterogéneos"
+    ],
+    correct: 1,
+    feedback: "El Rasgo 2, 'Anticipación', refiere a que el docente proyecta una modificación de la realidad antes de actuar: define qué tipo de objetos de conocimiento abordará y qué respuestas espera de sus estudiantes, todo ello previo al acto educativo."
+  },
+  {
+    type: "Completamiento",
+    text: "El rasgo de Representación en la planificación posee dos planos interdependientes: uno sistemático/formalizable que corresponde al documento escrito, y otro…",
+    options: [
+      "…denominado práctica social, que integra normas institucionales y una estructura teleoafectiva con finalidades y valores.",
+      "…vinculado a los saberes de la experiencia, construido en el espacio laboral mediante la intuición docente.",
+      "…subjetivo/experiencial, que corresponde a la prefiguración mental de la clase por parte del docente."
+    ],
+    correct: 2,
+    feedback: "El Rasgo 3, 'Representación', tiene un plano sistemático/formalizable (el documento escrito) y un plano subjetivo/experiencial que es la prefiguración mental que el docente construye internamente sobre cómo se desarrollará la clase. Ambos planos son interdependientes."
+  },
+  {
+    type: "Cuestionamiento directo",
+    text: "¿Qué caracteriza al rasgo de Práctica Social (Rasgo 4) en la planificación didáctica?",
+    options: [
+      "Está compuesta por formas de decir y hacer en un tiempo y espacio, atravesada por normas institucionales y una estructura teleoafectiva con finalidades, valores y emociones",
+      "Articula acciones diversas como redactar, diagnosticar y buscar información en un nudo indivisible mediado por la racionalidad",
+      "Actúa como un prisma que produce diversos efectos en la práctica educativa, desde la guía personal hasta el control institucional"
+    ],
+    correct: 0,
+    feedback: "La Práctica Social (Rasgo 4) describe que planificar siempre ocurre en un tiempo y espacio concretos, atravesado por normas institucionales y una estructura teleoafectiva que integra finalidades, valores y emociones del docente. No es un acto neutral ni individual."
+  },
+  {
+    type: "Cuestionamiento directo",
+    text: "Según el rasgo de Saberes (Rasgo 5), planificar requiere la movilización e integración de tres tipos de conocimientos. ¿Cuáles son?",
+    options: [
+      "Teórico, práctico y evaluativo",
+      "Científicos/tecnológicos, de la experiencia y profesionales",
+      "Curriculares, pedagógicos y administrativos"
+    ],
+    correct: 1,
+    feedback: "El Rasgo 5 identifica tres tipos de saberes que el docente debe movilizar al planificar: los saberes científicos y tecnológicos (teoría educativa, psicología, disciplina), los saberes de la experiencia (intuición construida en el espacio laboral) y los saberes profesionales (anclados en el trabajo cotidiano con estudiantes)."
+  },
+  {
+    type: "Relación de elementos",
+    text: "Seleccione la opción que relacione correctamente cada tipo de saber con su descripción:\n\nTipo de saber → Descripción:\n1. Saberes Científicos y Tecnológicos\n2. Saberes de la Experiencia\n3. Saberes Profesionales\n\na) Construidos en el espacio laboral; capacidad intuitiva de ordenar, prever secuencias y esperar resultados (Cifali).\nb) Conocimientos temporales, plurales, heterogéneos, fuertemente anclados en la situación y el trabajo con los estudiantes (Tardif).\nc) Incluyen ciencias de la educación, teoría curricular, psicología, psicopedagogía y la disciplina específica a enseñar.",
+    options: [
+      "1b, 2c, 3a",
+      "1c, 2b, 3a",
+      "1c, 2a, 3b"
+    ],
+    correct: 2,
+    feedback: "La relación correcta es: 1c (Científicos y Tecnológicos = ciencias de la educación, psicología, disciplina específica), 2a (Experiencia = capacidad intuitiva construida en el espacio laboral, según Cifali) y 3b (Profesionales = conocimientos situados en el trabajo con estudiantes, según Tardif)."
+  },
+  {
+    type: "Completamiento",
+    text: "El rasgo de Haceres Heterogéneos (Rasgo 6) en la planificación articula acciones diversas como redactar, diagnosticar, discutir y buscar información en…",
+    options: [
+      "…un nudo indivisible, mediado por el contexto de justificación y racionalidad.",
+      "…una secuencia ordenada de pasos que el docente ejecuta de manera progresiva.",
+      "…un proceso exclusivamente individual de toma de decisiones técnicas."
+    ],
+    correct: 0,
+    feedback: "El Rasgo 6 afirma que al planificar el docente realiza acciones muy diversas —redactar, diagnosticar, discutir, buscar información— que no son secuenciales ni aisladas, sino que se articulan en un nudo indivisible mediado por la racionalidad y el contexto de justificación."
+  },
+  {
+    type: "Cuestionamiento directo",
+    text: "¿Cómo describe Deleuze el rasgo de Proceso y Producto (Rasgo 7) en relación con la planificación didáctica?",
+    options: [
+      "Como un modelo fijo de objetivos que culmina en un texto definitivo e inamovible",
+      "Como un nudo de totalización móvil que puede desanudarse en la marcha, siendo tanto composición continua como texto materializado",
+      "Como un instrumento exclusivo de evaluación burocrática institucional"
+    ],
+    correct: 1,
+    feedback: "Deleuze aporta la noción de 'nudo de totalización móvil' para describir cómo la planificación es simultáneamente un proceso continuo en la mente del docente y un producto materializado en el texto escrito. Puede 'desanudarse' y recomponerse durante la práctica."
+  },
+  {
+    type: "Cuestionamiento directo",
+    text: "¿Qué metáfora se utiliza para describir el rasgo de Múltiples Funciones (Rasgo 8) en la planificación?",
+    options: [
+      "Una brújula que orienta al docente en su práctica cotidiana",
+      "Un mapa que delimita el territorio de la enseñanza institucional",
+      "Un prisma que produce diversos efectos en la práctica educativa, desde la guía personal hasta el control institucional"
+    ],
+    correct: 2,
+    feedback: "El Rasgo 8 utiliza la metáfora del prisma: así como un prisma descompone la luz en múltiples colores, la planificación produce simultáneamente diversos efectos —guía personal, comunicación, justificación, control institucional— dependiendo de cómo se usa."
+  },
+  {
+    type: "Cuestionamiento directo",
+    text: "¿Cuál de las funciones de la planificación se orienta a trazar el curso de acción y reducir la incertidumbre del docente ante la enseñanza?",
+    options: [
+      "Regulación y Orientación",
+      "Justificación y Análisis",
+      "Control"
+    ],
+    correct: 0,
+    feedback: "La función de 'Regulación y Orientación' es la que permite al docente trazar un curso de acción claro y reducir la incertidumbre que genera la imprevisibilidad del aula, dando dirección y orden a su práctica educativa."
+  },
+  {
+    type: "Cuestionamiento directo",
+    text: "¿Qué función de la planificación otorga racionalidad y legitima el porqué de las decisiones didácticas del docente?",
+    options: [
+      "Representación y Comunicación",
+      "Justificación y Análisis",
+      "Epistémica"
+    ],
+    correct: 1,
+    feedback: "La función de 'Justificación y Análisis' es la que dota de racionalidad a las decisiones docentes: al planificar, el docente argumenta por qué eligió determinados contenidos, estrategias y actividades, legitimando sus decisiones ante sí mismo y ante otros."
+  },
+  {
+    type: "Cuestionamiento directo",
+    text: "La función de Representación y Comunicación en la planificación cumple con…",
+    options: [
+      "…responder a los requerimientos burocráticos de la institución para la evaluación externa.",
+      "…reflejar cómo el docente concibe y ejerce su poder dentro de la institución educativa.",
+      "…hacer públicas las intenciones didácticas del docente ante colegas y estudiantes."
+    ],
+    correct: 2,
+    feedback: "La función de 'Representación y Comunicación' convierte la planificación en un acto comunicativo: hace visibles y públicas las intenciones pedagógicas del docente ante sus colegas, directivos y estudiantes, siendo un instrumento de diálogo profesional."
+  },
+  {
+    type: "Relación de elementos",
+    text: "Seleccione la opción que relacione correctamente cada función de la planificación con su descripción:\n\nFunción → Descripción:\n1. Política\n2. Control\n3. Epistémica\n\na) Refleja cómo el docente concibe y ejerce su poder y la institución de la educación.\nb) Responde a los requerimientos burocráticos de la institución (evaluación externa).\nc) Es la oportunidad para investigar la propia práctica docente.",
+    options: [
+      "1a, 2b, 3c",
+      "1b, 2c, 3a",
+      "1c, 2a, 3b"
+    ],
+    correct: 0,
+    feedback: "La relación correcta es: 1a (Política = refleja cómo el docente ejerce su poder), 2b (Control = responde a requerimientos burocráticos de evaluación externa) y 3c (Epistémica = oportunidad de investigar la propia práctica). Cada función responde a una dimensión distinta del acto de planificar."
+  },
+  {
+    type: "Cuestionamiento directo",
+    text: "¿Por qué se denomina 'función epistémica' a una de las funciones de la planificación?",
+    options: [
+      "Porque responde a los requerimientos burocráticos de la supervisión institucional",
+      "Porque convierte la planificación en una herramienta de conocimiento que permite al docente investigar y reflexionar sobre su propia práctica",
+      "Porque define las normas y procedimientos que regulan la acción educativa"
+    ],
+    correct: 1,
+    feedback: "La función epistémica es la más valorada en la formación docente: convierte la planificación en un instrumento de conocimiento. Al planificar, el docente se investiga a sí mismo, reflexiona sobre su sistema de acción personal y construye saber profesional sobre su propia práctica."
+  },
+  {
+    type: "Completamiento",
+    text: "Según la función epistémica, en la formación docente la planificación debe rescatarse de su mera función de control burocrático y elevarse como una herramienta de conocimiento, porque…",
+    options: [
+      "…permite reproducir con exactitud los modelos de enseñanza establecidos por la institución escolar.",
+      "…facilita la elaboración de documentos formales que satisfacen los requisitos administrativos de la supervisión.",
+      "…planificar es indagar y construir saberes sobre la propia práctica, obligando al docente a reflexionar sobre su sistema de acción personal."
+    ],
+    correct: 2,
+    feedback: "La función epistémica implica que planificar no es copiar formatos ni cumplir trámites: es un acto de indagación y construcción de saber. El docente, al planificar, reflexiona sobre su sistema de acción personal (Perrenoud) y fomenta haceres heterogéneos como dialogar, analizar textos y revisar la experiencia."
+  },
+  {
+    type: "Cuestionamiento directo",
+    text: "¿Cuál es el principal reto en la formación docente que se menciona en relación con la planificación propedéutica?",
+    options: [
+      "Evitar la construcción de propuestas in abstracto, favoreciendo en su lugar la planificación en un contexto situado y específico",
+      "Lograr que los docentes en formación dominen los modelos técnicos de objetivos sucesivos establecidos en el siglo XX",
+      "Garantizar que los documentos de planificación cumplan con todos los requisitos burocráticos institucionales"
+    ],
+    correct: 0,
+    feedback: "El mayor desafío en la formación docente es evitar planificar 'in abstracto', es decir, para un grupo imaginario o ideal. La propuesta es que los futuros docentes construyan planificaciones para contextos situados y concretos, con estudiantes reales y necesidades específicas."
+  },
+  {
+    type: "Cuestionamiento directo",
+    text: "¿Qué implica que la planificación propedéutica sea entendida como una 'representación abierta'?",
+    options: [
+      "Que el docente debe seguir el plan de clase sin modificaciones durante la ejecución",
+      "Que debe estar abierta a la inmediatez e imprevisibilidad propias de la enseñanza real",
+      "Que puede elaborarse sin considerar el contexto específico de los estudiantes"
+    ],
+    correct: 1,
+    feedback: "Entender la planificación como 'representación abierta' significa aceptar que ningún plan puede prever todo lo que sucederá en el aula. La planificación no es una prisión sino una guía flexible que se adapta a la inmediatez e imprevisibilidad inherentes a cualquier situación educativa real."
+  },
+  {
+    type: "Ordenamiento",
+    text: "Ordene las estrategias propuestas para superar la planificación in abstracto, de la primera a la última, según el contenido teórico:\n\n1. Asumir el posicionamiento de constructor de una intervención destinada a sujetos específicos.\n2. Observar y analizar clases reales antes de intervenir.\n3. Realizar una revisión biográfica para desarmar las propias concepciones de cuando se era alumno.",
+    options: [
+      "1, 3, 2",
+      "3, 1, 2",
+      "2, 1, 3"
+    ],
+    correct: 2,
+    feedback: "El orden correcto es: primero observar clases reales (2), luego asumir el posicionamiento de constructor para sujetos específicos (1), y finalmente realizar la revisión biográfica para deconstruir las propias concepciones como ex-alumno (3). Este proceso va de lo externo a lo interno."
+  },
+  {
+    type: "Relación de elementos",
+    text: "Seleccione la opción que relacione correctamente cada paradigma de planificación con sus características:\n\nParadigma → Características:\n1. Racionalidad Técnica (mediados siglo XX)\n2. Racionalidad Práctica (siglo XXI - Schön)\n\na) El documento es visto como un fin burocrático; la acción es la ejecución mecánica de lo previsto.\nb) El documento es un género epistémico (artefacto de enseñanza); la acción implica reflexión constante.",
+    options: [
+      "1a, 2b",
+      "1b, 2a",
+      "Ambos paradigmas comparten el mismo enfoque sobre el documento planificador"
+    ],
+    correct: 0,
+    feedback: "La Racionalidad Técnica (siglo XX) concibe el documento como un fin burocrático y la acción como ejecución mecánica. En cambio, la Racionalidad Práctica (Schön, siglo XXI) concibe el documento como artefacto epistémico de enseñanza y la acción como reflexión constante sobre la práctica."
+  },
+  {
+    type: "Completamiento",
+    text: "Según la evolución del paradigma en la planificación, la Racionalidad Práctica (Schön, siglo XXI) se diferencia de la Racionalidad Técnica porque su enfoque se centra en…",
+    options: [
+      "…el modelo por objetivos sucesivos como receta estricta que garantiza resultados de aprendizaje predecibles.",
+      "…la toma de decisiones situada y la resolución de problemas emergentes en el contexto real de enseñanza.",
+      "…la ejecución mecánica del plan previamente elaborado sin modificaciones en la práctica."
+    ],
+    correct: 1,
+    feedback: "La Racionalidad Práctica (Schön) abandona la 'receta estricta' de la Racionalidad Técnica para centrarse en la toma de decisiones situada: el docente resuelve problemas emergentes, reflexiona en y sobre la acción, y adapta sus decisiones al contexto real de enseñanza."
+  },
+  {
+    type: "Cuestionamiento directo",
+    text: "Según el contenido teórico, ¿por qué la planificación NO es un trámite?",
+    options: [
+      "Porque es un documento que el docente elabora para cumplir con las obligaciones administrativas de la institución",
+      "Porque es una prisión que limita la creatividad espontánea del docente en el aula",
+      "Porque es la arquitectura del pensamiento didáctico del docente, que refleja sus intenciones y concepciones pedagógicas profundas"
+    ],
+    correct: 2,
+    feedback: "La planificación no es un trámite burocrático sino la arquitectura del pensamiento didáctico del docente: es el espacio donde se materializan sus concepciones sobre la enseñanza, el aprendizaje y los estudiantes. Reduce todo lo que el docente piensa y decide a un texto que lo representa."
+  },
+  {
+    type: "Cuestionamiento directo",
+    text: "¿Por qué se afirma que la planificación didáctica no es una actividad solitaria?",
+    options: [
+      "Porque es el producto de un diálogo constante con la teoría, el contexto y los colegas",
+      "Porque requiere que el docente aplique mecánicamente los modelos teóricos establecidos por expertos",
+      "Porque se elabora siguiendo instrucciones precisas de la institución educativa"
+    ],
+    correct: 0,
+    feedback: "La planificación no es solitaria porque emerge del diálogo permanente: con la teoría pedagógica, con el contexto institucional y comunitario, y con los colegas docentes. Es una práctica social y colectiva, no un acto individual de aplicación mecánica de fórmulas."
+  },
+  {
+    type: "Completamiento",
+    text: "La planificación, como práctica de vida profesional, no es una prisión porque…",
+    options: [
+      "…obliga al docente a cumplir estrictamente con lo establecido en el documento sin posibilidad de ajuste.",
+      "…es un curso de acción que asume y respeta la imprevisibilidad propia del aula.",
+      "…permite al docente ignorar los imprevistos del aula y concentrarse en los objetivos predefinidos."
+    ],
+    correct: 1,
+    feedback: "La planificación no encierra ni rigidiza la práctica porque su naturaleza es la de un curso de acción flexible que asume la imprevisibilidad del aula. El docente planifica sabiendo que la realidad del aula puede diferir de lo planeado, y la buena planificación prevé esa apertura."
+  },
+  {
+    type: "Cuestionamiento directo",
+    text: "¿Qué afirmación sintetiza mejor la concepción de la planificación como herramienta de vida profesional, según el contenido teórico?",
+    options: [
+      "Planificar es elaborar un documento administrativo que responde a los requerimientos institucionales de evaluación externa",
+      "Planificar es aplicar los saberes teóricos adquiridos durante la formación inicial de manera sistemática",
+      "Planificar no se reduce a la aplicación de saberes teóricos; es el espacio vivo de construcción del saber profesional docente"
+    ],
+    correct: 2,
+    feedback: "La síntesis central del contenido es que planificar trasciende la mera aplicación de saberes teóricos: es un espacio vivo donde el docente construye activamente su saber profesional, dialoga con la teoría y el contexto, y se constituye como profesional reflexivo de la educación."
+  },
+  {
+    type: "Relación de elementos",
+    text: "Seleccione la opción que relacione correctamente los Rasgos 1-4 con sus descripciones:\n\nRasgo → Descripción:\n1. Competencia\n2. Anticipación\n3. Representación\n4. Práctica Social\n\na) Núcleo del perfil profesional; exige conocer currículos, prioridades y diseñar proyectos contextualizados.\nb) Proyecta la modificación de la realidad y define respuestas adecuadas antes del acto educativo.\nc) Posee un plano sistemático/formalizable y un plano subjetivo/experiencial (prefiguración mental).\nd) Atravesada por normas institucionales y una estructura teleoafectiva (finalidades, valores, emociones).",
+    options: [
+      "1a, 2b, 3c, 4d",
+      "1b, 2a, 3d, 4c",
+      "1c, 2d, 3a, 4b"
+    ],
+    correct: 0,
+    feedback: "La relación correcta es: Competencia (1a) = núcleo del perfil profesional; Anticipación (2b) = proyecta la realidad antes del acto; Representación (3c) = dos planos interdependientes; Práctica Social (4d) = atravesada por normas y estructura teleoafectiva. Cada rasgo aporta una dimensión única al acto de planificar."
+  },
+  {
+    type: "Ordenamiento",
+    text: "Ordene los siguientes elementos según representan la evolución del paradigma de planificación, de más antiguo (primero) a más reciente (último):\n\n1. La planificación como reflexión constante sobre la acción (espacio argumentativo).\n2. La planificación como modelo por objetivos sucesivos (receta estricta).\n3. La planificación como toma de decisiones situada y resolución de problemas.",
+    options: [
+      "3, 2, 1",
+      "2, 3, 1",
+      "1, 2, 3"
+    ],
+    correct: 1,
+    feedback: "La evolución correcta es: primero el modelo por objetivos sucesivos/receta estricta (Racionalidad Técnica, mediados siglo XX), luego la toma de decisiones situada y resolución de problemas (Schön, finales siglo XX), y finalmente la reflexión constante como espacio argumentativo (paradigma actual, siglo XXI)."
+  },
+  {
+    type: "Cuestionamiento directo",
+    text: "¿Qué afirma Edgar Morin sobre el concepto de complejidad, según el contenido teórico de la planificación didáctica?",
+    options: [
+      "Que es la acumulación de conocimientos disciplinares, pedagógicos y experienciales que el docente integra al planificar",
+      "Que es el conjunto de funciones que cumple la planificación como instrumento de regulación, justificación y control educativo",
+      "Que es el tejido de eventos, acciones, interacciones, retroacciones, determinaciones y azares que constituyen nuestro mundo fenoménico"
+    ],
+    correct: 2,
+    feedback: "Morin define la complejidad como 'el tejido de eventos, acciones, interacciones, retroacciones, determinaciones y azares que constituyen nuestro mundo fenoménico'. Esta definición es la metáfora central para entender por qué la planificación no puede reducirse a una lista lineal de pasos."
+  }
+];
+
+// ─── STATE ───
+let currentQ = 0;
+let score = 0;
+let answered = false;
+let studentName = "";
+
+// ─── TAB NAVIGATION ───
+function showTab(tab) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + tab).classList.add('active');
+  event && event.target && event.target.classList.add('active');
+}
+
+// ─── START QUIZ ───
+function startQuiz() {
+  const nameInput = document.getElementById('student-name').value.trim();
+  if (!nameInput) {
+    document.getElementById('student-name').focus();
+    document.getElementById('student-name').style.borderColor = 'var(--danger)';
+    setTimeout(() => document.getElementById('student-name').style.borderColor = '', 1500);
+    return;
+  }
+  studentName = nameInput;
+  currentQ = 0;
+  score = 0;
+  answered = false;
+
+  document.getElementById('nav-quiz').style.display = '';
+  document.getElementById('nav-results').style.display = 'none';
+
+  showTab('quiz');
+  document.querySelectorAll('.nav-btn')[1].classList.add('active');
+  renderQuestion();
+}
+
+// ─── RENDER QUESTION ───
+function renderQuestion() {
+  answered = false;
+  const q = questions[currentQ];
+  const area = document.getElementById('question-area');
+
+  const progress = ((currentQ) / questions.length) * 100;
+  document.getElementById('progress-fill').style.width = progress + '%';
+  document.getElementById('quiz-counter').innerHTML = `${currentQ + 1} <span>/ ${questions.length}</span>`;
+  document.getElementById('score-badge').textContent = `✅ Aciertos: ${score}`;
+  document.getElementById('btn-next').disabled = true;
+
+  // Build table for relación de elementos
+  let tableHTML = '';
+  if (q.type === 'Relación de elementos') {
+    const lines = q.text.split('\n').filter(l => l.trim());
+    let inTable = false;
+    tableHTML = '<div class="question-text" style="white-space:pre-line;">' + lines[0] + '</div>';
+    tableHTML += `<table class="rel-table"><thead><tr><th>Elemento</th><th>Descripción</th></tr></thead><tbody>`;
+    // Just render the question as styled text
+    tableHTML = '';
+  }
+
+  area.innerHTML = `
+    <div class="question-card slide-in">
+      <div class="question-type-badge">📌 ${q.type}</div>
+      <div class="question-number">Pregunta ${currentQ + 1} de ${questions.length}</div>
+      <div class="question-text" style="white-space:pre-line;">${q.text}</div>
+      <div class="options-list" id="options-list">
+        ${q.options.map((opt, i) => `
+          <button class="option-btn" onclick="selectAnswer(${i})" data-index="${i}">
+            <span class="option-letter">${['A','B','C'][i]}</span>
+            <span>${opt}</span>
+          </button>
+        `).join('')}
+      </div>
+      <div id="feedback-area" style="margin-top:12px;"></div>
+    </div>
+  `;
+}
+
+// ─── SELECT ANSWER ───
+function selectAnswer(index) {
+  if (answered) return;
+  answered = true;
+
+  const q = questions[currentQ];
+  const buttons = document.querySelectorAll('.option-btn');
+
+  buttons.forEach(btn => btn.disabled = true);
+
+  const selected = buttons[index];
+  const correct = buttons[q.correct];
+
+  if (index === q.correct) {
+    score++;
+    selected.classList.add('correct');
+    document.getElementById('feedback-area').innerHTML = `
+      <div class="feedback-card correct-fb">
+        <span class="feedback-icon">✅</span>
+        <div><strong>¡Correcto!</strong> ${q.feedback}</div>
+      </div>`;
+  } else {
+    selected.classList.add('incorrect');
+    correct.classList.add('correct');
+    document.getElementById('feedback-area').innerHTML = `
+      <div class="feedback-card incorrect-fb">
+        <span class="feedback-icon">❌</span>
+        <div><strong>Incorrecto.</strong> La respuesta correcta es la opción <strong>${['A','B','C'][q.correct]}</strong>. ${q.feedback}</div>
+      </div>`;
+  }
+
+  document.getElementById('score-badge').textContent = `✅ Aciertos: ${score}`;
+  document.getElementById('btn-next').disabled = false;
+}
+
+// ─── NEXT QUESTION ───
+function nextQuestion() {
+  if (!answered) return;
+  currentQ++;
+
+  if (currentQ >= questions.length) {
+    showResults();
+    return;
+  }
+
+  const area = document.getElementById('question-area');
+  area.querySelector('.question-card').classList.add('slide-out');
+  setTimeout(() => renderQuestion(), 280);
+}
+
+// ─── SHOW RESULTS ───
+function showResults() {
+  const pct = Math.round((score / questions.length) * 100);
+
+  document.getElementById('progress-fill').style.width = '100%';
+  document.getElementById('nav-results').style.display = '';
+
+  document.getElementById('res-correct').textContent = score;
+  document.getElementById('res-incorrect').textContent = questions.length - score;
+  document.getElementById('res-percent').textContent = pct + '%';
+  document.getElementById('results-name').textContent = studentName;
+  document.getElementById('results-subtitle').textContent = `Simulador completado el ${new Date().toLocaleDateString('es-MX',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}`;
+
+  let trophy, msg;
+  if (pct >= 90) {
+    trophy = '🏆'; msg = '¡Desempeño sobresaliente! Dominas con solidez los fundamentos de la arquitectura de la planificación didáctica. ¡Sigue adelante con ese nivel de compromiso académico!';
+  } else if (pct >= 75) {
+    trophy = '🥇'; msg = '¡Muy buen trabajo! Tienes una comprensión sólida del tema. Revisa los reactivos donde hubo error para consolidar los conceptos que aún puedes fortalecer.';
+  } else if (pct >= 60) {
+    trophy = '🎯'; msg = 'Buen esfuerzo. Alcanzaste un desempeño satisfactorio. Te recomendamos revisar la Guía de Estudio para reforzar los temas donde presentaste dificultad.';
+  } else if (pct >= 40) {
+    trophy = '📚'; msg = 'Vas en camino. Aún hay conceptos importantes que necesitan repaso. Consulta detenidamente la Guía de Estudio y vuelve a intentar el simulador.';
+  } else {
+    trophy = '💪'; msg = 'Este resultado es un punto de partida. No te desanimes: revisa el material teórico en la Guía de Estudio y practica de nuevo. ¡La perseverancia es parte del aprendizaje!';
+  }
+
+  document.getElementById('trophy-icon').textContent = trophy;
+  document.getElementById('motivation-msg').textContent = msg;
+
+  setTimeout(() => {
+    document.getElementById('perf-bar').style.width = pct + '%';
+    document.getElementById('perf-label').textContent = `${pct}% de desempeño — ${score} de ${questions.length} preguntas correctas`;
+  }, 300);
+
+  showTab('results');
+  document.querySelectorAll('.nav-btn')[2].classList.add('active');
+}
+
+// ─── RESTART ───
+function restartQuiz() {
+  currentQ = 0;
+  score = 0;
+  answered = false;
+  document.getElementById('nav-results').style.display = 'none';
+  document.getElementById('perf-bar').style.width = '0%';
+  showTab('start');
+  document.querySelectorAll('.nav-btn')[0].classList.add('active');
+}
+
+// ─── PDF TOGGLE ───
+function togglePDF() {
+  const wrap = document.getElementById('pdf-viewer-wrap');
+  const btn = event.target;
+  if (wrap.classList.contains('show')) {
+    wrap.classList.remove('show');
+    btn.textContent = '👁 Ver PDF aquí';
+  } else {
+    wrap.classList.add('show');
+    btn.textContent = '✖ Cerrar visor';
+    wrap.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+}
+</script>
+</body>
+</html>

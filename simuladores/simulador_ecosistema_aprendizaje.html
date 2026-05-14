@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador Interactivo — Prof. Francisco De Jesus Luna Benitez</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Raleway:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-light: #3b82f6;
+    --primary-dark: #1d4ed8;
+    --accent: #f97316;
+    --accent-light: #fb923c;
+    --success: #10b981;
+    --success-light: #34d399;
+    --error: #ef4444;
+    --error-light: #f87171;
+    --bg: #f0f7ff;
+    --bg2: #e8f4fd;
+    --white: #ffffff;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --border: #cbd5e1;
+    --card: #ffffff;
+    --shadow: 0 4px 24px rgba(37,99,235,0.10);
+    --shadow-lg: 0 8px 40px rgba(37,99,235,0.16);
+    --radius: 18px;
+    --radius-sm: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 50%, #fef9c3 100%);
+    min-height: 100vh;
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ─── ANIMATED BG BLOBS ─── */
+  .bg-blob {
+    position: fixed; border-radius: 50%; filter: blur(70px);
+    opacity: 0.18; pointer-events: none; z-index: 0;
+    animation: blobFloat 12s ease-in-out infinite alternate;
+  }
+  .blob1 { width:420px;height:420px;background:#3b82f6;top:-80px;left:-120px; }
+  .blob2 { width:320px;height:320px;background:#f97316;top:40%;right:-80px; animation-delay:3s; }
+  .blob3 { width:280px;height:280px;background:#10b981;bottom:-60px;left:30%; animation-delay:6s; }
+
+  @keyframes blobFloat {
+    from { transform: scale(1) translate(0,0); }
+    to   { transform: scale(1.12) translate(20px,30px); }
+  }
+
+  /* ─── WRAPPER ─── */
+  #app {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 0 16px 40px;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    width: 100%; max-width: 860px;
+    text-align: center;
+    padding: 36px 24px 20px;
+    animation: fadeDown .7s ease both;
+  }
+  .header-badge {
+    display: inline-block;
+    background: linear-gradient(90deg,var(--primary),var(--primary-light));
+    color: #fff; font-size: .78rem; font-weight: 800;
+    letter-spacing: .12em; text-transform: uppercase;
+    padding: 5px 18px; border-radius: 50px; margin-bottom: 12px;
+  }
+  header h1 {
+    font-family: 'Raleway', sans-serif;
+    font-size: clamp(1.6rem, 4vw, 2.7rem);
+    font-weight: 900;
+    background: linear-gradient(120deg,#1d4ed8,#2563eb,#0ea5e9);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; line-height: 1.15; margin-bottom: 6px;
+  }
+  header p.subtitle {
+    font-size: .95rem; color: var(--text-muted); font-weight: 600;
+  }
+  .header-divider {
+    width: 80px; height: 4px; border-radius: 2px; margin: 14px auto 0;
+    background: linear-gradient(90deg,var(--primary),var(--accent));
+  }
+
+  /* ─── CARDS ─── */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid rgba(255,255,255,.9);
+    padding: 36px 40px;
+    width: 100%; max-width: 760px;
+    animation: fadeUp .5s ease both;
+  }
+  @media(max-width:600px){
+    .card { padding: 26px 18px; }
+  }
+
+  /* ─── SCREENS ─── */
+  .screen { display: none; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; width:100%; }
+
+  /* ─── WELCOME SCREEN ─── */
+  .welcome-icon {
+    font-size: 4rem; margin-bottom: 10px;
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+
+  .welcome-title {
+    font-family:'Raleway',sans-serif; font-size:1.55rem; font-weight:900;
+    color:var(--text); text-align:center; margin-bottom:8px;
+  }
+  .welcome-sub {
+    color:var(--text-muted); text-align:center; font-size:.95rem; margin-bottom:22px; line-height:1.6;
+  }
+  .welcome-chips {
+    display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:28px;
+  }
+  .chip {
+    background: linear-gradient(135deg,#eff6ff,#dbeafe);
+    border: 1px solid #bfdbfe; border-radius:50px;
+    font-size:.78rem; font-weight:700; color:var(--primary); padding:5px 14px;
+  }
+
+  .input-group { width:100%; margin-bottom:20px; }
+  .input-group label {
+    display:block; font-weight:800; margin-bottom:8px; font-size:.95rem; color:var(--text);
+  }
+  .input-group input {
+    width:100%; padding:14px 18px; border-radius:var(--radius-sm);
+    border:2px solid var(--border); font-family:'Nunito',sans-serif;
+    font-size:1rem; font-weight:600; color:var(--text);
+    background:#f8fafc; outline:none; transition:.2s;
+  }
+  .input-group input:focus { border-color:var(--primary); background:#fff; }
+
+  /* ─── BUTTONS ─── */
+  .btn {
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding:14px 32px; border-radius:50px; font-family:'Nunito',sans-serif;
+    font-size:1rem; font-weight:800; cursor:pointer; border:none;
+    transition:.22s cubic-bezier(.4,0,.2,1); text-decoration:none;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg,var(--primary),var(--primary-light));
+    color:#fff; box-shadow:0 4px 16px rgba(37,99,235,.35);
+  }
+  .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(37,99,235,.45); }
+  .btn-primary:active { transform:translateY(0); }
+  .btn-accent {
+    background: linear-gradient(135deg,var(--accent),var(--accent-light));
+    color:#fff; box-shadow:0 4px 16px rgba(249,115,22,.3);
+  }
+  .btn-accent:hover { transform:translateY(-2px); }
+  .btn-success {
+    background: linear-gradient(135deg,var(--success),var(--success-light));
+    color:#fff;
+  }
+  .btn-outline {
+    background:transparent; color:var(--primary);
+    border:2px solid var(--primary); padding:12px 26px;
+  }
+  .btn-outline:hover { background:var(--primary); color:#fff; }
+  .btn-lg { padding:16px 40px; font-size:1.08rem; }
+  .btn-full { width:100%; }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-wrap {
+    width:100%; margin-bottom:6px;
+  }
+  .progress-top {
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:8px; font-size:.85rem; font-weight:700; color:var(--text-muted);
+  }
+  .progress-bar-bg {
+    height:10px; background:#e2e8f0; border-radius:50px; overflow:hidden;
+  }
+  .progress-bar-fill {
+    height:100%; border-radius:50px;
+    background: linear-gradient(90deg,var(--primary),var(--accent));
+    transition: width .45s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* ─── QUESTION CARD ─── */
+  .q-meta {
+    display:flex; align-items:center; gap:10px; margin-bottom:18px;
+  }
+  .q-num-badge {
+    background: linear-gradient(135deg,var(--primary),var(--primary-light));
+    color:#fff; font-size:.8rem; font-weight:900;
+    padding:4px 14px; border-radius:50px; white-space:nowrap;
+  }
+  .q-type-badge {
+    background:#f1f5f9; color:var(--text-muted); font-size:.75rem; font-weight:700;
+    padding:4px 12px; border-radius:50px; border:1px solid var(--border);
+  }
+  .q-text {
+    font-size:1.05rem; font-weight:700; color:var(--text); line-height:1.65;
+    margin-bottom:22px;
+  }
+
+  /* ─── TABLE IN QUESTION (ordenamiento/relación) ─── */
+  .q-table {
+    width:100%; border-collapse:collapse; margin-bottom:18px;
+    font-size:.88rem; border-radius:10px; overflow:hidden;
+    box-shadow:0 2px 8px rgba(0,0,0,.06);
+  }
+  .q-table th {
+    background:linear-gradient(135deg,var(--primary),var(--primary-light));
+    color:#fff; padding:9px 14px; text-align:left; font-weight:800;
+  }
+  .q-table td {
+    padding:9px 14px; border-bottom:1px solid #e2e8f0; background:#fff;
+  }
+  .q-table tr:last-child td { border-bottom:none; }
+
+  /* ─── OPTIONS ─── */
+  .options { display:flex; flex-direction:column; gap:12px; }
+  .option {
+    display:flex; align-items:flex-start; gap:14px;
+    padding:14px 18px; border-radius:var(--radius-sm);
+    border:2px solid var(--border); background:#f8fafc;
+    cursor:pointer; transition:.2s; position:relative; overflow:hidden;
+  }
+  .option:hover:not(.disabled) {
+    border-color:var(--primary-light); background:#eff6ff;
+    transform:translateX(3px);
+  }
+  .option.selected {
+    border-color:var(--primary); background:#eff6ff;
+  }
+  .option.correct {
+    border-color:var(--success); background:#f0fdf4;
+  }
+  .option.incorrect {
+    border-color:var(--error); background:#fef2f2;
+  }
+  .option.show-correct {
+    border-color:var(--success); background:#f0fdf4;
+  }
+  .option.disabled { cursor:default; }
+  .opt-letter {
+    width:32px; height:32px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:900; font-size:.88rem;
+    background: linear-gradient(135deg,var(--primary),var(--primary-light));
+    color:#fff; transition:.2s;
+  }
+  .option.correct .opt-letter { background:linear-gradient(135deg,var(--success),var(--success-light)); }
+  .option.incorrect .opt-letter { background:linear-gradient(135deg,var(--error),var(--error-light)); }
+  .option.show-correct .opt-letter { background:linear-gradient(135deg,var(--success),var(--success-light)); }
+  .opt-text { font-size:.93rem; font-weight:600; line-height:1.55; padding-top:3px; }
+
+  /* ─── FEEDBACK ─── */
+  .feedback-box {
+    margin-top:18px; padding:16px 20px; border-radius:var(--radius-sm);
+    animation: fadeUp .35s ease both;
+    font-size:.9rem; line-height:1.6; font-weight:600;
+  }
+  .feedback-box.correct-fb {
+    background:linear-gradient(135deg,#f0fdf4,#dcfce7);
+    border:2px solid var(--success); color:#166534;
+  }
+  .feedback-box.incorrect-fb {
+    background:linear-gradient(135deg,#fef2f2,#fee2e2);
+    border:2px solid var(--error); color:#991b1b;
+  }
+  .feedback-icon { font-size:1.2rem; margin-right:6px; }
+
+  /* ─── NEXT BUTTON AREA ─── */
+  .next-area {
+    margin-top:22px; display:flex; justify-content:flex-end;
+    animation:fadeUp .4s .1s ease both;
+  }
+
+  /* ─── RESULTS SCREEN ─── */
+  .results-header {
+    text-align:center; margin-bottom:28px;
+  }
+  .results-trophy { font-size:4rem; margin-bottom:10px; display:block; }
+  .results-name {
+    font-family:'Raleway',sans-serif; font-weight:900; font-size:1.45rem;
+    color:var(--text); margin-bottom:4px;
+  }
+  .results-title {
+    font-size:1rem; color:var(--text-muted); font-weight:600;
+  }
+  .score-circle-wrap {
+    display:flex; justify-content:center; margin:24px 0;
+  }
+  .score-circle {
+    width:150px; height:150px; border-radius:50%;
+    background: conic-gradient(var(--primary) 0deg, #e2e8f0 0deg);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: var(--shadow-lg);
+    position:relative;
+  }
+  .score-inner {
+    width:118px; height:118px; border-radius:50%;
+    background:#fff; display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+  }
+  .score-pct {
+    font-family:'Raleway',sans-serif; font-weight:900; font-size:2rem;
+    line-height:1; color:var(--primary);
+  }
+  .score-label { font-size:.72rem; font-weight:700; color:var(--text-muted); }
+
+  .stats-grid {
+    display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:22px;
+  }
+  .stat-card {
+    padding:18px; border-radius:var(--radius-sm); text-align:center;
+    border:2px solid;
+  }
+  .stat-card.green { border-color:var(--success); background:#f0fdf4; }
+  .stat-card.red   { border-color:var(--error);   background:#fef2f2; }
+  .stat-num {
+    font-family:'Raleway',sans-serif; font-weight:900; font-size:2rem; line-height:1;
+  }
+  .stat-card.green .stat-num { color:var(--success); }
+  .stat-card.red   .stat-num { color:var(--error); }
+  .stat-desc { font-size:.8rem; font-weight:700; color:var(--text-muted); margin-top:4px; }
+
+  .motivator-box {
+    background:linear-gradient(135deg,#eff6ff,#dbeafe);
+    border:2px solid #bfdbfe; border-radius:var(--radius-sm);
+    padding:16px 20px; text-align:center; margin-bottom:24px;
+    font-size:.95rem; font-weight:700; color:var(--primary-dark);
+    line-height:1.55;
+  }
+
+  .results-actions {
+    display:flex; flex-wrap:wrap; gap:12px; justify-content:center;
+  }
+
+  /* ─── GUIDE SCREEN ─── */
+  .guide-intro {
+    text-align:center; margin-bottom:22px;
+  }
+  .guide-intro h2 {
+    font-family:'Raleway',sans-serif; font-weight:900; font-size:1.5rem;
+    color:var(--text); margin-bottom:8px;
+  }
+  .guide-intro p { color:var(--text-muted); font-size:.92rem; }
+  .pdf-frame-wrap {
+    width:100%; border-radius:var(--radius-sm); overflow:hidden;
+    box-shadow:var(--shadow); border:2px solid #e2e8f0; margin-bottom:16px;
+    background:#f1f5f9;
+  }
+  .pdf-frame-wrap iframe {
+    width:100%; height:540px; border:none; display:block;
+  }
+  @media(max-width:600px){
+    .pdf-frame-wrap iframe { height:400px; }
+  }
+
+  /* ─── NAV TABS ─── */
+  .nav-tabs {
+    display:flex; gap:8px; justify-content:center;
+    margin-bottom:22px; flex-wrap:wrap;
+  }
+  .nav-tab {
+    padding:9px 20px; border-radius:50px; font-family:'Nunito',sans-serif;
+    font-size:.85rem; font-weight:800; cursor:pointer; border:2px solid var(--border);
+    background:var(--white); color:var(--text-muted); transition:.2s;
+  }
+  .nav-tab.active {
+    background:linear-gradient(135deg,var(--primary),var(--primary-light));
+    color:#fff; border-color:transparent;
+    box-shadow:0 4px 12px rgba(37,99,235,.3);
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(18px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes fadeDown {
+    from { opacity:0; transform:translateY(-18px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes slideIn {
+    from { opacity:0; transform:translateX(30px); }
+    to   { opacity:1; transform:translateX(0); }
+  }
+  .q-animate { animation: slideIn .38s cubic-bezier(.4,0,.2,1) both; }
+
+  /* ─── DIVIDER ─── */
+  .divider { width:100%; height:1px; background:#e2e8f0; margin:22px 0; }
+</style>
+</head>
+<body>
+
+<!-- BG BLOBS -->
+<div class="bg-blob blob1"></div>
+<div class="bg-blob blob2"></div>
+<div class="bg-blob blob3"></div>
+
+<div id="app">
+
+  <!-- ══════════════════════════════════════ HEADER -->
+  <header>
+    <div class="header-badge">🎓 Evaluación Interactiva</div>
+    <h1>Simulador Interactivo de Evaluación</h1>
+    <p class="subtitle">Prof. Francisco De Jesus Luna Benitez</p>
+    <div class="header-divider"></div>
+  </header>
+
+  <!-- ══════════════════════════════════════ NAV TABS -->
+  <div class="nav-tabs" id="navTabs">
+    <button class="nav-tab active" onclick="showTab('exam')">📝 Simulador</button>
+    <button class="nav-tab" onclick="showTab('guide')">📚 Guía de Estudio</button>
+  </div>
+
+  <!-- ══════════════════════════════════════ EXAM TAB -->
+  <div id="tabExam" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+
+    <!-- ── WELCOME SCREEN -->
+    <div class="screen active" id="screenWelcome">
+      <div class="card" style="max-width:580px;text-align:center;">
+        <div class="welcome-icon">🧠</div>
+        <div class="welcome-title">El Ecosistema del Aprendizaje</div>
+        <p class="welcome-sub">
+          Pon a prueba tus conocimientos sobre teorías del aprendizaje adaptativo,
+          evaluación formativa, motivación y más.
+        </p>
+        <div class="welcome-chips">
+          <span class="chip">30 Preguntas</span>
+          <span class="chip">3 Opciones</span>
+          <span class="chip">Retroalimentación Inmediata</span>
+          <span class="chip">4 Formatos USICAMM</span>
+        </div>
+        <div class="input-group" style="text-align:left;">
+          <label for="studentName">👤 Nombre del estudiante</label>
+          <input type="text" id="studentName" placeholder="Escribe tu nombre completo..." autocomplete="off">
+        </div>
+        <button class="btn btn-primary btn-lg btn-full" onclick="startExam()">
+          🚀 Iniciar Simulador
+        </button>
+      </div>
+    </div>
+
+    <!-- ── QUESTION SCREEN -->
+    <div class="screen" id="screenQuestion" style="width:100%;align-items:center;">
+      <div style="width:100%;max-width:760px;margin-bottom:14px;">
+        <div class="progress-wrap">
+          <div class="progress-top">
+            <span id="progressLabel">Pregunta 1 de 30</span>
+            <span id="scoreLabel">✅ 0 correctas</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card q-animate" id="questionCard">
+        <div class="q-meta">
+          <span class="q-num-badge" id="qNumBadge">Pregunta 1</span>
+          <span class="q-type-badge" id="qTypeBadge">Cuestionamiento directo</span>
+        </div>
+        <p class="q-text" id="qText"></p>
+        <div id="qTableWrap"></div>
+        <div class="options" id="optionsWrap"></div>
+        <div id="feedbackWrap"></div>
+        <div class="next-area" id="nextArea" style="display:none;">
+          <button class="btn btn-primary" onclick="nextQuestion()">
+            <span id="nextBtnLabel">Siguiente pregunta →</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RESULTS SCREEN -->
+    <div class="screen" id="screenResults">
+      <div class="card" style="max-width:600px;">
+        <div class="results-header">
+          <span class="results-trophy" id="resultsTrophy">🏆</span>
+          <div class="results-name" id="resultsName">Estudiante</div>
+          <div class="results-title">Resultados del Simulador — El Ecosistema del Aprendizaje</div>
+        </div>
+
+        <div class="score-circle-wrap">
+          <div class="score-circle" id="scoreCircle">
+            <div class="score-inner">
+              <span class="score-pct" id="scorePct">0%</span>
+              <span class="score-label">Desempeño</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card green">
+            <div class="stat-num" id="correctCount">0</div>
+            <div class="stat-desc">✅ Aciertos</div>
+          </div>
+          <div class="stat-card red">
+            <div class="stat-num" id="incorrectCount">0</div>
+            <div class="stat-desc">❌ Errores</div>
+          </div>
+        </div>
+
+        <div class="motivator-box" id="motivatorBox"></div>
+
+        <div class="results-actions">
+          <button class="btn btn-primary" onclick="restartExam()">🔄 Reintentar</button>
+          <button class="btn btn-outline" onclick="showTab('guide')">📚 Ver Guía de Estudio</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end tabExam -->
+
+  <!-- ══════════════════════════════════════ GUIDE TAB -->
+  <div id="tabGuide" style="width:100%;display:none;flex-direction:column;align-items:center;">
+    <div class="card" style="max-width:820px;">
+      <div class="guide-intro">
+        <h2>📚 Guía de Estudio Avanzada</h2>
+        <p>El Ecosistema del Aprendizaje — De la teoría académica a la práctica adaptativa en el aula.</p>
+        <p style="margin-top:6px;font-weight:700;color:var(--primary);">Prof. Francisco De Jesus Luna Benitez</p>
+      </div>
+      <div class="divider"></div>
+      <div class="pdf-frame-wrap">
+        <iframe
+          src="https://drive.google.com/file/d/1PE2CjEvy3kLU1XnVpz1C94COHzGoaBUz/preview"
+          allow="autoplay"
+          title="Guía de Estudio — El Ecosistema del Aprendizaje">
+        </iframe>
+      </div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <a class="btn btn-primary"
+           href="https://drive.google.com/file/d/1PE2CjEvy3kLU1XnVpz1C94COHzGoaBUz/view"
+           target="_blank" rel="noopener">
+          🔗 Abrir en nueva pestaña
+        </a>
+        <button class="btn btn-outline" onclick="showTab('exam')">📝 Volver al Simulador</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end app -->
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+//  QUESTION BANK — 30 preguntas basadas en "El Ecosistema del Aprendizaje"
+//  Distribución: A=10 correctas, B=10 correctas, C=10 correctas
+// ═══════════════════════════════════════════════════════════════════
+const questions = [
+  // ──────── BLOQUE 1: Las Tres Ramas del Aprendizaje ────────
+  {
+    num: 1,
+    type: "Cuestionamiento directo",
+    text: "¿Cuál de los siguientes ejemplos corresponde al aprendizaje implícito?",
+    options: [
+      "La adquisición del lenguaje en niños pequeños, que ocurre sin esfuerzo consciente ni instrucción formal.",
+      "El estudio de contenidos matemáticos dentro del aula bajo la guía de un docente.",
+      "La visita guiada de un grupo escolar a un museo de ciencias naturales organizada por la escuela."
+    ],
+    correct: 0,
+    feedback: "El aprendizaje implícito es la adquisición de información sin esfuerzo y a menudo sin consciencia, como el lenguaje en los niños. Las opciones B y C corresponden a aprendizaje formal e informal, respectivamente."
+  },
+  {
+    num: 2,
+    type: "Completamiento",
+    text: "Según el ecosistema del aprendizaje, una teoría bien fundada no dicta prescripciones rígidas, sino que…",
+    options: [
+      "establece reglas fijas que el docente debe aplicar mecánicamente en cada situación del aula.",
+      "ofrece un marco útil para el análisis, la reflexión y la adaptación creativa del docente.",
+      "determina con exactitud los resultados de aprendizaje esperados en cada grupo escolar."
+    ],
+    correct: 1,
+    feedback: "El rol de la teoría es proporcionar un marco de análisis y reflexión, no reglas rígidas. Esto permite al docente adaptar creativamente su práctica según el contexto real del aula."
+  },
+  {
+    num: 3,
+    type: "Cuestionamiento directo",
+    text: "¿En qué porcentaje del tiempo de vigilia transcurre el aprendizaje en entornos informales, según el ecosistema del aprendizaje?",
+    options: [
+      "50% del tiempo de vigilia ocurre en entornos informales.",
+      "60% del tiempo de vigilia se da en entornos informales.",
+      "79% del tiempo de vigilia transcurre en entornos informales."
+    ],
+    correct: 2,
+    feedback: "Según el ecosistema del aprendizaje, el 79% del tiempo de vigilia transcurre en entornos informales (hogares, museos, entre pares) y solo el 21% en la escuela formal. Esto obliga a la escuela a vincular ambos tipos de aprendizaje."
+  },
+  {
+    num: 4,
+    type: "Relación de elementos",
+    text: "Seleccione la opción que relaciona correctamente el tipo de aprendizaje con su descripción:\n\n1. Aprendizaje formal   2. Aprendizaje informal   3. Aprendizaje implícito\na) Adquisición sin esfuerzo ni consciencia   b) Ocurre en hogares, museos y entre pares   c) Diseño educativo en centros educativos",
+    table: {
+      headers: ["Núm.", "Tipo de Aprendizaje", "Descripción"],
+      rows: [
+        ["1", "Aprendizaje formal", "c) Diseño educativo en centros educativos"],
+        ["2", "Aprendizaje informal", "b) Ocurre en hogares, museos y entre pares"],
+        ["3", "Aprendizaje implícito", "a) Adquisición sin esfuerzo ni consciencia"]
+      ]
+    },
+    options: [
+      "1c, 2b, 3a",
+      "1b, 2a, 3c",
+      "1a, 2c, 3b"
+    ],
+    correct: 0,
+    feedback: "El aprendizaje formal ocurre en centros educativos (c), el informal en entornos cotidianos sin programa oficial (b), y el implícito se da sin esfuerzo ni consciencia (a). La relación correcta es 1c, 2b, 3a."
+  },
+  // ──────── BLOQUE 2: Experto de Rutina vs. Experto Adaptativo ────────
+  {
+    num: 5,
+    type: "Cuestionamiento directo",
+    text: "¿Cuál es el nivel de comprensión que caracteriza al experto de rutina?",
+    options: [
+      "Comprende profundamente los principios subyacentes de cada tarea que realiza.",
+      "Superficial: sabe 'qué' hacer, pero no necesariamente el 'por qué'.",
+      "Transfiere sus capacidades creativamente a situaciones nuevas y distintas."
+    ],
+    correct: 1,
+    feedback: "El experto de rutina posee comprensión superficial: ejecuta tareas típicas con rapidez y precisión, pero no comprende los principios subyacentes. Ante situaciones nuevas, experimenta frustración o bloqueo."
+  },
+  {
+    num: 6,
+    type: "Completamiento",
+    text: "El experto adaptativo, ante situaciones nuevas o problemas que no siguen el formato exacto…",
+    options: [
+      "experimenta frustración o bloqueo al no encontrar el procedimiento habitual memorizado.",
+      "aplica un algoritmo escolar aunque este no sea el más adecuado para la situación.",
+      "transfiere sus capacidades creativamente a distintas y nuevas situaciones."
+    ],
+    correct: 2,
+    feedback: "El experto adaptativo aplica conocimientos de manera flexible y creativa. Su comprensión profunda de los principios le permite transferir sus capacidades a nuevas situaciones, a diferencia del experto de rutina que se bloquea."
+  },
+  {
+    num: 7,
+    type: "Cuestionamiento directo",
+    text: "¿Cuál de las siguientes es una característica auténtica de los 5 pilares de la Habilidad Adaptativa?",
+    options: [
+      "Autorregulación motivacional: capacidad de mantener la atención y el esfuerzo ante la dificultad.",
+      "Memorización eficiente de contenidos para reproducirlos con exactitud en cualquier situación.",
+      "Dependencia progresiva de la retroalimentación del docente para avanzar en el aprendizaje."
+    ],
+    correct: 0,
+    feedback: "La autorregulación motivacional —capacidad de mantener la atención y el esfuerzo ante la dificultad mediante procesos volitivos— es efectivamente uno de los 5 pilares de la Habilidad Adaptativa."
+  },
+  // ──────── BLOQUE 3: Los 5 Pilares ────────
+  {
+    num: 8,
+    type: "Relación de elementos",
+    text: "Relacione cada pilar de la Habilidad Adaptativa con su descripción correcta:\n\n1. Autorregulación cognitiva   2. Base de conocimientos   3. Métodos heurísticos\na) Estrategias analíticas para transformar y descomponer problemas complejos\nb) Metacognición: capacidad de planificar y supervisar los propios procesos de resolución\nc) Específica del ámbito, organizada y flexible (hechos, símbolos, conceptos)",
+    table: {
+      headers: ["Pilar", "Descripción"],
+      rows: [
+        ["1. Autorregulación cognitiva", "b) Metacognición: planificar y supervisar los procesos de resolución"],
+        ["2. Base de conocimientos", "c) Específica del ámbito, organizada y flexible"],
+        ["3. Métodos heurísticos", "a) Estrategias analíticas para descomponer problemas"]
+      ]
+    },
+    options: [
+      "1a, 2c, 3b",
+      "1b, 2c, 3a",
+      "1c, 2b, 3a"
+    ],
+    correct: 1,
+    feedback: "La autorregulación cognitiva implica metacognición (b); la base de conocimientos es específica, organizada y flexible (c); los métodos heurísticos son estrategias analíticas para descomponer problemas (a). La relación es 1b, 2c, 3a."
+  },
+  {
+    num: 9,
+    type: "Cuestionamiento directo",
+    text: "Según los 5 pilares de la Habilidad Adaptativa, las Creencias Positivas se definen como…",
+    options: [
+      "la capacidad de planificar y supervisar los propios procesos de resolución de problemas.",
+      "las estrategias analíticas para transformar y descomponer situaciones complejas en el aula.",
+      "la autopercepción favorable del alumno hacia sí mismo y hacia el entorno de aprendizaje."
+    ],
+    correct: 2,
+    feedback: "Las Creencias Positivas corresponden a la autopercepción favorable del alumno sobre sí mismo como estudiante y sobre el entorno en que aprende. Las opciones A y B describen la autorregulación cognitiva y los métodos heurísticos, respectivamente."
+  },
+  // ──────── BLOQUE 4: Motivación y Autoeficacia ────────
+  {
+    num: 10,
+    type: "Cuestionamiento directo",
+    text: "¿Qué comportamiento caracteriza a los alumnos con alta autoeficacia, según el ecosistema del aprendizaje?",
+    options: [
+      "Eligen problemas más difíciles y muestran mayor persistencia ante los retos académicos.",
+      "Prefieren tareas sencillas para garantizar resultados positivos y evitar el fracaso.",
+      "Dependen de la retroalimentación constante del docente para mantener su motivación."
+    ],
+    correct: 0,
+    feedback: "Los alumnos con alta autoeficacia —quienes creen en su propia capacidad— eligen problemas más difíciles y muestran mayor persistencia. Esta confianza también se vincula a mejor memorización y uso de estrategias."
+  },
+  {
+    num: 11,
+    type: "Completamiento",
+    text: "Las creencias sobre la propia competencia tienen un poder predictivo especial porque…",
+    options: [
+      "determinan el tipo de actividades que el docente diseña para cada grupo escolar.",
+      "predicen las calificaciones escolares incluso mejor que el historial de notas previas.",
+      "establecen el nivel de dificultad que el docente debe asignar a cada alumno individualmente."
+    ],
+    correct: 1,
+    feedback: "El poder predictivo de las creencias de competencia es tal que predicen las calificaciones escolares incluso mejor que el historial de notas previas. Esto subraya la importancia de cultivar la autopercepción positiva."
+  },
+  {
+    num: 12,
+    type: "Cuestionamiento directo",
+    text: "Según el ecosistema del aprendizaje, ¿con qué proceso cognitivo se vincula directamente la confianza del alumno?",
+    options: [
+      "Con un mayor número de horas de estudio individual fuera del horario escolar.",
+      "Con la reducción de la cantidad de actividades asignadas por el docente en el aula.",
+      "Con una mejor memorización y uso eficaz de estrategias de aprendizaje."
+    ],
+    correct: 2,
+    feedback: "Según el Mejor Procesamiento descrito en el ecosistema, la confianza del alumno se vincula directamente a una mejor memorización y al uso más eficaz de estrategias. No es simplemente una cuestión de horas de estudio."
+  },
+  // ──────── BLOQUE 5: Termostato Emocional ────────
+  {
+    num: 13,
+    type: "Cuestionamiento directo",
+    text: "¿Cuál es el efecto de las situaciones escolares agotadoras sobre el aprendizaje, según el 'Termostato Emocional'?",
+    options: [
+      "Dañan el autoconcepto, generan emociones negativas e interfieren en el procesamiento de la información.",
+      "Estimulan al alumno a desarrollar estrategias alternativas para superar los obstáculos.",
+      "Promueven la autorregulación cognitiva al exigir mayor esfuerzo del alumno."
+    ],
+    correct: 0,
+    feedback: "Las situaciones escolares agotadoras ('zonas rojas') dañan el autoconcepto, generan emociones negativas y actúan como interferencia directa en el procesamiento de la información. Por eso el alumno debe aprender a gestionar su agitación emocional."
+  },
+  {
+    num: 14,
+    type: "Completamiento",
+    text: "Según el Principio 6 del Termostato Emocional, el rol del docente para gestionar la agitación emocional consiste en…",
+    options: [
+      "mostrar siempre un desempeño perfecto para servir como modelo ideal al grupo.",
+      "reconocer obstáculos, verbalizar estrategias de afrontamiento y modelar cómo manejar la frustración.",
+      "reducir al mínimo las actividades difíciles para evitar emociones negativas en los alumnos."
+    ],
+    correct: 1,
+    feedback: "El rol docente según el Termostato Emocional es proveer modelos realistas: no mostrar perfección, sino reconocer obstáculos, verbalizar estrategias de afrontamiento y modelar cómo manejar la frustración de forma constructiva."
+  },
+  {
+    num: 15,
+    type: "Cuestionamiento directo",
+    text: "Cuando un alumno experimenta alta agitación emocional en el aula, ¿qué ocurre con sus recursos cognitivos disponibles?",
+    options: [
+      "Se potencian, ya que la emoción activa la atención y la memoria de trabajo del alumno.",
+      "Se mantienen estables si el docente proporciona retroalimentación positiva inmediata.",
+      "Se ven comprometidos, ya que el aprendizaje requiere redirigir recursos cognitivos libres."
+    ],
+    correct: 2,
+    feedback: "Según el Principio 6, el aprendizaje requiere redirigir recursos cognitivos. La alta agitación emocional ocupa esos recursos, comprometiendo la capacidad de aprender. El alumno debe aprender a bajar el nivel y la duración de esa agitación."
+  },
+  // ──────── BLOQUE 6: Diseñando un Entorno Favorable ────────
+  {
+    num: 16,
+    type: "Cuestionamiento directo",
+    text: "Según el principio 'Diseñando un Entorno Favorable', ¿bajo qué condición florece la motivación del alumno?",
+    options: [
+      "Cuando el entorno escolar se percibe como favorable y colaborativo.",
+      "Cuando el docente establece metas de alto rendimiento para todo el grupo por igual.",
+      "Cuando se incrementa la frecuencia de evaluaciones sumativas para monitorear el avance."
+    ],
+    correct: 0,
+    feedback: "La motivación florece cuando el entorno escolar se percibe como favorable y colaborativo. Esto involucra tres elementos: autonomía y elección, enfoque en fortalezas, y comunidad segura."
+  },
+  {
+    num: 17,
+    type: "Relación de elementos",
+    text: "Relacione cada elemento del entorno favorable con su descripción correcta:\n\n1. Autonomía y elección   2. Enfoque en fortalezas   3. Comunidad segura\na) Fomentar el aprendizaje social sin amenazas, compartiendo y debatiendo estrategias abiertamente\nb) Proporcionar actividades donde los estudiantes elijan aquellas en las que creen tener mejor desempeño\nc) Acentuar los puntos fuertes del alumno con retroalimentación constructiva sistemática",
+    table: {
+      headers: ["Elemento", "Descripción"],
+      rows: [
+        ["1. Autonomía y elección", "b) Los estudiantes eligen actividades según su percepción de desempeño"],
+        ["2. Enfoque en fortalezas", "c) Acentuar puntos fuertes con retroalimentación constructiva"],
+        ["3. Comunidad segura", "a) Aprendizaje social sin amenazas, compartiendo estrategias"]
+      ]
+    },
+    options: [
+      "1c, 2b, 3a",
+      "1b, 2c, 3a",
+      "1a, 2c, 3b"
+    ],
+    correct: 1,
+    feedback: "Autonomía y elección implica que los alumnos elijan actividades (b); Enfoque en fortalezas acentúa los puntos fuertes (c); Comunidad segura fomenta el aprendizaje sin amenazas (a). La relación correcta es 1b, 2c, 3a."
+  },
+  {
+    num: 18,
+    type: "Cuestionamiento directo",
+    text: "¿En qué consiste el elemento 'Comunidad Segura' dentro del diseño de un entorno favorable para el aprendizaje?",
+    options: [
+      "Establecer reglas estrictas de convivencia para garantizar el orden permanente en el aula.",
+      "Asignar roles fijos a los alumnos para organizar eficientemente el trabajo en equipo.",
+      "Fomentar el aprendizaje social sin amenazas, compartiendo productos y debatiendo estrategias abiertamente."
+    ],
+    correct: 2,
+    feedback: "La Comunidad Segura consiste en fomentar el aprendizaje social sin amenazas: compartir productos y debatir estrategias abiertamente para forjar una verdadera 'comunidad de alumnos', donde la colaboración sea genuina y libre de juicio."
+  },
+  // ──────── BLOQUE 7: Evaluación Formativa (Dylan Wiliam) ────────
+  {
+    num: 19,
+    type: "Cuestionamiento directo",
+    text: "Según 'La Brújula: La Evaluación como Puente', ¿cómo se define la evaluación formativa?",
+    options: [
+      "Como un mecanismo de corrección de ruta en tiempo real, no un veredicto final.",
+      "Como el instrumento para asignar calificaciones al término de cada unidad didáctica.",
+      "Como la herramienta que permite comparar el rendimiento individual entre estudiantes."
+    ],
+    correct: 0,
+    feedback: "La evaluación formativa es la 'brújula' que permite 'permanecer en curso'. No es un veredicto final, sino una corrección de ruta en tiempo real. Su meta última es que el alumno la internalice para autorregularse."
+  },
+  {
+    num: 20,
+    type: "Ordenamiento",
+    text: "Ordene las tres preguntas centrales de la Matriz de Evaluación Formativa de Dylan Wiliam según su secuencia lógica de aplicación:\n\n1. ¿Cómo llegar ahí?   2. ¿Dónde están los alumnos?   3. ¿Hacia dónde van?",
+    options: [
+      "2, 1, 3 — Se evalúa primero el estado actual, luego la meta y finalmente la ruta.",
+      "3, 2, 1 — Se define primero la meta, luego el estado actual y finalmente la ruta.",
+      "1, 3, 2 — Se diseña primero la estrategia, luego la meta y finalmente se diagnostica."
+    ],
+    correct: 1,
+    feedback: "La secuencia lógica es: primero ¿Hacia dónde van? (definir la meta / intención de aprendizaje), luego ¿Dónde están? (evidencia del estado actual) y finalmente ¿Cómo llegar ahí? (retroalimentación y activación). Esto corresponde a la secuencia 3, 2, 1."
+  },
+  {
+    num: 21,
+    type: "Relación de elementos",
+    text: "En la Matriz de Dylan Wiliam, relacione cada actor con la estrategia que le corresponde bajo la pregunta indicada:\n\n1. Docente (¿Cómo llegar ahí?)   2. Compañeros (¿Dónde están?)   3. Alumno (¿Dónde están?)\na) Activar a los estudiantes como dueños de su propio aprendizaje\nb) Proporcionar retroalimentación que mueva a los alumnos hacia adelante\nc) Activar a los estudiantes como recursos de instrucción recíprocos",
+    table: {
+      headers: ["Actor / Pregunta", "Estrategia"],
+      rows: [
+        ["1. Docente — ¿Cómo llegar ahí?", "b) Proporcionar retroalimentación que mueva hacia adelante"],
+        ["2. Compañeros — ¿Dónde están?", "c) Activar a los estudiantes como recursos recíprocos"],
+        ["3. Alumno — ¿Dónde están?", "a) Activar a los estudiantes como dueños de su aprendizaje"]
+      ]
+    },
+    options: [
+      "1a, 2b, 3c",
+      "1c, 2a, 3b",
+      "1b, 2c, 3a"
+    ],
+    correct: 2,
+    feedback: "En la Matriz de Dylan Wiliam: el docente proporciona retroalimentación (b); los compañeros actúan como recursos de instrucción recíprocos (c); el alumno se activa como dueño de su aprendizaje (a). Relación correcta: 1b, 2c, 3a."
+  },
+  {
+    num: 22,
+    type: "Completamiento",
+    text: "La meta final de la evaluación formativa es que el alumno internalice la 'brújula' para…",
+    options: [
+      "autorregularse y disminuir progresivamente su dependencia de la retroalimentación externa.",
+      "obtener mejores calificaciones en las evaluaciones sumativas de fin de período.",
+      "desarrollar la capacidad de evaluar el desempeño de sus compañeros de manera objetiva."
+    ],
+    correct: 0,
+    feedback: "La meta final de la evaluación formativa es el desarrollo de la autonomía: el alumno debe internalizar la brújula para autorregularse, disminuyendo progresivamente su dependencia de la retroalimentación externa del docente."
+  },
+  // ──────── BLOQUE 8: Ecosistema Educativo Ideal ────────
+  {
+    num: 23,
+    type: "Cuestionamiento directo",
+    text: "En el ecosistema educativo ideal, ¿cuál es el elemento central alrededor del cual giran todos los componentes del sistema?",
+    options: [
+      "El docente adaptativo, que diseña y ajusta constantemente las estrategias de enseñanza.",
+      "El alumno adaptativo, como núcleo hacia el que se dirigen todos los componentes del sistema.",
+      "La evaluación formativa, como brújula que orienta todas las decisiones pedagógicas del aula."
+    ],
+    correct: 1,
+    feedback: "En la síntesis del ecosistema educativo ideal, el Alumno Adaptativo es el núcleo central. El diseño transversal, el motor afectivo y la brújula formativa orbitan alrededor de este centro, todos orientados a desarrollar su habilidad adaptativa."
+  },
+  {
+    num: 24,
+    type: "Cuestionamiento directo",
+    text: "¿Qué implica el 'Diseño Transversal' dentro del ecosistema educativo ideal, según la guía de estudio?",
+    options: [
+      "Diseñar actividades exclusivamente para el aprendizaje formal dentro del centro escolar.",
+      "Priorizar el aprendizaje informal sobre el formal para equilibrar los tiempos de estudio.",
+      "Integrar el aprendizaje formal (21%) con el aprendizaje informal y experiencial (79%)."
+    ],
+    correct: 2,
+    feedback: "El Diseño Transversal implica integrar el aprendizaje formal (que representa solo el 21% del tiempo de vigilia) con el aprendizaje informal y experiencial (79%). La escuela no puede ignorar ese 79% si quiere ser relevante."
+  },
+  {
+    num: 25,
+    type: "Cuestionamiento directo",
+    text: "El 'Motor Afectivo' del ecosistema educativo ideal incluye los siguientes elementos:",
+    options: [
+      "Autorregulación emocional, fomento de la autoeficacia y entornos colaborativos seguros.",
+      "Diseño de actividades formales con objetivos medibles y criterios de evaluación claros.",
+      "Ciclos continuos de retroalimentación y activación del alumno como dueño de su proceso."
+    ],
+    correct: 0,
+    feedback: "El Motor Afectivo agrupa la autorregulación emocional, el fomento de la autoeficacia y los entornos colaborativos seguros. La opción C describe la Brújula Formativa, no el Motor Afectivo."
+  },
+  {
+    num: 26,
+    type: "Completamiento",
+    text: "Según la síntesis del ecosistema educativo ideal, la educación moderna no trata de enseñar rutinas aisladas, sino de…",
+    options: [
+      "garantizar que todos los alumnos alcancen los mismos estándares en el mismo tiempo.",
+      "calibrar este sistema biológico complejo para desarrollar la Habilidad Adaptativa.",
+      "establecer programas rígidos que aseguren la cobertura total del contenido curricular."
+    ],
+    correct: 1,
+    feedback: "La educación moderna, según el ecosistema educativo ideal, no trata de enseñar rutinas aisladas, sino de calibrar el sistema biológico complejo del alumno para desarrollar la Habilidad Adaptativa. Esto requiere atender la dimensión cognitiva, emocional y social."
+  },
+  // ──────── BLOQUE 9: Gran Desconexión y Principios Fundamentales ────────
+  {
+    num: 27,
+    type: "Cuestionamiento directo",
+    text: "Según 'El Desafío Docente: La Gran Desconexión', ¿cuál es el 'Problema Histórico' de la práctica docente en el aula?",
+    options: [
+      "Los docentes carecen de acceso a investigación teórica actualizada sobre el aprendizaje.",
+      "Los investigadores no comparten sus hallazgos con los maestros de educación básica.",
+      "La comprensión general de enseñar ha sido relativamente estable y fija, lo que dificulta modificar el comportamiento real en las aulas."
+    ],
+    correct: 2,
+    feedback: "El 'Problema Histórico' identificado es que la comprensión general de enseñar ha sido relativamente estable y fija, lo que hace difícil modificar el comportamiento real en las aulas, generando la 'gran desconexión' entre investigación teórica y práctica docente."
+  },
+  // ──────── BLOQUE 10: Casos Aplicados ────────
+  {
+    num: 28,
+    type: "Caso aplicado",
+    text: "Una docente observa que un alumno resuelve correctamente todos los ejercicios del libro de texto. Sin embargo, cuando enfrenta un problema con un formato diferente al habitual, se bloquea y no sabe qué hacer. ¿Qué perfil describe esta situación?",
+    options: [
+      "El alumno presenta características de experto de rutina: sabe 'qué' hacer pero no comprende el 'por qué'.",
+      "El alumno tiene una base de conocimientos insuficiente para abordar cualquier tipo de problema.",
+      "El alumno presenta baja autoeficacia, lo que le impide intentar resolver problemas nuevos."
+    ],
+    correct: 0,
+    feedback: "Este es el perfil clásico del experto de rutina: es eficiente con tareas conocidas, pero al cambiar el formato se bloquea porque su comprensión es superficial —sabe 'qué' hacer, pero no 'por qué'— y no puede transferir creativamente su conocimiento."
+  },
+  {
+    num: 29,
+    type: "Caso aplicado",
+    text: "Durante un examen, un alumno experimenta intensa ansiedad que le impide concentrarse en los problemas. Según el Principio 6 del Termostato Emocional, la acción más adecuada del docente sería…",
+    options: [
+      "suspender el examen para que el alumno recupere completamente la calma antes de continuar.",
+      "modelar estrategias de afrontamiento, reconociendo los obstáculos y mostrando cómo manejar la frustración.",
+      "asignar una tarea alternativa más sencilla para que el alumno recupere la confianza progresivamente."
+    ],
+    correct: 1,
+    feedback: "Según el Principio 6, el docente debe proveer modelos realistas: reconocer obstáculos, verbalizar estrategias de afrontamiento y modelar cómo manejar la frustración. No se trata de evitar la dificultad, sino de aprender a gestionar la agitación emocional."
+  },
+  {
+    num: 30,
+    type: "Caso aplicado",
+    text: "Una maestra realiza preguntas orales durante la clase, observa con atención las respuestas de sus alumnos y ajusta la explicación en ese mismo momento según lo que detecta. ¿Cuál de las siguientes afirmaciones describe mejor esta práctica?",
+    options: [
+      "La maestra aplica una evaluación sumativa para obtener evidencia del nivel alcanzado por el grupo.",
+      "La maestra implementa una coevaluación entre pares como parte del aprendizaje colaborativo.",
+      "La maestra utiliza la evaluación formativa como brújula para corregir la ruta de aprendizaje en tiempo real."
+    ],
+    correct: 2,
+    feedback: "La práctica descrita corresponde a la evaluación formativa: diseñar actividades que aporten evidencia del aprendizaje (¿dónde están?) y ajustar la instrucción en tiempo real (¿cómo llegar ahí?). No es evaluación sumativa ni coevaluación entre pares."
+  }
+];
+
+// ═══════════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════════
+let currentQ = 0;
+let score = 0;
+let answered = false;
+let studentName = "";
+
+// ═══════════════════════════════════════════════════════════════════
+//  TAB SWITCHING
+// ═══════════════════════════════════════════════════════════════════
+function showTab(tab) {
+  const examDiv  = document.getElementById('tabExam');
+  const guideDiv = document.getElementById('tabGuide');
+  const tabs = document.querySelectorAll('.nav-tab');
+
+  if (tab === 'exam') {
+    examDiv.style.display  = 'flex';
+    guideDiv.style.display = 'none';
+    tabs[0].classList.add('active');
+    tabs[1].classList.remove('active');
+  } else {
+    examDiv.style.display  = 'none';
+    guideDiv.style.display = 'flex';
+    tabs[0].classList.remove('active');
+    tabs[1].classList.add('active');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  SCREENS
+// ═══════════════════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  START EXAM
+// ═══════════════════════════════════════════════════════════════════
+function startExam() {
+  const nameInput = document.getElementById('studentName').value.trim();
+  if (!nameInput) {
+    document.getElementById('studentName').style.borderColor = '#ef4444';
+    document.getElementById('studentName').placeholder = '⚠️ Por favor escribe tu nombre';
+    return;
+  }
+  studentName = nameInput;
+  currentQ = 0; score = 0; answered = false;
+  showScreen('screenQuestion');
+  renderQuestion();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  RENDER QUESTION
+// ═══════════════════════════════════════════════════════════════════
+function renderQuestion() {
+  answered = false;
+  const q = questions[currentQ];
+  const card = document.getElementById('questionCard');
+  card.className = 'card q-animate';
+
+  // Progress
+  const pct = Math.round((currentQ / 30) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `Pregunta ${currentQ + 1} de 30`;
+  document.getElementById('scoreLabel').textContent = `✅ ${score} correctas`;
+
+  // Badge
+  document.getElementById('qNumBadge').textContent = `Pregunta ${q.num}`;
+  document.getElementById('qTypeBadge').textContent = q.type;
+
+  // Text
+  document.getElementById('qText').textContent = q.text;
+
+  // Table (if exists)
+  const tableWrap = document.getElementById('qTableWrap');
+  if (q.table) {
+    let html = '<table class="q-table"><thead><tr>';
+    q.table.headers.forEach(h => { html += `<th>${h}</th>`; });
+    html += '</tr></thead><tbody>';
+    q.table.rows.forEach(r => {
+      html += '<tr>';
+      r.forEach(cell => { html += `<td>${cell}</td>`; });
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    tableWrap.innerHTML = html;
+  } else {
+    tableWrap.innerHTML = '';
+  }
+
+  // Options
+  const wrap = document.getElementById('optionsWrap');
+  wrap.innerHTML = '';
+  const letters = ['A', 'B', 'C'];
+  q.options.forEach((opt, i) => {
+    const div = document.createElement('div');
+    div.className = 'option';
+    div.innerHTML = `<span class="opt-letter">${letters[i]}</span><span class="opt-text">${opt}</span>`;
+    div.addEventListener('click', () => selectOption(i));
+    wrap.appendChild(div);
+  });
+
+  // Clear feedback & next
+  document.getElementById('feedbackWrap').innerHTML = '';
+  document.getElementById('nextArea').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  SELECT OPTION
+// ═══════════════════════════════════════════════════════════════════
+function selectOption(idx) {
+  if (answered) return;
+  answered = true;
+
+  const q = questions[currentQ];
+  const opts = document.querySelectorAll('.option');
+  opts.forEach(o => o.classList.add('disabled'));
+
+  const isCorrect = (idx === q.correct);
+  opts[idx].classList.add(isCorrect ? 'correct' : 'incorrect');
+  if (!isCorrect) opts[q.correct].classList.add('show-correct');
+
+  if (isCorrect) score++;
+
+  // Feedback
+  const fbWrap = document.getElementById('feedbackWrap');
+  fbWrap.innerHTML = isCorrect
+    ? `<div class="feedback-box correct-fb"><span class="feedback-icon">✅</span><strong>¡Correcto!</strong> ${q.feedback}</div>`
+    : `<div class="feedback-box incorrect-fb"><span class="feedback-icon">❌</span><strong>Respuesta incorrecta.</strong> ${q.feedback}</div>`;
+
+  // Update score label
+  document.getElementById('scoreLabel').textContent = `✅ ${score} correctas`;
+
+  // Show next button
+  const nextArea = document.getElementById('nextArea');
+  nextArea.style.display = 'flex';
+  document.getElementById('nextBtnLabel').textContent =
+    currentQ < 29 ? 'Siguiente pregunta →' : 'Ver resultados 🏁';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  NEXT QUESTION
+// ═══════════════════════════════════════════════════════════════════
+function nextQuestion() {
+  currentQ++;
+  if (currentQ < 30) {
+    renderQuestion();
+  } else {
+    showResults();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  SHOW RESULTS
+// ═══════════════════════════════════════════════════════════════════
+function showResults() {
+  showScreen('screenResults');
+  const errors = 30 - score;
+  const pct = Math.round((score / 30) * 100);
+
+  document.getElementById('resultsName').textContent = studentName;
+  document.getElementById('correctCount').textContent = score;
+  document.getElementById('incorrectCount').textContent = errors;
+  document.getElementById('scorePct').textContent = pct + '%';
+
+  // Conic gradient for circle
+  const deg = Math.round((score / 30) * 360);
+  let color = pct >= 80 ? '#10b981' : pct >= 60 ? '#f97316' : '#ef4444';
+  document.getElementById('scoreCircle').style.background =
+    `conic-gradient(${color} ${deg}deg, #e2e8f0 ${deg}deg)`;
+
+  // Trophy
+  document.getElementById('resultsTrophy').textContent =
+    pct >= 90 ? '🏆' : pct >= 70 ? '🌟' : pct >= 50 ? '📚' : '💪';
+
+  // Motivator
+  let msg = '';
+  if (pct >= 90) msg = `¡Excelente desempeño, ${studentName.split(' ')[0]}! Dominas el ecosistema del aprendizaje. Tu comprensión teórica y aplicada es sobresaliente.`;
+  else if (pct >= 75) msg = `¡Muy bien, ${studentName.split(' ')[0]}! Tienes una comprensión sólida del ecosistema del aprendizaje. Refuerza los temas donde tuviste dificultades.`;
+  else if (pct >= 60) msg = `Buen avance, ${studentName.split(' ')[0]}. Continúa revisando la guía de estudio para fortalecer los conceptos clave del ecosistema del aprendizaje.`;
+  else msg = `Sigue adelante, ${studentName.split(' ')[0]}. Consulta la Guía de Estudio y vuelve a intentarlo. ¡Cada intento es una oportunidad de aprendizaje adaptativo!`;
+  document.getElementById('motivatorBox').textContent = msg;
+
+  // Progress
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressLabel').textContent = 'Simulador completado';
+  document.getElementById('scoreLabel').textContent = `✅ ${score} / 30`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  RESTART
+// ═══════════════════════════════════════════════════════════════════
+function restartExam() {
+  currentQ = 0; score = 0; answered = false;
+  document.getElementById('progressFill').style.width = '0%';
+  showScreen('screenWelcome');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  ENTER KEY on name field
+// ═══════════════════════════════════════════════════════════════════
+document.getElementById('studentName').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') startExam();
+  this.style.borderColor = '';
+});
+</script>
+</body>
+</html>

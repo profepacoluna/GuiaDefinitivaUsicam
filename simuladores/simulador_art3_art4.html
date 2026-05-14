@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador | Artículos 3° y 4° Constitucionales</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #0f7b9e;
+    --primary-light: #1aa3cc;
+    --secondary: #e07b2a;
+    --secondary-light: #f5a84e;
+    --accent: #27ae78;
+    --accent2: #c0392b;
+    --bg-start: #e8f7fb;
+    --bg-mid: #fef3e8;
+    --bg-end: #e8f5ef;
+    --glass: rgba(255,255,255,0.72);
+    --glass-border: rgba(255,255,255,0.9);
+    --text-dark: #1a2a35;
+    --text-mid: #3a5060;
+    --text-soft: #6a8090;
+    --shadow: 0 8px 40px rgba(15,123,158,0.13);
+    --radius: 20px;
+    --radius-sm: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%);
+    background-attachment: fixed;
+    color: var(--text-dark);
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -120px; right: -120px;
+    width: 420px; height: 420px;
+    background: radial-gradient(circle, rgba(15,123,158,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -100px; left: -100px;
+    width: 380px; height: 380px;
+    background: radial-gradient(circle, rgba(224,123,42,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* HEADER */
+  .site-header {
+    background: linear-gradient(120deg, #0c6f90 0%, #1aa3cc 45%, #e07b2a 100%);
+    padding: 28px 20px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 30px rgba(15,123,158,0.25);
+  }
+  .site-header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+  .header-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.35);
+    color: #fff;
+    font-size: 0.72rem; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    padding: 4px 14px; border-radius: 30px;
+    margin-bottom: 10px;
+  }
+  .header-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.5rem, 4vw, 2.4rem);
+    font-weight: 800; color: #fff; line-height: 1.2;
+    margin-bottom: 6px;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.2);
+  }
+  .header-subtitle {
+    font-size: clamp(0.8rem, 2vw, 1rem);
+    color: rgba(255,255,255,0.88);
+    font-weight: 600; letter-spacing: 0.5px;
+  }
+  .header-decor { display: flex; justify-content: center; gap: 8px; margin-top: 14px; }
+  .header-decor span {
+    display: inline-block; width: 8px; height: 8px;
+    border-radius: 50%; background: rgba(255,255,255,0.5);
+  }
+  .header-decor span:nth-child(2) { background: rgba(255,255,255,0.8); width: 24px; border-radius: 4px; }
+
+  /* MAIN */
+  .main {
+    max-width: 820px; margin: 0 auto;
+    padding: 36px 16px 60px;
+    position: relative; z-index: 1;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--glass);
+    backdrop-filter: blur(16px);
+    border: 1.5px solid var(--glass-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 36px 40px;
+    animation: fadeSlideUp 0.5s ease both;
+  }
+  @media (max-width: 600px) { .card { padding: 24px 18px; } }
+
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%,100% { transform: scale(1); }
+    50%      { transform: scale(1.04); }
+  }
+  @keyframes checkBounce {
+    0%   { transform: scale(0) rotate(-10deg); }
+    60%  { transform: scale(1.2) rotate(5deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+  @keyframes shimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+
+  /* START SCREEN */
+  .start-screen { text-align: center; }
+  .start-icon {
+    width: 88px; height: 88px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 24px; font-size: 2.4rem;
+    box-shadow: 0 6px 30px rgba(15,123,158,0.3);
+    animation: pulse 3s ease infinite;
+  }
+  .start-screen h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.3rem, 3.5vw, 1.9rem);
+    color: var(--primary); margin-bottom: 10px;
+  }
+  .start-screen p {
+    color: var(--text-mid); font-size: 0.95rem; line-height: 1.6;
+    max-width: 500px; margin: 0 auto 28px;
+  }
+  .info-pills {
+    display: flex; gap: 10px; justify-content: center;
+    flex-wrap: wrap; margin-bottom: 30px;
+  }
+  .pill {
+    background: linear-gradient(135deg, rgba(15,123,158,0.1), rgba(224,123,42,0.1));
+    border: 1px solid rgba(15,123,158,0.2);
+    border-radius: 30px; padding: 6px 16px;
+    font-size: 0.8rem; font-weight: 700; color: var(--primary);
+  }
+  .input-group { margin-bottom: 24px; text-align: left; }
+  .input-group label {
+    display: block; font-weight: 700;
+    color: var(--text-mid); margin-bottom: 8px; font-size: 0.9rem;
+  }
+  .input-group input {
+    width: 100%; padding: 14px 18px;
+    border: 2px solid rgba(15,123,158,0.25);
+    border-radius: var(--radius-sm);
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem; font-weight: 600; color: var(--text-dark);
+    background: rgba(255,255,255,0.8); outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .input-group input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(15,123,158,0.12);
+  }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 14px 32px; border: none; border-radius: 50px; cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem; font-weight: 800;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary {
+    background: linear-gradient(120deg, var(--primary), var(--primary-light));
+    color: #fff; box-shadow: 0 6px 20px rgba(15,123,158,0.35);
+  }
+  .btn-primary:hover { box-shadow: 0 8px 28px rgba(15,123,158,0.45); }
+  .btn-outline {
+    background: rgba(255,255,255,0.7);
+    border: 2px solid var(--primary); color: var(--primary);
+  }
+  .btn-lg { padding: 16px 44px; font-size: 1.05rem; }
+  .btn-block { width: 100%; }
+
+  /* PROGRESS */
+  .progress-wrap { margin-bottom: 28px; }
+  .progress-info {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px;
+    font-size: 0.85rem; font-weight: 700; color: var(--text-mid);
+  }
+  .progress-track {
+    height: 10px; background: rgba(15,123,158,0.12);
+    border-radius: 10px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light), var(--secondary));
+    background-size: 200% 100%;
+    border-radius: 10px;
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+    animation: shimmer 2s linear infinite;
+  }
+
+  /* QUESTION */
+  .question-type-tag {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: #fff; font-size: 0.72rem; font-weight: 800;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 4px 14px; border-radius: 30px; margin-bottom: 16px;
+  }
+  .question-number {
+    font-size: 0.82rem; font-weight: 700; color: var(--text-soft); margin-bottom: 8px;
+  }
+  .question-text {
+    font-size: clamp(0.95rem, 2.5vw, 1.08rem);
+    font-weight: 700; color: var(--text-dark);
+    line-height: 1.65; margin-bottom: 24px;
+  }
+
+  /* RELATION TABLE */
+  .relation-table {
+    width: 100%; border-collapse: collapse;
+    margin-bottom: 20px;
+    border-radius: var(--radius-sm); overflow: hidden;
+    font-size: 0.88rem;
+  }
+  .relation-table th {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: #fff; font-weight: 800;
+    padding: 10px 16px; text-align: left;
+  }
+  .relation-table td {
+    padding: 9px 16px;
+    border-bottom: 1px solid rgba(15,123,158,0.1);
+    background: rgba(255,255,255,0.6);
+    vertical-align: top; line-height: 1.5;
+  }
+  .relation-table tr:last-child td { border-bottom: none; }
+
+  /* OPTIONS */
+  .options { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+  .option {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 16px 18px;
+    background: rgba(255,255,255,0.65);
+    border: 2px solid rgba(15,123,158,0.15);
+    border-radius: var(--radius-sm); cursor: pointer;
+    transition: all 0.22s ease;
+    font-size: 0.95rem; line-height: 1.55; font-weight: 600; color: var(--text-dark);
+  }
+  .option:hover:not(.disabled) {
+    border-color: var(--primary);
+    background: rgba(15,123,158,0.07);
+    transform: translateX(4px);
+  }
+  .option.selected { border-color: var(--primary); background: rgba(15,123,158,0.1); }
+  .option.correct  { border-color: var(--accent);  background: rgba(39,174,120,0.12); }
+  .option.incorrect{ border-color: var(--accent2); background: rgba(192,57,43,0.08); }
+  .option.disabled { cursor: not-allowed; }
+  .option-letter {
+    min-width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, rgba(15,123,158,0.15), rgba(15,123,158,0.08));
+    border: 2px solid rgba(15,123,158,0.25);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 0.85rem; color: var(--primary);
+    flex-shrink: 0; transition: all 0.22s;
+  }
+  .option.selected  .option-letter { background: var(--primary); color:#fff; border-color: var(--primary); }
+  .option.correct   .option-letter { background: var(--accent);  color:#fff; border-color: var(--accent); }
+  .option.incorrect .option-letter { background: var(--accent2); color:#fff; border-color: var(--accent2); }
+
+  /* FEEDBACK */
+  .feedback-box {
+    border-radius: var(--radius-sm);
+    padding: 16px 20px; margin-bottom: 20px;
+    display: flex; gap: 12px; align-items: flex-start;
+    animation: fadeSlideUp 0.35s ease;
+    font-size: 0.92rem; line-height: 1.6; font-weight: 600;
+  }
+  .feedback-box.correct-fb {
+    background: linear-gradient(135deg, rgba(39,174,120,0.15), rgba(39,174,120,0.08));
+    border: 1.5px solid rgba(39,174,120,0.4); color: #1a5c3a;
+  }
+  .feedback-box.incorrect-fb {
+    background: linear-gradient(135deg, rgba(192,57,43,0.1), rgba(192,57,43,0.05));
+    border: 1.5px solid rgba(192,57,43,0.3); color: #6b1e1e;
+  }
+  .feedback-icon { font-size: 1.5rem; flex-shrink: 0; animation: checkBounce 0.5s ease; }
+
+  /* BOTTOM BAR */
+  .bottom-bar { display: flex; justify-content: flex-end; align-items: center; gap: 12px; }
+
+  /* RESULTS */
+  .results-screen { text-align: center; }
+  .results-avatar {
+    width: 90px; height: 90px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.5rem; margin: 0 auto 20px;
+    box-shadow: 0 8px 30px rgba(15,123,158,0.3);
+  }
+  .results-name {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.2rem, 3vw, 1.6rem);
+    color: var(--primary); margin-bottom: 6px;
+  }
+  .results-subtitle { color: var(--text-soft); font-size: 0.9rem; margin-bottom: 28px; }
+  .score-ring-wrap {
+    position: relative; width: 160px; height: 160px; margin: 0 auto 28px;
+  }
+  .score-ring-wrap svg { transform: rotate(-90deg); }
+  .score-ring-wrap circle { fill: none; stroke-width: 14; stroke-linecap: round; transition: stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1); }
+  .score-ring-bg   { stroke: rgba(15,123,158,0.12); }
+  .score-ring-fill { stroke: url(#ringGrad); }
+  .score-center {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .score-pct {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem; font-weight: 800; color: var(--primary); line-height: 1;
+  }
+  .score-label { font-size: 0.78rem; font-weight: 700; color: var(--text-soft); margin-top: 2px; }
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 26px; }
+  .stat-box {
+    background: rgba(255,255,255,0.75);
+    border-radius: var(--radius-sm); padding: 18px 12px;
+    border: 1.5px solid rgba(15,123,158,0.13);
+  }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem; font-weight: 800; line-height: 1; margin-bottom: 4px;
+  }
+  .stat-num.green { color: var(--accent); }
+  .stat-num.red   { color: var(--accent2); }
+  .stat-desc { font-size: 0.8rem; font-weight: 700; color: var(--text-soft); }
+  .motivational {
+    background: linear-gradient(135deg, rgba(15,123,158,0.08), rgba(224,123,42,0.08));
+    border: 1.5px solid rgba(15,123,158,0.2);
+    border-radius: var(--radius-sm); padding: 18px 22px;
+    font-size: 0.95rem; font-weight: 700; color: var(--text-mid);
+    line-height: 1.6; margin-bottom: 26px; font-style: italic;
+  }
+  .results-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  /* GUIDE SECTION */
+  .guide-section { margin-top: 32px; }
+  .guide-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .guide-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--secondary), var(--secondary-light));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem; box-shadow: 0 4px 14px rgba(224,123,42,0.3);
+  }
+  .guide-title { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: var(--text-dark); }
+  .guide-title span { display: block; font-family: 'Nunito', sans-serif; font-size: 0.8rem; font-weight: 600; color: var(--text-soft); }
+  .guide-frame-wrap {
+    border-radius: var(--radius-sm); overflow: hidden;
+    border: 2px solid rgba(15,123,158,0.2);
+    box-shadow: 0 4px 20px rgba(15,123,158,0.1);
+  }
+  .guide-frame-wrap iframe { display: block; width: 100%; height: 520px; border: none; }
+  @media (max-width: 600px) { .guide-frame-wrap iframe { height: 380px; } }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(15,123,158,0.2), transparent);
+    margin: 28px 0;
+  }
+
+  /* HIDDEN */
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-badge">Evaluación Constitucional · México</div>
+  <h1 class="header-title">Simulador Interactivo de Evaluación</h1>
+  <div class="header-subtitle">Prof. Francisco De Jesus Luna Benitez</div>
+  <div class="header-decor">
+    <span></span><span></span><span></span>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- START SCREEN -->
+  <div id="startScreen" class="card start-screen">
+    <div class="start-icon">📜</div>
+    <h2>Artículos 3° y 4° Constitucionales</h2>
+    <p>Pon a prueba tus conocimientos sobre los derechos fundamentales a la educación y el bienestar garantizados en la Constitución Mexicana.</p>
+    <div class="info-pills">
+      <span class="pill">📝 20 Reactivos</span>
+      <span class="pill">⏱ Sin límite de tiempo</span>
+      <span class="pill">🎯 Retroalimentación inmediata</span>
+      <span class="pill">📊 Resultados detallados</span>
+    </div>
+    <div class="input-group">
+      <label for="studentName">✏️ Nombre del estudiante</label>
+      <input type="text" id="studentName" placeholder="Escribe tu nombre completo aquí..." maxlength="80" autocomplete="name">
+    </div>
+    <button class="btn btn-primary btn-lg btn-block" onclick="startSimulator()">
+      🚀 Iniciar Simulador
+    </button>
+    <div class="divider"></div>
+    <div class="guide-section">
+      <div class="guide-header">
+        <div class="guide-icon">📖</div>
+        <div class="guide-title">
+          Guía de Estudio
+          <span>Artículos 3° y 4° · Constitución Mexicana</span>
+        </div>
+      </div>
+      <div class="guide-frame-wrap">
+        <iframe src="https://drive.google.com/file/d/14U40u0OlJIhURpHWiz7ESfCuaTysei4a/preview" allowfullscreen loading="lazy" title="Guía de Estudio PDF"></iframe>
+      </div>
+      <div style="text-align:center;margin-top:12px;">
+        <a href="https://drive.google.com/file/d/14U40u0OlJIhURpHWiz7ESfCuaTysei4a/view" target="_blank" class="btn btn-outline" style="font-size:0.85rem;padding:10px 22px;">
+          🔗 Abrir en Google Drive
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div id="quizScreen" class="card hidden">
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span id="progressLabel">Pregunta 1 de 20</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+    </div>
+    <div id="questionTypeTag" class="question-type-tag"></div>
+    <div id="questionNumber" class="question-number"></div>
+    <div id="questionText" class="question-text"></div>
+    <div id="relationTable"></div>
+    <div class="options" id="optionsContainer"></div>
+    <div id="feedbackBox" class="hidden"></div>
+    <div class="bottom-bar">
+      <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>
+        Siguiente pregunta →
+      </button>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div id="resultsScreen" class="card results-screen hidden">
+    <div class="results-avatar">🏆</div>
+    <div class="results-name" id="resultsName"></div>
+    <div class="results-subtitle">Artículos 3° y 4° Constitucionales · Constitución Mexicana</div>
+    <div class="score-ring-wrap">
+      <svg width="160" height="160" viewBox="0 0 160 160">
+        <defs>
+          <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   style="stop-color:#0f7b9e"/>
+            <stop offset="50%"  style="stop-color:#1aa3cc"/>
+            <stop offset="100%" style="stop-color:#e07b2a"/>
+          </linearGradient>
+        </defs>
+        <circle class="score-ring-bg"   cx="80" cy="80" r="66" stroke-dasharray="414.7" stroke-dashoffset="0"/>
+        <circle class="score-ring-fill" id="ringFill" cx="80" cy="80" r="66" stroke-dasharray="414.7" stroke-dashoffset="414.7"/>
+      </svg>
+      <div class="score-center">
+        <div class="score-pct" id="scorePct">0%</div>
+        <div class="score-label">Desempeño</div>
+      </div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-num green" id="correctCount">0</div>
+        <div class="stat-desc">✅ Respuestas correctas</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num red" id="incorrectCount">0</div>
+        <div class="stat-desc">❌ Respuestas incorrectas</div>
+      </div>
+    </div>
+    <div class="motivational" id="motivationalMsg"></div>
+    <div class="results-btns">
+      <button class="btn btn-primary" onclick="restartQuiz()">🔁 Reintentar simulador</button>
+    </div>
+    <div class="divider"></div>
+    <div class="guide-section">
+      <div class="guide-header">
+        <div class="guide-icon">📖</div>
+        <div class="guide-title">
+          Guía de Estudio
+          <span>Refuerza lo aprendido</span>
+        </div>
+      </div>
+      <div class="guide-frame-wrap">
+        <iframe src="https://drive.google.com/file/d/14U40u0OlJIhURpHWiz7ESfCuaTysei4a/preview" allowfullscreen loading="lazy" title="Guía de Estudio PDF"></iframe>
+      </div>
+      <div style="text-align:center;margin-top:12px;">
+        <a href="https://drive.google.com/file/d/14U40u0OlJIhURpHWiz7ESfCuaTysei4a/view" target="_blank" class="btn btn-outline" style="font-size:0.85rem;padding:10px 22px;">
+          🔗 Abrir en Google Drive
+        </a>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ============================================================
+// 20 QUESTIONS — ARTICLES 3° & 4°
+// Correct distribution: A×7, B×7, C×6
+// ============================================================
+const questions = [
+
+  // Q1 Cuestionamiento Directo — Correct: B
+  {
+    type:"Cuestionamiento Directo",
+    text:"¿Cuál es el nivel educativo que, según el Artículo 3° Constitucional, tiene como responsabilidad del Estado concientizar sobre su importancia como derecho vital de la niñez, aunque no sea obligatorio en el mismo sentido que la educación básica?",
+    options:[
+      "A) La educación primaria, ya que es el primer nivel formal dentro de la educación básica obligatoria.",
+      "B) La educación inicial, cuya importancia como derecho de la niñez debe ser promovida por el Estado.",
+      "C) La educación media superior, que el Estado debe garantizar de manera obligatoria para todos."
+    ],
+    correct:1,
+    feedback:{
+      correct:"¡Correcto! La educación inicial es reconocida como un derecho vital de la niñez; el Estado tiene la responsabilidad de concientizar sobre ella, distinguiéndola del carácter obligatorio de la educación básica.",
+      incorrect:"La respuesta correcta es B. La educación inicial es el nivel sobre el que el Estado debe concientizar a la sociedad como derecho vital de la niñez, de acuerdo con el Artículo 3°, párrafo 1."
+    }
+  },
+
+  // Q2 Completamiento — Correct: A
+  {
+    type:"Completamiento",
+    text:"De acuerdo con el Artículo 3°, párrafo 2, la educación pública impartida por el Estado debe ser gratuita, laica, universal e inclusiva. Además, debe ser…",
+    options:[
+      "A) …pública, administrada y garantizada por las instituciones del Estado, sin costo para las personas.",
+      "B) …confesional, orientada por los principios éticos de las principales tradiciones religiosas del país.",
+      "C) …optativa a partir de secundaria, permitiendo a las familias decidir si continúan en el sistema público."
+    ],
+    correct:0,
+    feedback:{
+      correct:"¡Excelente! Las cinco reglas de oro del Art. 3° son: universal, laica, gratuita, inclusiva y pública. Esta última implica que es administrada y garantizada por las instituciones del Estado.",
+      incorrect:"La respuesta correcta es A. Las cinco reglas de oro de la educación pública son: universal, laica, gratuita, inclusiva y pública (administrada por el Estado). La educación confesional o la opcionalidad no forman parte de estos principios."
+    }
+  },
+
+  // Q3 Cuestionamiento Directo — Correct: C
+  {
+    type:"Cuestionamiento Directo",
+    text:"¿Cuál de los siguientes criterios educativos, establecidos en la Fracción II del Artículo 3°, concibe a la educación como un sistema de vida para el mejoramiento del pueblo y la defensa de la independencia y la cultura nacionales?",
+    options:[
+      "A) El criterio equitativo, que combate las desigualdades mediante apoyos en zonas marginadas.",
+      "B) El criterio intercultural y plurilingüe, que promueve el respeto al patrimonio histórico.",
+      "C) El criterio democrático y nacional, que entiende la democracia como forma de vida colectiva."
+    ],
+    correct:2,
+    feedback:{
+      correct:"¡Muy bien! El criterio democrático y nacional define la educación como un sistema de vida que busca el mejoramiento del pueblo y la defensa de la independencia y cultura de México.",
+      incorrect:"La respuesta correcta es C. El criterio democrático y nacional es el que concibe la educación como un sistema de vida, orientado al mejoramiento del pueblo y a la defensa de la independencia nacional."
+    }
+  },
+
+  // Q4 Relación de Elementos — Correct: B
+  {
+    type:"Relación de Elementos",
+    text:"Seleccione la opción que relacione correctamente el derecho del Artículo 4° con la obligación del Estado que le corresponde.",
+    tableHeaders:["Derecho (Art. 4°)","Obligación del Estado"],
+    tableLeft:["1. Salud integral","2. Seguridad económica","3. Alimentación nutritiva"],
+    tableRight:[
+      "a) Entregar pensiones a personas mayores de 65 años y a personas con discapacidad.",
+      "b) Crear el Sistema de Salud para el Bienestar con atención gratuita para personas sin seguridad social.",
+      "c) Asegurar el acceso a alimentos nutritivos, suficientes y de calidad."
+    ],
+    options:[
+      "A) 1b, 2c, 3a",
+      "B) 1b, 2a, 3c",
+      "C) 1a, 2b, 3c"
+    ],
+    correct:1,
+    feedback:{
+      correct:"¡Correcto! Salud integral → Sistema de Salud para el Bienestar (1b); Seguridad económica → pensiones para adultos mayores y personas con discapacidad (2a); Alimentación → garantizar alimentos nutritivos y suficientes (3c).",
+      incorrect:"La respuesta correcta es B: 1b, 2a, 3c. El Sistema de Salud para el Bienestar atiende el derecho a la salud; las pensiones responden a la seguridad económica; y asegurar alimentos nutritivos corresponde al derecho a la alimentación."
+    }
+  },
+
+  // Q5 Cuestionamiento Directo — Correct: A
+  {
+    type:"Cuestionamiento Directo",
+    text:"¿Qué garantía establece el Artículo 4° Constitucional en relación con el registro de identidad de toda persona al nacer?",
+    options:[
+      "A) El Estado garantiza de forma gratuita la primera copia certificada del acta de nacimiento.",
+      "B) El Estado asigna automáticamente una clave CURP al nacer, sin necesidad de registro formal.",
+      "C) El Estado otorga documentos de identidad oficial únicamente a partir de los 18 años de edad."
+    ],
+    correct:0,
+    feedback:{
+      correct:"¡Correcto! El Artículo 4° reconoce el derecho a la identidad desde el nacimiento y establece que el Estado debe garantizar gratuitamente la primera copia certificada del acta de nacimiento.",
+      incorrect:"La respuesta correcta es A. El Artículo 4° garantiza el derecho a la identidad desde el nacimiento; para ello, el Estado proporciona gratuitamente la primera copia certificada del acta de nacimiento."
+    }
+  },
+
+  // Q6 Ordenamiento — Correct: C
+  {
+    type:"Ordenamiento",
+    text:"Ordene los niveles de la trayectoria educativa de menor a mayor, tal como los establece el Artículo 3° Constitucional:\n\n1. Educación Básica (preescolar, primaria y secundaria)\n2. Educación Inicial\n3. Educación Media Superior\n4. Educación Superior",
+    options:[
+      "A) 1, 2, 3, 4",
+      "B) 2, 3, 1, 4",
+      "C) 2, 1, 3, 4"
+    ],
+    correct:2,
+    feedback:{
+      correct:"¡Excelente! El orden correcto es: Educación Inicial (2) → Educación Básica (1) → Educación Media Superior (3) → Educación Superior (4). Esta es la trayectoria educativa del Artículo 3°.",
+      incorrect:"La respuesta correcta es C: 2, 1, 3, 4. La trayectoria inicia con Educación Inicial, continúa con la Básica (preescolar, primaria, secundaria), luego la Media Superior y finalmente la Superior."
+    }
+  },
+
+  // Q7 Completamiento — Correct: B
+  {
+    type:"Completamiento",
+    text:"El Artículo 3°, párrafo 4, establece que la educación debe contribuir a la mejor convivencia humana. El principio que promueve específicamente la convivencia pacífica y la honestidad como valores cotidianos es…",
+    options:[
+      "A) …la Igualdad Sustantiva, que busca el desarrollo armónico de todas las facultades del ser humano.",
+      "B) …la Cultura de Paz, que promueve la convivencia pacífica, el rechazo a la violencia y la honestidad.",
+      "C) …la Mejora Continua, que integra valores éticos en un proceso constante de enseñanza-aprendizaje."
+    ],
+    correct:1,
+    feedback:{
+      correct:"¡Muy bien! La Cultura de Paz es el principio del Artículo 3° que promueve específicamente la convivencia pacífica y la honestidad como parte de la formación integral del individuo.",
+      incorrect:"La respuesta correcta es B. La Cultura de Paz promueve la convivencia pacífica y la honestidad. La Igualdad Sustantiva refiere al desarrollo armónico de facultades, y la Mejora Continua a la integración de valores éticos en el proceso educativo."
+    }
+  },
+
+  // Q8 Cuestionamiento Directo — Correct: A
+  {
+    type:"Cuestionamiento Directo",
+    text:"¿Cuál de las siguientes afirmaciones describe correctamente el derecho a la planificación familiar reconocido en el Artículo 4° Constitucional?",
+    options:[
+      "A) Toda persona tiene derecho a decidir de manera libre, responsable e informada sobre el número y espaciamiento de sus hijos.",
+      "B) El Estado determina el número óptimo de hijos por familia con base en estudios demográficos nacionales.",
+      "C) Las familias deben informar al Estado sobre su decisión de tener hijos para acceder a apoyos gubernamentales."
+    ],
+    correct:0,
+    feedback:{
+      correct:"¡Correcto! El Artículo 4° garantiza que la planificación familiar sea una decisión libre, responsable e informada de cada persona, sin intervención del Estado.",
+      incorrect:"La respuesta correcta es A. La planificación familiar es un derecho íntimo; el Artículo 4° garantiza que sea una decisión libre, responsable e informada de cada persona, no determinada por el Estado."
+    }
+  },
+
+  // Q9 Relación de Elementos — Correct: B
+  {
+    type:"Relación de Elementos",
+    text:"Seleccione la opción que relacione correctamente cada derecho del Artículo 4° con su descripción constitucional.",
+    tableHeaders:["Derecho","Descripción"],
+    tableLeft:["1. Alimentación","2. Agua y saneamiento","3. Vivienda adecuada"],
+    tableRight:[
+      "a) La Ley establece los instrumentos y apoyos necesarios para que las familias alcancen este objetivo.",
+      "b) Derecho a una alimentación nutritiva, suficiente y de calidad.",
+      "c) Acceso, disposición y saneamiento de agua para uso personal y doméstico, suficiente, salubre y asequible."
+    ],
+    options:[
+      "A) 1c, 2a, 3b",
+      "B) 1b, 2c, 3a",
+      "C) 1a, 2b, 3c"
+    ],
+    correct:1,
+    feedback:{
+      correct:"¡Excelente! Alimentación = nutritiva, suficiente y de calidad (1b); Agua y saneamiento = acceso suficiente, salubre y asequible (2c); Vivienda = la Ley establece los instrumentos y apoyos necesarios (3a).",
+      incorrect:"La respuesta correcta es B: 1b, 2c, 3a. Alimentación refiere a nutrición suficiente y de calidad; Agua y saneamiento a acceso salubre y asequible; y Vivienda adecuada se apoya en instrumentos legales definidos por la Ley."
+    }
+  },
+
+  // Q10 Cuestionamiento Directo — Correct: C
+  {
+    type:"Cuestionamiento Directo",
+    text:"¿Cuál es el principio del Artículo 4° que establece que todas las decisiones del Estado deben garantizar plenamente los derechos de alimentación, salud, educación y sano esparcimiento de los menores de edad?",
+    options:[
+      "A) El Desarrollo de la Juventud, que incluye políticas públicas multidisciplinarias para la inclusión social.",
+      "B) La Vida Libre de Violencias, que refuerza los deberes de protección del Estado frente al maltrato.",
+      "C) El Interés Superior de la Niñez, que obliga al Estado a priorizar el bienestar integral de los menores."
+    ],
+    correct:2,
+    feedback:{
+      correct:"¡Muy bien! El Interés Superior de la Niñez es el principio rector que exige que todas las decisiones del Estado garanticen plenamente los derechos de alimentación, salud, educación y sano esparcimiento de niñas, niños y adolescentes.",
+      incorrect:"La respuesta correcta es C. El Interés Superior de la Niñez sitúa los derechos de los menores como prioridad absoluta del Estado, abarcando alimentación, salud, educación y esparcimiento."
+    }
+  },
+
+  // Q11 Completamiento — Correct: A
+  {
+    type:"Completamiento",
+    text:"El criterio equitativo de la educación, establecido en la Fracción II del Artículo 3°, busca combatir las desigualdades sociales. Para ello, el Estado implementa medidas como…",
+    options:[
+      "A) …apoyos alimentarios en zonas marginadas y programas de educación para adultos, eliminando barreras económicas de acceso.",
+      "B) …la imposición de cuotas mínimas de inscripción en escuelas privadas ubicadas en zonas con mayor marginación.",
+      "C) …la selección de estudiantes con mérito académico sobresaliente para otorgarles becas exclusivas del sistema federal."
+    ],
+    correct:0,
+    feedback:{
+      correct:"¡Correcto! El criterio equitativo se materializa con apoyos alimentarios en zonas marginadas y educación para adultos, atacando las desigualdades que impiden el acceso a la educación.",
+      incorrect:"La respuesta correcta es A. El criterio equitativo combate las desigualdades mediante apoyos alimentarios en zonas marginadas y educación para adultos, garantizando el acceso sin barreras económicas."
+    }
+  },
+
+  // Q12 Cuestionamiento Directo — Correct: B
+  {
+    type:"Cuestionamiento Directo",
+    text:"La directora de una escuela pública invita a un ministro religioso a impartir una clase sobre valores espirituales como parte del programa académico oficial. ¿Qué principio constitucional se estaría vulnerando con esta acción?",
+    options:[
+      "A) El principio de educación inclusiva, que exige eliminar barreras de aprendizaje y participación.",
+      "B) El principio de educación laica, que establece que la educación pública debe ser completamente ajena a cualquier doctrina religiosa.",
+      "C) El principio de educación equitativa, que prohíbe prácticas que generen desigualdad entre los estudiantes."
+    ],
+    correct:1,
+    feedback:{
+      correct:"¡Correcto! El principio de laicidad del Artículo 3° establece que la educación pública debe ser completamente ajena a cualquier doctrina religiosa. Incorporar a un ministro religioso al programa viola este principio.",
+      incorrect:"La respuesta correcta es B. La laicidad de la educación pública, consagrada en el Artículo 3°, garantiza la separación total entre la iglesia y la escuela, prohibiendo cualquier contenido religioso en el programa oficial."
+    }
+  },
+
+  // Q13 Ordenamiento — Correct: A
+  {
+    type:"Ordenamiento",
+    text:"Ordene los elementos del sistema de pensiones no contributivas del Artículo 4°, de la protección más focalizada (menor cobertura) a la más amplia (mayor cobertura):\n\n1. Prioridad en rehabilitación para personas con discapacidad menores de 18 años\n2. Pensión para personas con discapacidad menores de 65 años\n3. Pensión estatal para adultos mayores a partir de los 65 años",
+    options:[
+      "A) 1, 2, 3",
+      "B) 3, 2, 1",
+      "C) 2, 1, 3"
+    ],
+    correct:0,
+    feedback:{
+      correct:"¡Excelente! De más focalizado a más amplio: primero la prioridad en rehabilitación para menores de 18 con discapacidad (1), luego la pensión para personas con discapacidad en general (2), y finalmente la pensión universal para adultos mayores de 65 años (3).",
+      incorrect:"La respuesta correcta es A: 1, 2, 3. El sistema inicia con la protección más focalizada (rehabilitación para menores con discapacidad), avanza hacia la pensión para personas con discapacidad en general, y culmina con la pensión para todos los adultos mayores de 65 años."
+    }
+  },
+
+  // Q14 Cuestionamiento Directo — Correct: C
+  {
+    type:"Cuestionamiento Directo",
+    text:"¿A qué sector de la población está dirigido principalmente el Sistema de Salud para el Bienestar, según el Artículo 4° Constitucional?",
+    options:[
+      "A) A todas las personas que cuenten con seguridad social en el IMSS o el ISSSTE.",
+      "B) Exclusivamente a personas mayores de 65 años y a personas con discapacidad permanente.",
+      "C) A personas que no cuentan con seguridad social, ofreciendo atención integral y gratuita con extensión progresiva."
+    ],
+    correct:2,
+    feedback:{
+      correct:"¡Muy bien! El Sistema de Salud para el Bienestar atiende principalmente a quienes no tienen acceso a seguridad social, garantizando atención integral y gratuita con progresiva ampliación de servicios.",
+      incorrect:"La respuesta correcta es C. El Sistema de Salud para el Bienestar fue creado para atender a las personas sin seguridad social, garantizándoles atención integral y gratuita con extensión progresiva de servicios."
+    }
+  },
+
+  // Q15 Relación de Elementos — Correct: A
+  {
+    type:"Relación de Elementos",
+    text:"Relacione cada criterio orientador de la educación con su descripción correcta, de acuerdo con la Fracción II del Artículo 3° Constitucional.",
+    tableHeaders:["Criterio","Descripción"],
+    tableLeft:["1. Integral y de excelencia","2. Intercultural y plurilingüe","3. Democrático y nacional"],
+    tableRight:[
+      "a) Desarrollo cognitivo, socioemocional y físico para alcanzar el pensamiento crítico y el máximo logro de aprendizaje.",
+      "b) Sistema de vida para el mejoramiento del pueblo y defensa de la independencia y cultura nacionales.",
+      "c) Respeto al patrimonio histórico y convivencia armónica en la diversidad cultural y lingüística."
+    ],
+    options:[
+      "A) 1a, 2c, 3b",
+      "B) 1c, 2b, 3a",
+      "C) 1b, 2a, 3c"
+    ],
+    correct:0,
+    feedback:{
+      correct:"¡Correcto! Integral y de excelencia = desarrollo cognitivo-socioemocional y físico (1a); Intercultural y plurilingüe = respeto al patrimonio y convivencia en la diversidad (2c); Democrático y nacional = sistema de vida colectivo (3b).",
+      incorrect:"La respuesta correcta es A: 1a, 2c, 3b. El criterio integral y de excelencia apunta al desarrollo cognitivo-socioemocional; el intercultural promueve la convivencia en la diversidad; y el democrático-nacional concibe la educación como sistema de vida."
+    }
+  },
+
+  // Q16 Completamiento — Correct: B
+  {
+    type:"Completamiento",
+    text:"El Artículo 4° Constitucional establece que la mujer y el hombre son iguales ante la ley. Además, el Estado está obligado a garantizar…",
+    options:[
+      "A) …que todas las instituciones laborales otorguen salarios idénticos sin distinción de género, antigüedad ni puesto.",
+      "B) …la igualdad sustantiva entre géneros y reforzar los deberes de protección del Estado frente a la violencia contra mujeres, adolescentes, niñas y niños.",
+      "C) …que las escuelas públicas impartan obligatoriamente cursos de perspectiva de género en todos los niveles educativos."
+    ],
+    correct:1,
+    feedback:{
+      correct:"¡Muy bien! El Artículo 4° va más allá de la igualdad formal: garantiza la igualdad sustantiva y establece deberes reforzados del Estado para proteger a mujeres, adolescentes, niñas y niños de la violencia.",
+      incorrect:"La respuesta correcta es B. El Artículo 4° garantiza la igualdad sustantiva y establece deberes reforzados del Estado para proteger a mujeres, adolescentes, niñas y niños frente a situaciones de violencia."
+    }
+  },
+
+  // Q17 Cuestionamiento Directo — Correct: C
+  {
+    type:"Cuestionamiento Directo",
+    text:"Según el Artículo 3° Constitucional, ¿quién es el rector, impartidor y garante del sistema educativo en México?",
+    options:[
+      "A) La Secretaría de Educación Pública (SEP), como única institución federal encargada de normar y operar la educación.",
+      "B) Los municipios, como el nivel de gobierno más cercano a la comunidad escolar y a sus necesidades locales.",
+      "C) El Estado, entendido como el conjunto de la Federación, los estados, la Ciudad de México y los municipios."
+    ],
+    correct:2,
+    feedback:{
+      correct:"¡Excelente! El Artículo 3° establece que es el Estado —la Federación, los estados, la Ciudad de México y los municipios— quien actúa como rector, impartidor y garante de la educación en México.",
+      incorrect:"La respuesta correcta es C. El Artículo 3° establece que el Estado en sentido amplio —Federación, estados, Ciudad de México y municipios— es el responsable de garantizar la educación, no solo la SEP ni los municipios de manera aislada."
+    }
+  },
+
+  // Q18 Completamiento — Correct: A
+  {
+    type:"Completamiento",
+    text:"El sistema de becas establecido en el Artículo 4° Constitucional está destinado a estudiantes de todos los niveles del sistema público. Su objetivo central es…",
+    options:[
+      "A) …garantizar la equidad educativa, priorizando a familias en condición de pobreza para asegurar su permanencia en el sistema.",
+      "B) …financiar exclusivamente estudios universitarios para alumnos con promedio mínimo de 9.0 en media superior.",
+      "C) …canalizar recursos a instituciones privadas para ampliar su oferta académica en zonas rurales del país."
+    ],
+    correct:0,
+    feedback:{
+      correct:"¡Correcto! El sistema de becas del Artículo 4° busca garantizar la equidad educativa, priorizando a familias en situación de pobreza para que los estudiantes permanezcan en el sistema público.",
+      incorrect:"La respuesta correcta es A. El sistema de becas tiene como objetivo garantizar la equidad educativa, priorizando a las familias en condición de pobreza en todos los niveles del sistema público."
+    }
+  },
+
+  // Q19 Ordenamiento — Correct: B
+  {
+    type:"Ordenamiento",
+    text:"Ordene los derechos de desarrollo integral del Artículo 4° según el grupo poblacional al que se dirigen, de más específico a más amplio:\n\n1. Movilidad segura (toda la población)\n2. Interés Superior de la Niñez (menores de edad)\n3. Desarrollo de la Juventud (jóvenes)\n4. Cultura Física y Deporte (promovida por el Estado para toda la población)",
+    options:[
+      "A) 1, 2, 3, 4",
+      "B) 2, 3, 4, 1",
+      "C) 3, 2, 1, 4"
+    ],
+    correct:1,
+    feedback:{
+      correct:"¡Excelente! De más específico a más amplio: Interés Superior de la Niñez (solo menores) → Desarrollo de la Juventud (jóvenes) → Cultura Física y Deporte (promovida para todos) → Movilidad Segura (derecho universal).",
+      incorrect:"La respuesta correcta es B: 2, 3, 4, 1. El Interés Superior de la Niñez es el más focalizado; le sigue el Desarrollo de la Juventud; luego la Cultura Física promovida para todos; y finalmente la Movilidad Segura como derecho universal."
+    }
+  },
+
+  // Q20 Cuestionamiento Directo — Correct: C
+  {
+    type:"Cuestionamiento Directo",
+    text:"¿Cuál es la relación fundamental que existe entre el Artículo 3° y el Artículo 4° de la Constitución Política de los Estados Unidos Mexicanos?",
+    options:[
+      "A) El Artículo 3° regula la educación privada y el Artículo 4° la educación pública, conformando un sistema educativo mixto.",
+      "B) El Artículo 3° otorga derechos económicos y el Artículo 4° garantiza el derecho a la educación como base del desarrollo.",
+      "C) El Artículo 3° forma mentes libres mediante la educación, y el Artículo 4° protege las condiciones materiales, físicas y sociales para vivir con dignidad."
+    ],
+    correct:2,
+    feedback:{
+      correct:"¡Correcto! Ambos artículos construyen el Ecosistema del Bienestar Mexicano: el Artículo 3° forma al ciudadano mediante la educación (la mente), y el Artículo 4° asegura las condiciones de vida digna (el cuerpo y la sociedad).",
+      incorrect:"La respuesta correcta es C. La Constitución diseña ambos artículos como un sistema complementario: el Artículo 3° educa y forma mentes libres, críticas y preparadas; mientras que el Artículo 4° asegura que ese ciudadano tenga condiciones materiales, físicas y sociales para vivir con dignidad."
+    }
+  }
+
+];
+
+// STATE
+let current = 0;
+let score = 0;
+let studentName = "";
+let answered = false;
+
+function show(id){ document.getElementById(id).classList.remove('hidden'); }
+function hide(id){ document.getElementById(id).classList.add('hidden'); }
+
+function startSimulator(){
+  const el = document.getElementById('studentName');
+  const name = el.value.trim();
+  if(!name){
+    el.style.borderColor='#c0392b';
+    el.placeholder='⚠️ Por favor escribe tu nombre para continuar...';
+    el.focus();
+    setTimeout(()=>{ el.style.borderColor=''; el.placeholder='Escribe tu nombre completo aquí...'; },2500);
+    return;
+  }
+  studentName=name; current=0; score=0; answered=false;
+  hide('startScreen'); show('quizScreen');
+  window.scrollTo({top:0,behavior:'smooth'});
+  renderQuestion();
+}
+
+function renderQuestion(){
+  answered=false;
+  const q=questions[current];
+  const pct=Math.round((current/questions.length)*100);
+
+  document.getElementById('progressLabel').textContent=`Pregunta ${current+1} de ${questions.length}`;
+  document.getElementById('progressPct').textContent=`${pct}%`;
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('questionTypeTag').textContent=q.type;
+  document.getElementById('questionNumber').textContent=`Reactivo ${current+1}`;
+  document.getElementById('questionText').innerHTML=q.text.replace(/\n/g,'<br>');
+
+  const tableWrap=document.getElementById('relationTable');
+  if(q.tableHeaders){
+    let html=`<table class="relation-table"><thead><tr><th>${q.tableHeaders[0]}</th><th>${q.tableHeaders[1]}</th></tr></thead><tbody>`;
+    const rows=Math.max(q.tableLeft.length,q.tableRight.length);
+    for(let i=0;i<rows;i++){
+      html+=`<tr><td>${q.tableLeft[i]||''}</td><td>${q.tableRight[i]||''}</td></tr>`;
+    }
+    html+=`</tbody></table>`;
+    tableWrap.innerHTML=html; tableWrap.style.display='block';
+  } else {
+    tableWrap.innerHTML=''; tableWrap.style.display='none';
+  }
+
+  const container=document.getElementById('optionsContainer');
+  container.innerHTML='';
+  ['A','B','C'].forEach((letter,i)=>{
+    const div=document.createElement('div');
+    div.className='option'; div.id=`opt-${i}`;
+    div.innerHTML=`<div class="option-letter">${letter}</div><div>${q.options[i].substring(3)}</div>`;
+    div.addEventListener('click',()=>selectOption(i));
+    container.appendChild(div);
+  });
+
+  const fb=document.getElementById('feedbackBox');
+  fb.innerHTML=''; fb.className='hidden';
+
+  const nb=document.getElementById('nextBtn');
+  nb.disabled=true;
+  nb.textContent=current<questions.length-1?'Siguiente pregunta →':'Ver resultados 🏆';
+
+  const card=document.getElementById('quizScreen');
+  card.style.animation='none'; void card.offsetWidth; card.style.animation='fadeSlideUp 0.4s ease';
+}
+
+function selectOption(index){
+  if(answered) return;
+  answered=true;
+  const q=questions[current];
+  const opts=document.querySelectorAll('.option');
+  opts.forEach(o=>o.classList.add('disabled'));
+  const isCorrect=(index===q.correct);
+  if(isCorrect) score++;
+  opts[index].classList.add(isCorrect?'correct':'incorrect');
+  if(!isCorrect) opts[q.correct].classList.add('correct');
+  const fb=document.getElementById('feedbackBox');
+  fb.className=`feedback-box ${isCorrect?'correct-fb':'incorrect-fb'}`;
+  fb.innerHTML=`<div class="feedback-icon">${isCorrect?'✅':'❌'}</div><div>${isCorrect?q.feedback.correct:q.feedback.incorrect}</div>`;
+  document.getElementById('nextBtn').disabled=false;
+}
+
+function nextQuestion(){
+  if(!answered) return;
+  current++;
+  if(current<questions.length){ renderQuestion(); }
+  else { showResults(); }
+}
+
+function showResults(){
+  hide('quizScreen'); show('resultsScreen');
+  window.scrollTo({top:0,behavior:'smooth'});
+  const total=questions.length;
+  const pct=Math.round((score/total)*100);
+  const errors=total-score;
+  document.getElementById('resultsName').textContent=studentName;
+  document.getElementById('correctCount').textContent=score;
+  document.getElementById('incorrectCount').textContent=errors;
+  document.getElementById('scorePct').textContent=pct+'%';
+  let msg='';
+  if(pct===100) msg='🌟 ¡Perfecto! Dominas completamente los Artículos 3° y 4° Constitucionales. ¡Excelente trabajo!';
+  else if(pct>=80) msg='🎉 ¡Muy buen desempeño! Tienes un sólido conocimiento de los derechos constitucionales. Sigue repasando para alcanzar la excelencia.';
+  else if(pct>=60) msg='👍 Buen trabajo. Comprende los conceptos clave, pero te recomendamos repasar la Guía de Estudio para fortalecer los temas con errores.';
+  else if(pct>=40) msg='💪 Vas por buen camino. Revisa la Guía de Estudio con atención y vuelve a intentarlo. ¡Cada intento te acerca al dominio del tema!';
+  else msg='📖 No te desanimes. Utiliza la Guía de Estudio para profundizar en el contenido y vuelve a practicar. ¡La constancia es la clave del éxito!';
+  document.getElementById('motivationalMsg').textContent=`"${msg}"`;
+  setTimeout(()=>{
+    const circ=2*Math.PI*66;
+    document.getElementById('ringFill').style.strokeDashoffset=circ-(pct/100)*circ;
+  },300);
+}
+
+function restartQuiz(){
+  current=0; score=0; answered=false;
+  hide('resultsScreen'); show('startScreen');
+  document.getElementById('studentName').value=studentName;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>

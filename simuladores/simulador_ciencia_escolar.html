@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador – La Ciencia Escolar en Secundaria</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--vd:#1a5c2e;--vm:#2d7a47;--vc:#4caf72;--do:#c9921a;--dc:#f0b429;--am:#fff8e7;--bl:#fff;--gc:#f5f7f5;--gt:#3d4a3d;--sh:0 8px 32px rgba(26,92,46,.13);--r:20px;--rb:14px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:linear-gradient(135deg,#e8f5ec 0%,#fffde7 50%,#e8f5ec 100%);min-height:100vh;color:var(--gt)}
+.header{background:linear-gradient(135deg,var(--vd) 0%,var(--vm) 60%,var(--vc) 100%);padding:28px 20px 22px;text-align:center;box-shadow:0 4px 20px rgba(26,92,46,.25)}
+.header h1{font-family:'Poppins',sans-serif;font-size:clamp(1.15rem,3vw,1.7rem);font-weight:700;color:#fff;line-height:1.3}
+.header h2{font-size:clamp(.82rem,2vw,.98rem);font-weight:600;color:var(--dc);margin-top:4px}
+.header p{font-size:.78rem;color:rgba(255,255,255,.72);margin-top:3px;font-style:italic}
+.nav-tabs{display:flex;justify-content:center;gap:8px;padding:14px 16px 0;flex-wrap:wrap}
+.nav-tab{background:rgba(255,255,255,.7);border:2px solid var(--vc);border-radius:30px;padding:8px 22px;font-size:.84rem;font-weight:700;cursor:pointer;color:var(--vd);transition:all .2s;font-family:'Nunito',sans-serif}
+.nav-tab:hover,.nav-tab.active{background:var(--vm);color:#fff;border-color:var(--vm);box-shadow:0 3px 12px rgba(45,122,71,.3)}
+.main{max-width:820px;margin:0 auto;padding:20px 16px 40px}
+.sec{display:none;animation:fiu .4s ease}
+.sec.active{display:block}
+@keyframes fiu{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.card{background:var(--bl);border-radius:var(--r);box-shadow:var(--sh);padding:36px 28px}
+.card-green{border-top:6px solid var(--vm)}
+.card-gold{border-top:6px solid var(--do)}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--vd),var(--vc));color:#fff;border-radius:30px;padding:6px 20px;font-size:.76rem;font-weight:700;letter-spacing:1px;margin-bottom:18px;text-transform:uppercase}
+.card h3{font-family:'Poppins',sans-serif;font-size:1.45rem;color:var(--vd);margin-bottom:10px}
+.card > p{color:#666;font-size:.93rem;line-height:1.6;margin-bottom:18px}
+.stats-row{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin:20px 0 28px}
+.stat-chip{background:var(--gc);border-radius:12px;padding:10px 18px;text-align:center;min-width:100px}
+.stat-chip .n{font-size:1.5rem;font-weight:900;color:var(--vd)}
+.stat-chip .l{font-size:.7rem;color:#888;font-weight:700;text-transform:uppercase}
+.fg{text-align:left;margin-bottom:20px}
+.fg label{display:block;font-weight:700;color:var(--vd);margin-bottom:8px;font-size:.9rem}
+.fg input{width:100%;padding:14px 18px;border:2px solid #d0e8d6;border-radius:var(--rb);font-size:1rem;font-family:'Nunito',sans-serif;outline:none;transition:border .2s;background:var(--gc)}
+.fg input:focus{border-color:var(--vm);background:#fff}
+.fg input.err{border-color:#e53935}
+.bp{background:linear-gradient(135deg,var(--vd) 0%,var(--vc) 100%);color:#fff;border:none;border-radius:var(--rb);padding:16px 36px;font-size:1rem;font-weight:800;cursor:pointer;transition:all .25s;box-shadow:0 4px 18px rgba(45,122,71,.35);display:inline-flex;align-items:center;gap:8px;font-family:'Nunito',sans-serif}
+.bp:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(45,122,71,.45)}
+.bs{background:linear-gradient(135deg,var(--do) 0%,var(--dc) 100%);color:#fff;border:none;border-radius:var(--rb);padding:14px 28px;font-size:.93rem;font-weight:800;cursor:pointer;transition:all .25s;box-shadow:0 4px 14px rgba(201,146,26,.35);display:inline-flex;align-items:center;gap:8px;font-family:'Nunito',sans-serif}
+.bs:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(201,146,26,.45)}
+.prog-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:.82rem;font-weight:700;color:var(--vd)}
+.sc-row{display:flex;gap:10px}
+.sc{background:#fff;border-radius:20px;padding:4px 14px;font-size:.77rem;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.sc.ok{color:var(--vm);border:1.5px solid var(--vc)}
+.sc.ko{color:#e53935;border:1.5px solid #ffcdd2}
+.prog-bg{background:#d0e8d6;border-radius:30px;height:10px;overflow:hidden;margin-bottom:16px}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--vd),var(--vc));border-radius:30px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.qcard{background:var(--bl);border-radius:var(--r);box-shadow:var(--sh);padding:26px 24px;border-top:5px solid var(--vm);animation:fiu .3s ease}
+.qh{display:flex;align-items:flex-start;gap:14px;margin-bottom:18px}
+.qnum{background:linear-gradient(135deg,var(--vd),var(--vc));color:#fff;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:900;flex-shrink:0}
+.qfmt{display:inline-block;background:var(--am);color:var(--do);border-radius:20px;padding:3px 12px;font-size:.7rem;font-weight:700;border:1px solid var(--dc);margin-bottom:6px}
+.qtxt{font-size:clamp(.88rem,2.2vw,1rem);font-weight:700;color:var(--gt);line-height:1.55}
+.qtbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:.86rem;border-radius:10px;overflow:hidden}
+.qtbl th{background:var(--vd);color:#fff;padding:10px 12px;text-align:left}
+.qtbl td{padding:8px 12px;border-bottom:1px solid #e0ede3;vertical-align:top}
+.qtbl tr:nth-child(even) td{background:#f2faf4}
+.opts{list-style:none;display:flex;flex-direction:column;gap:10px;margin-top:18px}
+.opt{background:var(--gc);border:2px solid #d0e8d6;border-radius:var(--rb);padding:13px 16px;cursor:pointer;transition:all .2s;display:flex;align-items:flex-start;gap:12px;font-size:clamp(.84rem,2vw,.94rem);line-height:1.5;font-weight:600}
+.opt:hover:not(.dis){border-color:var(--vm);background:#e8f5ec;transform:translateX(4px)}
+.opt.ok{border-color:#2e7d32;background:#e8f5e9;color:#1b5e20}
+.opt.ko{border-color:#c62828;background:#ffebee;color:#b71c1c}
+.opt.dis{cursor:default}
+.ol{background:var(--vd);color:#fff;border-radius:8px;min-width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.84rem;flex-shrink:0}
+.opt.ok .ol{background:#2e7d32}
+.opt.ko .ol{background:#c62828}
+.fb{margin-top:14px;border-radius:14px;padding:13px 16px;font-size:.88rem;font-weight:700;display:flex;gap:10px;align-items:flex-start;animation:fiu .3s ease;line-height:1.5}
+.fb.ok{background:#e8f5e9;border:1.5px solid #a5d6a7;color:#1b5e20}
+.fb.ko{background:#ffebee;border:1.5px solid #ef9a9a;color:#b71c1c}
+.fb-ic{font-size:1.35rem;flex-shrink:0}
+.btn-row{display:flex;justify-content:flex-end;margin-top:18px;gap:10px;flex-wrap:wrap}
+.res-emoji{font-size:3.5rem;margin-bottom:10px}
+.res-nom{font-size:.98rem;color:#888;margin-bottom:4px;font-weight:600}
+.res-tit{font-family:'Poppins',sans-serif;font-size:clamp(1.2rem,3vw,1.7rem);font-weight:700;color:var(--vd);margin-bottom:6px}
+.res-pct{font-size:3.5rem;font-weight:900;font-family:'Poppins',sans-serif;margin:10px 0}
+.res-stats{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin:20px 0}
+.rs{background:var(--gc);border-radius:14px;padding:16px 24px;min-width:110px;text-align:center}
+.rs .n{font-size:2rem;font-weight:900}
+.rs .l{font-size:.73rem;font-weight:700;text-transform:uppercase;color:#888}
+.n.ok{color:var(--vm)}
+.n.ko{color:#e53935}
+.n.pct{color:var(--do)}
+.mot{background:linear-gradient(135deg,var(--am),#fff);border:2px solid var(--dc);border-radius:14px;padding:16px 20px;margin:18px 0;font-size:.93rem;font-weight:700;color:var(--do);font-style:italic}
+.guia-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:18px}
+.guia-card p{color:#777;font-size:.88rem;margin-bottom:20px}
+.pdfframe{width:100%;height:570px;border:none;border-radius:14px;box-shadow:0 2px 20px rgba(0,0,0,.12)}
+@media(max-width:520px){.card,.qcard{padding:18px 13px}.qtbl{font-size:.76rem}.qtbl th,.qtbl td{padding:6px 8px}.pdfframe{height:400px}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div style="font-size:2.3rem;margin-bottom:6px">🔬</div>
+  <h1>Simulador Interactivo de Evaluación</h1>
+  <h2>La Ciencia Escolar en Secundaria &mdash; Fase 6</h2>
+  <p>Prof. Francisco De Jesus Luna Benitez</p>
+</header>
+
+<div class="nav-tabs" id="navTabs">
+  <button class="nav-tab active" id="tab-inicio">&#127968; Inicio</button>
+  <button class="nav-tab" id="tab-simulador" style="display:none">&#128221; Simulador</button>
+  <button class="nav-tab" id="tab-resultados" style="display:none">&#127942; Resultados</button>
+  <button class="nav-tab" id="tab-guia">&#128218; Gu&iacute;a de Estudio</button>
+</div>
+
+<div class="main">
+
+  <!-- INICIO -->
+  <div id="sec-inicio" class="sec active">
+    <div class="card card-green" style="text-align:center">
+      <div class="badge">&#127979; Fundamentos Pedag&oacute;gicos y Habilidades Cient&iacute;ficas</div>
+      <h3>&#161;Pon a prueba tus conocimientos!</h3>
+      <p>Este simulador eval&uacute;a los contenidos de la Gu&iacute;a de Estudio <em>La Ciencia Escolar en Secundaria</em>, abarcando los Cuatro Pilares del Pensamiento Cient&iacute;fico y sus aplicaciones did&aacute;cticas.</p>
+      <div class="stats-row">
+        <div class="stat-chip"><div class="n">30</div><div class="l">Preguntas</div></div>
+        <div class="stat-chip"><div class="n">4</div><div class="l">Formatos</div></div>
+        <div class="stat-chip"><div class="n">4</div><div class="l">Pilares</div></div>
+      </div>
+      <div class="fg">
+        <label for="ninput">&#128100; Tu nombre completo</label>
+        <input type="text" id="ninput" placeholder="Escribe tu nombre aqu&iacute;..." />
+      </div>
+      <button class="bp" id="btnIniciar">&#128640; Iniciar Simulador</button>
+    </div>
+  </div>
+
+  <!-- SIMULADOR -->
+  <div id="sec-simulador" class="sec">
+    <div class="prog-info">
+      <span id="progLabel">Pregunta 1 de 30</span>
+      <div class="sc-row">
+        <span class="sc ok" id="scOk">&#9989; 0</span>
+        <span class="sc ko" id="scKo">&#10060; 0</span>
+      </div>
+    </div>
+    <div class="prog-bg"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div id="qArea"></div>
+  </div>
+
+  <!-- RESULTADOS -->
+  <div id="sec-resultados" class="sec">
+    <div class="card card-gold" style="text-align:center">
+      <div class="res-emoji" id="resEmoji">&#127881;</div>
+      <div class="res-nom" id="resNom"></div>
+      <div class="res-tit">Evaluaci&oacute;n Completada</div>
+      <div class="res-pct" id="resPct"></div>
+      <div class="res-stats">
+        <div class="rs"><div class="n ok" id="resAc"></div><div class="l">Aciertos</div></div>
+        <div class="rs"><div class="n ko" id="resEr"></div><div class="l">Errores</div></div>
+        <div class="rs"><div class="n pct" id="resPct2"></div><div class="l">Desempe&ntilde;o</div></div>
+      </div>
+      <div class="mot" id="resMot"></div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <button class="bp" id="btnReiniciar">&#128260; Intentar de nuevo</button>
+        <button class="bs" id="btnVerGuia" style="margin-top:6px">&#128218; Ver Gu&iacute;a de Estudio</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GUIA -->
+  <div id="sec-guia" class="sec">
+    <div class="card card-gold">
+      <h3 style="font-family:'Poppins',sans-serif;color:var(--vd);margin-bottom:8px">&#128218; Gu&iacute;a de Estudio &mdash; La Ciencia Escolar en Secundaria</h3>
+      <p class="guia-card">Fundamentos Pedag&oacute;gicos y Habilidades Cient&iacute;ficas (Fase 6)<br><em>Elaborada por Prof. Francisco De Jesus Luna Benitez</em></p>
+      <div class="guia-btns">
+        <button class="bp" id="btnAbrirPdf">&#128279; Abrir en nueva pesta&ntilde;a</button>
+        <button class="bs" id="btnTogglePdf">&#128065;&#65039; Mostrar / Ocultar visor</button>
+      </div>
+      <div id="visorPdf" style="display:none">
+        <iframe class="pdfframe" id="pdfFrame" src="" allow="autoplay" title="Guia de Estudio PDF"></iframe>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+
+// ── PREGUNTAS ────────────────────────────────────────
+var Q = [
+{n:1,f:"Cuestionamiento directo",
+ b:"\xbfCu\xe1l es el punto de partida correcto para la ense\xf1anza de la ciencia escolar exitosa seg\xfan la perspectiva pedag\xf3gica moderna?",
+ t:null,
+ o:["El listado de temas del programa oficial de estudios del ciclo escolar.",
+    "La vida personal y social del estudiante adolescente, involucr\xe1ndolo en asuntos vitales de su entorno.",
+    "La revisi\xf3n sistem\xe1tica del libro de texto para responder las preguntas al final de cada cap\xedtulo."],
+ c:1,
+ ok:"Correcto. La ciencia escolar exitosa abandona la l\xf3gica puramente disciplinar y toma como punto de partida la vida adolescente, resolviendo problemas que afectan la vida personal y social del estudiante.",
+ ko:"Respuesta correcta: B. La ciencia escolar exitosa tiene como punto de partida la vida adolescente, no el listado de temas ni el libro de texto. Como se\xf1ala Juan Ignacio Pozo: aprender ciencias es reconstruir ideas personales por medio del di\xe1logo."},
+
+{n:2,f:"Completamiento",
+ b:"En la ciencia escolar, \u201caprender ciencias es reconstruir las ideas personales por medio del di\xe1logo con otras personas y otros conocimientos.\u201d Esta afirmaci\xf3n corresponde al pensamiento de\u2026",
+ t:null,
+ o:["\u2026Juan Ignacio Pozo, quien subraya que el aprendizaje cient\xedfico es fundamentalmente un proceso dial\xf3gico y social.",
+    "\u2026Lidya Galagovsky, quien establece que toda hip\xf3tesis debe surgir de preguntas impuestas por el docente.",
+    "\u2026el libro de texto, cuyas actividades orientan al estudiante a resolver ejercicios de ciencias de forma individual."],
+ c:0,
+ ok:"Excelente. La cita corresponde a Juan Ignacio Pozo y resume el enfoque dial\xf3gico y social del aprendizaje cient\xedfico escolar.",
+ ko:"Respuesta correcta: A. La afirmaci\xf3n es de Juan Ignacio Pozo y destaca que aprender ciencias implica un proceso dial\xf3gico y social, no individual ni impuesto."},
+
+{n:3,f:"Relaci\xf3n de elementos",
+ b:"Seleccione la opci\xf3n que relaciona correctamente cada pilar del pensamiento cient\xedfico escolar con su descripci\xf3n.",
+ t:{c1:"Pilar",c2:"Descripci\xf3n",
+    rows:[["1. Indagaci\xf3n","a) Intervenir en el entorno para convertir observaciones en evidencias."],
+          ["2. Hip\xf3tesis","b) Utilizar informaci\xf3n validada como base responsable para la acci\xf3n."],
+          ["3. Experimentaci\xf3n","c) Reflejar la naturaleza de la ciencia en la b\xfasqueda de respuestas."],
+          ["4. Toma de Decisiones","d) Transformar la curiosidad y buenas preguntas en posibles soluciones."]]},
+ o:["1b, 2d, 3a, 4c","1c, 2a, 3d, 4b","1c, 2d, 3a, 4b"],
+ c:2,
+ ok:"Perfecto. Indagaci\xf3n: buscar respuestas (c); Hip\xf3tesis: transformar preguntas en soluciones (d); Experimentaci\xf3n: convertir observaciones en evidencias (a); Toma de Decisiones: base responsable para la acci\xf3n (b).",
+ ko:"Respuesta correcta: C (1c, 2d, 3a, 4b). Indagaci\xf3n=reflejar naturaleza de la ciencia; Hip\xf3tesis=transformar preguntas en soluciones; Experimentaci\xf3n=convertir observaciones en evidencias; Toma de Decisiones=informaci\xf3n validada para actuar."},
+
+{n:4,f:"Ordenamiento",
+ b:"Ordene los pasos del \u201cAlgoritmo de la Acci\xf3n\u201d del Pilar 4 (Toma de Decisiones Informadas), del primero al \xfaltimo.\n\n1. Visualizar opciones y sus impactos \xe9ticos/sociales.\n2. Establecer objetivos: \xbfqu\xe9 queremos resolver o mejorar?\n3. Evaluar, decidir y actuar llevando a la pr\xe1ctica la mejor opci\xf3n.\n4. Obtener informaci\xf3n basada en evidencia emp\xedrica o documental.",
+ t:null,
+ o:["2, 4, 1, 3","1, 2, 4, 3","4, 1, 2, 3"],
+ c:0,
+ ok:"Correcto. El Algoritmo de la Acci\xf3n sigue: Establecer objetivos \u2192 Obtener informaci\xf3n \u2192 Visualizar opciones \u2192 Evaluar, decidir y actuar.",
+ ko:"Respuesta correcta: A (2, 4, 1, 3). Primero se establecen los objetivos, luego se obtiene informaci\xf3n, despu\xe9s se visualizan opciones, y finalmente se eval\xfaa, decide y act\xfaa."},
+
+{n:5,f:"Cuestionamiento directo",
+ b:"\xbfCu\xe1l de las siguientes afirmaciones describe correctamente la caracter\xedstica principal de la indagaci\xf3n en el aula de ciencias?",
+ t:null,
+ o:["Es un m\xe9todo cient\xedfico r\xedgido y ordenado que los estudiantes deben seguir paso a paso.",
+    "Es un proceso lineal que inicia con la formulaci\xf3n de hip\xf3tesis y concluye con la obtenci\xf3n de resultados.",
+    "Es un proceso amplio y complejo donde convergen el planteamiento de preguntas, la formulaci\xf3n de hip\xf3tesis, la interpretaci\xf3n de datos emp\xedricos y la creaci\xf3n de modelos y argumentos."],
+ c:2,
+ ok:"Muy bien. La indagaci\xf3n no sigue un m\xe9todo r\xedgido ni lineal; es un proceso amplio y complejo que integra m\xfaltiples habilidades cient\xedficas de forma simult\xe1nea.",
+ ko:"Respuesta correcta: C. La indagaci\xf3n no sigue un m\xe9todo r\xedgido ni lineal. Es un proceso amplio donde convergen preguntas, hip\xf3tesis, interpretaci\xf3n de datos emp\xedricos y creaci\xf3n de argumentos."},
+
+{n:6,f:"Completamiento",
+ b:"En la Matriz de Progresi\xf3n de los 4 Tipos de Indagaci\xf3n, la indagaci\xf3n estructurada se caracteriza porque\u2026",
+ t:null,
+ o:["\u2026el docente provee el principio, el problema y el procedimiento paso a paso, mientras el alumno verifica los resultados esperados.",
+    "\u2026el docente propone la pregunta y el proceso completo, mientras el alumno ejecuta el procedimiento para encontrar la respuesta.",
+    "\u2026el docente plantea \xfanicamente el problema inicial y el alumno dise\xf1a y desarrolla los procedimientos para resolverlo."],
+ c:1,
+ ok:"Correcto. En la indagaci\xf3n estructurada, el docente propone tanto la pregunta como el proceso completo; el alumno ejecuta para encontrar la respuesta.",
+ ko:"Respuesta correcta: B. En la indagaci\xf3n estructurada el docente propone la pregunta Y el proceso completo; el alumno solo ejecuta. No confundir con Para Confirmar (A) ni con Guiada (C)."},
+
+{n:7,f:"Cuestionamiento directo",
+ b:"\xbfCu\xe1l de los siguientes enunciados constituye una hip\xf3tesis escolar v\xe1lida y comprobable?",
+ t:null,
+ o:["Si aumenta la concentraci\xf3n de CO\u2082 en los oc\xe9anos, habr\xe1 disoluci\xf3n de arrecifes de coral.",
+    "\xbfC\xf3mo evolucionan los anfibios?",
+    "\xa1Creo que desconoces el funcionamiento de un gato hidr\xe1ulico!"],
+ c:0,
+ ok:"Excelente. Esta afirmaci\xf3n causal relaciona variables comprobables (CO\u2082 y carbonato de calcio), por lo tanto es una hip\xf3tesis v\xe1lida que puede ponerse a prueba.",
+ ko:"Respuesta correcta: A. Si aumenta el CO\u2082\u2026 relaciona variables comprobables. La opci\xf3n B es una pregunta abierta y la C es un juicio de valor, ninguna es hip\xf3tesis v\xe1lida."},
+
+{n:8,f:"Relaci\xf3n de elementos",
+ b:"Seleccione la opci\xf3n que relaciona correctamente cada tipo de indagaci\xf3n con el rol que desempe\xf1a el ALUMNO.",
+ t:{c1:"Tipo de Indagaci\xf3n",c2:"Rol del Alumno",
+    rows:[["1. Para Confirmar","a) Desarrolla sus propias preguntas y dise\xf1a sus formas de proceder."],
+          ["2. Guiada","b) Ejecuta el procedimiento para encontrar la respuesta."],
+          ["3. Estructurada","c) Verifica los resultados esperados siguiendo instrucciones."],
+          ["4. Abierta (Independiente)","d) Dise\xf1a y desarrolla los procedimientos para resolver el problema."]]},
+ o:["1b, 2d, 3a, 4c","1c, 2b, 3d, 4a","1c, 2d, 3b, 4a"],
+ c:2,
+ ok:"Perfecto. Para Confirmar: verifica (c); Guiada: dise\xf1a procedimientos (d); Estructurada: ejecuta (b); Abierta: desarrolla sus propias preguntas y m\xe9todos (a).",
+ ko:"Respuesta correcta: C (1c, 2d, 3b, 4a). En Para Confirmar el alumno verifica; en Guiada dise\xf1a los procedimientos; en Estructurada ejecuta; en Abierta desarrolla sus propias preguntas y m\xe9todos."},
+
+{n:9,f:"Ordenamiento",
+ b:"Ordene los cuatro componentes que convergen en el proceso de indagaci\xf3n cient\xedfica escolar, comenzando por el que da inicio al proceso.\n\n1. Interpretaci\xf3n de datos emp\xedricos.\n2. Formulaci\xf3n de hip\xf3tesis.\n3. Creaci\xf3n de modelos y argumentos.\n4. Planteamiento de preguntas.",
+ t:null,
+ o:["2, 4, 1, 3","4, 2, 1, 3","1, 4, 2, 3"],
+ c:1,
+ ok:"Correcto. El proceso de indagaci\xf3n inicia con el planteamiento de preguntas, luego la hip\xf3tesis, despu\xe9s la interpretaci\xf3n de datos emp\xedricos y finaliza con la creaci\xf3n de modelos y argumentos.",
+ ko:"Respuesta correcta: B (4, 2, 1, 3). Primero se plantean preguntas, luego se formulan hip\xf3tesis, despu\xe9s se interpretan los datos emp\xedricos y finalmente se crean modelos y argumentos."},
+
+{n:10,f:"Cuestionamiento directo",
+ b:"\xbfQu\xe9 elemento distingue a la experimentaci\xf3n escolar (Pilar 3) de la simple realizaci\xf3n de manualidades?",
+ t:null,
+ o:["La experimentaci\xf3n implica intervenir en el mundo f\xedsico con un objetivo definido para obtener respuestas a preguntas relevantes.",
+    "La experimentaci\xf3n consiste en seguir instrucciones del docente para producir un producto tangible y observable.",
+    "La experimentaci\xf3n se limita a la verificaci\xf3n de resultados ya conocidos por el libro de texto."],
+ c:0,
+ ok:"Muy bien. La experimentaci\xf3n escolar no es hacer manualidades: es intervenir en el mundo f\xedsico con un objetivo definido para obtener respuestas a preguntas relevantes.",
+ ko:"Respuesta correcta: A. Su esencia es intervenir intencionalmente en el mundo f\xedsico para responder preguntas relevantes, no seguir instrucciones ni verificar resultados del libro."},
+
+{n:11,f:"Completamiento",
+ b:"La V de Gowin divide el proceso cient\xedfico en dominio conceptual (Pensar) y dominio metodol\xf3gico (Hacer). En el caso del jocoque, el dominio metodol\xf3gico incluye\u2026",
+ t:null,
+ o:["\u2026los conceptos clave como cambio f\xedsico vs. qu\xedmico, fermentaci\xf3n l\xe1ctica y desnaturalizaci\xf3n de prote\xednas.",
+    "\u2026la teor\xeda de que las reacciones qu\xedmicas producen sustancias con propiedades diferentes.",
+    "\u2026el procedimiento (250 mL de leche + jugo de lim\xf3n + jocoque), los datos y variables, y las conclusiones obtenidas."],
+ c:2,
+ ok:"Excelente. El dominio metodol\xf3gico (Hacer) comprende el procedimiento experimental, los datos y variables registrados y las conclusiones derivadas.",
+ ko:"Respuesta correcta: C. El dominio metodol\xf3gico incluye procedimiento, datos/variables y conclusiones. Los conceptos clave y la teor\xeda pertenecen al dominio conceptual (Pensar)."},
+
+{n:12,f:"Cuestionamiento directo",
+ b:"\xbfCu\xe1l es el objetivo final del Pilar 1 (La Indagaci\xf3n) seg\xfan la gu\xeda pedag\xf3gica de la Ciencia Escolar en Secundaria?",
+ t:null,
+ o:["Memorizar el m\xe9todo cient\xedfico para aplicarlo de forma mec\xe1nica en experimentos de laboratorio.",
+    "Entender c\xf3mo se genera el conocimiento cient\xedfico y desarrollar flexibilidad de pensamiento, tolerancia al fracaso y curiosidad.",
+    "Completar las actividades del libro de texto siguiendo los pasos indicados por el docente."],
+ c:1,
+ ok:"Correcto. El objetivo final de la indagaci\xf3n es entender c\xf3mo se genera el conocimiento cient\xedfico y desarrollar flexibilidad de pensamiento, tolerancia al fracaso y curiosidad genuina.",
+ ko:"Respuesta correcta: B. El objetivo final no es memorizar un m\xe9todo mec\xe1nico ni completar actividades. Busca que los estudiantes comprendan la generaci\xf3n del conocimiento cient\xedfico y desarrollen flexibilidad, tolerancia al fracaso y curiosidad."},
+
+{n:13,f:"Relaci\xf3n de elementos",
+ b:"Seleccione la opci\xf3n que relaciona correctamente cada componente de la experimentaci\xf3n escolar (Pilar 3) con su descripci\xf3n.",
+ t:{c1:"Componente",c2:"Descripci\xf3n",
+    rows:[["1. Transformaci\xf3n","a) Convertir simples observaciones en evidencias s\xf3lidas."],
+          ["2. An\xe1lisis Cr\xedtico","b) Regular y autorregular el propio aprendizaje evaluando resultados contra la hip\xf3tesis."],
+          ["3. Lenguaje","c) Identificar datos an\xf3malos o fallas en el procedimiento."],
+          ["4. Autonom\xeda","d) Incorporar progresivamente la terminolog\xeda cient\xedfica para describir el fen\xf3meno."]]},
+ o:["1a, 2c, 3d, 4b","1c, 2a, 3b, 4d","1d, 2b, 3a, 4c"],
+ c:0,
+ ok:"Perfecto. Transformaci\xf3n: convertir observaciones en evidencias (a); An\xe1lisis Cr\xedtico: identificar anomal\xedas (c); Lenguaje: terminolog\xeda cient\xedfica (d); Autonom\xeda: autorregular el aprendizaje (b).",
+ ko:"Respuesta correcta: A (1a, 2c, 3d, 4b). Transformaci\xf3n=observaciones en evidencias; An\xe1lisis Cr\xedtico=identificar datos an\xf3malos; Lenguaje=terminolog\xeda cient\xedfica; Autonom\xeda=autorregular el aprendizaje."},
+
+{n:14,f:"Ordenamiento",
+ b:"Un grupo detecta contaminaci\xf3n en el r\xedo de su comunidad y aplica el Pilar 4. Ordene los pasos correctamente.\n\n1. Implementar la propuesta que mejor atienda los intereses individuales y colectivos.\n2. Identificar las opciones de soluci\xf3n y sus posibles impactos \xe9ticos y sociales.\n3. Recopilar datos basados en evidencia emp\xedrica y documental sobre el problema.\n4. Definir el objetivo: reducir la contaminaci\xf3n del r\xedo.",
+ t:null,
+ o:["3, 4, 2, 1","2, 3, 1, 4","4, 3, 2, 1"],
+ c:2,
+ ok:"Correcto. Primero se definen objetivos (4), luego se obtiene informaci\xf3n (3), despu\xe9s se visualizan opciones (2) y finalmente se eval\xfaa, decide y act\xfaa (1).",
+ ko:"Respuesta correcta: C (4, 3, 2, 1). El Algoritmo de la Acci\xf3n establece: Establecer objetivos \u2192 Obtener informaci\xf3n \u2192 Visualizar opciones \u2192 Evaluar, decidir y actuar."},
+
+{n:15,f:"Completamiento",
+ b:"Seg\xfan Lidya Galagovsky, las buenas preguntas que generan hip\xf3tesis en ciencias escolares\u2026",
+ t:null,
+ o:["\u2026deben ser proporcionadas por el docente o extra\xeddas directamente del libro de texto para garantizar su rigor cient\xedfico.",
+    "\u2026deben surgir del contexto (medios, observaciones, lectura cr\xedtica), demandar argumentaci\xf3n y no ser impuestas por el docente ni por el libro.",
+    "\u2026deben ser preguntas abiertas que no afirmen ninguna soluci\xf3n posible, sino que inviten a la reflexi\xf3n filos\xf3fica."],
+ c:1,
+ ok:"Muy bien. Galagovsky se\xf1ala que las preguntas surgen del contexto real, demandan argumentaci\xf3n sobre c\xf3mo se pondr\xe1n a prueba y no deben ser impuestas externamente.",
+ ko:"Respuesta correcta: B. Galagovsky establece tres caracter\xedsticas: surgen del contexto, demandan argumentaci\xf3n y no son impuestas por el docente ni el libro de texto."},
+
+{n:16,f:"Cuestionamiento directo",
+ b:"Una maestra presenta a sus alumnos la problem\xe1tica de la calidad del agua en su comunidad y les pide que dise\xf1en su propio procedimiento de investigaci\xf3n para resolverla. \xbfQu\xe9 tipo de indagaci\xf3n est\xe1 promoviendo?",
+ t:null,
+ o:["Indagaci\xf3n guiada, porque el docente plantea el problema inicial y el alumno dise\xf1a y desarrolla los procedimientos para resolverlo.",
+    "Indagaci\xf3n abierta, porque el docente facilita el entorno y el alumno desarrolla sus propias preguntas y formas de proceder.",
+    "Indagaci\xf3n estructurada, porque el docente propone la pregunta y el alumno ejecuta el proceso completo."],
+ c:0,
+ ok:"Correcto. En la indagaci\xf3n guiada el docente plantea el problema inicial y son los alumnos quienes dise\xf1an y desarrollan los procedimientos para resolverlo.",
+ ko:"Respuesta correcta: A. Se trata de indagaci\xf3n guiada: el docente solo pone el problema y los alumnos dise\xf1an sus propios procedimientos. En la abierta, adem\xe1s, los alumnos formulan sus propias preguntas."},
+
+{n:17,f:"Relaci\xf3n de elementos",
+ b:"Seleccione la opci\xf3n que relaciona correctamente cada elemento del dominio metodol\xf3gico (Hacer) de la V de Gowin con su definici\xf3n en el caso del jocoque.",
+ t:{c1:"Elemento",c2:"Definici\xf3n",
+    rows:[["1. Procedimiento","a) Cantidad de lim\xf3n, cantidad de jocoque, tiempo de fermentaci\xf3n."],
+          ["2. Datos y Variables","b) 250 mL de leche + jugo de lim\xf3n + cucharada de jocoque durante 30 min."],
+          ["3. Conclusiones","c) La pregunta central que orienta toda la investigaci\xf3n."],
+          ["4. Pregunta Central","d) El lim\xf3n desnaturaliza la case\xedna; los lactobacilos logran la fermentaci\xf3n l\xe1ctica."]]},
+ o:["1b, 2a, 3c, 4d","1b, 2a, 3d, 4c","1a, 2b, 3d, 4c"],
+ c:1,
+ ok:"Excelente. Procedimiento=los pasos (b); Datos y Variables=los factores medibles (a); Conclusiones=lo que se concluye (d); Pregunta Central=la que orienta todo (c).",
+ ko:"Respuesta correcta: B (1b, 2a, 3d, 4c). El procedimiento describe los pasos; los datos y variables son los factores medibles; las conclusiones explican los resultados; la pregunta central orienta la investigaci\xf3n."},
+
+{n:18,f:"Completamiento",
+ b:"Las habilidades cient\xedficas, seg\xfan los Cuatro Pilares del Pensamiento Cient\xedfico Escolar, no son acciones aisladas, sino\u2026",
+ t:null,
+ o:["\u2026tareas individuales que cada alumno realiza de forma independiente siguiendo el m\xe9todo cient\xedfico tradicional.",
+    "\u2026actividades de laboratorio que refuerzan los contenidos del programa de estudios.",
+    "\u2026procesos de largo aliento que demandan un trabajo sostenido y dial\xf3gico entre todos los participantes."],
+ c:2,
+ ok:"Muy bien. Los Cuatro Pilares enfatizan que las habilidades cient\xedficas son procesos de largo aliento, sostenidos y dial\xf3gicos, no acciones aisladas ni individuales.",
+ ko:"Respuesta correcta: C. Las habilidades cient\xedficas son procesos de largo aliento que demandan trabajo sostenido y dial\xf3gico, tal como lo establece la gu\xeda de los Cuatro Pilares."},
+
+{n:19,f:"Cuestionamiento directo",
+ b:"\xbfCu\xe1l de los siguientes enunciados NO constituye una hip\xf3tesis escolar v\xe1lida?",
+ t:null,
+ o:["El sonido requiere un medio f\xedsico para su transmisi\xf3n.",
+    "\xbfC\xf3mo evolucionan los anfibios?",
+    "Si aumenta la concentraci\xf3n de CO\u2082 en los oc\xe9anos, habr\xe1 disoluci\xf3n de arrecifes."],
+ c:1,
+ ok:"Correcto. '\xbfC\xf3mo evolucionan los anfibios?' es una pregunta abierta que no afirma una posible soluci\xf3n, por tanto no es una hip\xf3tesis v\xe1lida.",
+ ko:"Respuesta correcta: B. '\xbfC\xf3mo evolucionan los anfibios?' es una pregunta abierta, no una hip\xf3tesis. Las opciones A y C s\xed son hip\xf3tesis v\xe1lidas porque afirman relaciones causales comprobables."},
+
+{n:20,f:"Ordenamiento",
+ b:"Ordene los cuatro pilares del pensamiento cient\xedfico escolar seg\xfan su secuencia l\xf3gica en el proceso de investigaci\xf3n, del inicial al final.\n\n1. Toma de Decisiones Informadas.\n2. Hip\xf3tesis.\n3. Indagaci\xf3n.\n4. Experimentaci\xf3n.",
+ t:null,
+ o:["3, 2, 4, 1","2, 3, 1, 4","1, 3, 4, 2"],
+ c:0,
+ ok:"Perfecto. El proceso inicia con la Indagaci\xf3n, contin\xfaa con la Hip\xf3tesis, avanza hacia la Experimentaci\xf3n y culmina con la Toma de Decisiones Informadas.",
+ ko:"Respuesta correcta: A (3, 2, 4, 1). La secuencia l\xf3gica es: Indagaci\xf3n (plantear preguntas) \u2192 Hip\xf3tesis (proponer soluciones) \u2192 Experimentaci\xf3n (obtener evidencias) \u2192 Toma de Decisiones (actuar responsablemente)."},
+
+{n:21,f:"Completamiento",
+ b:"La integraci\xf3n entre Ciencias Naturales y Matem\xe1ticas fortalece el an\xe1lisis integral de la realidad. En esta relaci\xf3n interdisciplinaria, las matem\xe1ticas contribuyen principalmente\u2026",
+ t:null,
+ o:["\u2026aportando el contexto \xe9tico y social para que los estudiantes tomen decisiones responsables sobre problemas actuales.",
+    "\u2026desarrollando la curiosidad y la tolerancia al fracaso necesarias para la indagaci\xf3n cient\xedfica.",
+    "\u2026proveyendo herramientas anal\xedticas como gr\xe1ficas y m\xe9tricas, y fortaleciendo el razonamiento l\xf3gico, inductivo, deductivo, anal\xf3gico y abductivo."],
+ c:2,
+ ok:"Excelente. Las matem\xe1ticas proveen las m\xe9tricas y herramientas anal\xedticas (gr\xe1ficas circulares, de barras), mientras que la ciencia aporta el contexto \xe9tico y social.",
+ ko:"Respuesta correcta: C. Las matem\xe1ticas contribuyen con herramientas anal\xedficas y fortalecen el razonamiento l\xf3gico en sus diferentes formas. El contexto \xe9tico/social lo aporta la ciencia."},
+
+{n:22,f:"Cuestionamiento directo",
+ b:"\xbfCu\xe1l es el fin principal de la Ciencia Escolar en Secundaria, seg\xfan la gu\xeda de Fase 6?",
+ t:null,
+ o:["Desarrollar el pensamiento cient\xedfico como fuente de valores, actitudes y colaboraci\xf3n que permita a los adolescentes cuestionar creencias y valorar los impactos sociales de la tecnolog\xeda, transformando la forma en que piensan, sienten e interact\xfaan en el mundo.",
+    "Preparar a los estudiantes para obtener calificaciones aprobatorias en las evaluaciones estandarizadas nacionales.",
+    "Transmitir el conocimiento cient\xedfico acumulado a trav\xe9s de los libros de texto de manera ordenada y sistem\xe1tica."],
+ c:0,
+ ok:"Excelente. El fin principal es desarrollar el pensamiento cient\xedfico como fuente de valores y colaboraci\xf3n, transformando la forma en que los adolescentes piensan, sienten, interact\xfaan y existen en el mundo.",
+ ko:"Respuesta correcta: A. El objetivo \xfaltimo es entender, descubrir y cambiar la forma en la que pensamos, sentimos, interactuamos y existimos en el mundo, no aprobar ex\xe1menes ni transmitir contenidos del libro."},
+
+{n:23,f:"Relaci\xf3n de elementos",
+ b:"Seleccione la opci\xf3n que relaciona correctamente cada tipo de indagaci\xf3n con el rol correspondiente del DOCENTE.",
+ t:{c1:"Tipo",c2:"Rol del Docente",
+    rows:[["1. Para Confirmar","a) Facilita y gu\xeda el entorno de aprendizaje."],
+          ["2. Estructurada","b) Propone la pregunta y el proceso completo de investigaci\xf3n."],
+          ["3. Guiada","c) Plantea \xfanicamente el problema inicial."],
+          ["4. Abierta","d) Provee el principio, el problema y el procedimiento paso a paso."]]},
+ o:["1d, 2c, 3b, 4a","1d, 2b, 3c, 4a","1b, 2d, 3a, 4c"],
+ c:1,
+ ok:"Correcto. Para Confirmar: docente provee principio + problema + procedimiento (d); Estructurada: propone pregunta y proceso completo (b); Guiada: solo plantea el problema (c); Abierta: facilita el entorno (a).",
+ ko:"Respuesta correcta: B (1d, 2b, 3c, 4a). El rol del docente se reduce progresivamente: en Para Confirmar lo dirige todo; en Estructurada propone pregunta y proceso; en Guiada solo el problema; en Abierta solo facilita el entorno."},
+
+{n:24,f:"Ordenamiento",
+ b:"Ordene los niveles de la Matriz de Progresi\xf3n de los Tipos de Indagaci\xf3n del que ofrece MENOR autonom\xeda al que ofrece MAYOR autonom\xeda.\n\n1. Guiada\n2. Abierta (Independiente)\n3. Estructurada\n4. Para Confirmar",
+ t:null,
+ o:["2, 1, 3, 4","3, 4, 1, 2","4, 3, 1, 2"],
+ c:2,
+ ok:"Muy bien. De menor a mayor autonom\xeda: Para Confirmar (solo verifica) \u2192 Estructurada (solo ejecuta) \u2192 Guiada (dise\xf1a procedimientos) \u2192 Abierta (desarrolla sus propias preguntas y m\xe9todos).",
+ ko:"Respuesta correcta: C (4, 3, 1, 2). El grado de autonom\xeda crece conforme los estudiantes ganan experiencia: Para Confirmar (m\xednima) \u2192 Estructurada \u2192 Guiada \u2192 Abierta (m\xe1xima)."},
+
+{n:25,f:"Completamiento",
+ b:"El dominio conceptual (Pensar) de la V de Gowin en el experimento del jocoque incluye como teor\xeda de base que\u2026",
+ t:null,
+ o:["\u2026las reacciones qu\xedmicas producen sustancias con propiedades diferentes, lo que implica la separaci\xf3n y uni\xf3n de \xe1tomos.",
+    "\u2026el procedimiento consiste en mezclar 250 mL de leche hervida con jugo de lim\xf3n y jocoque durante 30 minutos.",
+    "\u2026la conclusi\xf3n principal es que el lim\xf3n causa desnaturalizaci\xf3n de la case\xedna y los lactobacilos logran la fermentaci\xf3n l\xe1ctica."],
+ c:0,
+ ok:"Correcto. La teor\xeda del dominio conceptual establece que las reacciones qu\xedmicas producen sustancias nuevas con propiedades diferentes, basadas en la separaci\xf3n y uni\xf3n de \xe1tomos.",
+ ko:"Respuesta correcta: A. La teor\xeda (dominio conceptual) establece que las reacciones qu\xedmicas producen sustancias nuevas. El procedimiento y las conclusiones pertenecen al dominio metodol\xf3gico (Hacer)."},
+
+{n:26,f:"Cuestionamiento directo",
+ b:"Un grupo de estudiantes detecta que en su escuela se desperdicia agua. Investigan cu\xe1nta se pierde, eval\xfaan opciones y deciden implementar un sistema de reutilizaci\xf3n. \xbfQu\xe9 Pilar aplican en la fase de implementar la soluci\xf3n elegida?",
+ t:null,
+ o:["Pilar 2: Hip\xf3tesis, porque transforman su curiosidad en una posible soluci\xf3n al problema.",
+    "Pilar 3: Experimentaci\xf3n, porque intervienen en el entorno f\xedsico para convertir observaciones en evidencias.",
+    "Pilar 4: Toma de Decisiones Informadas, porque utilizan informaci\xf3n validada como base responsable para la acci\xf3n."],
+ c:2,
+ ok:"Excelente. Al utilizar la informaci\xf3n recopilada para decidir e implementar la mejor soluci\xf3n, los estudiantes aplican el Pilar 4: Toma de Decisiones Informadas.",
+ ko:"Respuesta correcta: C. Implementar la soluci\xf3n elegida con base en informaci\xf3n validada corresponde al Pilar 4: Toma de Decisiones Informadas, cuyo fin es utilizar la informaci\xf3n validada como base responsable para la acci\xf3n."},
+
+{n:27,f:"Relaci\xf3n de elementos",
+ b:"Seleccione la opci\xf3n que relaciona correctamente cada expresi\xf3n con su diagn\xf3stico respecto a si constituye o no una hip\xf3tesis escolar v\xe1lida.",
+ t:{c1:"Expresi\xf3n",c2:"Diagn\xf3stico",
+    rows:[["1. C\xf3mo evolucionan los anfibios (pregunta)","a) No es hip\xf3tesis: pregunta abierta sin soluci\xf3n afirmada."],
+          ["2. El sonido requiere un medio f\xedsico para transmitirse.","b) No es hip\xf3tesis: opini\xf3n/juicio de valor, no experimentable."],
+          ["3. Creo que desconoces el gato hidr\xe1ulico (juicio)","c) S\xed es hip\xf3tesis: relaciona variables comprobables."],
+          ["4. Si aumenta CO\u2082 en oc\xe9anos, habr\xe1 disoluci\xf3n de arrecifes.","d) S\xed es hip\xf3tesis: afirmaci\xf3n causal que puede probarse."]]},
+ o:["1a, 2d, 3b, 4c","1c, 2a, 3d, 4b","1b, 2c, 3a, 4d"],
+ c:0,
+ ok:"Perfecto. Pregunta sobre anfibios: no es hip\xf3tesis (a); Sonido requiere medio: s\xed es hip\xf3tesis (d); Opini\xf3n sobre gato hidr\xe1ulico: juicio de valor (b); CO\u2082 y arrecifes: hip\xf3tesis causal (c).",
+ ko:"Respuesta correcta: A (1a, 2d, 3b, 4c). La pregunta abierta sobre anfibios no es hip\xf3tesis; el enunciado del sonido s\xed lo es; la opini\xf3n es juicio de valor; el enunciado del CO\u2082 es hip\xf3tesis causal v\xe1lida."},
+
+{n:28,f:"Completamiento",
+ b:"Seg\xfan la gu\xeda pedag\xf3gica de Fase 6, el grado de apertura en los tipos de indagaci\xf3n debe\u2026",
+ t:null,
+ o:["\u2026mantenerse constante a lo largo del ciclo escolar para garantizar consistencia en los aprendizajes.",
+    "\u2026aumentar conforme los estudiantes ganan experiencia, pasando de niveles m\xe1s dirigidos a niveles m\xe1s aut\xf3nomos e independientes.",
+    "\u2026disminuir progresivamente para que el docente recupere el control del proceso al final del ciclo escolar."],
+ c:1,
+ ok:"Correcto. La Matriz de Progresi\xf3n establece que el grado de apertura debe aumentar conforme los estudiantes ganan experiencia, avanzando hacia mayor autonom\xeda.",
+ ko:"Respuesta correcta: B. La gu\xeda es clara: el grado de apertura debe aumentar conforme los estudiantes ganan experiencia. Mantenerlo constante o reducirlo va contra el principio de progresi\xf3n hacia la autonom\xeda."},
+
+{n:29,f:"Cuestionamiento directo",
+ b:"\xbfCu\xe1l de las siguientes situaciones describe correctamente la aplicaci\xf3n del Pilar 3 (Experimentaci\xf3n) en el aula de ciencias?",
+ t:null,
+ o:["Los alumnos leen el procedimiento del libro, siguen los pasos y anotan los resultados en la tabla proporcionada.",
+    "Los alumnos escuchan la explicaci\xf3n del docente y responden las preguntas de comprensi\xf3n del cap\xedtulo.",
+    "Los alumnos realizan un experimento con jocoque, identifican datos an\xf3malos, incorporan terminolog\xeda cient\xedfica y autorregulan su aprendizaje al comparar resultados con su hip\xf3tesis original."],
+ c:2,
+ ok:"Excelente. La opci\xf3n C integra los cuatro componentes del Pilar 3: transformaci\xf3n, an\xe1lisis cr\xedtico, lenguaje cient\xedfico y autonom\xeda para autorregular el aprendizaje.",
+ ko:"Respuesta correcta: C. El Pilar 3 implica transformaci\xf3n, an\xe1lisis cr\xedtico, incorporaci\xf3n de lenguaje cient\xedfico y autonom\xeda. Seguir pasos del libro o escuchar explicaciones no constituye experimentaci\xf3n en este sentido pedag\xf3gico."},
+
+{n:30,f:"Ordenamiento",
+ b:"Ordene los cuatro elementos del dominio metodol\xf3gico (Hacer) de la V de Gowin en la secuencia correcta de una investigaci\xf3n, del inicio al final.\n\n1. Conclusiones: interpretar los resultados obtenidos.\n2. Pregunta central: \xbfqu\xe9 quiero investigar?\n3. Datos y Variables: registrar lo observado y medido.\n4. Procedimiento: describir c\xf3mo se llevar\xe1 a cabo la investigaci\xf3n.",
+ t:null,
+ o:["4, 2, 3, 1","2, 4, 3, 1","3, 2, 1, 4"],
+ c:1,
+ ok:"Perfecto. El dominio metodol\xf3gico sigue: Pregunta central \u2192 Procedimiento \u2192 Datos y Variables \u2192 Conclusiones.",
+ ko:"Respuesta correcta: B (2, 4, 3, 1). La secuencia es: Pregunta central (qu\xe9 investigar) \u2192 Procedimiento (c\xf3mo hacerlo) \u2192 Datos y Variables (qu\xe9 registrar) \u2192 Conclusiones (qu\xe9 concluir)."}
+];
+
+// ── ESTADO ─────────────────────────────────────────
+var E = {nombre:'', qi:0, ok:0, ko:0, done:false};
+
+// ── UTILS ──────────────────────────────────────────
+function $(id){ return document.getElementById(id); }
+function show(id){ $(id).classList.add('active'); }
+function hide(id){ $(id).classList.remove('active'); }
+
+function goTo(name){
+  ['inicio','simulador','resultados','guia'].forEach(function(s){
+    var sec = $('sec-'+s);
+    var tab = $('tab-'+s);
+    if(sec){ s===name ? sec.classList.add('active') : sec.classList.remove('active'); }
+    if(tab){ s===name ? tab.classList.add('active') : tab.classList.remove('active'); }
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── BOTONES ────────────────────────────────────────
+$('btnIniciar').addEventListener('click', function(){
+  var nom = $('ninput').value.trim();
+  if(!nom){
+    $('ninput').classList.add('err');
+    $('ninput').focus();
+    setTimeout(function(){ $('ninput').classList.remove('err'); }, 2000);
+    return;
+  }
+  E.nombre = nom; E.qi = 0; E.ok = 0; E.ko = 0; E.done = false;
+  $('tab-simulador').style.display = '';
+  goTo('simulador');
+  renderQ();
+});
+
+$('tab-inicio').addEventListener('click', function(){ goTo('inicio'); });
+$('tab-simulador').addEventListener('click', function(){ goTo('simulador'); });
+$('tab-resultados').addEventListener('click', function(){ goTo('resultados'); });
+$('tab-guia').addEventListener('click', function(){ goTo('guia'); });
+
+$('btnReiniciar').addEventListener('click', function(){
+  $('tab-simulador').style.display = 'none';
+  $('tab-resultados').style.display = 'none';
+  $('ninput').value = '';
+  goTo('inicio');
+});
+
+$('btnVerGuia').addEventListener('click', function(){ goTo('guia'); });
+
+$('btnAbrirPdf').addEventListener('click', function(){
+  window.open('https://drive.google.com/file/d/1LlHd31DinwMhibbisEGZe0wjW9xZgZLO/view?usp=sharing','_blank');
+});
+
+$('btnTogglePdf').addEventListener('click', function(){
+  var v = $('visorPdf');
+  if(v.style.display === 'none'){
+    v.style.display = 'block';
+    var fr = $('pdfFrame');
+    if(!fr.src || fr.src === window.location.href){
+      fr.src = 'https://drive.google.com/file/d/1LlHd31DinwMhibbisEGZe0wjW9xZgZLO/preview';
+    }
+  } else {
+    v.style.display = 'none';
+  }
+});
+
+// ── RENDER PREGUNTA ────────────────────────────────
+function renderQ(){
+  var q = Q[E.qi];
+  var pct = Math.round((E.qi/30)*100);
+  $('progLabel').textContent = 'Pregunta '+(E.qi+1)+' de 30';
+  $('progFill').style.width = pct+'%';
+  $('scOk').textContent = '\u2705 '+E.ok;
+  $('scKo').textContent = '\u274c '+E.ko;
+
+  var tbl = '';
+  if(q.t){
+    var rows = q.t.rows.map(function(r){
+      return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>';
+    }).join('');
+    tbl = '<table class="qtbl"><tr><th>'+q.t.c1+'</th><th>'+q.t.c2+'</th></tr>'+rows+'</table>';
+  }
+
+  var baseHTML = q.b.replace(/\n/g,'<br>');
+  var letras = ['A','B','C'];
+  var opts = q.o.map(function(op,i){
+    return '<li class="opt" data-i="'+i+'"><span class="ol">'+letras[i]+'</span><span>'+op+'</span></li>';
+  }).join('');
+
+  $('qArea').innerHTML =
+    '<div class="qcard">'+
+      '<div class="qh">'+
+        '<div class="qnum">'+q.n+'</div>'+
+        '<div>'+
+          '<div class="qfmt">&#128203; '+q.f+'</div>'+
+          '<div class="qtxt">'+baseHTML+'</div>'+
+        '</div>'+
+      '</div>'+
+      tbl+
+      '<ul class="opts" id="optsList">'+opts+'</ul>'+
+      '<div id="fbArea"></div>'+
+      '<div class="btn-row">'+
+        '<button class="bp" id="btnSig" style="display:none">'+
+          (E.qi<29 ? 'Siguiente pregunta &#8594;' : '&#127942; Ver resultados')+
+        '</button>'+
+      '</div>'+
+    '</div>';
+
+  // Listeners opciones
+  var lis = document.querySelectorAll('#optsList .opt');
+  lis.forEach(function(li){
+    li.addEventListener('click', function(){
+      elegir(parseInt(li.getAttribute('data-i')));
+    });
+  });
+
+  // Listener siguiente
+  $('btnSig').addEventListener('click', function(){
+    if(E.qi < 29){ E.qi++; renderQ(); }
+    else { showResults(); }
+  });
+}
+
+function elegir(idx){
+  if(E.done) return;
+  E.done = true;
+  var q = Q[E.qi];
+  var es = (idx === q.c);
+  if(es) E.ok++; else E.ko++;
+
+  document.querySelectorAll('#optsList .opt').forEach(function(li){
+    li.classList.add('dis');
+    var i = parseInt(li.getAttribute('data-i'));
+    if(i === q.c) li.classList.add('ok');
+    if(i === idx && !es) li.classList.add('ko');
+  });
+
+  var fb = $('fbArea');
+  if(es){
+    fb.innerHTML = '<div class="fb ok"><span class="fb-ic">&#9989;</span><span>'+q.ok+'</span></div>';
+  } else {
+    fb.innerHTML = '<div class="fb ko"><span class="fb-ic">&#10060;</span><span>'+q.ko+'</span></div>';
+  }
+
+  $('scOk').textContent = '\u2705 '+E.ok;
+  $('scKo').textContent = '\u274c '+E.ko;
+  $('btnSig').style.display = '';
+}
+
+function showResults(){
+  var pct = Math.round((E.ok/30)*100);
+  var emoji, msg;
+  if(pct>=90){ emoji='\ud83c\udfc6'; msg='Sobresaliente. Demuestras dominio s\xf3lido de los fundamentos pedag\xf3gicos. \xa1Sigue as\xed!'; }
+  else if(pct>=70){ emoji='\ud83c\udf1f'; msg='Buen trabajo. Tienes una base firme. Repasa los temas donde tuviste dificultades para consolidar tu aprendizaje.'; }
+  else if(pct>=50){ emoji='\ud83d\udcda'; msg='Vas por buen camino. Revisa la Gu\xeda de Estudio, especialmente los Cuatro Pilares, y vuelve a intentarlo.'; }
+  else { emoji='\ud83d\udcaa'; msg='No te rindas. Cada intento es una oportunidad de aprendizaje. Consulta la Gu\xeda de Estudio y practica de nuevo.'; }
+
+  var color = pct>=70 ? 'var(--vm)' : pct>=50 ? 'var(--do)' : '#e53935';
+  $('resEmoji').textContent = emoji;
+  $('resNom').textContent = E.nombre;
+  $('resPct').textContent = pct+'%';
+  $('resPct').style.color = color;
+  $('resAc').textContent = E.ok;
+  $('resEr').textContent = E.ko;
+  $('resPct2').textContent = pct+'%';
+  $('resMot').textContent = '\u201c'+msg+'\u201d';
+
+  $('tab-resultados').style.display = '';
+  goTo('resultados');
+}
+
+})();
+</script>
+</body>
+</html>

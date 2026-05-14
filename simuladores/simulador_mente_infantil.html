@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador – El Plano de la Mente Infantil</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #3b7dd8;
+    --primary-light: #5b9af0;
+    --primary-dark: #1e5bb5;
+    --secondary: #29b5a8;
+    --accent: #f59e42;
+    --accent2: #e05c7a;
+    --success: #22c55e;
+    --error: #ef4444;
+    --bg: #f0f4fc;
+    --card: #ffffff;
+    --text: #1a2340;
+    --text-soft: #4a5878;
+    --text-light: #8898bb;
+    --border: #dde4f4;
+    --shadow: 0 4px 24px rgba(59,125,216,0.10);
+    --shadow-lg: 0 8px 40px rgba(59,125,216,0.16);
+    --radius: 18px;
+    --radius-sm: 10px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 10% 10%, rgba(91,154,240,0.13) 0%, transparent 60%),
+      radial-gradient(ellipse at 90% 85%, rgba(41,181,168,0.11) 0%, transparent 55%),
+      radial-gradient(ellipse at 50% 50%, rgba(245,158,66,0.05) 0%, transparent 70%);
+  }
+
+  /* ─── HEADER ─── */
+  .site-header {
+    background: linear-gradient(135deg, #1e5bb5 0%, #3b7dd8 45%, #29b5a8 100%);
+    padding: 28px 20px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 30px rgba(30,91,181,0.35);
+  }
+  .site-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .header-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #e8f4ff;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 5px 16px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+  .site-header h1 {
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.15;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    letter-spacing: -0.5px;
+  }
+  .site-header h1 span { color: #ffe08a; }
+  .header-sub {
+    margin-top: 8px;
+    font-size: clamp(0.8rem, 2vw, 1rem);
+    color: rgba(255,255,255,0.82);
+    font-weight: 400;
+    font-family: 'Lora', serif;
+    font-style: italic;
+  }
+  .header-author {
+    margin-top: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.18);
+    padding: 7px 20px;
+    border-radius: 30px;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  .header-author::before { content: '👨‍🏫'; font-size: 1rem; }
+
+  /* ─── NAV TABS ─── */
+  .nav-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 18px 20px 0;
+    flex-wrap: wrap;
+  }
+  .nav-tab {
+    background: var(--card);
+    border: 2px solid var(--border);
+    color: var(--text-soft);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 9px 22px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.25s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .nav-tab:hover { border-color: var(--primary); color: var(--primary); }
+  .nav-tab.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    box-shadow: 0 4px 14px rgba(59,125,216,0.35);
+  }
+
+  /* ─── MAIN CONTAINER ─── */
+  .main { max-width: 780px; margin: 0 auto; padding: 24px 16px 60px; }
+
+  /* ─── SCREENS ─── */
+  .screen { display: none; animation: fadeIn 0.4s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+  /* ─── START SCREEN ─── */
+  .start-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 44px 40px;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .start-card::before {
+    content: '🧠';
+    position: absolute;
+    top: -10px; right: -10px;
+    font-size: 120px;
+    opacity: 0.05;
+    transform: rotate(15deg);
+  }
+  .start-icon { font-size: 56px; margin-bottom: 16px; display: block; }
+  .start-card h2 { font-size: 1.7rem; font-weight: 800; color: var(--primary-dark); margin-bottom: 8px; }
+  .start-card p { color: var(--text-soft); font-size: 0.95rem; margin-bottom: 28px; line-height: 1.6; }
+  .info-pills {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 32px;
+  }
+  .pill {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--bg); border: 1px solid var(--border);
+    padding: 7px 16px; border-radius: 20px;
+    font-size: 0.83rem; font-weight: 600; color: var(--text-soft);
+  }
+  .pill span { font-size: 1rem; }
+  .input-group { margin-bottom: 24px; text-align: left; }
+  .input-group label {
+    display: block; font-size: 0.88rem; font-weight: 700;
+    color: var(--text-soft); margin-bottom: 8px; letter-spacing: 0.3px;
+  }
+  .input-group input {
+    width: 100%; padding: 14px 18px;
+    border: 2px solid var(--border); border-radius: var(--radius-sm);
+    font-family: 'Outfit', sans-serif; font-size: 1rem; color: var(--text);
+    outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    background: var(--bg);
+  }
+  .input-group input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59,125,216,0.12);
+    background: white;
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white; border: none; border-radius: 14px;
+    padding: 16px 36px; font-family: 'Outfit', sans-serif;
+    font-size: 1.05rem; font-weight: 700; cursor: pointer;
+    box-shadow: 0 5px 20px rgba(59,125,216,0.35);
+    transition: all 0.25s; letter-spacing: 0.2px;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(59,125,216,0.45); }
+  .btn-primary:active { transform: translateY(0); }
+
+  /* ─── QUIZ SCREEN ─── */
+  .progress-bar-wrap {
+    background: var(--border); border-radius: 8px; height: 8px;
+    margin-bottom: 20px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    border-radius: 8px;
+    transition: width 0.6s cubic-bezier(.4,0,.2,1);
+  }
+  .quiz-meta {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 18px; flex-wrap: wrap; gap: 8px;
+  }
+  .q-counter {
+    font-size: 0.85rem; font-weight: 700; color: var(--primary);
+    background: rgba(59,125,216,0.1); padding: 5px 14px; border-radius: 20px;
+  }
+  .q-type-badge {
+    font-size: 0.78rem; font-weight: 700; padding: 4px 12px;
+    border-radius: 20px; letter-spacing: 0.3px; text-transform: uppercase;
+  }
+  .type-cd { background: #e8f4ff; color: #1e5bb5; }
+  .type-co { background: #fff0e8; color: #c45d10; }
+  .type-or { background: #f0f9ff; color: #0369a1; }
+  .type-re { background: #f0fdf4; color: #15803d; }
+  .score-mini {
+    font-size: 0.85rem; font-weight: 700; color: var(--text-soft);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .score-mini .ok { color: var(--success); }
+  .score-mini .err { color: var(--error); }
+
+  .question-card {
+    background: var(--card); border-radius: var(--radius);
+    border: 1px solid var(--border); box-shadow: var(--shadow);
+    padding: 32px; margin-bottom: 18px; transition: all 0.3s;
+  }
+  .q-stem {
+    font-size: 1.05rem; line-height: 1.7; color: var(--text);
+    font-weight: 500; margin-bottom: 24px;
+  }
+  .q-stem strong { color: var(--primary-dark); }
+  .q-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9rem; }
+  .q-table th {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white; padding: 10px 14px; font-weight: 700; text-align: left;
+  }
+  .q-table td { padding: 9px 14px; border-bottom: 1px solid var(--border); }
+  .q-table tr:nth-child(even) td { background: var(--bg); }
+
+  .options-list { display: flex; flex-direction: column; gap: 12px; }
+  .option-btn {
+    display: flex; align-items: flex-start; gap: 14px;
+    background: var(--bg); border: 2px solid var(--border);
+    border-radius: var(--radius-sm); padding: 14px 18px;
+    cursor: pointer; transition: all 0.22s; text-align: left;
+    font-family: 'Outfit', sans-serif; font-size: 0.95rem; color: var(--text);
+    line-height: 1.55;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--primary-light);
+    background: rgba(59,125,216,0.05);
+    transform: translateX(3px);
+    box-shadow: 0 2px 12px rgba(59,125,216,0.12);
+  }
+  .option-btn.selected { border-color: var(--primary); background: rgba(59,125,216,0.08); }
+  .option-btn.correct { border-color: var(--success) !important; background: rgba(34,197,94,0.1) !important; }
+  .option-btn.wrong { border-color: var(--error) !important; background: rgba(239,68,68,0.08) !important; }
+  .option-btn:disabled { cursor: default; }
+  .opt-label {
+    display: flex; align-items: center; justify-content: center;
+    min-width: 32px; height: 32px; border-radius: 8px;
+    background: white; border: 2px solid var(--border);
+    font-weight: 800; font-size: 0.9rem; color: var(--primary);
+    flex-shrink: 0; transition: all 0.2s;
+  }
+  .option-btn.selected .opt-label { background: var(--primary); border-color: var(--primary); color: white; }
+  .option-btn.correct .opt-label { background: var(--success); border-color: var(--success); color: white; }
+  .option-btn.wrong .opt-label { background: var(--error); border-color: var(--error); color: white; }
+
+  /* ─── FEEDBACK ─── */
+  .feedback-card {
+    border-radius: var(--radius-sm); padding: 16px 20px;
+    margin-top: 16px; display: none; animation: slideUp 0.3s ease;
+    border-left: 5px solid;
+  }
+  .feedback-card.show { display: flex; gap: 12px; align-items: flex-start; }
+  .feedback-card.success { background: rgba(34,197,94,0.1); border-color: var(--success); }
+  .feedback-card.error { background: rgba(239,68,68,0.07); border-color: var(--error); }
+  .fb-icon { font-size: 1.4rem; flex-shrink: 0; }
+  .fb-text { font-size: 0.9rem; line-height: 1.6; color: var(--text); }
+  .fb-text strong { color: var(--text); font-weight: 700; }
+  @keyframes slideUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+  /* ─── NAV BUTTONS ─── */
+  .quiz-nav { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }
+  .btn-next {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white; border: none; border-radius: 12px;
+    padding: 13px 28px; font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 14px rgba(59,125,216,0.3);
+    transition: all 0.22s; opacity: 0.4; pointer-events: none;
+  }
+  .btn-next.enabled { opacity: 1; pointer-events: all; }
+  .btn-next.enabled:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(59,125,216,0.4); }
+
+  /* ─── RESULTS SCREEN ─── */
+  .results-card {
+    background: var(--card); border-radius: var(--radius);
+    border: 1px solid var(--border); box-shadow: var(--shadow-lg);
+    overflow: hidden;
+  }
+  .results-header {
+    background: linear-gradient(135deg, #1e5bb5 0%, #3b7dd8 50%, #29b5a8 100%);
+    padding: 36px 32px; text-align: center; color: white;
+  }
+  .results-header h2 { font-size: 1.8rem; font-weight: 800; margin: 12px 0 6px; }
+  .results-header p { opacity: 0.85; font-size: 0.95rem; }
+  .results-body { padding: 36px 32px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-bottom: 28px; }
+  .stat-box {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 14px;
+    padding: 20px 16px; text-align: center;
+  }
+  .stat-box .stat-val { font-size: 2.2rem; font-weight: 800; line-height: 1; }
+  .stat-box .stat-label { font-size: 0.78rem; font-weight: 600; color: var(--text-soft); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-box.ok .stat-val { color: var(--success); }
+  .stat-box.err .stat-val { color: var(--error); }
+  .stat-box.pct .stat-val { color: var(--primary); }
+  .stat-box.total .stat-val { color: var(--text); }
+  .perf-bar-wrap {
+    background: var(--border); border-radius: 8px; height: 14px;
+    margin-bottom: 20px; overflow: hidden;
+  }
+  .perf-bar {
+    height: 100%; border-radius: 8px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    transition: width 1.2s cubic-bezier(.4,0,.2,1);
+  }
+  .motivation-msg {
+    background: linear-gradient(135deg, rgba(59,125,216,0.08), rgba(41,181,168,0.08));
+    border: 1px solid var(--border); border-radius: 14px;
+    padding: 20px 24px; text-align: center;
+    font-size: 1rem; font-weight: 600; color: var(--text);
+    line-height: 1.6; margin-bottom: 24px;
+  }
+  .motivation-msg .emoji { font-size: 2rem; display: block; margin-bottom: 8px; }
+  .results-actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: white; border: 2px solid var(--border); color: var(--text);
+    border-radius: 12px; padding: 12px 24px;
+    font-family: 'Outfit', sans-serif; font-size: 0.92rem; font-weight: 700;
+    cursor: pointer; transition: all 0.22s;
+  }
+  .btn-secondary:hover { border-color: var(--primary); color: var(--primary); background: rgba(59,125,216,0.04); }
+
+  /* ─── GUIDE SCREEN ─── */
+  .guide-card {
+    background: var(--card); border-radius: var(--radius);
+    border: 1px solid var(--border); box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .guide-header {
+    background: linear-gradient(135deg, #1e5bb5, #29b5a8);
+    padding: 24px 28px; display: flex; align-items: center; gap: 14px; color: white;
+  }
+  .guide-header-icon { font-size: 2rem; }
+  .guide-header h2 { font-size: 1.3rem; font-weight: 800; }
+  .guide-header p { font-size: 0.85rem; opacity: 0.82; margin-top: 2px; }
+  .guide-body { padding: 24px 28px; }
+  .guide-body p { color: var(--text-soft); font-size: 0.93rem; margin-bottom: 16px; line-height: 1.6; }
+  .guide-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
+  .btn-guide {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white; border: none; border-radius: 12px;
+    padding: 12px 24px; font-family: 'Outfit', sans-serif;
+    font-size: 0.92rem; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 14px rgba(59,125,216,0.3); transition: all 0.22s;
+    text-decoration: none;
+  }
+  .btn-guide:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(59,125,216,0.4); }
+  .btn-guide-outline {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: white; border: 2px solid var(--primary); color: var(--primary);
+    border-radius: 12px; padding: 11px 24px;
+    font-family: 'Outfit', sans-serif; font-size: 0.92rem; font-weight: 700;
+    cursor: pointer; transition: all 0.22s; text-decoration: none;
+  }
+  .btn-guide-outline:hover { background: rgba(59,125,216,0.05); }
+  .pdf-embed-wrap {
+    border-radius: 12px; overflow: hidden; border: 2px solid var(--border);
+    background: #f5f7fc;
+  }
+  .pdf-embed-wrap iframe {
+    width: 100%; height: 600px; display: block; border: none;
+  }
+  .pdf-fallback {
+    padding: 32px; text-align: center; color: var(--text-soft);
+    display: none;
+  }
+
+  /* ─── TOPIC CARDS (Guide) ─── */
+  .topics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 20px; }
+  .topic-card {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px; display: flex; gap: 10px; align-items: flex-start;
+  }
+  .topic-icon { font-size: 1.4rem; flex-shrink: 0; }
+  .topic-title { font-weight: 700; font-size: 0.85rem; color: var(--text); margin-bottom: 3px; }
+  .topic-desc { font-size: 0.78rem; color: var(--text-soft); line-height: 1.4; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 600px) {
+    .start-card { padding: 28px 20px; }
+    .question-card { padding: 22px 18px; }
+    .results-body { padding: 24px 18px; }
+    .guide-body { padding: 20px 18px; }
+    .q-stem { font-size: 0.97rem; }
+    .option-btn { font-size: 0.9rem; padding: 12px 14px; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* ─── UTILITY ─── */
+  .text-center { text-align: center; }
+  .mt-4 { margin-top: 16px; }
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HEADER ═══════════════ -->
+<header class="site-header">
+  <div class="header-badge">Simulador Interactivo de Evaluación</div>
+  <h1>El Plano de la <span>Mente Infantil</span></h1>
+  <p class="header-sub">De la intuición docente a la integración científica del desarrollo del niño</p>
+  <div class="header-author">Prof. Francisco De Jesus Luna Benitez</div>
+</header>
+
+<!-- ═══════════════ NAV TABS ═══════════════ -->
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="showTab('simulador')">📝 Simulador</button>
+  <button class="nav-tab" onclick="showTab('guia')">📚 Guía de Estudio</button>
+</div>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<div class="main">
+
+  <!-- ══ TAB: SIMULADOR ══ -->
+  <div id="tab-simulador">
+
+    <!-- PANTALLA INICIO -->
+    <div id="screen-start" class="screen active">
+      <div class="start-card">
+        <span class="start-icon">🧠</span>
+        <h2>¿Listo para evaluar tu conocimiento?</h2>
+        <p>Este simulador contiene <strong>30 preguntas</strong> de opción múltiple basadas en el contenido de <em>"El Plano de la Mente Infantil"</em>. Encontrarás preguntas teóricas, prácticas y casos aplicados.</p>
+        <div class="info-pills">
+          <div class="pill"><span>📋</span> 30 Preguntas</div>
+          <div class="pill"><span>🔤</span> 4 Formatos</div>
+          <div class="pill"><span>💡</span> Retroalimentación inmediata</div>
+          <div class="pill"><span>📊</span> Resultados finales</div>
+        </div>
+        <div class="input-group">
+          <label>👤 Ingresa tu nombre completo</label>
+          <input type="text" id="input-nombre" placeholder="Escribe tu nombre aquí..." maxlength="80" />
+        </div>
+        <button class="btn-primary" onclick="iniciarSimulador()">
+          🚀 Iniciar Simulador
+        </button>
+      </div>
+    </div>
+
+    <!-- PANTALLA QUIZ -->
+    <div id="screen-quiz" class="screen">
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <div class="quiz-meta">
+        <div class="q-counter" id="q-counter">Pregunta 1 / 30</div>
+        <div class="q-type-badge type-cd" id="q-type-badge">Cuestionamiento Directo</div>
+        <div class="score-mini">
+          <span class="ok" id="mini-ok">✔ 0</span>
+          <span class="err" id="mini-err">✘ 0</span>
+        </div>
+      </div>
+      <div class="question-card" id="question-card">
+        <div class="q-stem" id="q-stem"></div>
+        <div class="options-list" id="options-list"></div>
+        <div class="feedback-card" id="feedback-card">
+          <div class="fb-icon" id="fb-icon"></div>
+          <div class="fb-text" id="fb-text"></div>
+        </div>
+      </div>
+      <div class="quiz-nav">
+        <button class="btn-next" id="btn-next" onclick="nextQuestion()">
+          Siguiente pregunta →
+        </button>
+      </div>
+    </div>
+
+    <!-- PANTALLA RESULTADOS -->
+    <div id="screen-results" class="screen">
+      <div class="results-card">
+        <div class="results-header">
+          <div id="results-emoji" style="font-size:3rem;"></div>
+          <h2 id="results-title">¡Examen completado!</h2>
+          <p id="results-nombre"></p>
+        </div>
+        <div class="results-body">
+          <div class="stats-grid">
+            <div class="stat-box total">
+              <div class="stat-val">30</div>
+              <div class="stat-label">Total preguntas</div>
+            </div>
+            <div class="stat-box ok">
+              <div class="stat-val" id="res-ok">0</div>
+              <div class="stat-label">Aciertos</div>
+            </div>
+            <div class="stat-box err">
+              <div class="stat-val" id="res-err">0</div>
+              <div class="stat-label">Errores</div>
+            </div>
+            <div class="stat-box pct">
+              <div class="stat-val" id="res-pct">0%</div>
+              <div class="stat-label">Desempeño</div>
+            </div>
+          </div>
+          <div class="perf-bar-wrap">
+            <div class="perf-bar" id="perf-bar" style="width:0%"></div>
+          </div>
+          <div class="motivation-msg" id="motivation-msg"></div>
+          <div class="results-actions">
+            <button class="btn-primary" onclick="reiniciar()">🔄 Volver a intentar</button>
+            <button class="btn-secondary" onclick="showTab('guia')">📚 Ver Guía de Estudio</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-simulador -->
+
+  <!-- ══ TAB: GUÍA ══ -->
+  <div id="tab-guia" style="display:none;">
+    <div class="guide-card">
+      <div class="guide-header">
+        <div class="guide-header-icon">📖</div>
+        <div>
+          <h2>Guía de Estudio: El Plano de la Mente Infantil</h2>
+          <p>Prof. Francisco De Jesus Luna Benitez</p>
+        </div>
+      </div>
+      <div class="guide-body">
+        <p>Accede a la guía completa de estudio en formato PDF. Puedes visualizarla directamente aquí o abrirla en una nueva pestaña para mayor comodidad.</p>
+        <div class="guide-actions">
+          <a class="btn-guide" href="https://drive.google.com/file/d/1zVi-H7cC8BHNl3Xr_C0y1LWqK6g4LjCw/view?usp=sharing" target="_blank" rel="noopener">
+            🔗 Abrir en nueva pestaña
+          </a>
+          <button class="btn-guide-outline" onclick="togglePDF()">
+            👁️ Visualizar aquí
+          </button>
+        </div>
+        <div class="pdf-embed-wrap" id="pdf-embed-wrap" style="display:none;">
+          <iframe
+            src="https://drive.google.com/file/d/1zVi-H7cC8BHNl3Xr_C0y1LWqK6g4LjCw/preview"
+            allow="autoplay"
+            title="Guía de Estudio - El Plano de la Mente Infantil">
+          </iframe>
+        </div>
+        <div class="divider"></div>
+        <p style="font-weight:700; color:var(--text); margin-bottom:12px;">📌 Temas que cubre esta guía:</p>
+        <div class="topics-grid">
+          <div class="topic-card"><div class="topic-icon">🎓</div><div><div class="topic-title">Intuición Docente</div><div class="topic-desc">4 concepciones ante el niño "no preparado"</div></div></div>
+          <div class="topic-card"><div class="topic-icon">⚖️</div><div><div class="topic-title">5 Problemas Fundamentales</div><div class="topic-desc">Naturaleza, continuidad, plasticidad y más</div></div></div>
+          <div class="topic-card"><div class="topic-icon">📜</div><div><div class="topic-title">Legado Histórico</div><div class="topic-desc">Locke (Tabula rasa) y Rousseau</div></div></div>
+          <div class="topic-card"><div class="topic-icon">🧬</div><div><div class="topic-title">Teorías Biológicas</div><div class="topic-desc">Gesell: maduración y genética conductual</div></div></div>
+          <div class="topic-card"><div class="topic-icon">🛋️</div><div><div class="topic-title">Teorías Psicoanalíticas</div><div class="topic-desc">Freud (psicosexual) y Erikson (psicosocial)</div></div></div>
+          <div class="topic-card"><div class="topic-icon">🔁</div><div><div class="topic-title">Teorías Conductuales</div><div class="topic-desc">Watson y Skinner: estímulo-respuesta</div></div></div>
+          <div class="topic-card"><div class="topic-icon">🧩</div><div><div class="topic-title">Teorías Cognoscitivas</div><div class="topic-desc">Piaget y procesamiento de información</div></div></div>
+          <div class="topic-card"><div class="topic-icon">👥</div><div><div class="topic-title">Aprendizaje Social</div><div class="topic-desc">Bandura: determinismo recíproco</div></div></div>
+          <div class="topic-card"><div class="topic-icon">🏗️</div><div><div class="topic-title">Teoría Sociocultural</div><div class="topic-desc">Vygotsky: mente compartida</div></div></div>
+          <div class="topic-card"><div class="topic-icon">🌐</div><div><div class="topic-title">Teorías Ecológicas</div><div class="topic-desc">Bronfenbrenner: sistemas anidados</div></div></div>
+          <div class="topic-card"><div class="topic-icon">🔮</div><div><div class="topic-title">Visión Posmoderna</div><div class="topic-desc">El cambio de paradigma del desarrollo</div></div></div>
+          <div class="topic-card"><div class="topic-icon">📊</div><div><div class="topic-title">Matriz de Síntesis</div><div class="topic-desc">Comparación transversal de teorías</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ═══════════════════════════════════════════
+//  BANCO DE 30 PREGUNTAS
+// ═══════════════════════════════════════════
+const preguntas = [
+  // ── 1 ──────────────────────────────────────
+  {
+    tipo: 'cd', tipoBadge: 'Cuestionamiento Directo', tipoClass: 'type-cd',
+    stem: `Un docente observa que un alumno de 6 años aún no sabe leer y decide esperar sin intervenir, argumentando que <strong>"con el tiempo madurará solo"</strong>. Esta decisión refleja una concepción:`,
+    opciones: [
+      'Diagnóstico-prescriptiva, porque implica esperar a que se identifique el déficit específico.',
+      'Naturalista, porque considera que el desarrollo es maduración interna y la naturaleza hará su trabajo.',
+      'Interaccionista, porque supone que el ambiente solo puede aportar nutrición al proceso natural.'
+    ],
+    correcta: 1, // B
+    fb_ok: '¡Excelente! La concepción naturalista sostiene que el desarrollo es un proceso de maduración interna; la acción docente es esperar a que la naturaleza haga su trabajo.',
+    fb_err: 'La respuesta correcta es B. La concepción naturalista ve el desarrollo como maduración interna, por eso el docente decide solo esperar. La interaccionista, en cambio, adaptaría los materiales al alumno.'
+  },
+  // ── 2 ──────────────────────────────────────
+  {
+    tipo: 'co', tipoBadge: 'Completamiento', tipoClass: 'type-co',
+    stem: `Según John Locke, el niño es una <em>"tabula rasa"</em> (hoja en blanco), lo que implica que…`,
+    opciones: [
+      '…es producto exclusivo de su ambiente y experiencia, sin predisposiciones innatas que determinen su desarrollo.',
+      '…nace con un programa interno de desarrollo que se despliega de manera natural en etapas.',
+      '…su desarrollo depende de la interacción entre biología y ambiente de forma simultánea.'
+    ],
+    correcta: 0, // A
+    fb_ok: '¡Correcto! Para Locke el niño no es bueno ni malo; es moldeado por su entorno, lo que sienta las bases del enfoque conductual.',
+    fb_err: 'La respuesta correcta es A. "Tabula rasa" significa que el niño es resultado exclusivo de su ambiente y experiencia, no de predisposiciones innatas. Eso lo diferencia de Rousseau (opción B).'
+  },
+  // ── 3 ──────────────────────────────────────
+  {
+    tipo: 'or', tipoBadge: 'Ordenamiento', tipoClass: 'type-or',
+    stem: `Ordene las etapas del <strong>desarrollo psicosexual de Freud</strong> de la primera (más temprana) a la última:<br><br>
+    1. Oral &nbsp;&nbsp; 2. Fálica &nbsp;&nbsp; 3. Anal &nbsp;&nbsp; 4. Latencia &nbsp;&nbsp; 5. Genital`,
+    opciones: [
+      'Oral → Fálica → Anal → Latencia → Genital',
+      'Oral → Anal → Latencia → Fálica → Genital',
+      'Oral → Anal → Fálica → Latencia → Genital'
+    ],
+    correcta: 2, // C
+    fb_ok: '¡Excelente! El orden correcto de Freud es: Oral, Anal, Fálica, Latencia y Genital. La personalidad básica queda fijada en los primeros 5 años.',
+    fb_err: 'La respuesta correcta es C. La secuencia de Freud es: Oral → Anal → Fálica → Latencia → Genital. La etapa Anal precede a la Fálica, no al revés.'
+  },
+  // ── 4 ──────────────────────────────────────
+  {
+    tipo: 're', tipoBadge: 'Relación de Elementos', tipoClass: 'type-re',
+    stem: `Relacione el teórico con su concepto central:<br><br>
+    <table class="q-table"><thead><tr><th>Teórico</th><th>Concepto</th></tr></thead><tbody>
+    <tr><td>1. Vygotsky</td><td>a) Determinismo recíproco: mente, conducta y ambiente se influyen mutuamente</td></tr>
+    <tr><td>2. Bronfenbrenner</td><td>b) Las funciones mentales se transforman en superiores a través de la interacción social</td></tr>
+    <tr><td>3. Bandura</td><td>c) El entorno como "muñecas rusas" de contextos interactivos</td></tr>
+    </tbody></table>`,
+    opciones: [
+      '1c – 2a – 3b',
+      '1b – 2c – 3a',
+      '1a – 2b – 3c'
+    ],
+    correcta: 1, // B
+    fb_ok: '¡Correcto! Vygotsky = interacción social (b); Bronfenbrenner = sistemas anidados (c); Bandura = determinismo recíproco (a).',
+    fb_err: 'La respuesta correcta es B: Vygotsky propone que las funciones mentales se transforman por la interacción social; Bronfenbrenner habla de los sistemas anidados; Bandura del determinismo recíproco.'
+  },
+  // ── 5 ──────────────────────────────────────
+  {
+    tipo: 'cd', tipoBadge: 'Cuestionamiento Directo', tipoClass: 'type-cd',
+    stem: `¿Cuál de los siguientes planteamientos corresponde específicamente al <strong>condicionamiento operante de B.F. Skinner</strong>?`,
+    opciones: [
+      'El desarrollo ocurre en etapas discretas guiadas por la maduración biológica del niño.',
+      'Los niños construyen activamente su conocimiento interactuando con el ambiente físico y social.',
+      'Las conductas y el lenguaje se adquieren y fortalecen mediante recompensas y refuerzos de los adultos.'
+    ],
+    correcta: 2, // C
+    fb_ok: '¡Correcto! Skinner explica el desarrollo como un proceso en que las conductas —incluyendo el lenguaje— se adquieren y mantienen gracias a recompensas y refuerzos externos.',
+    fb_err: 'La respuesta correcta es C. Skinner propone que las conductas y el lenguaje se adquieren mediante refuerzos. La opción A describe a Gesell (biológica) y la B a Piaget (cognoscitiva).'
+  },
+  // ── 6 ──────────────────────────────────────
+  {
+    tipo: 'co', tipoBadge: 'Completamiento', tipoClass: 'type-co',
+    stem: `Según la <strong>teoría sociocultural de Vygotsky</strong>, procesos como hablar, razonar o resolver problemas…`,
+    opciones: [
+      '…se realizan primero en un plano social entre personas, y solo después se internalizan individualmente.',
+      '…son producto exclusivo de la maduración biológica y se despliegan sin necesidad de interacción.',
+      '…dependen del condicionamiento operante aplicado por los adultos para su adquisición.'
+    ],
+    correcta: 0, // A
+    fb_ok: '¡Excelente! Para Vygotsky, los procesos mentales superiores emergen primero en el plano social (interpsicológico) y luego se internalizan (intrapsicológico).',
+    fb_err: 'La respuesta correcta es A. Vygotsky plantea que los procesos mentales superiores aparecen primero socialmente y luego se internalizan. Esto es la esencia de su teoría sociocultural.'
+  },
+  // ── 7 ──────────────────────────────────────
+  {
+    tipo: 'cd', tipoBadge: 'Cuestionamiento Directo', tipoClass: 'type-cd',
+    stem: `Un niño tímido busca consistentemente actividades solitarias, evitando el juego con otros. Según la <strong>Genética Conductual Contemporánea</strong>, la explicación más adecuada es que:`,
+    opciones: [
+      'El ambiente moldea completamente su personalidad y determina sus preferencias sociales sin influencia genética.',
+      'Sus genes predisponen un temperamento que lo lleva a buscar entornos congruentes con sus características innatas.',
+      'Su etapa psicosocial actual (según Erikson) determina momentáneamente sus preferencias de interacción.'
+    ],
+    correcta: 1, // B
+    fb_ok: '¡Correcto! La Genética Conductual Contemporánea propone que los genes moldean el ambiente: los niños con ciertas predisposiciones buscan activamente entornos específicos.',
+    fb_err: 'La respuesta correcta es B. La Genética Conductual Contemporánea muestra que los genes moldean el ambiente: un niño tímido busca entornos solitarios. Esto es diferente a decir que el ambiente lo moldea a él.'
+  },
+  // ── 8 ──────────────────────────────────────
+  {
+    tipo: 'or', tipoBadge: 'Ordenamiento', tipoClass: 'type-or',
+    stem: `Ordene las <strong>etapas del desarrollo cognoscitivo de Piaget</strong> de la más temprana a la más avanzada:<br><br>
+    1. Sensoriomotora &nbsp;&nbsp; 2. Operaciones formales &nbsp;&nbsp; 3. Preoperacional &nbsp;&nbsp; 4. Operaciones concretas`,
+    opciones: [
+      'Sensoriomotora → Preoperacional → Operaciones concretas → Operaciones formales',
+      'Sensoriomotora → Operaciones formales → Preoperacional → Operaciones concretas',
+      'Preoperacional → Sensoriomotora → Operaciones concretas → Operaciones formales'
+    ],
+    correcta: 0, // A
+    fb_ok: '¡Excelente! La secuencia invariable de Piaget es: Sensoriomotora → Preoperacional → Operaciones concretas → Operaciones formales.',
+    fb_err: 'La respuesta correcta es A. Piaget propone una secuencia invariable: Sensoriomotora, Preoperacional, Operaciones concretas y finalmente Operaciones formales.'
+  },
+  // ── 9 ──────────────────────────────────────
+  {
+    tipo: 're', tipoBadge: 'Relación de Elementos', tipoClass: 'type-re',
+    stem: `Relacione cada <strong>problema fundamental del desarrollo</strong> con la descripción que le corresponde:<br><br>
+    <table class="q-table"><thead><tr><th>Problema</th><th>Descripción</th></tr></thead><tbody>
+    <tr><td>1. Naturaleza / Crianza</td><td>a) El niño moldeado por el entorno vs. el niño constructor activo de su desarrollo</td></tr>
+    <tr><td>2. Continuidad / Discontinuidad</td><td>b) Biología innata vs. ambiente y experiencia como determinantes</td></tr>
+    <tr><td>3. Niño Pasivo / Niño Activo</td><td>c) Cambios graduales y sumativos vs. etapas abruptas y cualitativas</td></tr>
+    </tbody></table>`,
+    opciones: [
+      '1c – 2a – 3b',
+      '1a – 2c – 3b',
+      '1b – 2c – 3a'
+    ],
+    correcta: 2, // C
+    fb_ok: '¡Correcto! Naturaleza/Crianza = biología vs. ambiente (b); Continuidad/Discontinuidad = cambios graduales vs. abruptos (c); Niño Pasivo/Activo = moldeado vs. constructor (a).',
+    fb_err: 'La respuesta correcta es C: Naturaleza/Crianza hace referencia a biología vs. ambiente; Continuidad/Discontinuidad a cambios graduales vs. etapas; y Niño Pasivo/Activo al rol que tiene el niño en su desarrollo.'
+  },
+  // ── 10 ─────────────────────────────────────
+  {
+    tipo: 'cd', tipoBadge: 'Cuestionamiento Directo', tipoClass: 'type-cd',
+    stem: `¿Cuál de las siguientes acciones docentes corresponde a la <strong>concepción interaccionista</strong> del desarrollo infantil?`,
+    opciones: [
+      'Proveer una gran diversidad de experiencias y adaptar los materiales a cada estudiante, reconociendo la interacción niño-ambiente.',
+      'Ofrecer instrucción complementaria y tiempo extra para que el niño madure biológicamente.',
+      'Identificar el déficit específico del niño (ej. motricidad) y aplicar programas de compensación.'
+    ],
+    correcta: 0, // A
+    fb_ok: '¡Excelente! La concepción interaccionista considera que el desarrollo es resultado de la interacción niño-ambiente; por eso el docente diversifica experiencias y adapta materiales.',
+    fb_err: 'La respuesta correcta es A. La concepción interaccionista provee experiencias variadas y adapta materiales. La opción B es remedialista y la C es diagnóstico-prescriptiva.'
+  },
+  // ── 11 ─────────────────────────────────────
+  {
+    tipo: 'co', tipoBadge: 'Completamiento', tipoClass: 'type-co',
+    stem: `En la teoría ecológica de Bronfenbrenner, el <strong>microsistema</strong> incluye…`,
+    opciones: [
+      '…los valores culturales, leyes, costumbres y sistemas político-económicos que rigen la sociedad.',
+      '…el entorno inmediato del niño: familia, escuela, compañeros, iglesia y barrio.',
+      '…el lugar de trabajo de los padres, los medios masivos y los servicios comunitarios.'
+    ],
+    correcta: 1, // B
+    fb_ok: '¡Correcto! El microsistema es el anillo más cercano al niño e incluye familia, escuela, compañeros, iglesia y barrio: los contextos donde interactúa directamente.',
+    fb_err: 'La respuesta correcta es B. El microsistema engloba los entornos donde el niño participa directamente: familia, escuela, compañeros. La opción A es el macrosistema y la C el exosistema/mesosistema.'
+  },
+  // ── 12 ─────────────────────────────────────
+  {
+    tipo: 'cd', tipoBadge: 'Cuestionamiento Directo', tipoClass: 'type-cd',
+    stem: `Una maestra diseña clases en que los alumnos construyen maquetas, manipulan objetos y debaten entre pares para resolver problemas. Esta estrategia se fundamenta principalmente en:`,
+    opciones: [
+      'La teoría conductual de Watson, que enfatiza el condicionamiento clásico por asociación.',
+      'La teoría psicoanalítica de Freud, que prioriza la resolución de conflictos internos del desarrollo.',
+      'La teoría cognoscitiva de Piaget, donde los niños construyen activamente su conocimiento interactuando con el ambiente físico y social.'
+    ],
+    correcta: 2, // C
+    fb_ok: '¡Excelente! Piaget propone que los niños son constructores activos de su conocimiento al interactuar con su entorno. La maestra aplica este principio al hacer que los alumnos actúen directamente.',
+    fb_err: 'La respuesta correcta es C. Piaget defiende que el conocimiento se construye activamente interactuando con el mundo. Watson (A) se centraría en estímulos y respuestas condicionados.'
+  },
+  // ── 13 ─────────────────────────────────────
+  {
+    tipo: 're', tipoBadge: 'Relación de Elementos', tipoClass: 'type-re',
+    stem: `Relacione cada perspectiva teórica con su postura sobre el problema <strong>Continuidad / Discontinuidad</strong>:<br><br>
+    <table class="q-table"><thead><tr><th>Perspectiva</th><th>Postura</th></tr></thead><tbody>
+    <tr><td>1. Teorías maduracionales (Freud, Erikson, Gesell)</td><td>a) Discontinua: desarrollo por etapas abruptas y cualitativas</td></tr>
+    <tr><td>2. Teorías conductuales (Watson, Skinner)</td><td>b) Mixta: discontinua en Piaget, continua en procesamiento de información</td></tr>
+    <tr><td>3. Teorías cognoscitivas (Piaget + Info)</td><td>c) Continua: desarrollo gradual, sin etapas definidas</td></tr>
+    </tbody></table>`,
+    opciones: [
+      '1a – 2c – 3b',
+      '1b – 2a – 3c',
+      '1c – 2b – 3a'
+    ],
+    correcta: 0, // A
+    fb_ok: '¡Correcto! Maduracionales = discontinua por etapas (a); Conductuales = continua sin etapas (c); Cognoscitivas (Piaget+Info) = mixta (b).',
+    fb_err: 'La respuesta correcta es A. Las teorías maduracionales son discontinuas (etapas); las conductuales son continuas (sin etapas); las cognoscitivas son mixtas (Piaget discontinuo, procesamiento continuo).'
+  },
+  // ── 14 ─────────────────────────────────────
+  {
+    tipo: 'co', tipoBadge: 'Completamiento', tipoClass: 'type-co',
+    stem: `Según <strong>Erik Erikson</strong>, a diferencia de Freud, el desarrollo de la personalidad…`,
+    opciones: [
+      '…queda determinado en los primeros cinco años de vida, durante el período crítico establecido por la etapa fálica.',
+      '…dura toda la vida, ya que reconoce la influencia continua de la sociedad más allá de la infancia temprana.',
+      '…depende del condicionamiento operante y los refuerzos que recibe el niño durante la escolaridad.'
+    ],
+    correcta: 1, // B
+    fb_ok: '¡Excelente! Erikson amplía el modelo freudiano: reconoce la influencia de la sociedad y propone que el desarrollo psicosocial continúa durante toda la vida, no solo en la infancia.',
+    fb_err: 'La respuesta correcta es B. Erikson es la clave: a diferencia de Freud, sostiene que la personalidad se desarrolla durante toda la vida bajo influencia social. Freud (opción A) fijaba la personalidad en los primeros 5 años.'
+  },
+  // ── 15 ─────────────────────────────────────
+  {
+    tipo: 'cd', tipoBadge: 'Cuestionamiento Directo', tipoClass: 'type-cd',
+    stem: `Jean-Jacques Rousseau sostenía que <em>"el niño nace en un estado de bondad natural y sigue un programa de desarrollo interno"</em>. ¿Cuál es la implicación pedagógica directa de esta visión?`,
+    opciones: [
+      'El maestro debe aplicar premios y castigos rigurosos para moldear la conducta del niño desde temprana edad.',
+      'El maestro debe identificar los déficits del niño y diseñar programas de compensación específicos.',
+      'El aprendizaje debe adaptarse a las capacidades naturales de cada fase del desarrollo del niño.'
+    ],
+    correcta: 2, // C
+    fb_ok: '¡Correcto! Rousseau es el precursor de la educación centrada en el niño: el aprendizaje debe ajustarse a los momentos y capacidades naturales de cada fase del desarrollo.',
+    fb_err: 'La respuesta correcta es C. La visión de Rousseau implica adaptar el aprendizaje a las capacidades naturales de cada etapa. La opción A es el legado de Locke (conductual) y la B sería una visión diagnóstico-prescriptiva.'
+  },
+  // ── 16 ─────────────────────────────────────
+  {
+    tipo: 'or', tipoBadge: 'Ordenamiento', tipoClass: 'type-or',
+    stem: `Ordene el <strong>flujo del procesamiento de información</strong> según el modelo de la "metáfora computacional", del primer al último paso:<br><br>
+    1. Memoria a corto plazo / de trabajo &nbsp;&nbsp; 2. Registros sensoriales &nbsp;&nbsp; 3. Estímulos ambientales &nbsp;&nbsp; 4. Memoria a largo plazo`,
+    opciones: [
+      'Registros sensoriales → Estímulos ambientales → Memoria a corto plazo → Memoria a largo plazo',
+      'Estímulos ambientales → Registros sensoriales → Memoria a corto plazo → Memoria a largo plazo',
+      'Memoria a corto plazo → Estímulos ambientales → Registros sensoriales → Memoria a largo plazo'
+    ],
+    correcta: 1, // B
+    fb_ok: '¡Excelente! El flujo correcto es: Estímulos ambientales → Registros sensoriales → Memoria a corto plazo (atención) → Memoria a largo plazo (codificación).',
+    fb_err: 'La respuesta correcta es B. El modelo de procesamiento de información comienza con los estímulos del ambiente, pasan a los registros sensoriales, luego a la memoria de trabajo (atención) y finalmente a la memoria a largo plazo.'
+  },
+  // ── 17 ─────────────────────────────────────
+  {
+    tipo: 'cd', tipoBadge: 'Cuestionamiento Directo', tipoClass: 'type-cd',
+    stem: `En un aula, un alumno de segundo grado imita el comportamiento agresivo de un compañero mayor. Desde la perspectiva de <strong>Albert Bandura</strong>, la explicación más precisa es que:`,
+    opciones: [
+      'Los niños aprenden observando e imitando a modelos, pero procesan activamente las consecuencias de lo observado antes de reproducir la conducta.',
+      'El niño fue condicionado clásicamente: asoció la agresión con una respuesta emocional que ahora reproduce automáticamente.',
+      'La etapa fálica del desarrollo psicosexual genera conflictos internos que se expresan en conductas agresivas e imitativas.'
+    ],
+    correcta: 0, // A
+    fb_ok: '¡Correcto! Bandura reformuló el conductismo incluyendo la mente: los niños aprenden por observación e imitación, pero procesan activamente las consecuencias, no solo replican mecánicamente.',
+    fb_err: 'La respuesta correcta es A. Bandura propone el aprendizaje por observación: el niño imita, pero procesa activamente las consecuencias. Esto lo distingue del condicionamiento clásico (B) y del psicoanálisis (C).'
+  },
+  // ── 18 ─────────────────────────────────────
+  {
+    tipo: 're', tipoBadge: 'Relación de Elementos', tipoClass: 'type-re',
+    stem: `Relacione cada <strong>nivel del modelo ecológico de Bronfenbrenner</strong> con los elementos que lo conforman:<br><br>
+    <table class="q-table"><thead><tr><th>Nivel</th><th>Elementos</th></tr></thead><tbody>
+    <tr><td>1. Macrosistema</td><td>a) Familia, escuela, compañeros, iglesia, barrio</td></tr>
+    <tr><td>2. Exosistema / Mesosistema</td><td>b) Valores culturales, leyes, costumbres, sistemas político-económicos</td></tr>
+    <tr><td>3. Microsistema</td><td>c) Lugar de trabajo de padres, medios masivos, servicios comunitarios</td></tr>
+    </tbody></table>`,
+    opciones: [
+      '1a – 2c – 3b',
+      '1c – 2b – 3a',
+      '1b – 2c – 3a'
+    ],
+    correcta: 2, // C
+    fb_ok: '¡Correcto! Macrosistema = valores culturales, leyes (b); Exosistema/Mesosistema = trabajo de padres, medios masivos (c); Microsistema = familia, escuela, barrio (a).',
+    fb_err: 'La respuesta correcta es C: el Macrosistema incluye cultura y leyes; el Exosistema/Mesosistema incluye trabajo de padres y medios; el Microsistema incluye familia y escuela, que son los entornos directos del niño.'
+  },
+  // ── 19 ─────────────────────────────────────
+  {
+    tipo: 'co', tipoBadge: 'Completamiento', tipoClass: 'type-co',
+    stem: `La <strong>visión posmoderna del desarrollo</strong> plantea que los dualismos tradicionales como "naturaleza vs. crianza"…`,
+    opciones: [
+      '…están obsoletos, ya que las teorías son construcciones humanas, el niño y el ambiente cambian sin cesar y el desarrollo rara vez sigue secuencias universales.',
+      '…son la base científica más sólida para explicar el desarrollo infantil con certeza y generalidad absoluta.',
+      '…deben resolverse a favor de la biología, pues la genética es el factor determinante del desarrollo infantil.'
+    ],
+    correcta: 0, // A
+    fb_ok: '¡Excelente! La visión posmoderna señala que los dualismos clásicos están superados: ninguna teoría explica todo, el desarrollo no sigue secuencias universales y el contexto siempre importa.',
+    fb_err: 'La respuesta correcta es A. La visión posmoderna declara obsoletos los dualismos: las teorías son construcciones humanas, el niño y el contexto cambian constantemente, y no existen secuencias universales.'
+  },
+  // ── 20 ─────────────────────────────────────
+  {
+    tipo: 'cd', tipoBadge: 'Cuestionamiento Directo', tipoClass: 'type-cd',
+    stem: `Según la <strong>Matriz de Síntesis Teórica</strong>, ¿qué postura adoptan las teorías conductuales respecto al <em>rol del niño</em> en su desarrollo?`,
+    opciones: [
+      'El niño es activo: construye activamente su conocimiento e impulsa su propio desarrollo.',
+      'El niño es esencialmente pasivo: su desarrollo es modelado por estímulos y refuerzos externos, aunque en el aprendizaje social puede mostrarse algo más activo.',
+      'El niño es activo únicamente cuando interactúa con un adulto más capaz dentro de la zona de desarrollo próximo.'
+    ],
+    correcta: 1, // B
+    fb_ok: '¡Correcto! Según la Matriz, las teorías conductuales consideran al niño pasivo (moldeado externamente), aunque en el aprendizaje social cognoscitivo hay un matiz de actividad.',
+    fb_err: 'La respuesta correcta es B. La Matriz de Síntesis indica que las teorías conductuales conciben al niño como pasivo: es moldeado por el entorno. La opción A corresponde a teorías interactivas/cognoscitivas.'
+  },
+  // ── 21 ─────────────────────────────────────
+  {
+    tipo: 'or', tipoBadge: 'Ordenamiento', tipoClass: 'type-or',
+    stem: `Ordene los <strong>niveles del modelo ecológico de Bronfenbrenner</strong>, del más cercano al niño al más alejado:<br><br>
+    1. Macrosistema (valores culturales, leyes) &nbsp;&nbsp; 2. Microsistema (familia, escuela) &nbsp;&nbsp; 3. Exosistema/Mesosistema (trabajo de padres, medios)`,
+    opciones: [
+      'Macrosistema → Exosistema → Microsistema',
+      'Exosistema → Macrosistema → Microsistema',
+      'Microsistema → Exosistema/Mesosistema → Macrosistema'
+    ],
+    correcta: 2, // C
+    fb_ok: '¡Excelente! El modelo ecológico va del núcleo más cercano al niño: Microsistema (familia, escuela) → Exosistema/Mesosistema → Macrosistema (cultura, leyes).',
+    fb_err: 'La respuesta correcta es C. El modelo de Bronfenbrenner es como "muñecas rusas": el Microsistema es el anillo más cercano al niño; el Macrosistema (cultura) es el más alejado.'
+  },
+  // ── 22 ─────────────────────────────────────
+  {
+    tipo: 'cd', tipoBadge: 'Cuestionamiento Directo', tipoClass: 'type-cd',
+    stem: `¿Cuál es el concepto central que distingue la teoría maduracional de <strong>Arnold Gesell</strong> respecto a otras perspectivas del desarrollo?`,
+    opciones: [
+      'El concepto de "madurez biológica": el aprendizaje solo ocurre cuando el niño está biológicamente listo; el ambiente aporta nutrición pero no altera la secuencia.',
+      'El concepto de "tabula rasa": el niño es producto exclusivo de su entorno y sus experiencias acumuladas.',
+      'El concepto de "determinismo recíproco": la mente, la conducta y el ambiente se influyen mutuamente de forma bidireccional.'
+    ],
+    correcta: 0, // A
+    fb_ok: '¡Correcto! Gesell introdujo el concepto de "madurez": el aprendizaje aguarda a que el niño esté biológicamente preparado. El ambiente puede nutrir, pero no cambiar la secuencia predeterminada.',
+    fb_err: 'La respuesta correcta es A. Gesell es el teórico de la maduración: el aprendizaje solo ocurre cuando el niño está biológicamente listo. "Tabula rasa" (B) es Locke y "determinismo recíproco" (C) es Bandura.'
+  },
+  // ── 23 ─────────────────────────────────────
+  {
+    tipo: 're', tipoBadge: 'Relación de Elementos', tipoClass: 'type-re',
+    stem: `Relacione cada <strong>concepción docente</strong> con la acción que realiza ante un niño considerado "no preparado":<br><br>
+    <table class="q-table"><thead><tr><th>Concepción</th><th>Acción</th></tr></thead><tbody>
+    <tr><td>1. Concepción naturalista</td><td>a) Identificar el déficit específico (ej. audición, motricidad) y aplicar programas de compensación</td></tr>
+    <tr><td>2. Concepción remedialista</td><td>b) Dar un año más; la naturaleza hará su trabajo por sí sola</td></tr>
+    <tr><td>3. Concepción diagnóstico-prescriptiva</td><td>c) Ofrecer instrucción complementaria y tiempo extra para que madure</td></tr>
+    </tbody></table>`,
+    opciones: [
+      '1c – 2a – 3b',
+      '1b – 2c – 3a',
+      '1a – 2b – 3c'
+    ],
+    correcta: 1, // B
+    fb_ok: '¡Correcto! Naturalista = esperar (b); Remedialista = instrucción complementaria y tiempo (c); Diagnóstico-prescriptiva = identificar déficit y compensar (a).',
+    fb_err: 'La respuesta correcta es B: la naturalista espera que la naturaleza actúe; la remedialista da instrucción extra y tiempo; la diagnóstico-prescriptiva identifica el déficit y aplica un programa de compensación.'
+  },
+  // ── 24 ─────────────────────────────────────
+  {
+    tipo: 'co', tipoBadge: 'Completamiento', tipoClass: 'type-co',
+    stem: `En el aprendizaje social cognoscitivo de <strong>Bandura</strong>, el concepto de <em>"determinismo recíproco"</em> implica que…`,
+    opciones: [
+      '…el desarrollo está determinado únicamente por factores genéticos que el niño no puede modificar con su conducta.',
+      '…el ambiente controla de forma unilateral la conducta del niño mediante refuerzos y castigos externos.',
+      '…las representaciones mentales del niño, su conducta y el ambiente se influyen mutuamente de forma bidireccional y constante.'
+    ],
+    correcta: 2, // C
+    fb_ok: '¡Excelente! El determinismo recíproco de Bandura: mente (percepciones, emociones), conducta y ambiente forman un triángulo de influencias mutuas. El niño no es receptor pasivo.',
+    fb_err: 'La respuesta correcta es C. Para Bandura, el determinismo recíproco significa que mente, conducta y ambiente se influyen en tres direcciones. El niño actúa sobre el ambiente y ese ambiente influye en su pensamiento.'
+  },
+  // ── 25 ─────────────────────────────────────
+  {
+    tipo: 'cd', tipoBadge: 'Cuestionamiento Directo', tipoClass: 'type-cd',
+    stem: `Una docente coloca intencionalmente a un alumno con dificultades junto a un compañero más avanzado, para que lo guíe en la resolución de problemas. Esta estrategia se fundamenta principalmente en:`,
+    opciones: [
+      'La teoría sociocultural de Vygotsky: el niño asume responsabilidad creciente guiado por compañeros más capaces, transformando funciones elementales en superiores.',
+      'La teoría conductual de Skinner: el compañero actúa como reforzador positivo que fortalece las conductas correctas del alumno con dificultades.',
+      'La teoría maduracional de Gesell: el ambiente del aula aporta la nutrición necesaria para que la maduración siga su secuencia natural.'
+    ],
+    correcta: 0, // A
+    fb_ok: '¡Correcto! Vygotsky propone que los niños asumen responsabilidad creciente guiados por pares más capaces. Colocar a un alumno más avanzado junto a uno con dificultades es un andamiaje clásico de esta teoría.',
+    fb_err: 'La respuesta correcta es A. Esta es la esencia de Vygotsky: el aprendizaje ocurre en la interacción social guiada por alguien más capaz. Skinner (B) se centraría en refuerzos, no en el aprendizaje guiado por pares.'
+  },
+  // ── 26 ─────────────────────────────────────
+  {
+    tipo: 're', tipoBadge: 'Relación de Elementos', tipoClass: 'type-re',
+    stem: `Relacione cada perspectiva teórica con su postura sobre el problema <strong>Naturaleza / Crianza</strong>:<br><br>
+    <table class="q-table"><thead><tr><th>Perspectiva</th><th>Postura</th></tr></thead><tbody>
+    <tr><td>1. Teorías maduracionales</td><td>a) Ambiente: la crianza es el factor determinante</td></tr>
+    <tr><td>2. Teorías contextuales (Vygotsky, Bronfenbrenner)</td><td>b) Biología: la naturaleza es el factor determinante</td></tr>
+    <tr><td>3. Teorías conductuales</td><td>c) Interacción multinivel entre naturaleza y crianza en múltiples contextos</td></tr>
+    </tbody></table>`,
+    opciones: [
+      '1c – 2a – 3b',
+      '1b – 2c – 3a',
+      '1a – 2b – 3c'
+    ],
+    correcta: 1, // B
+    fb_ok: '¡Correcto! Maduracionales = biología/naturaleza (b); Contextuales = interacción multinivel (c); Conductuales = ambiente/crianza (a). Así aparece en la Matriz de Síntesis Teórica.',
+    fb_err: 'La respuesta correcta es B: las teorías maduracionales (Gesell) priorizan la biología; las contextuales (Vygotsky, Bronfenbrenner) consideran la interacción multinivel; las conductuales priorizan el ambiente.'
+  },
+  // ── 27 ─────────────────────────────────────
+  {
+    tipo: 'co', tipoBadge: 'Completamiento', tipoClass: 'type-co',
+    stem: `Según la <strong>Matriz de Síntesis Teórica</strong>, la postura de las <strong>teorías interactivas</strong> (como la de Piaget) respecto al problema Estabilidad / Plasticidad es…`,
+    opciones: [
+      '…gran plasticidad, porque el desarrollo es totalmente continuo y sin períodos críticos fijos.',
+      '…períodos críticos fijos, porque la biología determina momentos inamovibles e invariantes del desarrollo.',
+      '…un poco de plasticidad, ya que combina cierta estabilidad en las etapas con algo de flexibilidad de cambio.'
+    ],
+    correcta: 2, // C
+    fb_ok: '¡Correcto! La Matriz indica que las teorías interactivas (como Piaget) adoptan una postura intermedia: reconocen cierta plasticidad, pero también una secuencia de etapas relativamente estable.',
+    fb_err: 'La respuesta correcta es C. Según la Matriz de Síntesis, las teorías interactivas (Piaget) tienen "un poco de plasticidad": más que las maduracionales (periodos críticos fijos), pero menos que las conductuales o contextuales.'
+  },
+  // ── 28 ─────────────────────────────────────
+  {
+    tipo: 'cd', tipoBadge: 'Cuestionamiento Directo', tipoClass: 'type-cd',
+    stem: `Según la <strong>visión posmoderna del desarrollo</strong>, ¿por qué ninguna teoría por sí sola puede explicar completamente el mundo infantil?`,
+    opciones: [
+      'Porque las teorías son construcciones humanas (no verdades absolutas), el desarrollo rara vez tiene secuencias universales y el niño junto con su ambiente cambian sin cesar.',
+      'Porque solo las teorías biológicas poseen la rigurosidad científica suficiente para explicar el desarrollo con certeza.',
+      'Porque el conductismo ya demostró que las etapas críticas universales son necesarias y suficientes para comprender el desarrollo.'
+    ],
+    correcta: 0, // A
+    fb_ok: '¡Excelente! La visión posmoderna reconoce que las teorías son construcciones humanas, no verdades absolutas; el desarrollo no sigue secuencias universales y el niño y su entorno cambian continuamente.',
+    fb_err: 'La respuesta correcta es A. La visión posmoderna declara que las teorías son construcciones humanas y que el desarrollo no sigue secuencias universales, pues niño y ambiente cambian sin cesar. Ninguna teoría lo explica todo.'
+  },
+  // ── 29 ─────────────────────────────────────
+  {
+    tipo: 'or', tipoBadge: 'Ordenamiento', tipoClass: 'type-or',
+    stem: `Ordene las siguientes perspectivas teóricas de <strong>mayor énfasis biologicista a mayor énfasis contextual/ambiental</strong>, según lo presentado en la guía:<br><br>
+    1. Teorías conductuales &nbsp;&nbsp; 2. Teorías biológicas/maduracionales &nbsp;&nbsp; 3. Teorías contextuales (Vygotsky, Bronfenbrenner) &nbsp;&nbsp; 4. Teorías cognoscitivas (Piaget)`,
+    opciones: [
+      'Maduracionales → Cognoscitivas → Conductuales → Contextuales',
+      'Maduracionales → Conductuales → Cognoscitivas → Contextuales',
+      'Conductuales → Maduracionales → Cognoscitivas → Contextuales'
+    ],
+    correcta: 1, // B
+    fb_ok: '¡Correcto! De más biologicista a más contextual: Maduracionales (biología pura) → Conductuales (ambiente externo) → Cognoscitivas (interacción niño-ambiente) → Contextuales (sistemas anidados).',
+    fb_err: 'La respuesta correcta es B. El espectro va de las más biologicistas (maduracionales) a las más contextuales (Vygotsky, Bronfenbrenner). Las conductuales priorizan el ambiente externo; las cognoscitivas, la interacción.'
+  },
+  // ── 30 ─────────────────────────────────────
+  {
+    tipo: 'cd', tipoBadge: 'Cuestionamiento Directo', tipoClass: 'type-cd',
+    stem: `Un director escolar reflexiona sobre por qué un alumno que cambió de barrio y escuela mejoró notablemente su desempeño académico. Desde la perspectiva <strong>ecológica de Bronfenbrenner</strong>, la explicación más adecuada es:`,
+    opciones: [
+      'El alumno alcanzó su nivel de madurez biológica necesario para el aprendizaje justo en ese momento del año.',
+      'El nuevo maestro aplicó refuerzos positivos más efectivos mediante el condicionamiento operante.',
+      'El cambio en su microsistema (nuevo barrio, nuevos compañeros, nueva escuela) modificó su desarrollo, pues los cambios en un nivel del sistema ecológico influyen radicalmente en los demás.'
+    ],
+    correcta: 2, // C
+    fb_ok: '¡Excelente! Bronfenbrenner propone que los sistemas anidados interactúan: un cambio en el microsistema (barrio, escuela) repercute en todos los demás niveles y transforma el desarrollo del niño.',
+    fb_err: 'La respuesta correcta es C. Bronfenbrenner explica que los cambios en un nivel del sistema ecológico (microsistema: barrio, escuela) influyen radicalmente en los demás y pueden transformar el desarrollo del niño.'
+  }
+];
+
+// ═══════════════════════════════════════════
+//  ESTADO DEL SIMULADOR
+// ═══════════════════════════════════════════
+let nombre = '';
+let currentQ = 0;
+let aciertos = 0;
+let errores = 0;
+let respondida = false;
+const letras = ['A', 'B', 'C'];
+
+// ═══════════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════════
+function showTab(tab) {
+  document.getElementById('tab-simulador').style.display = (tab === 'simulador') ? 'block' : 'none';
+  document.getElementById('tab-guia').style.display = (tab === 'guia') ? 'block' : 'none';
+  document.querySelectorAll('.nav-tab').forEach((el, i) => {
+    el.classList.toggle('active', (i === 0 && tab === 'simulador') || (i === 1 && tab === 'guia'));
+  });
+}
+
+// ═══════════════════════════════════════════
+//  INICIAR
+// ═══════════════════════════════════════════
+function iniciarSimulador() {
+  const inp = document.getElementById('input-nombre').value.trim();
+  if (!inp) {
+    document.getElementById('input-nombre').focus();
+    document.getElementById('input-nombre').style.borderColor = 'var(--error)';
+    setTimeout(() => document.getElementById('input-nombre').style.borderColor = '', 1500);
+    return;
+  }
+  nombre = inp;
+  currentQ = 0; aciertos = 0; errores = 0;
+  mostrarScreen('screen-quiz');
+  renderPregunta();
+}
+
+function mostrarScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ═══════════════════════════════════════════
+//  RENDER PREGUNTA
+// ═══════════════════════════════════════════
+function renderPregunta() {
+  respondida = false;
+  const q = preguntas[currentQ];
+  const pct = (currentQ / 30) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('q-counter').textContent = `Pregunta ${currentQ + 1} / 30`;
+  const badge = document.getElementById('q-type-badge');
+  badge.textContent = q.tipoBadge;
+  badge.className = 'q-type-badge ' + q.tipoClass;
+  document.getElementById('mini-ok').textContent = '✔ ' + aciertos;
+  document.getElementById('mini-err').textContent = '✘ ' + errores;
+  document.getElementById('q-stem').innerHTML = q.stem;
+
+  const ol = document.getElementById('options-list');
+  ol.innerHTML = '';
+  q.opciones.forEach((op, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="opt-label">${letras[i]}</span><span>${op}</span>`;
+    btn.onclick = () => seleccionar(i);
+    ol.appendChild(btn);
+  });
+
+  const fb = document.getElementById('feedback-card');
+  fb.className = 'feedback-card';
+  document.getElementById('btn-next').classList.remove('enabled');
+}
+
+// ═══════════════════════════════════════════
+//  SELECCIONAR
+// ═══════════════════════════════════════════
+function seleccionar(idx) {
+  if (respondida) return;
+  respondida = true;
+  const q = preguntas[currentQ];
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach(b => b.disabled = true);
+
+  if (idx === q.correcta) {
+    aciertos++;
+    btns[idx].classList.add('correct');
+    mostrarFeedback(true, q.fb_ok);
+  } else {
+    errores++;
+    btns[idx].classList.add('wrong');
+    btns[q.correcta].classList.add('correct');
+    mostrarFeedback(false, `<strong>Respuesta correcta: ${letras[q.correcta]}.</strong> ${q.fb_err}`);
+  }
+  document.getElementById('mini-ok').textContent = '✔ ' + aciertos;
+  document.getElementById('mini-err').textContent = '✘ ' + errores;
+  document.getElementById('btn-next').classList.add('enabled');
+}
+
+// ═══════════════════════════════════════════
+//  FEEDBACK
+// ═══════════════════════════════════════════
+function mostrarFeedback(ok, msg) {
+  const fb = document.getElementById('feedback-card');
+  const icon = document.getElementById('fb-icon');
+  const text = document.getElementById('fb-text');
+  fb.className = 'feedback-card show ' + (ok ? 'success' : 'error');
+  icon.textContent = ok ? '🎉' : '💡';
+  text.innerHTML = msg;
+}
+
+// ═══════════════════════════════════════════
+//  SIGUIENTE
+// ═══════════════════════════════════════════
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= 30) {
+    mostrarResultados();
+  } else {
+    // Transición suave
+    const card = document.getElementById('question-card');
+    card.style.opacity = '0'; card.style.transform = 'translateX(20px)';
+    setTimeout(() => {
+      renderPregunta();
+      card.style.transition = 'opacity 0.3s, transform 0.3s';
+      card.style.opacity = '1'; card.style.transform = 'translateX(0)';
+    }, 200);
+  }
+}
+
+// ═══════════════════════════════════════════
+//  RESULTADOS
+// ═══════════════════════════════════════════
+function mostrarResultados() {
+  mostrarScreen('screen-results');
+  const pct = Math.round((aciertos / 30) * 100);
+  document.getElementById('res-ok').textContent = aciertos;
+  document.getElementById('res-err').textContent = errores;
+  document.getElementById('res-pct').textContent = pct + '%';
+  document.getElementById('results-nombre').textContent = nombre;
+
+  let emoji, title, msg;
+  if (pct >= 90) {
+    emoji = '🏆'; title = '¡Dominio excelente!';
+    msg = `<span class="emoji">🌟</span>Felicitaciones, ${nombre}. Tu comprensión del desarrollo infantil es sobresaliente. Sigue profundizando para consolidar tu experticia docente.`;
+  } else if (pct >= 75) {
+    emoji = '🎯'; title = '¡Muy buen desempeño!';
+    msg = `<span class="emoji">💪</span>Buen trabajo, ${nombre}. Tienes una base teórica sólida. Revisa los temas donde tuviste dudas para alcanzar la excelencia.`;
+  } else if (pct >= 60) {
+    emoji = '📖'; title = '¡Progreso notable!';
+    msg = `<span class="emoji">📚</span>Bien, ${nombre}. Llevas un avance significativo. Te recomendamos repasar la Guía de Estudio para fortalecer los conceptos clave.`;
+  } else {
+    emoji = '🌱'; title = 'Sigue practicando';
+    msg = `<span class="emoji">💡</span>No te desanimes, ${nombre}. Buen trabajo al intentarlo. Estudia la Guía de Estudio y vuelve a practicar para mejorar tu desempeño.`;
+  }
+
+  document.getElementById('results-emoji').textContent = emoji;
+  document.getElementById('results-title').textContent = title;
+  document.getElementById('motivation-msg').innerHTML = msg;
+
+  setTimeout(() => {
+    document.getElementById('perf-bar').style.width = pct + '%';
+    document.getElementById('progress-fill').style.width = '100%';
+  }, 200);
+}
+
+// ═══════════════════════════════════════════
+//  REINICIAR
+// ═══════════════════════════════════════════
+function reiniciar() {
+  currentQ = 0; aciertos = 0; errores = 0; respondida = false;
+  document.getElementById('input-nombre').value = nombre;
+  document.getElementById('progress-fill').style.width = '0%';
+  mostrarScreen('screen-start');
+}
+
+// ═══════════════════════════════════════════
+//  PDF TOGGLE
+// ═══════════════════════════════════════════
+function togglePDF() {
+  const wrap = document.getElementById('pdf-embed-wrap');
+  if (wrap.style.display === 'none') {
+    wrap.style.display = 'block';
+    wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+// Inicializar tab
+showTab('simulador');
+</script>
+</body>
+</html>

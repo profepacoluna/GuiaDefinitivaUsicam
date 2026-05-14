@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador – Acuerdo 14/12/23 | Prof. Francisco de Jesús Luna Benítez</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Merriweather:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary:    #1a6fa8;
+    --primary-lt: #2f8fc8;
+    --accent:     #f0a500;
+    --accent-lt:  #ffc740;
+    --success:    #1a9e6e;
+    --error:      #d94040;
+    --bg:         #f0f6fc;
+    --card:       #ffffff;
+    --text:       #1a2a3a;
+    --muted:      #5a7080;
+    --border:     #cde0ef;
+    --shadow:     0 4px 24px rgba(26,111,168,.13);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .site-header {
+    background: linear-gradient(135deg, #0d4f80 0%, #1a6fa8 45%, #2599d4 100%);
+    padding: 28px 20px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .site-header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 70% 50%, rgba(255,199,64,.18) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .header-badge {
+    display: inline-block;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.35);
+    color: #fff;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 50px;
+    margin-bottom: 12px;
+  }
+  .site-header h1 {
+    font-family: 'Merriweather', serif;
+    font-size: clamp(1.3rem, 4vw, 2rem);
+    color: #fff;
+    line-height: 1.25;
+    text-shadow: 0 2px 12px rgba(0,0,0,.25);
+  }
+  .site-header h1 span { color: var(--accent-lt); }
+  .header-sub {
+    margin-top: 8px;
+    font-size: .9rem;
+    color: rgba(255,255,255,.8);
+    font-weight: 600;
+  }
+  .header-dec {
+    position: absolute;
+    bottom: -18px; right: -18px;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.06);
+    pointer-events: none;
+  }
+
+  /* ── TABS ── */
+  .tabs-bar {
+    display: flex;
+    background: #fff;
+    border-bottom: 2px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,.07);
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 14px 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: .92rem;
+    font-weight: 700;
+    color: var(--muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all .25s;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+  }
+  .tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    background: rgba(26,111,168,.05);
+  }
+  .tab-btn:hover:not(.active) { background: #f5f9fd; color: var(--primary-lt); }
+
+  /* ── PANELS ── */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── WELCOME SCREEN ── */
+  #welcome-screen {
+    max-width: 540px;
+    margin: 40px auto;
+    padding: 0 18px;
+    animation: fadeUp .5s ease both;
+  }
+  .welcome-card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 36px 32px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    text-align: center;
+  }
+  .welcome-icon {
+    width: 80px; height: 80px;
+    background: linear-gradient(135deg, #e8f4ff, #c5e0f5);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 2.2rem;
+  }
+  .welcome-card h2 {
+    font-size: 1.45rem; font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 8px;
+  }
+  .welcome-card p { color: var(--muted); font-size: .93rem; line-height: 1.6; margin-bottom: 6px; }
+  .info-pills {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    justify-content: center;
+    margin: 18px 0 24px;
+  }
+  .pill {
+    background: linear-gradient(135deg, #e8f4ff, #d0ebff);
+    border: 1px solid #b0d6f0;
+    color: var(--primary);
+    font-size: .78rem; font-weight: 700;
+    padding: 5px 12px; border-radius: 50px;
+  }
+  .input-group { text-align: left; margin-bottom: 20px; }
+  .input-group label {
+    display: block; font-weight: 700; font-size: .88rem;
+    color: var(--text); margin-bottom: 7px;
+  }
+  .input-group input {
+    width: 100%; padding: 13px 16px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem; font-weight: 600;
+    color: var(--text);
+    background: #f8fbff;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .input-group input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(26,111,168,.12);
+  }
+  .btn-start {
+    width: 100%; padding: 15px;
+    background: linear-gradient(135deg, var(--primary), #0d4f80);
+    color: #fff; font-family: 'Nunito', sans-serif;
+    font-size: 1.05rem; font-weight: 800;
+    border: none; border-radius: 14px;
+    cursor: pointer; letter-spacing: .03em;
+    box-shadow: 0 4px 16px rgba(26,111,168,.35);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .btn-start:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26,111,168,.4); }
+  .btn-start:active { transform: translateY(0); }
+
+  /* ── QUIZ SCREEN ── */
+  #quiz-screen { max-width: 720px; margin: 0 auto; padding: 24px 18px 40px; }
+  .progress-wrap {
+    margin-bottom: 20px;
+    animation: fadeUp .4s ease both;
+  }
+  .progress-info {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px;
+  }
+  .progress-label { font-size: .82rem; font-weight: 700; color: var(--muted); }
+  .progress-count { font-size: .82rem; font-weight: 800; color: var(--primary); }
+  .progress-bar-bg {
+    height: 8px; border-radius: 50px;
+    background: #ddeef7;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; border-radius: 50px;
+    background: linear-gradient(90deg, var(--primary-lt), var(--accent));
+    transition: width .5s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* question card */
+  .q-card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 28px 28px 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    animation: fadeUp .35s ease both;
+    transition: box-shadow .2s;
+  }
+  .q-tipo {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: linear-gradient(135deg, #e8f4ff, #d0ebff);
+    border: 1px solid #b0d6f0;
+    color: var(--primary); font-size: .72rem; font-weight: 800;
+    letter-spacing: .08em; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 50px; margin-bottom: 14px;
+  }
+  .q-num { font-size: .78rem; color: var(--accent); font-weight: 800; }
+  .q-base {
+    font-size: 1rem; font-weight: 700; line-height: 1.65;
+    color: var(--text); margin-bottom: 6px;
+  }
+  /* table for RE questions */
+  .q-table {
+    width: 100%; border-collapse: collapse;
+    font-size: .88rem; margin: 10px 0 16px;
+    border-radius: 10px; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .q-table th {
+    background: linear-gradient(135deg, #ddeef7, #c8e3f5);
+    color: var(--primary); font-weight: 800; font-size: .78rem;
+    text-transform: uppercase; letter-spacing: .07em;
+    padding: 9px 14px; text-align: left;
+  }
+  .q-table td { padding: 8px 14px; border-top: 1px solid var(--border); font-weight: 600; vertical-align: top; }
+  .q-table tr:nth-child(even) td { background: #f5faff; }
+  /* list for OR questions */
+  .q-list {
+    background: #f5faff; border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 16px;
+    margin: 10px 0 16px;
+    list-style: none;
+  }
+  .q-list li {
+    padding: 5px 0; font-size: .9rem; font-weight: 600;
+    display: flex; align-items: flex-start; gap: 10px;
+    border-bottom: 1px dashed #ddeef7;
+  }
+  .q-list li:last-child { border-bottom: none; }
+  .q-list .li-num {
+    min-width: 24px; height: 24px;
+    background: var(--primary); color: #fff;
+    border-radius: 50%; font-size: .72rem; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+
+  /* options */
+  .options { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+  .opt-btn {
+    width: 100%; padding: 13px 16px;
+    background: #f8fbff; border: 2px solid var(--border);
+    border-radius: 12px; text-align: left;
+    font-family: 'Nunito', sans-serif; font-size: .93rem; font-weight: 700;
+    color: var(--text); cursor: pointer;
+    display: flex; align-items: flex-start; gap: 12px;
+    transition: all .18s;
+    line-height: 1.5;
+  }
+  .opt-btn:hover:not(:disabled) {
+    border-color: var(--primary-lt);
+    background: #eef6fd;
+    transform: translateX(3px);
+  }
+  .opt-letter {
+    min-width: 30px; height: 30px;
+    background: linear-gradient(135deg, #ddeef7, #c8e3f5);
+    color: var(--primary); border-radius: 8px;
+    font-size: .82rem; font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+    transition: all .18s;
+  }
+  .opt-btn.correct {
+    border-color: var(--success);
+    background: linear-gradient(135deg, #e6f9f2, #d0f2e4);
+  }
+  .opt-btn.correct .opt-letter {
+    background: var(--success); color: #fff;
+  }
+  .opt-btn.wrong {
+    border-color: var(--error);
+    background: linear-gradient(135deg, #fdeaea, #fbd4d4);
+  }
+  .opt-btn.wrong .opt-letter {
+    background: var(--error); color: #fff;
+  }
+  .opt-btn.highlight {
+    border-color: var(--success);
+    background: linear-gradient(135deg, #e6f9f2, #d0f2e4);
+  }
+  .opt-btn.highlight .opt-letter {
+    background: var(--success); color: #fff;
+  }
+  .opt-btn:disabled { cursor: default; }
+
+  /* feedback */
+  .feedback {
+    margin-top: 16px; padding: 14px 16px;
+    border-radius: 12px; font-size: .88rem; font-weight: 600;
+    line-height: 1.6; display: none;
+    animation: fadeUp .3s ease both;
+  }
+  .feedback.correct-fb {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: linear-gradient(135deg, #e6f9f2, #d4f5e5);
+    border: 1px solid #8dd5b0; color: #0d6e47;
+  }
+  .feedback.wrong-fb {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: linear-gradient(135deg, #fdeaea, #fbd4d4);
+    border: 1px solid #f0a0a0; color: #8b1a1a;
+  }
+  .fb-icon { font-size: 1.3rem; flex-shrink: 0; }
+  .fb-text strong { font-weight: 800; display: block; margin-bottom: 3px; }
+
+  /* next button */
+  .btn-next {
+    display: none; width: 100%; margin-top: 16px;
+    padding: 13px;
+    background: linear-gradient(135deg, var(--primary), #0d4f80);
+    color: #fff; font-family: 'Nunito', sans-serif;
+    font-size: .95rem; font-weight: 800;
+    border: none; border-radius: 12px;
+    cursor: pointer; letter-spacing: .03em;
+    box-shadow: 0 4px 14px rgba(26,111,168,.3);
+    transition: transform .15s, box-shadow .15s;
+    animation: fadeUp .3s ease both;
+  }
+  .btn-next:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(26,111,168,.38); }
+  .btn-next:active { transform: translateY(0); }
+
+  /* stats bar */
+  .stats-bar {
+    display: flex; gap: 10px; margin-top: 16px;
+    animation: fadeUp .35s ease .05s both;
+  }
+  .stat-chip {
+    flex: 1; padding: 10px 8px;
+    background: var(--card); border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    border: 1px solid var(--border);
+    text-align: center;
+  }
+  .stat-chip .sv { font-size: 1.3rem; font-weight: 900; }
+  .stat-chip .sl { font-size: .68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; }
+  .stat-chip.ok .sv { color: var(--success); }
+  .stat-chip.err .sv { color: var(--error); }
+  .stat-chip.pct .sv { color: var(--primary); }
+
+  /* ── RESULTS SCREEN ── */
+  #results-screen { max-width: 580px; margin: 0 auto; padding: 30px 18px 50px; }
+  .result-card {
+    background: var(--card); border-radius: 24px;
+    padding: 36px 28px; box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    text-align: center;
+    animation: scaleIn .45s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  .result-trophy {
+    font-size: 3.5rem; margin-bottom: 10px;
+    animation: bounce 1s ease .45s both;
+  }
+  .result-name { font-size: 1rem; color: var(--muted); font-weight: 700; margin-bottom: 4px; }
+  .result-title {
+    font-family: 'Merriweather', serif;
+    font-size: 1.5rem; color: var(--primary);
+    margin-bottom: 20px; line-height: 1.3;
+  }
+  .result-donut-wrap {
+    display: flex; justify-content: center; margin: 16px 0 22px;
+  }
+  .result-donut {
+    width: 130px; height: 130px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+    font-size: 2rem; font-weight: 900;
+    color: var(--primary);
+    box-shadow: 0 4px 18px rgba(26,111,168,.18);
+    position: relative;
+  }
+  .result-donut .pct-label { font-size: .7rem; font-weight: 700; color: var(--muted); margin-top: -3px; }
+  .result-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin-bottom: 22px;
+  }
+  .rg-cell {
+    padding: 14px 10px; border-radius: 14px;
+    border: 1px solid var(--border);
+  }
+  .rg-cell .rv { font-size: 1.8rem; font-weight: 900; }
+  .rg-cell .rl { font-size: .72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
+  .rg-cell.ok { background: linear-gradient(135deg, #e6f9f2, #d4f5e5); border-color: #8dd5b0; }
+  .rg-cell.ok .rv { color: var(--success); }
+  .rg-cell.err { background: linear-gradient(135deg, #fdeaea, #fbd4d4); border-color: #f0a0a0; }
+  .rg-cell.err .rv { color: var(--error); }
+  .motivador {
+    background: linear-gradient(135deg, #e8f4ff, #d0ebff);
+    border: 1px solid #b0d6f0; border-radius: 14px;
+    padding: 16px; font-size: .92rem; font-weight: 700;
+    color: var(--primary); line-height: 1.6; margin-bottom: 22px;
+    font-style: italic;
+  }
+  .btn-retry {
+    display: inline-block; padding: 13px 36px;
+    background: linear-gradient(135deg, var(--accent), #e09000);
+    color: #fff; font-family: 'Nunito', sans-serif;
+    font-size: 1rem; font-weight: 800; border: none;
+    border-radius: 14px; cursor: pointer;
+    box-shadow: 0 4px 14px rgba(240,165,0,.35);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .btn-retry:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(240,165,0,.4); }
+
+  /* ── GUÍA DE ESTUDIO ── */
+  #panel-guia { padding: 24px 18px; max-width: 860px; margin: 0 auto; }
+  .guia-header {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--card); border-radius: 16px;
+    padding: 18px 22px; box-shadow: var(--shadow);
+    border: 1px solid var(--border); margin-bottom: 18px;
+    animation: fadeUp .4s ease both;
+  }
+  .guia-icon { font-size: 2.2rem; }
+  .guia-header h3 { font-size: 1.1rem; font-weight: 800; color: var(--primary); }
+  .guia-header p { font-size: .82rem; color: var(--muted); font-weight: 600; margin-top: 2px; }
+  .btn-open-pdf {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; margin-left: auto;
+    background: linear-gradient(135deg, var(--primary), #0d4f80);
+    color: #fff; font-family: 'Nunito', sans-serif;
+    font-size: .88rem; font-weight: 800; border: none;
+    border-radius: 10px; cursor: pointer; white-space: nowrap;
+    box-shadow: 0 3px 10px rgba(26,111,168,.3);
+    text-decoration: none;
+    transition: transform .15s;
+  }
+  .btn-open-pdf:hover { transform: translateY(-1px); }
+  .pdf-frame-wrap {
+    background: var(--card); border-radius: 16px;
+    padding: 10px; box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    animation: fadeUp .4s ease .1s both;
+  }
+  .pdf-frame-wrap iframe {
+    width: 100%; height: 74vh;
+    border: none; border-radius: 10px; display: block;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(.88); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); }
+    30% { transform: translateY(-14px); }
+    60% { transform: translateY(-5px); }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .q-card { padding: 20px 16px; }
+    .site-header h1 { font-size: 1.15rem; }
+    .result-grid { grid-template-columns: 1fr 1fr; }
+    .guia-header { flex-wrap: wrap; }
+    .btn-open-pdf { margin-left: 0; width: 100%; justify-content: center; }
+    .stats-bar { flex-wrap: wrap; }
+    .stat-chip { min-width: calc(33% - 7px); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════ HEADER ════════════════════ -->
+<header class="site-header">
+  <div class="header-badge">🏫 Educación Básica · SEP · 2023</div>
+  <h1>Simulador Interactivo de Evaluación<br><span>Acuerdo 14/12/23</span></h1>
+  <p class="header-sub">Prof. Francisco De Jesús Luna Benítez</p>
+  <div class="header-dec"></div>
+</header>
+
+<!-- ════════════════════ TABS ════════════════════ -->
+<nav class="tabs-bar">
+  <button class="tab-btn active" id="tab-sim" onclick="switchTab('sim')">
+    📝 Simulador de Examen
+  </button>
+  <button class="tab-btn" id="tab-guia" onclick="switchTab('guia')">
+    📚 Guía de Estudio
+  </button>
+</nav>
+
+<!-- ════════════════════ PANEL SIMULADOR ════════════════════ -->
+<div class="panel active" id="panel-sim">
+
+  <!-- Welcome -->
+  <div id="welcome-screen">
+    <div class="welcome-card">
+      <div class="welcome-icon">📋</div>
+      <h2>¡Bienvenido/a al Simulador!</h2>
+      <p>Evalúa tus conocimientos sobre el <strong>Acuerdo 14/12/23</strong>: Lineamientos para el protocolo de erradicación del acoso escolar en educación básica.</p>
+      <div class="info-pills">
+        <span class="pill">📌 30 preguntas</span>
+        <span class="pill">✅ 3 opciones c/u</span>
+        <span class="pill">⚡ Retroalimentación inmediata</span>
+        <span class="pill">📊 Resultado final</span>
+      </div>
+      <div class="input-group">
+        <label for="nombre-input">👤 Nombre del estudiante</label>
+        <input type="text" id="nombre-input" placeholder="Escribe tu nombre completo..." autocomplete="off">
+      </div>
+      <button class="btn-start" onclick="iniciarSimulador()">Iniciar Simulador →</button>
+    </div>
+  </div>
+
+  <!-- Quiz -->
+  <div id="quiz-screen" style="display:none;">
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span class="progress-label">Progreso del examen</span>
+        <span class="progress-count" id="prog-count">Pregunta 1 de 30</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="prog-bar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-chip ok">
+        <div class="sv" id="stat-ok">0</div>
+        <div class="sl">✅ Aciertos</div>
+      </div>
+      <div class="stat-chip err">
+        <div class="sv" id="stat-err">0</div>
+        <div class="sl">❌ Errores</div>
+      </div>
+      <div class="stat-chip pct">
+        <div class="sv" id="stat-pct">0%</div>
+        <div class="sl">📊 Desempeño</div>
+      </div>
+    </div>
+
+    <div class="q-card" id="q-card" style="margin-top:16px;">
+      <span class="q-tipo"><span class="q-num" id="q-num">01</span> <span id="q-tipo-label">Cuestionamiento directo</span></span>
+      <div class="q-base" id="q-base"></div>
+      <div id="q-extra"></div>
+      <div class="options" id="options-wrap"></div>
+      <div class="feedback" id="feedback-box"></div>
+      <button class="btn-next" id="btn-next" onclick="siguientePregunta()">Siguiente pregunta →</button>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="results-screen" style="display:none;">
+    <div class="result-card">
+      <div class="result-trophy" id="res-trophy">🏆</div>
+      <div class="result-name" id="res-name">Estudiante</div>
+      <div class="result-title">Resultados del Simulador</div>
+      <div class="result-donut-wrap">
+        <div class="result-donut" id="res-donut" style="background: conic-gradient(var(--primary) 0%, #ddeef7 0%);">
+          <span id="res-pct-text">0%</span>
+          <span class="pct-label">desempeño</span>
+        </div>
+      </div>
+      <div class="result-grid">
+        <div class="rg-cell ok">
+          <div class="rv" id="res-ok">0</div>
+          <div class="rl">✅ Aciertos</div>
+        </div>
+        <div class="rg-cell err">
+          <div class="rv" id="res-err">0</div>
+          <div class="rl">❌ Errores</div>
+        </div>
+      </div>
+      <div class="motivador" id="res-motivador"></div>
+      <button class="btn-retry" onclick="reiniciar()">🔄 Intentar de nuevo</button>
+    </div>
+  </div>
+
+</div><!-- /panel-sim -->
+
+<!-- ════════════════════ PANEL GUÍA ════════════════════ -->
+<div class="panel" id="panel-guia">
+  <div class="guia-header">
+    <div class="guia-icon">📄</div>
+    <div>
+      <h3>Guía de Estudio – Acuerdo 14/12/23</h3>
+      <p>Protocolo de erradicación del acoso escolar · Educación básica</p>
+    </div>
+    <a class="btn-open-pdf" href="https://drive.google.com/file/d/14er9gdBvI_4uOYkxymrITQY32unjUH3R/view?usp=sharing" target="_blank" rel="noopener">
+      🔗 Abrir en Drive
+    </a>
+  </div>
+  <div class="pdf-frame-wrap">
+    <iframe src="https://drive.google.com/file/d/14er9gdBvI_4uOYkxymrITQY32unjUH3R/preview" allow="autoplay" title="Guía de Estudio"></iframe>
+  </div>
+</div>
+
+<!-- ════════════════════ JAVASCRIPT ════════════════════ -->
+<script>
+/* ──────────────────── TAB LOGIC ──────────────────── */
+function switchTab(tab) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+/* ──────────────────── QUESTIONS DATA ──────────────────── */
+const preguntas = [
+  /* 01 – CD – A */
+  {
+    tipo: "Cuestionamiento directo",
+    base: "¿Cuál es el propósito principal de los Lineamientos establecidos en el Acuerdo número 14/12/23 emitido por la SEP?",
+    extra: null,
+    opciones: {
+      A: "Establecer acciones para la prevención, atención (detección, notificación, intervención y seguimiento) y medidas de no repetición del acoso escolar en educación básica.",
+      B: "Sancionar penalmente a los educandos que cometan actos de acoso escolar dentro de los planteles educativos.",
+      C: "Regular el uso de dispositivos tecnológicos e internet en las aulas de educación preescolar, primaria y secundaria."
+    },
+    correcta: "A",
+    justificacion: "El Artículo 1 establece que los Lineamientos tienen como propósito establecer acciones para la prevención, atención (detección, notificación, intervención y seguimiento) y medidas de no repetición del acoso escolar en los planteles educativos de tipo básico."
+  },
+  /* 02 – CD – B */
+  {
+    tipo: "Cuestionamiento directo",
+    base: "¿A quiénes están dirigidos los Lineamientos del Acuerdo 14/12/23 según el Artículo 2?",
+    extra: null,
+    opciones: {
+      A: "Exclusivamente a los educandos de educación básica y a sus madres, padres o tutores.",
+      B: "A las Autoridades Educativas Locales (AEL) que proveen educación básica (preescolar, primaria y secundaria).",
+      C: "Solo al personal docente con funciones directivas o de supervisión en los planteles federales."
+    },
+    correcta: "B",
+    justificacion: "El Artículo 2 indica que los Lineamientos están dirigidos a las Autoridades Educativas Estatales, de la Ciudad de México y Municipales (AEL) que proveen educación básica, para que impulsen acciones que garanticen a NNA el derecho a una educación libre de violencia."
+  },
+  /* 03 – CD – C */
+  {
+    tipo: "Cuestionamiento directo",
+    base: "¿Cuál de las siguientes características distingue al acoso escolar de otras situaciones de violencia entre educandos?",
+    extra: null,
+    opciones: {
+      A: "Que ocurre de forma espontánea y sin planificación previa entre grupos de educandos en el plantel.",
+      B: "Que requiere la participación activa o la negligencia de figuras educativas para que se produzca.",
+      C: "Que es intencional, repetitivo y se desarrolla en una relación de desigualdad de poder entre los educandos."
+    },
+    correcta: "C",
+    justificacion: "El Artículo 6 define el acoso escolar por tres características distintivas: intención (voluntad de someter y causar daño), repetición (conducta violenta persistente) y duración (tiempo transcurrido desde el inicio de la violencia), en un contexto de desigualdad de poder."
+  },
+  /* 04 – RE – A */
+  {
+    tipo: "Relación de elementos",
+    base: "Seleccione la opción que relacione correctamente cada tipo de acoso escolar con su definición según el Artículo 6 de los Lineamientos.",
+    extra: {
+      tipo: "tabla",
+      columnas: ["Tipo de acoso", "Definición"],
+      filas: [
+        ["1. Acoso físico", "a) Expresiones agresivas directas o indirectas (burlas, insultos, sobrenombres, amenazas) con intención de humillar o intimidar."],
+        ["2. Acoso verbal", "b) Publicación de mensajes electrónicos, imágenes o videos para amenazar o humillar a través de plataformas digitales."],
+        ["3. Ciberacoso", "c) Golpes, empujones, zancadillas, patadas o daño a bienes personales de forma repetida."]
+      ]
+    },
+    opciones: {
+      A: "1c, 2a, 3b",
+      B: "1a, 2c, 3b",
+      C: "1b, 2a, 3c"
+    },
+    correcta: "A",
+    justificacion: "El Artículo 6 define: acoso físico (1c) como agresiones corporales o daño a bienes; acoso verbal (2a) como expresiones agresivas con palabras; ciberacoso (3b) como el uso de plataformas digitales para amenazar o humillar mediante mensajes electrónicos, imágenes o videos."
+  },
+  /* 05 – CD – B */
+  {
+    tipo: "Cuestionamiento directo",
+    base: "Según el Artículo 25 de los Lineamientos, ¿quiénes pueden realizar la detección de un posible caso de acoso escolar?",
+    extra: null,
+    opciones: {
+      A: "Únicamente el personal directivo, docente y de apoyo y asistencia a la educación del plantel.",
+      B: "Las y los educandos, madres, padres o tutores, así como cualquier figura educativa del plantel.",
+      C: "Solo las Autoridades Educativas Locales a través de sus áreas administrativas especializadas."
+    },
+    correcta: "B",
+    justificacion: "El Artículo 25 establece que la detección puede realizarse por las y los educandos, madres, padres o tutores, así como por cualquier figura educativa; y también puede surgir de los comentarios de los espectadores de este tipo de violencia."
+  },
+  /* 06 – CO – C */
+  {
+    tipo: "Completamiento",
+    base: "De acuerdo con el Artículo 7, los Lineamientos se regirán bajo principios rectores que incluyen el interés superior de la niñez, la no discriminación, la inclusión y la igualdad sustantiva. Entre los demás principios también se contempla…",
+    extra: null,
+    opciones: {
+      A: "…la aplicación de sanciones ejemplares y medidas punitivas para disuadir conductas de acoso escolar.",
+      B: "…la vigilancia permanente y el control disciplinario de los educandos dentro y fuera del plantel.",
+      C: "…la confidencialidad, la debida diligencia, la celeridad, la no revictimización y el acceso a la justicia."
+    },
+    correcta: "C",
+    justificacion: "El Artículo 7 enumera 16 principios rectores que incluyen, entre otros: participación infantil y adolescente, corresponsabilidad, principio pro persona, respeto a la dignidad, acceso a una vida libre de violencia, acceso a la justicia, confidencialidad, debida diligencia, celeridad y no revictimización."
+  },
+  /* 07 – CD – A */
+  {
+    tipo: "Cuestionamiento directo",
+    base: "¿Qué papel desempeñan los espectadores dentro de las situaciones de acoso escolar según el Artículo 6 de los Lineamientos?",
+    extra: null,
+    opciones: {
+      A: "Actúan de manera pasiva o incitadora, convirtiéndose en cómplices al permitir que los hechos de violencia continúen.",
+      B: "Son considerados víctimas directas del acoso y deben recibir el mismo nivel de protección que la víctima principal.",
+      C: "Tienen la obligación jurídica de interponer una denuncia formal ante las autoridades ministeriales de forma inmediata."
+    },
+    correcta: "A",
+    justificacion: "El Artículo 6 define a los espectadores como educandos que no participan directamente pero actúan de manera pasiva o incitadora, convirtiéndose en cómplices al permitir que los hechos continúen, debido al temor de sufrir agresiones similares."
+  },
+  /* 08 – OR – B */
+  {
+    tipo: "Ordenamiento",
+    base: "Ordene los cuatro momentos de atención a casos de acoso escolar establecidos en el Artículo 23, del primero al último, tal como los establece el Acuerdo 14/12/23.",
+    extra: {
+      tipo: "lista",
+      items: [
+        "Seguimiento",
+        "Notificación",
+        "Detección",
+        "Intervención"
+      ]
+    },
+    opciones: {
+      A: "2, 3, 4, 1 (Notificación → Detección → Intervención → Seguimiento)",
+      B: "3, 2, 4, 1 (Detección → Notificación → Intervención → Seguimiento)",
+      C: "4, 3, 2, 1 (Intervención → Detección → Notificación → Seguimiento)"
+    },
+    correcta: "B",
+    justificacion: "El Artículo 23 establece el orden correcto de atención: 1.° Detección, 2.° Notificación, 3.° Intervención y 4.° Seguimiento. Este proceso garantiza la identificación oportuna del caso, su reporte, la acción institucional y el acompañamiento posterior."
+  },
+  /* 09 – CD – C */
+  {
+    tipo: "Cuestionamiento directo",
+    base: "¿Cuál es la función principal del cuerpo colegiado conformado por los directivos y el personal docente, según el Artículo 16 de los Lineamientos?",
+    extra: null,
+    opciones: {
+      A: "Aplicar sanciones disciplinarias directas y definitivas a los educandos que realicen conductas de acoso.",
+      B: "Elaborar informes estadísticos sobre violencia escolar para remitirlos directamente a la Secretaría de Educación Pública.",
+      C: "Diseñar e implementar mecanismos y procedimientos de prevención, atención y medidas de no repetición del acoso escolar."
+    },
+    correcta: "C",
+    justificacion: "El Artículo 16 establece que los directivos convocarán al personal docente para conformar un cuerpo colegiado cuyas funciones son el diseño e implementación de los mecanismos y procedimientos de prevención, atención (detección, notificación, intervención y seguimiento) y medidas de no repetición del acoso escolar."
+  },
+  /* 10 – RE – A */
+  {
+    tipo: "Relación de elementos",
+    base: "Seleccione la opción que relacione correctamente cada enfoque transversal del Artículo 8 con su descripción.",
+    extra: {
+      tipo: "tabla",
+      columnas: ["Enfoque", "Descripción"],
+      filas: [
+        ["1. Enfoque humanista", "a) Fomenta el aprecio y respeto por la dignidad de las personas, sustentado en ideales de fraternidad e igualdad."],
+        ["2. Perspectiva de género", "b) Garantiza el reconocimiento, protección y ejercicio pleno de los derechos de niñas, niños y adolescentes."],
+        ["3. Enfoque de derechos de NNA", "c) Propone eliminar las causas de opresión de género promoviendo la igualdad entre mujeres y hombres."]
+      ]
+    },
+    opciones: {
+      A: "1a, 2c, 3b",
+      B: "1b, 2a, 3c",
+      C: "1c, 2b, 3a"
+    },
+    correcta: "A",
+    justificacion: "El Artículo 6 y el Artículo 8 definen: el enfoque humanista (1a) centrado en la dignidad humana y la fraternidad; la perspectiva de género (2c) que elimina la opresión de género; y el enfoque de derechos de NNA (3b) que garantiza el ejercicio pleno de sus derechos."
+  },
+  /* 11 – CO – B */
+  {
+    tipo: "Completamiento",
+    base: "Según el Artículo 6, el ciberacoso consiste en la publicación o envío de mensajes electrónicos, incluidos textos, imágenes o videos, con el objetivo de amenazar, atacar, difundir rumores o humillar a un educando, utilizando…",
+    extra: null,
+    opciones: {
+      A: "…llamadas telefónicas y comunicaciones verbales directas realizadas en el interior de los planteles educativos.",
+      B: "…plataformas digitales como redes sociales, mensajería instantánea y de texto.",
+      C: "…medios impresos como carteles, panfletos o publicaciones colocadas en los tableros de avisos del plantel."
+    },
+    correcta: "B",
+    justificacion: "El Artículo 6 define el ciberacoso como el uso de plataformas digitales —redes sociales, mensajería instantánea y de texto— para publicar o enviar contenidos que amenacen, ataquen, difundan rumores, humillen o utilicen imágenes sin consentimiento de un educando."
+  },
+  /* 12 – CD – C */
+  {
+    tipo: "Cuestionamiento directo",
+    base: "¿Cuál es la finalidad principal de las medidas de no repetición establecidas en el Artículo 44 de los Lineamientos?",
+    extra: null,
+    opciones: {
+      A: "Expulsar definitivamente del plantel educativo al educando que haya ejercido conductas de acoso escolar.",
+      B: "Remitir inmediatamente el caso al Ministerio Público sin necesidad de la intervención del cuerpo colegiado.",
+      C: "Evitar que se repitan actos de acoso escolar y lograr el restablecimiento de la sana convivencia libre de violencia en el ámbito educativo."
+    },
+    correcta: "C",
+    justificacion: "El Artículo 44 establece que las medidas de no repetición tienen como finalidad evitar que se repitan actos de acoso escolar y lograr el restablecimiento de la sana convivencia libre de violencia en el ámbito educativo, involucrando a la víctima, a los educandos que ejercieron los actos y a la comunidad escolar en general."
+  },
+  /* 13 – OR – A */
+  {
+    tipo: "Ordenamiento",
+    base: "Ordene los siguientes pasos del proceso de intervención ante un caso confirmado de acoso escolar, según el Artículo 35, del primero al último.",
+    extra: {
+      tipo: "lista",
+      items: [
+        "Implementación de prácticas restaurativas y formativas en la comunidad escolar.",
+        "Confirmación del caso de acoso escolar por parte del cuerpo colegiado.",
+        "Redacción de cartas de compromisos del educando agresor y de su madre, padre o tutor.",
+        "Elaboración de actas de hechos por parte del personal docente y/o directivo."
+      ]
+    },
+    opciones: {
+      A: "2, 4, 3, 1 (Confirmación → Actas → Compromisos → Prácticas restaurativas)",
+      B: "4, 2, 1, 3 (Actas → Confirmación → Prácticas restaurativas → Compromisos)",
+      C: "1, 3, 4, 2 (Prácticas restaurativas → Compromisos → Actas → Confirmación)"
+    },
+    correcta: "A",
+    justificacion: "El Artículo 35 establece que el proceso de intervención inicia con la confirmación del caso (2), seguida de la elaboración de actas de hechos (4), la redacción de cartas de compromisos (3) y, finalmente, la implementación de prácticas restaurativas (1) en la comunidad escolar."
+  },
+  /* 14 – CD – B */
+  {
+    tipo: "Cuestionamiento directo",
+    base: "Según el Artículo 28, ¿bajo qué principios debe llevarse a cabo la notificación de un posible caso de acoso escolar o ciberacoso?",
+    extra: null,
+    opciones: {
+      A: "Bajo los principios de publicidad, transparencia y acceso irrestricto a la información pública.",
+      B: "Bajo los principios de no revictimización y confidencialidad, considerando los derechos de las NNA.",
+      C: "Bajo los principios de celeridad, sanción inmediata y restitución económica del daño causado."
+    },
+    correcta: "B",
+    justificacion: "El Artículo 28 establece que la notificación debe realizarse considerando los derechos de las NNA por algún medio de comunicación, bajo los principios de no revictimización y confidencialidad; y en casos de ciberacoso, también se informará a las autoridades competentes para eliminar el contenido multimedia."
+  },
+  /* 15 – RE – C */
+  {
+    tipo: "Relación de elementos",
+    base: "Seleccione la opción que relacione correctamente cada vía de notificación del Artículo 30 con su descripción.",
+    extra: {
+      tipo: "tabla",
+      columnas: ["Vía de notificación", "Descripción"],
+      filas: [
+        ["1. Queja", "a) Notificación de un caso por organismos de Derechos Humanos o procuración de justicia, derivada de quejas o denuncias previas."],
+        ["2. Denuncia", "b) Notificación verbal, digital o escrita presentada por terceros ante docentes o autoridades escolares o educativas."],
+        ["3. Solicitud de Atención", "c) Notificación verbal, digital o escrita presentada por la posible víctima, madres, padres o tutores ante docentes o autoridades."]
+      ]
+    },
+    opciones: {
+      A: "1b, 2c, 3a",
+      B: "1a, 2b, 3c",
+      C: "1c, 2b, 3a"
+    },
+    correcta: "C",
+    justificacion: "El Artículo 30 define tres vías: la Queja (1c), presentada por la víctima o sus tutores; la Denuncia (2b), presentada por terceros; y la Solicitud de Atención (3a), proveniente de organismos de Derechos Humanos o de procuración de justicia derivada de quejas o denuncias previas."
+  },
+  /* 16 – CD – A */
+  {
+    tipo: "Cuestionamiento directo",
+    base: "¿Bajo qué principios deberá llevarse a cabo la aplicación de los Lineamientos, según el Artículo 3 del Acuerdo 14/12/23?",
+    extra: null,
+    opciones: {
+      A: "Garantizando el interés superior de la niñez, la no discriminación y el respeto irrestricto de la dignidad humana, a partir de una formación humanista y comunitaria.",
+      B: "Aplicando sanciones ejemplares y medidas punitivas orientadas a disuadir conductas violentas entre los educandos.",
+      C: "Priorizando la seguridad institucional del plantel educativo sobre los derechos individuales de los educandos involucrados."
+    },
+    correcta: "A",
+    justificacion: "El Artículo 3 establece que la aplicación de los Lineamientos deberá llevarse a cabo garantizando el interés superior de la niñez, la no discriminación y el respeto irrestricto de la dignidad humana, a partir de una formación humanista y comunitaria."
+  },
+  /* 17 – CO – B */
+  {
+    tipo: "Completamiento",
+    base: "Según el Artículo 19, las AEL procurarán garantizar la formación continua de las figuras educativas a través de programas con cursos especializados en acoso escolar, cultura de paz y resolución pacífica de conflictos, así como en…",
+    extra: null,
+    opciones: {
+      A: "…estrategias de vigilancia continua y control disciplinario aplicables dentro de los planteles educativos.",
+      B: "…desarrollo de habilidades socioemocionales, derechos humanos, participación infantil e interés superior de la niñez.",
+      C: "…aplicación de sanciones administrativas progresivas y suspensión escolar temporal de los educandos agresores."
+    },
+    correcta: "B",
+    justificacion: "El Artículo 19 establece que los programas de formación deben incluir cursos especializados en: promoción del sentido de comunidad, cohesión grupal, solidaridad, acoso escolar, cultura de paz, resolución pacífica de conflictos, prácticas restaurativas, habilidades socioemocionales, derechos humanos y participación infantil."
+  },
+  /* 18 – CD – C */
+  {
+    tipo: "Cuestionamiento directo",
+    base: "¿Qué se entiende por 'prácticas restaurativas' según la definición del Artículo 6 de los Lineamientos?",
+    extra: null,
+    opciones: {
+      A: "Medidas disciplinarias orientadas a sancionar al educando agresor y proteger a la víctima mediante su separación del grupo.",
+      B: "Estrategias de vigilancia y supervisión continua del comportamiento de los educandos dentro y fuera del plantel.",
+      C: "Herramientas y métodos de resolución de conflictos cuyo objetivo es subsanar los daños y reparar las relaciones, en lugar de infligir un castigo."
+    },
+    correcta: "C",
+    justificacion: "El Artículo 6 define las prácticas restaurativas como herramientas y métodos de resolución de conflictos basadas en los principios de la justicia restaurativa, cuyo objetivo es subsanar los daños y reparar las relaciones, en lugar de infligir un castigo y represalia; se basan en valores como equidad, responsabilidad, empatía y resiliencia."
+  },
+  /* 19 – OR – A */
+  {
+    tipo: "Ordenamiento",
+    base: "Ordene las siguientes vías de notificación del acoso escolar (Artículo 30) según el nivel de formalidad institucional, de menor a mayor.",
+    extra: {
+      tipo: "lista",
+      items: [
+        "Solicitud de Atención (por organismos de Derechos Humanos o procuración de justicia).",
+        "Denuncia (presentada por terceros ante docentes o autoridades escolares).",
+        "Queja (presentada por la posible víctima o sus madres, padres o tutores)."
+      ]
+    },
+    opciones: {
+      A: "3, 2, 1 (Queja → Denuncia → Solicitud de Atención)",
+      B: "2, 3, 1 (Denuncia → Queja → Solicitud de Atención)",
+      C: "1, 3, 2 (Solicitud de Atención → Queja → Denuncia)"
+    },
+    correcta: "A",
+    justificacion: "El nivel de formalidad institucional va de menor a mayor: 3.° Queja (presentada directamente por la víctima o tutores), 2.° Denuncia (presentada por terceros), y 1.° Solicitud de Atención (proveniente de organismos de Derechos Humanos o procuración de justicia, que implica el mayor nivel de institucionalidad)."
+  },
+  /* 20 – CD – B */
+  {
+    tipo: "Cuestionamiento directo",
+    base: "Según el Artículo 41, ¿cuál de las siguientes acciones forma parte del proceso de seguimiento a casos de acoso escolar o ciberacoso?",
+    extra: null,
+    opciones: {
+      A: "Elaborar actas de hechos y redactar cartas de compromisos para los educandos involucrados en el caso.",
+      B: "Dar acompañamiento pedagógico a los involucrados y documentar el progreso del acompañamiento mediante bitácoras.",
+      C: "Realizar campañas de sensibilización comunitaria para prevenir futuros casos de acoso en el plantel."
+    },
+    correcta: "B",
+    justificacion: "El Artículo 41 establece que el proceso de seguimiento contempla: dar acompañamiento pedagógico a los involucrados, documentar el progreso mediante bitácoras, verificar el cumplimiento de acuerdos y establecer rutas de comunicación entre autoridades, madres, padres o tutores."
+  },
+  /* 21 – RE – C */
+  {
+    tipo: "Relación de elementos",
+    base: "Seleccione la opción que relacione correctamente cada artículo con el contenido que establece dentro de los Lineamientos del Acuerdo 14/12/23.",
+    extra: {
+      tipo: "tabla",
+      columnas: ["Artículo", "Contenido"],
+      filas: [
+        ["1. Artículo 16", "a) Establece los cuatro momentos de atención a víctimas de acoso escolar."],
+        ["2. Artículo 23", "b) Establece las medidas de no repetición para restablecer la sana convivencia."],
+        ["3. Artículo 44", "c) Convoca al personal docente para conformar un cuerpo colegiado con funciones de prevención y atención."]
+      ]
+    },
+    opciones: {
+      A: "1b, 2a, 3c",
+      B: "1a, 2c, 3b",
+      C: "1c, 2a, 3b"
+    },
+    correcta: "C",
+    justificacion: "El Artículo 16 (1c) establece la conformación del cuerpo colegiado; el Artículo 23 (2a) define los cuatro momentos de atención: detección, notificación, intervención y seguimiento; el Artículo 44 (3b) establece las medidas de no repetición para restablecer la sana convivencia libre de violencia."
+  },
+  /* 22 – CD – A */
+  {
+    tipo: "Cuestionamiento directo",
+    base: "¿Cuál de las siguientes es una medida preventiva del Artículo 20, orientada a la participación organizada de la comunidad escolar para salvaguardar la integridad de los educandos?",
+    extra: null,
+    opciones: {
+      A: "La instauración de mecanismos de resolución pacífica de conflictos y de gestión escolar democrática, donde la participación de NNA sea el eje rector.",
+      B: "La elaboración de actas de hechos ante la confirmación de casos de acoso escolar por parte del cuerpo colegiado.",
+      C: "La canalización inmediata de las víctimas a servicios de salud y a instancias de procuración de justicia."
+    },
+    correcta: "A",
+    justificacion: "El Artículo 20 enumera entre las medidas preventivas la instauración de mecanismos de resolución pacífica de conflictos y de gestión escolar democrática, donde la participación de NNA sea el eje rector; también incluye talleres para madres y padres, identificación de lugares de riesgo y proyectos comunitarios de identidad escolar."
+  },
+  /* 23 – CO – B */
+  {
+    tipo: "Completamiento",
+    base: "De acuerdo con el Artículo 38 de los Lineamientos, la canalización se refiere a las acciones de coordinación institucional para que la víctima, el educando agresor, madres, padres o tutores reciban un servicio de atención, con base en…",
+    extra: null,
+    opciones: {
+      A: "…las sanciones aplicadas directamente por el cuerpo colegiado del plantel sin necesidad de valoración previa.",
+      B: "…una valoración previa y los acuerdos de colaboración definidos con la instancia prestadora del servicio.",
+      C: "…la denuncia formal presentada ante el Ministerio Público por las autoridades escolares y educativas."
+    },
+    correcta: "B",
+    justificacion: "El Artículo 38 define la canalización como las acciones de coordinación institucional basadas en una valoración previa y en los acuerdos de colaboración definidos con la instancia prestadora del servicio de atención."
+  },
+  /* 24 – CD – C */
+  {
+    tipo: "Cuestionamiento directo",
+    base: "Según el Artículo 22, ¿cuál es una de las estrategias que deben implementar las AEL para prevenir el ciberacoso en la comunidad escolar?",
+    extra: null,
+    opciones: {
+      A: "Prohibir el uso de dispositivos electrónicos y conexión a internet en todos los planteles de educación básica.",
+      B: "Establecer sanciones disciplinarias para educandos que utilicen redes sociales durante la jornada escolar.",
+      C: "Diseñar estrategias de prevención del ciberacoso que desarrollen habilidades de privacidad digital e instrumentar campañas de ciberseguridad desde nivel preescolar."
+    },
+    correcta: "C",
+    justificacion: "El Artículo 22 establece que las AEL deben instrumentar campañas de difusión sobre ciberseguridad desde nivel preescolar y diseñar estrategias de prevención del ciberacoso que desarrollen habilidades de cuidado y autocuidado, como la privacidad digital, y cómo responder de forma segura a personas desconocidas en redes sociales y videojuegos."
+  },
+  /* 25 – OR – A */
+  {
+    tipo: "Ordenamiento",
+    base: "Ordene los siguientes enfoques transversales del Artículo 8 de acuerdo con el orden en que aparecen listados en los Lineamientos del Acuerdo 14/12/23, del primero al último.",
+    extra: {
+      tipo: "lista",
+      items: [
+        "Enfoque de acción sin daño.",
+        "Enfoque humanista.",
+        "Perspectiva de género.",
+        "Enfoque centrado en las víctimas."
+      ]
+    },
+    opciones: {
+      A: "2, 3, 4, 1 (Humanista → Perspectiva de género → Centrado en víctimas → Acción sin daño)",
+      B: "3, 2, 1, 4 (Perspectiva de género → Humanista → Acción sin daño → Centrado en víctimas)",
+      C: "4, 1, 3, 2 (Centrado en víctimas → Acción sin daño → Perspectiva de género → Humanista)"
+    },
+    correcta: "A",
+    justificacion: "El Artículo 8 lista los enfoques en el siguiente orden: I. Humanista (2), II. Comunitario, III. Perspectiva de género (3), IV. Derechos humanos, V. Derechos de NNA, VI. Centrado en víctimas (4), VII. Acción sin daño (1), VIII. Diferencial y especializado. El orden correcto es: Humanista → Perspectiva de género → Centrado en víctimas → Acción sin daño."
+  },
+  /* 26 – CD – B */
+  {
+    tipo: "Cuestionamiento directo",
+    base: "Según el Artículo 9, ¿cuáles son algunos de los derechos que las figuras educativas deben salvaguardar en el desempeño de sus funciones?",
+    extra: null,
+    opciones: {
+      A: "El derecho a la propiedad privada, al trabajo digno y a la seguridad social de los educandos.",
+      B: "El derecho a una vida libre de violencia, a la integridad personal, a la salud, a la educación y a la igualdad y no discriminación.",
+      C: "El derecho al voto, a la libre expresión política y a la asociación colectiva de los educandos."
+    },
+    correcta: "B",
+    justificacion: "El Artículo 9 establece que las figuras educativas deberán velar por, entre otros: derecho a una vida libre de violencia, derecho a la integridad personal, derecho a la salud, derecho a la inclusión de NNA con discapacidad, derecho a la educación, derecho a la igualdad y no discriminación, y derecho a la libertad de expresión."
+  },
+  /* 27 – RE – C */
+  {
+    tipo: "Relación de elementos",
+    base: "Seleccione la opción que relacione correctamente cada medida preventiva del Artículo 19 con el grupo al que está principalmente destinada.",
+    extra: {
+      tipo: "tabla",
+      columnas: ["Medida preventiva (Art. 19)", "Destinatario principal"],
+      filas: [
+        ["1. Diseño de programas de formación con cursos especializados.", "a) Personal de nuevo ingreso con funciones de supervisión, dirección o docencia."],
+        ["2. Gestión de programas de formación para el ingreso.", "b) Figuras educativas, para confirmar la participación anual en los programas."],
+        ["3. Mecanismos para confirmar la formación anual.", "c) Todas las figuras educativas del plantel educativo."]
+      ]
+    },
+    opciones: {
+      A: "1c, 2b, 3a",
+      B: "1b, 2c, 3a",
+      C: "1c, 2a, 3b"
+    },
+    correcta: "C",
+    justificacion: "El Artículo 19 establece: (1c) el diseño de programas está orientado a todas las figuras educativas; (2a) la gestión de los programas es para el personal de nuevo ingreso con funciones de supervisión, dirección, docencia, apoyo y ATP; (3b) los mecanismos de confirmación buscan promover y verificar la formación anual de todas las figuras participantes."
+  },
+  /* 28 – CD – A */
+  {
+    tipo: "Cuestionamiento directo",
+    base: "¿Cuál es la definición de 'cultura de paz' que ofrecen los Lineamientos del Artículo 6 del Acuerdo 14/12/23?",
+    extra: null,
+    opciones: {
+      A: "Proceso que permite el desarrollo de conocimientos, capacidades, actitudes y valores en las personas para resolver conflictos de manera pacífica y rechazar cualquier tipo de violencia.",
+      B: "Estrategia institucional de la SEP para eliminar el acoso escolar mediante la aplicación de sanciones administrativas progresivas.",
+      C: "Conjunto de normas y procedimientos legales que regulan la convivencia armónica en los planteles de educación básica del país."
+    },
+    correcta: "A",
+    justificacion: "El Artículo 6 define la cultura de paz como el proceso que permite el desarrollo de conocimientos, capacidades, actitudes y valores en las personas para resolver conflictos de manera pacífica, rechazar cualquier tipo de violencia y tratar de generar condiciones hacia la paz, tanto a nivel personal como social."
+  },
+  /* 29 – CO – B */
+  {
+    tipo: "Completamiento",
+    base: "De acuerdo con el Artículo 47, el personal directivo coordinará al personal docente para realizar actividades con los educandos e identificar los impactos que tuvieron los actos de acoso escolar, con el fin de…",
+    extra: null,
+    opciones: {
+      A: "…elaborar actas de hechos y documentar estadísticamente los casos de acoso escolar registrados durante el ciclo.",
+      B: "…identificar si en el mismo espacio se han presentado otros actos similares y, con base en esa información, diseñar las medidas de no repetición.",
+      C: "…canalizar de forma inmediata a todas las partes involucradas con las autoridades ministeriales y de salud."
+    },
+    correcta: "B",
+    justificacion: "El Artículo 47 establece que el personal directivo coordinará al personal docente para identificar los impactos individuales y escolares del acoso, así como para detectar si en el mismo espacio se han presentado otros actos con características similares; con base en esa información, se diseñarán las medidas de no repetición."
+  },
+  /* 30 – CD – C */
+  {
+    tipo: "Cuestionamiento directo",
+    base: "Según el Transitorio TERCERO del Acuerdo 14/12/23, ¿en cuántos días las Autoridades Educativas Locales deben realizar las acciones pertinentes para observar lo establecido en los Lineamientos?",
+    extra: null,
+    opciones: {
+      A: "30 días naturales a partir de la publicación del Acuerdo en el Diario Oficial de la Federación.",
+      B: "60 días hábiles a partir de la entrada en vigor del presente Acuerdo.",
+      C: "90 días a partir de la entrada en vigor del presente Acuerdo."
+    },
+    correcta: "C",
+    justificacion: "El Transitorio TERCERO establece expresamente que las AEL, dentro del plazo de 90 (noventa) días, realizarán las acciones pertinentes para observar lo establecido en los Lineamientos del Acuerdo 14/12/23, considerando las particularidades de cada entidad federativa."
+  }
+];
+
+/* ──────────────────── STATE ──────────────────── */
+let estado = {
+  nombre: '',
+  indice: 0,
+  aciertos: 0,
+  errores: 0,
+  respondida: false
+};
+
+/* ──────────────────── INIT ──────────────────── */
+function iniciarSimulador() {
+  const input = document.getElementById('nombre-input');
+  const nombre = input.value.trim();
+  if (!nombre) {
+    input.style.borderColor = '#d94040';
+    input.focus();
+    setTimeout(() => input.style.borderColor = '', 1800);
+    return;
+  }
+  estado.nombre = nombre;
+  estado.indice = 0;
+  estado.aciertos = 0;
+  estado.errores = 0;
+  estado.respondida = false;
+
+  document.getElementById('welcome-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  actualizarStats();
+  renderPregunta();
+}
+
+/* ──────────────────── RENDER ──────────────────── */
+function renderPregunta() {
+  const p = preguntas[estado.indice];
+  const num = estado.indice + 1;
+  const pct = Math.round((num - 1) / 30 * 100);
+
+  document.getElementById('prog-count').textContent = `Pregunta ${num} de 30`;
+  document.getElementById('prog-bar').style.width = pct + '%';
+  document.getElementById('q-num').textContent = num.toString().padStart(2, '0');
+  document.getElementById('q-tipo-label').textContent = p.tipo;
+  document.getElementById('q-base').textContent = p.base;
+
+  // extra content
+  const extraEl = document.getElementById('q-extra');
+  extraEl.innerHTML = '';
+  if (p.extra) {
+    if (p.extra.tipo === 'tabla') {
+      let html = '<table class="q-table"><thead><tr>';
+      p.extra.columnas.forEach(c => html += `<th>${c}</th>`);
+      html += '</tr></thead><tbody>';
+      p.extra.filas.forEach(f => {
+        html += '<tr>';
+        f.forEach(cell => html += `<td>${cell}</td>`);
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+      extraEl.innerHTML = html;
+    } else if (p.extra.tipo === 'lista') {
+      let html = '<ul class="q-list">';
+      p.extra.items.forEach((item, i) => {
+        html += `<li><span class="li-num">${i+1}</span><span>${item}</span></li>`;
+      });
+      html += '</ul>';
+      extraEl.innerHTML = html;
+    }
+  }
+
+  // options
+  const wrap = document.getElementById('options-wrap');
+  wrap.innerHTML = '';
+  ['A', 'B', 'C'].forEach(letra => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.innerHTML = `<span class="opt-letter">${letra}</span><span>${p.opciones[letra]}</span>`;
+    btn.onclick = () => responder(letra, btn);
+    wrap.appendChild(btn);
+  });
+
+  // reset feedback
+  const fb = document.getElementById('feedback-box');
+  fb.className = 'feedback';
+  fb.innerHTML = '';
+  fb.style.display = 'none';
+
+  // hide next
+  const btnNext = document.getElementById('btn-next');
+  btnNext.style.display = 'none';
+
+  // animate card
+  const card = document.getElementById('q-card');
+  card.style.animation = 'none';
+  card.offsetHeight; // reflow
+  card.style.animation = 'fadeUp .35s ease both';
+
+  estado.respondida = false;
+}
+
+/* ──────────────────── ANSWER ──────────────────── */
+function responder(letra, btnSeleccionado) {
+  if (estado.respondida) return;
+  estado.respondida = true;
+
+  const p = preguntas[estado.indice];
+  const correcta = p.correcta;
+  const esCorrecta = letra === correcta;
+
+  if (esCorrecta) estado.aciertos++;
+  else estado.errores++;
+
+  // disable all buttons and style
+  const bots = document.querySelectorAll('.opt-btn');
+  bots.forEach(b => {
+    b.disabled = true;
+    const ltr = b.querySelector('.opt-letter').textContent;
+    if (ltr === correcta) b.classList.add('highlight');
+  });
+  if (!esCorrecta) btnSeleccionado.classList.add('wrong');
+  else btnSeleccionado.classList.add('correct');
+
+  // feedback
+  const fb = document.getElementById('feedback-box');
+  if (esCorrecta) {
+    fb.className = 'feedback correct-fb';
+    fb.innerHTML = `<span class="fb-icon">✅</span><div class="fb-text"><strong>¡Respuesta correcta!</strong>${p.justificacion}</div>`;
+  } else {
+    fb.className = 'feedback wrong-fb';
+    fb.innerHTML = `<span class="fb-icon">❌</span><div class="fb-text"><strong>Respuesta incorrecta. La opción correcta es: ${correcta}</strong>${p.justificacion}</div>`;
+  }
+  fb.style.display = 'flex';
+
+  actualizarStats();
+
+  // show next
+  const btnNext = document.getElementById('btn-next');
+  btnNext.style.display = 'block';
+  if (estado.indice >= 29) {
+    btnNext.textContent = 'Ver resultados finales →';
+  } else {
+    btnNext.textContent = 'Siguiente pregunta →';
+  }
+}
+
+function actualizarStats() {
+  const respondidas = estado.aciertos + estado.errores;
+  const pct = respondidas > 0 ? Math.round(estado.aciertos / respondidas * 100) : 0;
+  document.getElementById('stat-ok').textContent = estado.aciertos;
+  document.getElementById('stat-err').textContent = estado.errores;
+  document.getElementById('stat-pct').textContent = pct + '%';
+}
+
+/* ──────────────────── NEXT ──────────────────── */
+function siguientePregunta() {
+  if (estado.indice >= 29) {
+    mostrarResultados();
+    return;
+  }
+  estado.indice++;
+  renderPregunta();
+}
+
+/* ──────────────────── RESULTS ──────────────────── */
+function mostrarResultados() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  const rs = document.getElementById('results-screen');
+  rs.style.display = 'block';
+
+  const pct = Math.round(estado.aciertos / 30 * 100);
+
+  document.getElementById('res-name').textContent = estado.nombre;
+  document.getElementById('res-ok').textContent = estado.aciertos;
+  document.getElementById('res-err').textContent = estado.errores;
+  document.getElementById('res-pct-text').textContent = pct + '%';
+
+  // trophy emoji based on score
+  let trophy, motivador;
+  if (pct >= 90) {
+    trophy = '🏆';
+    motivador = '¡Excelente desempeño! Dominas los Lineamientos del Acuerdo 14/12/23. Eres un referente en la erradicación del acoso escolar.';
+  } else if (pct >= 75) {
+    trophy = '🥈';
+    motivador = '¡Muy buen trabajo! Tienes una sólida comprensión del Acuerdo. Refuerza los temas con menor acierto y tu desempeño será sobresaliente.';
+  } else if (pct >= 60) {
+    trophy = '📘';
+    motivador = 'Buen esfuerzo. Sigue practicando para fortalecer tus conocimientos sobre el protocolo de erradicación del acoso escolar.';
+  } else {
+    trophy = '💪';
+    motivador = 'No te desanimes. Revisa la Guía de Estudio disponible en la pestaña correspondiente y vuelve a intentarlo. ¡Tú puedes lograrlo!';
+  }
+
+  document.getElementById('res-trophy').textContent = trophy;
+  document.getElementById('res-motivador').textContent = motivador;
+
+  // donut gradient
+  const angle = Math.round(pct * 3.6);
+  const color = pct >= 75 ? '#1a9e6e' : pct >= 60 ? '#f0a500' : '#d94040';
+  document.getElementById('res-donut').style.background =
+    `conic-gradient(${color} ${angle}deg, #ddeef7 ${angle}deg)`;
+  document.getElementById('res-pct-text').style.color = color;
+}
+
+/* ──────────────────── RESTART ──────────────────── */
+function reiniciar() {
+  document.getElementById('results-screen').style.display = 'none';
+  document.getElementById('nombre-input').value = '';
+  document.getElementById('welcome-screen').style.display = 'block';
+  estado = { nombre: '', indice: 0, aciertos: 0, errores: 0, respondida: false };
+}
+</script>
+</body>
+</html>

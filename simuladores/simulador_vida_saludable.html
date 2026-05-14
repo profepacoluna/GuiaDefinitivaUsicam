@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador – Vida Saludable | Prof. Francisco De Jesus Luna Benitez</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --burgundy: #7B1D3A;
+    --burgundy-light: #9D2A4A;
+    --green: #2D6A4F;
+    --green-light: #3A8A65;
+    --gold: #C4962A;
+    --gold-light: #E8B84B;
+    --cream: #FAF7F2;
+    --cream2: #F3EDE3;
+    --white: #FFFFFF;
+    --text-dark: #2C1810;
+    --text-mid: #5A3E35;
+    --text-light: #8A6A60;
+    --shadow: 0 8px 32px rgba(123,29,58,0.12);
+    --shadow-sm: 0 3px 12px rgba(123,29,58,0.08);
+    --radius: 18px;
+    --radius-sm: 10px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND PATTERN ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 10% 5%, rgba(196,150,42,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 90% 90%, rgba(45,106,79,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 50% 50%, rgba(123,29,58,0.04) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 0 16px 60px; }
+
+  /* ── HEADER ── */
+  .site-header {
+    background: linear-gradient(135deg, var(--burgundy) 0%, #9D2A4A 45%, #7B1D3A 100%);
+    padding: 0 0 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 6px 30px rgba(123,29,58,0.35);
+  }
+  .site-header::before {
+    content: '';
+    position: absolute;
+    top: -40px; left: -60px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+  }
+  .site-header::after {
+    content: '';
+    position: absolute;
+    bottom: -50px; right: -40px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: rgba(196,150,42,0.12);
+  }
+  .header-inner {
+    position: relative;
+    z-index: 2;
+    padding: 28px 24px 22px;
+  }
+  .header-badge {
+    display: inline-block;
+    background: rgba(196,150,42,0.25);
+    border: 1px solid rgba(196,150,42,0.5);
+    color: var(--gold-light);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    padding: 5px 16px;
+    border-radius: 30px;
+    margin-bottom: 10px;
+  }
+  .header-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.5rem, 5vw, 2.4rem);
+    color: #FFFFFF;
+    line-height: 1.15;
+    margin-bottom: 6px;
+  }
+  .header-subtitle {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.75);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .header-bar {
+    background: linear-gradient(90deg, var(--green) 0%, var(--green-light) 50%, var(--green) 100%);
+    padding: 8px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .header-bar span {
+    color: rgba(255,255,255,0.9);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+  .leaf-icon { font-size: 1rem; }
+
+  /* ── PROGRESS BAR ── */
+  .progress-container {
+    background: var(--cream2);
+    border-bottom: 1px solid rgba(123,29,58,0.1);
+    padding: 10px 24px;
+    display: none;
+    align-items: center;
+    gap: 14px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  .progress-label { font-size: 0.78rem; font-weight: 800; color: var(--burgundy); white-space: nowrap; }
+  .progress-track {
+    flex: 1;
+    height: 8px;
+    background: rgba(123,29,58,0.12);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--burgundy), var(--gold));
+    border-radius: 99px;
+    transition: width 0.5s cubic-bezier(.34,1.56,.64,1);
+  }
+  .progress-score {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: var(--green);
+    white-space: nowrap;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; animation: fadeSlideIn 0.45s cubic-bezier(.25,.8,.25,1) forwards; }
+  .screen.active { display: block; }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(22px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── WELCOME SCREEN ── */
+  .welcome-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 44px 36px;
+    margin-top: 36px;
+    text-align: center;
+    border-top: 5px solid var(--burgundy);
+    position: relative;
+    overflow: hidden;
+  }
+  .welcome-card::before {
+    content: '🌿';
+    position: absolute;
+    top: -10px; right: -10px;
+    font-size: 5rem;
+    opacity: 0.05;
+    transform: rotate(20deg);
+  }
+  .welcome-icon {
+    width: 80px; height: 80px;
+    background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.2rem;
+    margin: 0 auto 22px;
+    box-shadow: 0 8px 24px rgba(123,29,58,0.3);
+  }
+  .welcome-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.3rem, 4vw, 1.9rem);
+    color: var(--burgundy);
+    margin-bottom: 10px;
+  }
+  .welcome-card p {
+    color: var(--text-mid);
+    font-size: 0.93rem;
+    line-height: 1.7;
+    margin-bottom: 24px;
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .info-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 30px;
+  }
+  .pill {
+    background: var(--cream2);
+    border: 1px solid rgba(123,29,58,0.15);
+    border-radius: 30px;
+    padding: 6px 16px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-mid);
+    display: flex; align-items: center; gap: 5px;
+  }
+
+  .input-group {
+    position: relative;
+    max-width: 420px;
+    margin: 0 auto 22px;
+  }
+  .input-icon {
+    position: absolute;
+    left: 14px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.1rem;
+  }
+  .input-group input {
+    width: 100%;
+    padding: 14px 14px 14px 42px;
+    border: 2px solid rgba(123,29,58,0.2);
+    border-radius: var(--radius-sm);
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    background: var(--cream);
+    outline: none;
+    transition: border-color .25s, box-shadow .25s;
+  }
+  .input-group input:focus {
+    border-color: var(--burgundy);
+    box-shadow: 0 0 0 3px rgba(123,29,58,0.12);
+  }
+  .input-group input::placeholder { color: var(--text-light); font-weight: 500; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    padding: 14px 32px;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    transition: all .25s cubic-bezier(.34,1.56,.64,1);
+    letter-spacing: 0.3px;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light));
+    color: white;
+    box-shadow: 0 6px 20px rgba(123,29,58,0.35);
+  }
+  .btn-primary:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 10px 28px rgba(123,29,58,0.4); }
+  .btn-green {
+    background: linear-gradient(135deg, var(--green), var(--green-light));
+    color: white;
+    box-shadow: 0 6px 20px rgba(45,106,79,0.35);
+  }
+  .btn-green:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 10px 28px rgba(45,106,79,0.4); }
+  .btn-gold {
+    background: linear-gradient(135deg, #A87820, var(--gold));
+    color: white;
+    box-shadow: 0 6px 20px rgba(196,150,42,0.35);
+  }
+  .btn-gold:hover { transform: translateY(-2px) scale(1.02); }
+  .btn-outline {
+    background: transparent;
+    border: 2px solid var(--burgundy);
+    color: var(--burgundy);
+  }
+  .btn-outline:hover { background: var(--burgundy); color: white; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+  /* ── QUESTION SCREEN ── */
+  .question-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-top: 24px;
+    overflow: hidden;
+    animation: questionIn 0.4s cubic-bezier(.25,.8,.25,1) forwards;
+  }
+  @keyframes questionIn {
+    from { opacity: 0; transform: translateX(30px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .question-header {
+    background: linear-gradient(135deg, var(--cream2), #EDE4D6);
+    padding: 18px 26px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-bottom: 1px solid rgba(123,29,58,0.1);
+  }
+  .q-number {
+    background: var(--burgundy);
+    color: white;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(123,29,58,0.3);
+  }
+  .q-type-badge {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(123,29,58,0.1);
+    color: var(--burgundy);
+  }
+
+  .question-body { padding: 26px 26px 16px; }
+  .question-text {
+    font-size: clamp(0.95rem, 2.5vw, 1.06rem);
+    font-weight: 600;
+    color: var(--text-dark);
+    line-height: 1.7;
+    margin-bottom: 22px;
+  }
+
+  /* Table for relación de elementos */
+  .relation-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 18px;
+    font-size: 0.88rem;
+  }
+  .relation-table th {
+    background: var(--burgundy);
+    color: white;
+    padding: 8px 14px;
+    text-align: left;
+    font-weight: 700;
+  }
+  .relation-table td {
+    padding: 7px 14px;
+    border-bottom: 1px solid rgba(123,29,58,0.08);
+    vertical-align: top;
+  }
+  .relation-table tr:nth-child(even) td { background: var(--cream2); }
+
+  /* Options */
+  .options-list { display: flex; flex-direction: column; gap: 11px; }
+  .option-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+    width: 100%;
+    background: var(--cream);
+    border: 2px solid rgba(123,29,58,0.12);
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.93rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    transition: all .22s ease;
+    line-height: 1.55;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--burgundy);
+    background: rgba(123,29,58,0.04);
+    transform: translateX(4px);
+  }
+  .option-letter {
+    background: rgba(123,29,58,0.12);
+    color: var(--burgundy);
+    font-weight: 800;
+    font-size: 0.85rem;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all .22s ease;
+  }
+  .option-btn:hover:not(:disabled) .option-letter {
+    background: var(--burgundy);
+    color: white;
+  }
+  .option-btn.selected {
+    border-color: var(--gold);
+    background: rgba(196,150,42,0.07);
+  }
+  .option-btn.selected .option-letter {
+    background: var(--gold);
+    color: white;
+  }
+  .option-btn.correct {
+    border-color: var(--green);
+    background: rgba(45,106,79,0.08);
+    animation: correctPulse .5s ease;
+  }
+  .option-btn.correct .option-letter {
+    background: var(--green);
+    color: white;
+  }
+  .option-btn.wrong {
+    border-color: #C0392B;
+    background: rgba(192,57,43,0.07);
+  }
+  .option-btn.wrong .option-letter {
+    background: #C0392B;
+    color: white;
+  }
+  .option-btn:disabled { cursor: default; }
+
+  @keyframes correctPulse {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+
+  /* Feedback */
+  .feedback-box {
+    margin: 16px 26px 0;
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.6;
+    display: none;
+    animation: fadeSlideIn .3s ease forwards;
+  }
+  .feedback-box.correct-fb {
+    background: rgba(45,106,79,0.1);
+    border-left: 4px solid var(--green);
+    color: var(--green);
+  }
+  .feedback-box.wrong-fb {
+    background: rgba(192,57,43,0.08);
+    border-left: 4px solid #C0392B;
+    color: #A93226;
+  }
+  .feedback-icon { font-size: 1.1rem; margin-right: 6px; }
+
+  .question-footer {
+    padding: 18px 26px;
+    display: flex;
+    justify-content: flex-end;
+    border-top: 1px solid rgba(123,29,58,0.07);
+    margin-top: 16px;
+  }
+
+  /* ── GUIDE BUTTON (floating) ── */
+  .guide-btn-wrap {
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  /* ── RESULTS SCREEN ── */
+  .results-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-top: 30px;
+    overflow: hidden;
+  }
+  .results-hero {
+    background: linear-gradient(135deg, var(--burgundy) 0%, #9D2A4A 60%, #7B1D3A 100%);
+    padding: 36px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .results-hero::before {
+    content: '';
+    position: absolute;
+    top: -30px; left: -30px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+  }
+  .results-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; right: -20px;
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    background: rgba(196,150,42,0.15);
+  }
+  .results-hero h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.4rem, 4vw, 2rem);
+    color: white;
+    margin-bottom: 6px;
+    position: relative; z-index: 1;
+  }
+  .results-hero .student-name {
+    color: var(--gold-light);
+    font-size: 1.05rem;
+    font-weight: 700;
+    position: relative; z-index: 1;
+  }
+
+  .score-ring-wrap {
+    position: relative; z-index: 1;
+    display: flex;
+    justify-content: center;
+    margin: 24px 0 10px;
+  }
+  .score-ring {
+    width: 130px; height: 130px;
+    position: relative;
+  }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-ring-text {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .score-pct {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: white;
+    line-height: 1;
+  }
+  .score-pct-label { font-size: 0.7rem; color: rgba(255,255,255,0.75); font-weight: 700; }
+
+  .results-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: rgba(123,29,58,0.08);
+    border-top: 1px solid rgba(123,29,58,0.1);
+  }
+  .stat-box {
+    background: var(--white);
+    padding: 22px 12px;
+    text-align: center;
+  }
+  .stat-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-light);
+  }
+  .stat-box.correct-stat .stat-number { color: var(--green); }
+  .stat-box.wrong-stat .stat-number { color: #C0392B; }
+  .stat-box.total-stat .stat-number { color: var(--burgundy); }
+
+  .results-message {
+    padding: 26px 28px;
+    text-align: center;
+  }
+  .message-emoji { font-size: 2.5rem; margin-bottom: 10px; display: block; }
+  .message-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: var(--burgundy);
+    margin-bottom: 8px;
+  }
+  .message-text {
+    color: var(--text-mid);
+    font-size: 0.93rem;
+    line-height: 1.7;
+    max-width: 480px;
+    margin: 0 auto 24px;
+  }
+
+  .results-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    padding: 0 28px 28px;
+  }
+
+  /* ── GUIDE SECTION ── */
+  .guide-section {
+    background: linear-gradient(135deg, var(--green), var(--green-light));
+    border-radius: var(--radius);
+    margin-top: 24px;
+    padding: 24px 28px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 6px 24px rgba(45,106,79,0.25);
+  }
+  .guide-icon-wrap {
+    width: 60px; height: 60px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem;
+    flex-shrink: 0;
+  }
+  .guide-text h3 {
+    color: white;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+  }
+  .guide-text p {
+    color: rgba(255,255,255,0.85);
+    font-size: 0.83rem;
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(44,24,16,0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: white;
+    border-radius: var(--radius);
+    width: 100%;
+    max-width: 900px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.3);
+    animation: fadeSlideIn .3s ease;
+  }
+  .modal-header {
+    background: linear-gradient(135deg, var(--green), var(--green-light));
+    padding: 16px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+  .modal-header h3 { color: white; font-size: 1.05rem; font-weight: 800; }
+  .modal-close {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    font-size: 1.3rem;
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .2s;
+  }
+  .modal-close:hover { background: rgba(255,255,255,0.35); }
+  .modal-body { flex: 1; overflow: hidden; }
+  .modal-body iframe {
+    width: 100%;
+    height: 70vh;
+    border: none;
+    display: block;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .welcome-card { padding: 28px 18px; }
+    .question-body { padding: 18px 16px 10px; }
+    .question-footer { padding: 14px 16px; }
+    .feedback-box { margin: 12px 16px 0; }
+    .results-stats { grid-template-columns: repeat(3, 1fr); }
+    .stat-number { font-size: 1.6rem; }
+    .guide-section { flex-direction: column; text-align: center; }
+    .results-actions { flex-direction: column; }
+    .btn { width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ HEADER ═══════════ -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-badge">🏥 Estrategia Nacional · NEM 2024</div>
+    <h1 class="header-title">Simulador Interactivo de Evaluación</h1>
+    <p class="header-subtitle">Prof. Francisco De Jesus Luna Benitez</p>
+  </div>
+  <div class="header-bar">
+    <span class="leaf-icon">🌿</span>
+    <span>Proyecto Comunitario y Estrategia Nacional Vida Saludable · Nueva Escuela Mexicana</span>
+    <span class="leaf-icon">🌿</span>
+  </div>
+</header>
+
+<!-- ═══════════ PROGRESS BAR ═══════════ -->
+<div class="progress-container" id="progressContainer">
+  <span class="progress-label" id="progressLabel">Pregunta 1/30</span>
+  <div class="progress-track">
+    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  </div>
+  <span class="progress-score" id="progressScore">✓ 0 &nbsp;✗ 0</span>
+</div>
+
+<!-- ═══════════ WRAPPER ═══════════ -->
+<div class="wrapper">
+
+  <!-- ─── PANTALLA 1: BIENVENIDA ─── -->
+  <div class="screen active" id="screenWelcome">
+    <div class="welcome-card">
+      <div class="welcome-icon">🏫</div>
+      <h2>Bienvenido al Simulador</h2>
+      <p>Pon a prueba tus conocimientos sobre la <strong>Estrategia Nacional Vida Saludable</strong> y el <strong>Proyecto Comunitario</strong> en el marco de la Nueva Escuela Mexicana. Responde 30 preguntas de opción múltiple y recibe retroalimentación inmediata.</p>
+      <div class="info-pills">
+        <span class="pill">📝 30 preguntas</span>
+        <span class="pill">🎯 3 opciones por reactivo</span>
+        <span class="pill">⚡ Retroalimentación inmediata</span>
+        <span class="pill">🏆 Resultados al final</span>
+      </div>
+      <div class="input-group">
+        <span class="input-icon">👤</span>
+        <input type="text" id="studentName" placeholder="Escribe tu nombre completo" autocomplete="off" maxlength="80">
+      </div>
+      <button class="btn btn-primary" onclick="startSimulator()">
+        Iniciar Simulador &nbsp;→
+      </button>
+    </div>
+    <div class="guide-section" style="margin-top:22px;">
+      <div class="guide-icon-wrap">📖</div>
+      <div class="guide-text">
+        <h3>Guía de Estudio disponible</h3>
+        <p>Antes de comenzar, puedes repasar la Guía de Estudio: Proyecto Comunitario y Estrategia Nacional Vida Saludable.</p>
+        <button class="btn btn-gold" onclick="openGuide()" style="font-size:0.85rem;padding:10px 22px;">
+          📄 Abrir Guía de Estudio
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PANTALLA 2: PREGUNTAS ─── -->
+  <div class="screen" id="screenQuestion">
+    <div class="question-card" id="questionCard">
+      <div class="question-header">
+        <div class="q-number" id="qNumber">1</div>
+        <div>
+          <div class="q-type-badge" id="qTypeBadge">Cuestionamiento directo</div>
+        </div>
+      </div>
+      <div class="question-body">
+        <div class="question-text" id="questionText"></div>
+        <div id="tableContainer"></div>
+        <div class="options-list" id="optionsList"></div>
+      </div>
+      <div class="feedback-box" id="feedbackBox"></div>
+      <div class="question-footer">
+        <button class="btn btn-primary" id="btnNext" onclick="nextQuestion()" disabled>
+          Siguiente pregunta &nbsp;→
+        </button>
+      </div>
+    </div>
+    <div class="guide-btn-wrap">
+      <button class="btn btn-outline" onclick="openGuide()" style="font-size:0.82rem;padding:9px 20px;">
+        📖 Consultar Guía de Estudio
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── PANTALLA 3: RESULTADOS ─── -->
+  <div class="screen" id="screenResults">
+    <div class="results-card">
+      <div class="results-hero">
+        <h2>¡Simulador Completado!</h2>
+        <p class="student-name" id="resultName"></p>
+        <div class="score-ring-wrap">
+          <div class="score-ring">
+            <svg width="130" height="130" viewBox="0 0 130 130">
+              <circle cx="65" cy="65" r="55" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="12"/>
+              <circle cx="65" cy="65" r="55" fill="none" stroke="#E8B84B" stroke-width="12"
+                stroke-dasharray="345.4" stroke-dashoffset="345.4"
+                stroke-linecap="round" id="ringCircle" style="transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)"/>
+            </svg>
+            <div class="score-ring-text">
+              <div class="score-pct" id="resultPct">0%</div>
+              <div class="score-pct-label">DESEMPEÑO</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="results-stats">
+        <div class="stat-box correct-stat">
+          <div class="stat-number" id="statCorrect">0</div>
+          <div class="stat-label">✓ Aciertos</div>
+        </div>
+        <div class="stat-box wrong-stat">
+          <div class="stat-number" id="statWrong">0</div>
+          <div class="stat-label">✗ Errores</div>
+        </div>
+        <div class="stat-box total-stat">
+          <div class="stat-number">30</div>
+          <div class="stat-label">📋 Total</div>
+        </div>
+      </div>
+      <div class="results-message">
+        <span class="message-emoji" id="resultEmoji">🎉</span>
+        <h3 class="message-title" id="resultTitle">Excelente desempeño</h3>
+        <p class="message-text" id="resultMsg"></p>
+      </div>
+      <div class="results-actions">
+        <button class="btn btn-primary" onclick="restartSimulator()">🔄 Reiniciar simulador</button>
+        <button class="btn btn-green" onclick="openGuide()">📖 Repasar Guía de Estudio</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /wrapper -->
+
+<!-- ═══════════ MODAL GUÍA ═══════════ -->
+<div class="modal-overlay" id="guideModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>📖 Guía de Estudio: Proyecto Comunitario y Estrategia Nacional Vida Saludable</h3>
+      <button class="modal-close" onclick="closeGuide()">✕</button>
+    </div>
+    <div class="modal-body">
+      <iframe src="https://drive.google.com/file/d/1wYAExqZ-LdjyvyB5-oX-xutwTLlDFNH9/preview"
+        allow="autoplay" title="Guía de Estudio Vida Saludable"></iframe>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  BANCO DE 30 PREGUNTAS
+//  Distribución: A=10, B=10, C=10
+//  Tipos: cuestionamiento directo, completamiento,
+//         relación de elementos, ordenamiento
+// ═══════════════════════════════════════════════
+const questions = [
+  // ── Q1 ── Cuestionamiento directo | Correcta: B
+  {
+    type: 'Cuestionamiento directo',
+    text: '¿Cuál es el eje articulador de la Nueva Escuela Mexicana que fundamenta pedagógicamente la Estrategia Nacional Vida Saludable?',
+    options: [
+      'Bienestar Colectivo e Inclusión Educativa.',
+      'Vida Saludable.',
+      'Desarrollo Comunitario y Participación Ciudadana.'
+    ],
+    correct: 1,
+    feedback: 'La opción correcta es B. El eje articulador "Vida Saludable" promueve comprender que las acciones individuales y colectivas influyen en el buen vivir y que la salud es un fenómeno social determinado por condicionantes sociales, no solo un hecho biológico.'
+  },
+  // ── Q2 ── Cuestionamiento directo | Correcta: A
+  {
+    type: 'Cuestionamiento directo',
+    text: '¿Cuántos pilares de salud prioritaria aborda la Estrategia Nacional Vida Saludable para niñas y niños de 6 a 12 años?',
+    options: [
+      'Tres: Nutrición, Salud Visual y Salud Bucal.',
+      'Cuatro: Nutrición, Actividad Física, Salud Visual y Salud Bucal.',
+      'Dos: Nutrición y Salud Bucal.'
+    ],
+    correct: 0,
+    feedback: 'La opción correcta es A. La estrategia aborda tres pilares prioritarios: Nutrición (malos hábitos que causan sobrepeso, obesidad y ENT), Salud Visual (trastornos que dificultan el aprendizaje) y Salud Bucal (alta prevalencia de caries dental).'
+  },
+  // ── Q3 ── Cuestionamiento directo | Correcta: C
+  {
+    type: 'Cuestionamiento directo',
+    text: '¿Qué campo formativo de la NEM se vincula directamente con la Estrategia Nacional Vida Saludable y promueve la intervención en problemáticas de salud del contexto inmediato?',
+    options: [
+      'Saberes y Pensamiento Científico.',
+      'Ética, Naturaleza y Sociedad.',
+      'De lo Humano y lo Comunitario.'
+    ],
+    correct: 2,
+    feedback: 'La opción correcta es C. El campo formativo "De lo Humano y lo Comunitario" promueve la participación colectiva y dinámica para explorar, reflexionar e intervenir en problemáticas de salud del contexto inmediato, articulándose con el eje "Vida Saludable".'
+  },
+  // ── Q4 ── Cuestionamiento directo | Correcta: B
+  {
+    type: 'Cuestionamiento directo',
+    text: '¿Qué institución coordina la estación de Peso y Talla durante la Jornada de Salud Escolar para calcular el Índice de Masa Corporal (IMC)?',
+    options: [
+      'IMSS (Instituto Mexicano del Seguro Social).',
+      'SNDIF (Sistema Nacional para el Desarrollo Integral de la Familia).',
+      'Secretaría de Educación Pública (SEP).'
+    ],
+    correct: 1,
+    feedback: 'La opción correcta es B. El SNDIF coordina la estación de Peso y Talla, donde se realizan los registros necesarios para calcular el Índice de Masa Corporal (IMC) de cada alumna y alumno.'
+  },
+  // ── Q5 ── Cuestionamiento directo | Correcta: A
+  {
+    type: 'Cuestionamiento directo',
+    text: '¿Qué instrumento se utiliza en la estación de Salud Visual de la Jornada de Salud Escolar para medir la agudeza visual de los estudiantes?',
+    options: [
+      'Carta Snellen.',
+      'Optómetro digital de campo.',
+      'Lupa de aumento con escala milimétrica.'
+    ],
+    correct: 0,
+    feedback: 'La opción correcta es A. La carta Snellen es el instrumento utilizado en la estación de Salud Visual (coordinada por el IMSS) para medir la agudeza visual de las alumnas y los alumnos durante la Jornada de Salud Escolar.'
+  },
+  // ── Q6 ── Completamiento | Correcta: C
+  {
+    type: 'Completamiento',
+    text: 'La Estrategia Nacional Vida Saludable es una intervención interinstitucional coordinada por el Gobierno de México, la SEP, la Secretaría de Salud, el IMSS y…',
+    options: [
+      '…la UNAM y el CONACYT, para brindar respaldo científico a las acciones de salud escolar.',
+      '…el ISSSTE y la CONADE, responsables de la activación física y la atención médica en escuelas.',
+      '…el SNDIF, que completa el esquema interinstitucional de coordinación para la salud escolar.'
+    ],
+    correct: 2,
+    feedback: 'La opción correcta es C. El SNDIF (Sistema Nacional para el Desarrollo Integral de la Familia) completa el grupo de instituciones que coordinan la Estrategia Nacional Vida Saludable, siendo responsable de la estación de Peso y Talla durante la Jornada de Salud Escolar.'
+  },
+  // ── Q7 ── Cuestionamiento directo | Correcta: B
+  {
+    type: 'Cuestionamiento directo',
+    text: '¿Qué condición es indispensable para que una alumna o alumno pueda participar en la revisión de peso, talla, vista y aplicación de flúor durante la Jornada de Salud Escolar?',
+    options: [
+      'Que el alumno se encuentre en buen estado de salud el día de la jornada escolar.',
+      'La firma del Consentimiento Informado por parte del tutor o tutora legalmente responsable.',
+      'Que el directivo haya notificado a la Autoridad Educativa Local con 15 días de anticipación.'
+    ],
+    correct: 1,
+    feedback: 'La opción correcta es B. El Consentimiento Informado firmado por el tutor es un requisito indispensable. Sin dicha firma, no podrá realizarse ninguna revisión (peso, talla, vista) ni la aplicación de flúor al alumno o alumna.'
+  },
+  // ── Q8 ── Cuestionamiento directo | Correcta: A
+  {
+    type: 'Cuestionamiento directo',
+    text: '¿Cuántas estaciones médicas especializadas conforman el circuito de la Fase 2 ("Durante") de la Jornada de Salud Escolar?',
+    options: [
+      'Cuatro estaciones: Peso y Talla, Salud Visual, Salud Bucal y Promoción.',
+      'Cinco estaciones, incluyendo una de activación física y otra de nutrición.',
+      'Tres estaciones: Nutrición, Salud Visual y Salud Bucal.'
+    ],
+    correct: 0,
+    feedback: 'La opción correcta es A. El circuito especializado de la Fase 2 consta de cuatro estaciones: (1) Peso y Talla – SNDIF, (2) Salud Visual – IMSS, (3) Salud Bucal – IMSS, y (4) Promoción – Secretaría de Salud.'
+  },
+  // ── Q9 ── Relación de elementos | Correcta: C
+  {
+    type: 'Relación de elementos',
+    text: 'Seleccione la opción que relaciona correctamente cada pilar de la Estrategia Nacional Vida Saludable con el problema de salud que busca atender:',
+    table: {
+      cols: ['Pilar', 'Problema de salud'],
+      rows: [
+        ['1. Nutrición', 'a) Caries dental e infecciones bucales por consumo de azúcares y mala higiene.'],
+        ['2. Salud Visual', 'b) Sobrepeso, obesidad, bajo peso, baja talla y Enfermedades No Transmisibles (ENT).'],
+        ['3. Salud Bucal', 'c) Trastornos no detectados (visión borrosa) que representan una discapacidad visual y dificultan el aprendizaje.']
+      ]
+    },
+    options: [
+      '1a, 2b, 3c',
+      '1c, 2a, 3b',
+      '1b, 2c, 3a'
+    ],
+    correct: 2,
+    feedback: 'La opción correcta es C: 1b, 2c, 3a. Nutrición atiende el sobrepeso, obesidad y ENT (b); Salud Visual atiende los trastornos visuales no detectados que dificultan el aprendizaje (c); y Salud Bucal atiende las caries e infecciones (a).'
+  },
+  // ── Q10 ── Cuestionamiento directo | Correcta: B
+  {
+    type: 'Cuestionamiento directo',
+    text: '¿En qué concepto fundamental se basa la visión de la salud de la Nueva Escuela Mexicana según la Guía de Estudio Vida Saludable?',
+    options: [
+      'La salud es un asunto exclusivamente biológico e individual que depende de la genética de cada persona.',
+      'La salud es un hecho social determinado por condicionantes sociales, no solo un fenómeno biológico.',
+      'La salud depende principalmente de los servicios médicos disponibles en cada comunidad escolar.'
+    ],
+    correct: 1,
+    feedback: 'La opción correcta es B. La NEM concibe la salud como un hecho social, no solo biológico. Esto implica que las condiciones de vida, el entorno y los determinantes sociales influyen de forma decisiva en el bienestar de niñas y niños.'
+  },
+  // ── Q11 ── Cuestionamiento directo | Correcta: C
+  {
+    type: 'Cuestionamiento directo',
+    text: 'Un docente necesita explicar a los padres de familia qué se realizará en la estación de Salud Bucal de la Jornada de Salud Escolar. ¿Cuál es la descripción correcta?',
+    options: [
+      'Revisión de agudeza visual con carta Snellen y, de ser necesario, aplicación de gotas oftálmicas.',
+      'Medición del Índice de Masa Corporal con registro de peso y talla y recomendaciones nutricionales.',
+      'Técnica de cepillado dental, revisión de caries y aplicación preventiva de flúor.'
+    ],
+    correct: 2,
+    feedback: 'La opción correcta es C. La estación de Salud Bucal (coordinada por el IMSS) comprende tres acciones: la enseñanza de la técnica correcta de cepillado, la revisión de caries dental y la aplicación de flúor como medida preventiva.'
+  },
+  // ── Q12 ── Cuestionamiento directo | Correcta: A
+  {
+    type: 'Cuestionamiento directo',
+    text: '¿Cuál es la acción saludable permanente denominada "Vive Activo" que los docentes deben implementar cotidianamente en el aula?',
+    options: [
+      'Realizar de 5 a 10 minutos de actividad física, juego o acción motriz en cualquier momento de la jornada escolar.',
+      'Consumir colectivamente frutas y verduras frescas durante el recreo escolar todos los días.',
+      'Practicar ejercicios de respiración y relajación guiada al inicio de cada clase.'
+    ],
+    correct: 0,
+    feedback: 'La opción correcta es A. "Vive Activo" consiste en realizar de 5 a 10 minutos de actividad física, juego o acción motriz. Puede ejecutarse en cualquier momento de la jornada escolar y, al repetirse con regularidad, se consolida como hábito saludable.'
+  },
+  // ── Q13 ── Completamiento | Correcta: B
+  {
+    type: 'Completamiento',
+    text: 'La acción saludable permanente "Lava tus Dientes" establece un cepillado individual obligatorio…',
+    options: [
+      '…al inicio de la jornada escolar, utilizando pasta fluorada provista por el centro educativo.',
+      '…después del receso escolar y del consumo de alimentos, usando un kit de higiene traído de casa.',
+      '…al finalizar el día, en presencia del personal de salud asignado permanentemente a la escuela.'
+    ],
+    correct: 1,
+    feedback: 'La opción correcta es B. "Lava tus Dientes" se realiza después del receso escolar y del consumo de alimentos, usando el kit de higiene bucal que cada alumno lleva de casa. Al repetirse diariamente se consolida como hábito permanente de salud bucal.'
+  },
+  // ── Q14 ── Cuestionamiento directo | Correcta: C
+  {
+    type: 'Cuestionamiento directo',
+    text: '¿Con qué tipo de actividad concluye la Jornada de Salud Escolar durante la Fase 2 ("Durante")?',
+    options: [
+      'Una conferencia magistral sobre nutrición y prevención de enfermedades impartida por especialistas.',
+      'La entrega formal de resultados médicos individuales a cada padre o madre de familia.',
+      'Una actividad física comunitaria de integración voluntaria que fomenta el movimiento con propósito y diversión.'
+    ],
+    correct: 2,
+    feedback: 'La opción correcta es C. El cierre de la Jornada de Salud Escolar es una Actividad Física Comunitaria con participación voluntaria de toda la comunidad. Incluye actividades como rayuela, carreras en zigzag, circuito de saltos y coreografías espontáneas.'
+  },
+  // ── Q15 ── Ordenamiento | Correcta: A
+  {
+    type: 'Ordenamiento',
+    text: 'Ordene correctamente las tres fases de la Ruta del Proyecto Comunitario Vida Saludable, de la primera a la última:\n\n1. Seguimiento y Celebración (análisis de informes y Feria de la Salud).\n2. Preparación y Sensibilización (capacitación en línea y firma de consentimientos).\n3. La Jornada de Salud Escolar (circuito de 4 estaciones médicas).',
+    options: [
+      '2, 3, 1',
+      '3, 1, 2',
+      '1, 2, 3'
+    ],
+    correct: 0,
+    feedback: 'La opción correcta es A: 2, 3, 1. Primero se realiza la Fase 1 "Antes" (Preparación y Sensibilización – capacitación, reunión con familias, consentimientos), luego la Fase 2 "Durante" (Jornada de Salud Escolar con el circuito de 4 estaciones) y finalmente la Fase 3 "Después" (Seguimiento y Celebración).'
+  },
+  // ── Q16 ── Cuestionamiento directo | Correcta: B
+  {
+    type: 'Cuestionamiento directo',
+    text: '¿Cuál de los tres pilares de la Estrategia Nacional Vida Saludable se refiere específicamente a la prohibición de venta de alimentos ultraprocesados y con bajo valor nutricional en los espacios escolares?',
+    options: [
+      'Currículo.',
+      'Regulación.',
+      'Proyecto Comunitario.'
+    ],
+    correct: 1,
+    feedback: 'La opción correcta es B. El pilar "Regulación" contempla las disposiciones normativas para prohibir la venta de alimentos ultraprocesados y de bajo valor nutricional en espacios escolares, promoviendo entornos alimentarios saludables dentro de las escuelas.'
+  },
+  // ── Q17 ── Cuestionamiento directo | Correcta: C
+  {
+    type: 'Cuestionamiento directo',
+    text: 'Según la Matriz de Responsabilidades de la Guía de Estudio, ¿cuál es una función específica de los docentes durante la Jornada de Salud Escolar (Fase 2)?',
+    options: [
+      'Coordinar la logística del circuito médico de estaciones junto a las brigadas de salud.',
+      'Recibir y entregar los informes de resultados individuales a las familias de los alumnos.',
+      'Organizar al grupo escolar y apoyar en el desarrollo del circuito de estaciones médicas.'
+    ],
+    correct: 2,
+    feedback: 'La opción correcta es C. Según la Matriz de Responsabilidades, los docentes organizan al grupo y apoyan en el circuito de estaciones. La coordinación logística es responsabilidad de los directivos, y la entrega de informes a familias también recae en el equipo directivo.'
+  },
+  // ── Q18 ── Cuestionamiento directo | Correcta: A
+  {
+    type: 'Cuestionamiento directo',
+    text: '¿Cuál es el evento de celebración que se organiza al concluir el ciclo escolar como parte de la Fase 3 ("Después") del Proyecto Comunitario?',
+    options: [
+      'Feria de la Salud, como exposición comunitaria para compartir evidencias y celebrar logros.',
+      'Jornada de Activación Física Nacional, con participación de autoridades educativas municipales.',
+      'Festival del Bienestar Escolar, organizado por los Consejos de Participación Social.'
+    ],
+    correct: 0,
+    feedback: 'La opción correcta es A. La Feria de la Salud se realiza al final del ciclo escolar como una exposición comunitaria donde se comparten las evidencias del proyecto, se reflexiona sobre el impacto logrado y se celebran los avances alcanzados por la comunidad escolar.'
+  },
+  // ── Q19 ── Relación de elementos | Correcta: B
+  {
+    type: 'Relación de elementos',
+    text: 'Seleccione la opción que relaciona correctamente cada fase de la Ruta del Proyecto Comunitario con su actividad principal:',
+    table: {
+      cols: ['Fase', 'Actividad principal'],
+      rows: [
+        ['1. Antes (Fase 1)', 'a) Circuito de 4 estaciones médicas especializadas.'],
+        ['2. Durante (Fase 2)', 'b) Capacitación en línea, asamblea con familias y firma de consentimientos.'],
+        ['3. Después (Fase 3)', 'c) Análisis de informes de resultados y organización de la Feria de la Salud.']
+      ]
+    },
+    options: [
+      '1a, 2c, 3b',
+      '1b, 2a, 3c',
+      '1c, 2b, 3a'
+    ],
+    correct: 1,
+    feedback: 'La opción correcta es B: 1b, 2a, 3c. La Fase 1 "Antes" corresponde a la Preparación y Sensibilización (capacitación y consentimientos). La Fase 2 "Durante" es la Jornada con el circuito de estaciones. La Fase 3 "Después" incluye análisis de resultados y la Feria de la Salud.'
+  },
+  // ── Q20 ── Cuestionamiento directo | Correcta: C
+  {
+    type: 'Cuestionamiento directo',
+    text: '¿Cuál es la responsabilidad de los directivos escolares respecto a los informes de resultados generados en la Jornada de Salud Escolar?',
+    options: [
+      'Publicarlos en el tablero escolar para que toda la comunidad conozca los datos de salud grupales.',
+      'Enviarlos directamente a la Secretaría de Salud para su integración al registro estadístico nacional.',
+      'Recibirlos de las brigadas de salud y entregarlos a las familias de las alumnas y los alumnos.'
+    ],
+    correct: 2,
+    feedback: 'La opción correcta es C. Según la Matriz de Responsabilidades, los directivos son quienes reciben los informes de resultados de las brigadas de salud y son responsables de hacerlos llegar a las familias de cada alumna y alumno de la escuela.'
+  },
+  // ── Q21 ── Cuestionamiento directo | Correcta: A
+  {
+    type: 'Cuestionamiento directo',
+    text: '¿Qué institución coordina tanto la estación de Salud Visual como la de Salud Bucal durante la Jornada de Salud Escolar?',
+    options: [
+      'IMSS (Instituto Mexicano del Seguro Social).',
+      'SNDIF (Sistema Nacional para el Desarrollo Integral de la Familia).',
+      'Secretaría de Educación Pública (SEP).'
+    ],
+    correct: 0,
+    feedback: 'La opción correcta es A. El IMSS coordina dos de las cuatro estaciones del circuito: la estación de Salud Visual (medición de agudeza visual con carta Snellen) y la estación de Salud Bucal (técnica de cepillado, revisión de caries y aplicación de flúor).'
+  },
+  // ── Q22 ── Cuestionamiento directo | Correcta: B
+  {
+    type: 'Cuestionamiento directo',
+    text: '¿Cuál es el objetivo del pilar "Currículo" dentro de la Estrategia Nacional Vida Saludable?',
+    options: [
+      'Prohibir la venta de alimentos ultraprocesados y con bajo valor nutricional en los espacios escolares.',
+      'Desarrollar proyectos didácticos y acciones saludables permanentes para crear hábitos de vida sana.',
+      'Organizar Jornadas de Salud Escolar en colaboración con especialistas e instituciones de salud.'
+    ],
+    correct: 1,
+    feedback: 'La opción correcta es B. El pilar "Currículo" se orienta a integrar en el proceso educativo proyectos didácticos (a nivel aula, escuela y comunidad) y acciones saludables permanentes que, al repetirse en el tiempo, se consolidan como hábitos de vida saludable en los estudiantes.'
+  },
+  // ── Q23 ── Completamiento | Correcta: C
+  {
+    type: 'Completamiento',
+    text: 'El campo formativo "De lo Humano y lo Comunitario" de la NEM promueve la participación colectiva y dinámica para explorar, reflexionar e intervenir en…',
+    options: [
+      '…contenidos curriculares relacionados con matemáticas y ciencias naturales del plan de estudios.',
+      '…estrategias de aprendizaje cognitivo para el desarrollo del pensamiento crítico del alumno.',
+      '…problemáticas de salud del contexto inmediato de la comunidad escolar.'
+    ],
+    correct: 2,
+    feedback: 'La opción correcta es C. El campo formativo "De lo Humano y lo Comunitario" orienta la participación colectiva hacia la exploración, reflexión e intervención en las problemáticas de salud que existen en el contexto inmediato de la comunidad escolar.'
+  },
+  // ── Q24 ── Cuestionamiento directo | Correcta: A
+  {
+    type: 'Cuestionamiento directo',
+    text: 'Un directivo escolar desea informar a los padres de familia sobre qué sucede en la estación de Promoción durante la Jornada de Salud Escolar. ¿Cuál es la descripción correcta?',
+    options: [
+      'Se imparten pláticas sobre higiene personal, alimentación saludable y desarrollo socioemocional.',
+      'Se aplican vacunas de refuerzo y suplementos vitamínicos a las alumnas y los alumnos.',
+      'Se mide la agudeza visual y se detectan posibles problemas de refracción ocular.'
+    ],
+    correct: 0,
+    feedback: 'La opción correcta es A. La estación de Promoción (coordinada por la Secretaría de Salud) consiste en pláticas educativas sobre tres temas clave: higiene personal, alimentación saludable y desarrollo socioemocional de las niñas y los niños.'
+  },
+  // ── Q25 ── Cuestionamiento directo | Correcta: B
+  {
+    type: 'Cuestionamiento directo',
+    text: '¿Cuál es el propósito principal de la Asamblea de Sensibilización que los docentes y directivos deben realizar durante la Fase 1 ("Antes") del Proyecto Comunitario?',
+    options: [
+      'Capacitar a los docentes en técnicas avanzadas de primeros auxilios para emergencias escolares.',
+      'Dialogar con las familias sobre la importancia de la prevención en salud y los beneficios del proyecto.',
+      'Organizar los grupos de alumnos para asignarles una estación específica del circuito médico.'
+    ],
+    correct: 1,
+    feedback: 'La opción correcta es B. La Asamblea de Sensibilización tiene como propósito dialogar con las familias sobre la importancia de la prevención en salud. Es en este espacio donde también se informa sobre el proyecto y se obtiene el Consentimiento Informado de los tutores.'
+  },
+  // ── Q26 ── Cuestionamiento directo | Correcta: C
+  {
+    type: 'Cuestionamiento directo',
+    text: 'Durante el cierre de la Jornada de Salud Escolar, el docente organiza la Actividad Física Comunitaria. ¿Cuál de las siguientes describe correctamente las actividades incluidas?',
+    options: [
+      'Visualización de videos educativos sobre enfermedades crónicas no transmisibles en México.',
+      'Talleres de cocina saludable y preparación de recetas nutritivas con productos locales.',
+      'Jugar rayuela, carreras en zigzag, circuito de saltos alternados y coreografías espontáneas.'
+    ],
+    correct: 2,
+    feedback: 'La opción correcta es C. El cierre de la Jornada incluye cuatro actividades de movimiento comunitario: (1) jugar a la rayuela, (2) carreras en zigzag, (3) circuito de saltos alternados y (4) música y coreografías espontáneas, con participación voluntaria de toda la comunidad.'
+  },
+  // ── Q27 ── Cuestionamiento directo | Correcta: A
+  {
+    type: 'Cuestionamiento directo',
+    text: '¿En qué consiste el Vínculo Curricular que los docentes deben realizar durante la Fase 3 ("Después") del Proyecto Comunitario?',
+    options: [
+      'Investigar los temas de salud trabajados en la biblioteca escolar y en los Libros de Texto Gratuitos (LTG).',
+      'Distribuir materiales impresos de promoción de la salud entre las familias de la comunidad escolar.',
+      'Gestionar la presencia de nuevas brigadas médicas para visitas de seguimiento en los siguientes meses.'
+    ],
+    correct: 0,
+    feedback: 'La opción correcta es A. El Vínculo Curricular consiste en que los docentes profundicen los temas de salud del proyecto investigando en la biblioteca escolar y en los Libros de Texto Gratuitos (LTG), integrando así los aprendizajes de salud al currículo oficial.'
+  },
+  // ── Q28 ── Relación de elementos | Correcta: B
+  {
+    type: 'Relación de elementos',
+    text: 'Seleccione la opción que relaciona correctamente cada institución con su responsabilidad dentro del circuito de estaciones de la Jornada de Salud Escolar:',
+    table: {
+      cols: ['Institución', 'Responsabilidad en la Jornada'],
+      rows: [
+        ['1. SNDIF', 'a) Técnica de cepillado dental y aplicación de flúor.'],
+        ['2. IMSS – Salud Bucal', 'b) Registro de peso y talla para calcular el IMC.'],
+        ['3. Secretaría de Salud', 'c) Pláticas sobre higiene, alimentación y desarrollo socioemocional.']
+      ]
+    },
+    options: [
+      '1a, 2c, 3b',
+      '1b, 2a, 3c',
+      '1c, 2b, 3a'
+    ],
+    correct: 1,
+    feedback: 'La opción correcta es B: 1b, 2a, 3c. El SNDIF registra peso y talla para calcular el IMC (b). El IMSS – Salud Bucal enseña técnica de cepillado y aplica flúor (a). La Secretaría de Salud imparte pláticas de promoción de la salud (c).'
+  },
+  // ── Q29 ── Completamiento | Correcta: C
+  {
+    type: 'Completamiento',
+    text: 'Según la Guía de Estudio Vida Saludable, se considera que la salud de niñas y niños de 6 a 12 años es un hecho social porque…',
+    options: [
+      '…los problemas de salud dependen exclusivamente de los hábitos alimenticios de cada familia de manera individual.',
+      '…las enfermedades infantiles son transmitidas de generación en generación únicamente por herencia genética.',
+      '…está determinada por condicionantes sociales y no puede reducirse solo a un fenómeno biológico individual.'
+    ],
+    correct: 2,
+    feedback: 'La opción correcta es C. La guía establece que la salud infantil no es solo un hecho biológico sino un hecho social, ya que está profundamente determinada por condicionantes sociales como el entorno familiar, comunitario, económico y educativo de cada niña y niño.'
+  },
+  // ── Q30 ── Cuestionamiento directo | Correcta: A
+  {
+    type: 'Cuestionamiento directo',
+    text: '¿Cuál es la función principal de la Feria de la Salud que se organiza al concluir el ciclo escolar como parte del Proyecto Comunitario?',
+    options: [
+      'Compartir evidencias del proyecto, reflexionar sobre su impacto y celebrar los logros alcanzados por la comunidad.',
+      'Realizar una nueva jornada médica para evaluar el progreso en los indicadores de salud de los alumnos.',
+      'Distribuir materiales educativos sobre nutrición elaborados por la Secretaría de Educación Pública.'
+    ],
+    correct: 0,
+    feedback: 'La opción correcta es A. La Feria de la Salud es una exposición comunitaria con tres propósitos centrales: compartir las evidencias generadas durante el proyecto, reflexionar colectivamente sobre el impacto logrado y celebrar los logros alcanzados por toda la comunidad escolar.'
+  }
+];
+
+// ═══════════════════════════════════════════════
+//  VARIABLES DE ESTADO
+// ═══════════════════════════════════════════════
+let currentQ = 0;
+let correctCount = 0;
+let wrongCount = 0;
+let answered = false;
+let studentName = '';
+
+// ═══════════════════════════════════════════════
+//  FUNCIONES PRINCIPALES
+// ═══════════════════════════════════════════════
+function startSimulator() {
+  const nameInput = document.getElementById('studentName').value.trim();
+  if (!nameInput) {
+    document.getElementById('studentName').focus();
+    document.getElementById('studentName').style.borderColor = '#C0392B';
+    setTimeout(() => { document.getElementById('studentName').style.borderColor = ''; }, 1800);
+    return;
+  }
+  studentName = nameInput;
+  currentQ = 0;
+  correctCount = 0;
+  wrongCount = 0;
+
+  const pc = document.getElementById('progressContainer');
+  pc.style.display = 'flex';
+
+  showScreen('screenQuestion');
+  renderQuestion();
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  el.classList.add('active');
+}
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  answered = false;
+
+  // Number & type
+  document.getElementById('qNumber').textContent = currentQ + 1;
+  document.getElementById('qTypeBadge').textContent = q.type;
+
+  // Text
+  document.getElementById('questionText').textContent = q.text;
+
+  // Table (if any)
+  const tableContainer = document.getElementById('tableContainer');
+  tableContainer.innerHTML = '';
+  if (q.table) {
+    const tbl = document.createElement('table');
+    tbl.className = 'relation-table';
+    const thead = document.createElement('thead');
+    const headRow = document.createElement('tr');
+    q.table.cols.forEach(col => {
+      const th = document.createElement('th');
+      th.textContent = col;
+      headRow.appendChild(th);
+    });
+    thead.appendChild(headRow);
+    tbl.appendChild(thead);
+    const tbody = document.createElement('tbody');
+    q.table.rows.forEach(row => {
+      const tr = document.createElement('tr');
+      row.forEach(cell => {
+        const td = document.createElement('td');
+        td.textContent = cell;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    tbl.appendChild(tbody);
+    tableContainer.appendChild(tbl);
+  }
+
+  // Options
+  const optList = document.getElementById('optionsList');
+  optList.innerHTML = '';
+  const letters = ['A', 'B', 'C'];
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="option-letter">${letters[i]}</span><span>${opt}</span>`;
+    btn.onclick = () => selectAnswer(i);
+    optList.appendChild(btn);
+  });
+
+  // Reset feedback & next btn
+  const fb = document.getElementById('feedbackBox');
+  fb.style.display = 'none';
+  fb.className = 'feedback-box';
+  fb.innerHTML = '';
+
+  document.getElementById('btnNext').disabled = true;
+
+  // Re-animate card
+  const card = document.getElementById('questionCard');
+  card.style.animation = 'none';
+  void card.offsetWidth;
+  card.style.animation = 'questionIn 0.4s cubic-bezier(.25,.8,.25,1) forwards';
+
+  updateProgress();
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+
+  const q = questions[currentQ];
+  const btns = document.querySelectorAll('.option-btn');
+  const isCorrect = (idx === q.correct);
+
+  // Style buttons
+  btns.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.correct) btn.classList.add('correct');
+    else if (i === idx && !isCorrect) btn.classList.add('wrong');
+  });
+
+  // Feedback
+  const fb = document.getElementById('feedbackBox');
+  if (isCorrect) {
+    correctCount++;
+    fb.className = 'feedback-box correct-fb';
+    fb.innerHTML = `<span class="feedback-icon">✅</span> <strong>¡Correcto!</strong> ${q.feedback}`;
+  } else {
+    wrongCount++;
+    fb.className = 'feedback-box wrong-fb';
+    fb.innerHTML = `<span class="feedback-icon">❌</span> <strong>Respuesta incorrecta.</strong> ${q.feedback}`;
+  }
+  fb.style.display = 'block';
+
+  // Enable next / finish
+  const btnNext = document.getElementById('btnNext');
+  btnNext.disabled = false;
+  if (currentQ === questions.length - 1) {
+    btnNext.textContent = '📊 Ver resultados';
+    btnNext.innerHTML = '📊 Ver mis resultados';
+  }
+
+  updateProgress();
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+function updateProgress() {
+  const total = questions.length;
+  const done = currentQ + (answered ? 1 : 0);
+  const pct = Math.round((done / total) * 100);
+
+  document.getElementById('progressLabel').textContent = `Pregunta ${Math.min(currentQ + 1, total)} / ${total}`;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressScore').textContent = `✓ ${correctCount}  ✗ ${wrongCount}`;
+}
+
+function showResults() {
+  showScreen('screenResults');
+  document.getElementById('progressContainer').style.display = 'none';
+
+  const pct = Math.round((correctCount / questions.length) * 100);
+
+  document.getElementById('resultName').textContent = studentName;
+  document.getElementById('resultPct').textContent = pct + '%';
+  document.getElementById('statCorrect').textContent = correctCount;
+  document.getElementById('statWrong').textContent = wrongCount;
+
+  // Animate ring
+  const circumference = 2 * Math.PI * 55; // 345.4
+  const offset = circumference - (pct / 100) * circumference;
+  setTimeout(() => {
+    document.getElementById('ringCircle').style.strokeDashoffset = offset;
+  }, 200);
+
+  // Message
+  let emoji, title, msg;
+  if (pct >= 90) {
+    emoji = '🏆'; title = '¡Excelente dominio del tema!';
+    msg = 'Demuestras un conocimiento sólido y profundo sobre la Estrategia Nacional Vida Saludable y el Proyecto Comunitario. ¡Sigue así, eres un referente para tu comunidad escolar!';
+  } else if (pct >= 75) {
+    emoji = '🌟'; title = '¡Muy buen desempeño!';
+    msg = 'Tienes un buen manejo de los temas. Repasa los reactivos en los que tuviste duda y consulta la Guía de Estudio para reforzar los puntos más específicos.';
+  } else if (pct >= 60) {
+    emoji = '📚'; title = 'Buen trabajo, sigue practicando.';
+    msg = 'Tienes una base importante sobre Vida Saludable. Te invitamos a repasar la Guía de Estudio para fortalecer los pilares y las fases del Proyecto Comunitario.';
+  } else if (pct >= 40) {
+    emoji = '💪'; title = 'En progreso — ¡no te rindas!';
+    msg = 'Hay áreas de oportunidad importantes. Revisa con calma la Guía de Estudio, especialmente las fases del proyecto, la matriz de responsabilidades y las estaciones de la jornada.';
+  } else {
+    emoji = '🌱'; title = 'Cada intento es aprendizaje.';
+    msg = 'Es un buen punto de partida. Estudia la Guía de Estudio Vida Saludable antes de reintentar el simulador. Con dedicación, mejorarás significativamente tu desempeño.';
+  }
+
+  document.getElementById('resultEmoji').textContent = emoji;
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultMsg').textContent = msg;
+}
+
+function restartSimulator() {
+  currentQ = 0;
+  correctCount = 0;
+  wrongCount = 0;
+  answered = false;
+  document.getElementById('btnNext').textContent = '';
+  document.getElementById('btnNext').innerHTML = 'Siguiente pregunta &nbsp;→';
+  document.getElementById('ringCircle').style.strokeDashoffset = '345.4';
+  showScreen('screenWelcome');
+}
+
+// ─── MODAL GUÍA ───
+function openGuide() {
+  document.getElementById('guideModal').classList.add('open');
+}
+function closeGuide() {
+  document.getElementById('guideModal').classList.remove('open');
+}
+document.getElementById('guideModal').addEventListener('click', function(e) {
+  if (e.target === this) closeGuide();
+});
+
+// Enter key on name field
+document.getElementById('studentName').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') startSimulator();
+});
+</script>
+</body>
+</html>

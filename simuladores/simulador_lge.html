@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador LGE – Prof. Francisco De Jesus Luna Benitez</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --primary: #4F46E5;
+  --primary-light: #818CF8;
+  --primary-dark: #3730A3;
+  --sky: #0EA5E9;
+  --emerald: #10B981;
+  --amber: #F59E0B;
+  --rose: #F43F5E;
+  --text: #1E293B;
+  --text-muted: #64748B;
+  --border: #E2E8F0;
+  --card: #FFFFFF;
+  --shadow: 0 4px 24px rgba(79,70,229,0.10);
+  --shadow-lg: 0 12px 48px rgba(79,70,229,0.18);
+  --radius: 20px;
+  --radius-sm: 14px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Nunito', system-ui, sans-serif;
+  background: linear-gradient(150deg, #EEF2FF 0%, #E0F2FE 45%, #ECFDF5 100%);
+  min-height: 100vh;
+  color: var(--text);
+  padding-bottom: 48px;
+}
+
+/* ── HEADER ── */
+.site-header {
+  background: linear-gradient(120deg, #3730A3 0%, #4F46E5 35%, #0EA5E9 70%, #10B981 100%);
+  color: white;
+  text-align: center;
+  padding: 36px 20px 30px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 6px 32px rgba(79,70,229,0.30);
+}
+.site-header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 15% 50%, rgba(255,255,255,0.13) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 50%, rgba(255,255,255,0.09) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.06) 0%, transparent 60%);
+  pointer-events: none;
+}
+.header-inner { position: relative; z-index: 1; }
+.header-icon {
+  font-size: 2.8rem;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.20));
+  animation: floatIcon 3s ease-in-out infinite;
+}
+@keyframes floatIcon {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+.header-title {
+  font-size: clamp(1.25rem, 4.5vw, 2rem);
+  font-weight: 900;
+  letter-spacing: -0.3px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.18);
+  line-height: 1.25;
+}
+.header-author {
+  font-size: clamp(0.78rem, 2vw, 0.95rem);
+  font-weight: 700;
+  opacity: 0.92;
+  margin-top: 6px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+.header-tags {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  justify-content: center;
+  margin-top: 14px;
+}
+.htag {
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.30);
+  border-radius: 50px;
+  padding: 4px 14px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+
+/* ── LAYOUT ── */
+.container {
+  max-width: 740px;
+  margin: 0 auto;
+  padding: 28px 16px 0;
+}
+
+/* ── SCREENS ── */
+.screen { display: none; }
+.screen.active { display: block; animation: screenIn 0.45s cubic-bezier(.4,0,.2,1); }
+@keyframes screenIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 32px;
+  margin-bottom: 18px;
+  border: 1px solid rgba(79,70,229,0.06);
+  transition: box-shadow 0.2s;
+}
+@media (max-width:480px) { .card { padding: 20px 16px; } }
+
+/* ── START SCREEN ── */
+.start-hero {
+  text-align: center;
+  padding-bottom: 4px;
+}
+.start-icon-wrap {
+  width: 88px; height: 88px;
+  background: linear-gradient(135deg, #4F46E5 0%, #0EA5E9 100%);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 2.2rem;
+  box-shadow: 0 8px 24px rgba(79,70,229,0.28);
+}
+.start-title {
+  font-size: clamp(1.3rem, 3.5vw, 1.65rem);
+  font-weight: 900;
+  color: var(--primary);
+  margin-bottom: 10px;
+}
+.start-desc {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.65;
+  max-width: 480px;
+  margin: 0 auto 24px;
+}
+.info-pills {
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+  margin-bottom: 28px;
+}
+.pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: linear-gradient(120deg,#EEF2FF,#E0F2FE);
+  color: var(--primary-dark);
+  padding: 6px 14px;
+  border-radius: 50px;
+  font-size: 0.80rem;
+  font-weight: 800;
+  border: 1px solid rgba(79,70,229,0.12);
+}
+
+/* ── FORM ── */
+.form-group { margin-bottom: 22px; }
+.form-label {
+  display: block;
+  font-weight: 800;
+  font-size: 0.88rem;
+  color: var(--text);
+  margin-bottom: 8px;
+  letter-spacing: 0.2px;
+}
+.form-input {
+  width: 100%;
+  padding: 15px 18px;
+  border: 2.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  background: #FAFBFF;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79,70,229,0.10);
+}
+.form-input::placeholder { color: #B0BAC9; font-weight: 500; }
+.form-input.error { border-color: var(--rose); animation: shake 0.3s ease; }
+@keyframes shake {
+  0%,100%{transform:translateX(0)} 20%{transform:translateX(-5px)}
+  60%{transform:translateX(5px)} 80%{transform:translateX(-3px)}
+}
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%;
+  padding: 16px 24px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s;
+  letter-spacing: 0.3px;
+  line-height: 1;
+}
+.btn-primary {
+  background: linear-gradient(120deg, #4F46E5 0%, #0EA5E9 100%);
+  color: white;
+  box-shadow: 0 4px 18px rgba(79,70,229,0.32);
+}
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(79,70,229,0.38);
+}
+.btn-primary:active:not(:disabled) { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.btn-guide {
+  background: linear-gradient(120deg, #10B981 0%, #0EA5E9 100%);
+  color: white;
+  box-shadow: 0 4px 16px rgba(16,185,129,0.26);
+  font-size: 0.95rem;
+  padding: 14px 20px;
+}
+.btn-guide:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(16,185,129,0.32); }
+
+.btn-restart {
+  background: linear-gradient(120deg, #F59E0B 0%, #F43F5E 100%);
+  color: white;
+  box-shadow: 0 4px 16px rgba(245,158,11,0.26);
+  margin-bottom: 14px;
+}
+.btn-restart:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(245,158,11,0.32); }
+
+/* ── PROGRESS ── */
+.progress-wrap { margin-bottom: 20px; }
+.progress-top {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 10px;
+}
+.progress-label { font-size: 0.85rem; font-weight: 800; color: var(--text-muted); }
+.progress-pct   { font-size: 0.85rem; font-weight: 900; color: var(--primary); }
+.progress-track {
+  background: #DDE3F0;
+  border-radius: 50px;
+  height: 10px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4F46E5, #0EA5E9, #10B981);
+  border-radius: 50px;
+  transition: width 0.5s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── QUESTION CARD ── */
+.question-card {
+  animation: qSlideIn 0.38s cubic-bezier(.4,0,.2,1);
+}
+@keyframes qSlideIn {
+  from { opacity: 0; transform: translateX(28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.q-meta {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 20px;
+}
+.q-num {
+  background: linear-gradient(135deg, #4F46E5, #0EA5E9);
+  color: white;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.88rem;
+  font-weight: 900;
+  flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(79,70,229,0.28);
+}
+.q-type-tag {
+  background: linear-gradient(120deg,#EEF2FF,#E0F2FE);
+  color: var(--primary-dark);
+  padding: 5px 13px;
+  border-radius: 50px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  border: 1px solid rgba(79,70,229,0.12);
+}
+.q-text {
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.70;
+  margin-bottom: 22px;
+}
+.q-text p { margin-bottom: 6px; }
+.q-text ul { margin: 10px 0 10px 20px; }
+.q-text li { margin-bottom: 4px; line-height: 1.6; }
+
+/* REACTIVO TABLE */
+.rt {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0;
+  font-size: 0.88rem;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(79,70,229,0.07);
+}
+.rt th {
+  background: linear-gradient(120deg,#4F46E5,#0EA5E9);
+  color: white;
+  padding: 10px 14px;
+  font-weight: 800;
+  text-align: left;
+  font-size: 0.82rem;
+  letter-spacing: 0.3px;
+}
+.rt td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #E8EDF7;
+  font-weight: 600;
+  vertical-align: top;
+  line-height: 1.5;
+}
+.rt tr:nth-child(even) td { background: #F6F8FF; }
+.rt tr:last-child td { border-bottom: none; }
+
+/* OPTIONS */
+.options-list { display: flex; flex-direction: column; gap: 12px; }
+.opt-btn {
+  display: flex; align-items: flex-start; gap: 14px;
+  width: 100%;
+  padding: 16px 18px;
+  background: #FAFBFF;
+  border: 2.5px solid #DDE3F0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: left;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  transition: all 0.18s ease;
+  line-height: 1.55;
+}
+.opt-btn:hover:not(:disabled) {
+  border-color: var(--primary-light);
+  background: #EEF2FF;
+  transform: translateX(4px);
+  box-shadow: 0 2px 12px rgba(79,70,229,0.10);
+}
+.opt-btn.selected  { border-color: var(--primary); background: #EEF2FF; }
+.opt-btn.correct   { border-color: var(--emerald); background: #ECFDF5; }
+.opt-btn.incorrect { border-color: var(--rose); background: #FFF1F2; }
+.opt-btn:disabled  { cursor: default; transform: none !important; }
+.opt-letter {
+  display: flex; align-items: center; justify-content: center;
+  min-width: 30px; height: 30px;
+  border-radius: 50%;
+  background: #DDE3F0;
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 900;
+  flex-shrink: 0;
+  transition: all 0.18s;
+}
+.opt-btn.selected  .opt-letter { background: var(--primary); color: white; }
+.opt-btn.correct   .opt-letter { background: var(--emerald); color: white; }
+.opt-btn.incorrect .opt-letter { background: var(--rose);    color: white; }
+
+/* FEEDBACK */
+.feedback-box {
+  display: none;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 22px;
+  padding: 18px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 0.93rem;
+  font-weight: 600;
+  line-height: 1.65;
+  animation: fadeUp 0.28s ease;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.feedback-box.correct {
+  background: linear-gradient(120deg, #ECFDF5, #D1FAE5);
+  border: 2px solid #10B981;
+  color: #064E3B;
+}
+.feedback-box.incorrect {
+  background: linear-gradient(120deg, #FFF1F2, #FFE4E6);
+  border: 2px solid #F43F5E;
+  color: #881337;
+}
+.fb-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 1px; }
+
+/* NEXT BTN */
+.next-wrap { margin-top: 22px; display: none; }
+
+/* QUIZ FOOTER */
+.quiz-footer { text-align: center; margin-top: 4px; }
+.btn-guide-sm {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 20px;
+  background: linear-gradient(120deg,#10B981,#0EA5E9);
+  color: white;
+  border: none; border-radius: 50px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.84rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 3px 12px rgba(16,185,129,0.22);
+  letter-spacing: 0.2px;
+}
+.btn-guide-sm:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(16,185,129,0.28); }
+
+/* ── RESULTS ── */
+.results-top { text-align: center; margin-bottom: 28px; }
+.results-trophy { font-size: 3rem; margin-bottom: 8px; animation: bounceIn 0.6s cubic-bezier(.36,.07,.19,.97); }
+@keyframes bounceIn {
+  0%{transform:scale(0.5);opacity:0} 70%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1}
+}
+.results-title { font-size: 1.7rem; font-weight: 900; color: var(--primary); margin-bottom: 4px; }
+.results-student { font-size: 1.1rem; color: var(--text-muted); font-weight: 700; }
+
+/* Score ring */
+.ring-wrap { display: flex; justify-content: center; margin: 24px 0; }
+.ring-box  { position: relative; width: 170px; height: 170px; }
+.ring-box svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+.ring-bg   { fill: none; stroke: #DDE3F0; stroke-width: 14; }
+.ring-fill {
+  fill: none; stroke: url(#rg); stroke-width: 14; stroke-linecap: round;
+  transition: stroke-dashoffset 1.3s cubic-bezier(.4,0,.2,1);
+}
+.ring-center {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  text-align: center;
+}
+.ring-pct   { font-size: 2.4rem; font-weight: 900; color: var(--primary); line-height: 1; }
+.ring-label { font-size: 0.70rem; font-weight: 800; color: var(--text-muted); letter-spacing: 0.8px; }
+
+/* Stats */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 22px; }
+.stat-card {
+  border-radius: var(--radius-sm); padding: 20px 16px;
+  text-align: center;
+  border: 2px solid transparent;
+}
+.stat-card.sc  { background: #ECFDF5; border-color: var(--emerald); }
+.stat-card.se  { background: #FFF1F2; border-color: var(--rose); }
+.stat-num { font-size: 2.4rem; font-weight: 900; line-height: 1; }
+.sc .stat-num  { color: #065F46; }
+.se .stat-num  { color: #9F1239; }
+.stat-lbl { font-size: 0.80rem; font-weight: 800; color: var(--text-muted); margin-top: 5px; }
+
+/* Motivational */
+.moti-box {
+  background: linear-gradient(120deg,#EEF2FF,#E0F2FE);
+  border-radius: var(--radius-sm);
+  padding: 22px 20px;
+  text-align: center;
+  border: 1.5px solid rgba(79,70,229,0.13);
+  margin-bottom: 22px;
+}
+.moti-icon { font-size: 2.2rem; margin-bottom: 8px; }
+.moti-text { font-size: 1.0rem; font-weight: 700; color: var(--primary-dark); line-height: 1.65; }
+
+/* Divider */
+.divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 20px 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.divider::before, .divider::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* ── MODAL ── */
+.modal-bg {
+  position: fixed; inset: 0;
+  background: rgba(10,15,30,0.62);
+  backdrop-filter: blur(5px);
+  z-index: 200;
+  display: none; align-items: center; justify-content: center;
+  padding: 16px;
+}
+.modal-bg.open { display: flex; animation: fadeIn2 0.22s ease; }
+@keyframes fadeIn2 { from{opacity:0}to{opacity:1} }
+.modal-box {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  width: 100%; max-width: 820px;
+  max-height: 92vh;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  animation: modalIn 0.28s cubic-bezier(.4,0,.2,1);
+}
+@keyframes modalIn {
+  from { opacity:0; transform:scale(0.95) translateY(12px); }
+  to   { opacity:1; transform:scale(1) translateY(0); }
+}
+.modal-hd {
+  background: linear-gradient(120deg,#4F46E5,#0EA5E9);
+  color: white; padding: 18px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.modal-htitle { font-size: 1.05rem; font-weight: 900; }
+.modal-close {
+  background: rgba(255,255,255,0.20); border: 1.5px solid rgba(255,255,255,0.35);
+  color: white; width: 34px; height: 34px;
+  border-radius: 50%; cursor: pointer;
+  font-size: 1rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.modal-close:hover { background: rgba(255,255,255,0.35); }
+.modal-body { flex: 1; overflow: hidden; }
+.modal-body iframe { width: 100%; height: 72vh; border: none; display: block; }
+.modal-foot {
+  padding: 12px 24px;
+  background: #F8FAFF;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  flex-shrink: 0;
+}
+.modal-foot a {
+  color: var(--primary);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.modal-foot a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     HEADER
+═══════════════════════════════════════ -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-icon">📚</div>
+    <div class="header-title">Simulador Interactivo de Evaluación</div>
+    <div class="header-author">Prof. Francisco De Jesus Luna Benitez</div>
+    <div class="header-tags">
+      <span class="htag">⚖️ Ley General de Educación</span>
+      <span class="htag">📋 30 Reactivos</span>
+      <span class="htag">🎓 USICAMM</span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- ═══════════════════════════════════════
+     PANTALLA INICIAL
+═══════════════════════════════════════ -->
+<div id="screen-start" class="screen active">
+  <div class="card">
+    <div class="start-hero">
+      <div class="start-icon-wrap">📝</div>
+      <h2 class="start-title">Bienvenido al simulador</h2>
+      <p class="start-desc">Evalúa tus conocimientos sobre la <strong>Ley General de Educación</strong>. Responde 30 preguntas de opción múltiple con retroalimentación inmediata.</p>
+      <div class="info-pills">
+        <span class="pill">📋 30 preguntas</span>
+        <span class="pill">🔤 Opción múltiple A, B, C</span>
+        <span class="pill">💡 Retroalimentación inmediata</span>
+        <span class="pill">📊 Resultado al finalizar</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="student-name">👤 Nombre del estudiante</label>
+      <input type="text" id="student-name" class="form-input" placeholder="Escribe tu nombre completo aquí..." autocomplete="off">
+    </div>
+    <button class="btn btn-primary" onclick="startQuiz()">🚀 Iniciar simulador</button>
+  </div>
+  <div class="card" style="text-align:center;">
+    <p style="font-size:0.88rem;font-weight:700;color:var(--text-muted);margin-bottom:14px;">📄 Material de apoyo para el estudio</p>
+    <button class="btn btn-guide" onclick="openGuide()">📄 Abrir guía de estudio (PDF)</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     PANTALLA DEL EXAMEN
+═══════════════════════════════════════ -->
+<div id="screen-quiz" class="screen">
+  <div class="progress-wrap">
+    <div class="progress-top">
+      <span class="progress-label" id="prog-label">Pregunta 1 de 30</span>
+      <span class="progress-pct"   id="prog-pct">0%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="card question-card" id="q-card">
+    <div class="q-meta">
+      <div class="q-num" id="q-num">1</div>
+      <div class="q-type-tag" id="q-tag">Cuestionamiento directo</div>
+    </div>
+    <div class="q-text" id="q-text"></div>
+    <div class="options-list" id="opts"></div>
+    <div class="feedback-box" id="fb">
+      <div class="fb-icon" id="fb-icon"></div>
+      <div id="fb-text"></div>
+    </div>
+    <div class="next-wrap" id="next-wrap">
+      <button class="btn btn-primary" id="btn-next" onclick="nextQ()">Siguiente pregunta →</button>
+    </div>
+  </div>
+
+  <div class="quiz-footer">
+    <button class="btn-guide-sm" onclick="openGuide()">📄 Guía de estudio</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     PANTALLA DE RESULTADOS
+═══════════════════════════════════════ -->
+<div id="screen-results" class="screen">
+  <div class="card">
+    <div class="results-top">
+      <div class="results-trophy" id="res-trophy">🎓</div>
+      <div class="results-title">Resultados finales</div>
+      <div class="results-student" id="res-name">Estudiante</div>
+    </div>
+
+    <div class="ring-wrap">
+      <div class="ring-box">
+        <svg viewBox="0 0 170 170">
+          <defs>
+            <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%"   style="stop-color:#4F46E5"/>
+              <stop offset="50%"  style="stop-color:#0EA5E9"/>
+              <stop offset="100%" style="stop-color:#10B981"/>
+            </linearGradient>
+          </defs>
+          <circle class="ring-bg"   cx="85" cy="85" r="72"/>
+          <circle class="ring-fill" id="ring-fill" cx="85" cy="85" r="72"
+            stroke-dasharray="452.39" stroke-dashoffset="452.39"/>
+        </svg>
+        <div class="ring-center">
+          <div class="ring-pct"   id="res-pct">0%</div>
+          <div class="ring-label">DESEMPEÑO</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card sc">
+        <div class="stat-num" id="res-ok">0</div>
+        <div class="stat-lbl">✅ Aciertos</div>
+      </div>
+      <div class="stat-card se">
+        <div class="stat-num" id="res-err">0</div>
+        <div class="stat-lbl">❌ Errores</div>
+      </div>
+    </div>
+
+    <div class="moti-box">
+      <div class="moti-icon" id="moti-icon">⭐</div>
+      <div class="moti-text" id="moti-text"></div>
+    </div>
+
+    <button class="btn btn-restart" onclick="restartQuiz()">🔄 Reiniciar simulador</button>
+
+    <div class="divider">Recursos de estudio</div>
+    <button class="btn btn-guide" onclick="openGuide()">📄 Abrir guía de estudio (PDF)</button>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<!-- ═══════════════════════════════════════
+     MODAL GUÍA DE ESTUDIO
+═══════════════════════════════════════ -->
+<div class="modal-bg" id="modal-guide">
+  <div class="modal-box">
+    <div class="modal-hd">
+      <span class="modal-htitle">📄 Guía de Estudio — Ley General de Educación</span>
+      <button class="modal-close" onclick="closeGuide()">✕</button>
+    </div>
+    <div class="modal-body">
+      <iframe src="https://drive.google.com/file/d/1xLnMK5FmbMUBg-9LsQWVKhbZlwEpeEBq/preview" allow="autoplay"></iframe>
+    </div>
+    <div class="modal-foot">
+      <a href="https://drive.google.com/file/d/1xLnMK5FmbMUBg-9LsQWVKhbZlwEpeEBq/view" target="_blank">
+        🔗 Abrir en nueva pestaña
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════ -->
+<script>
+// ──────────────────────────────────────────
+// BANCO DE PREGUNTAS — 30 reactivos LGE
+// Distribución de respuestas correctas:
+//   A: Q1,Q4,Q7,Q10,Q13,Q16,Q19,Q22,Q25,Q28
+//   B: Q2,Q5,Q8,Q11,Q14,Q17,Q20,Q23,Q26,Q29
+//   C: Q3,Q6,Q9,Q12,Q15,Q18,Q21,Q24,Q27,Q30
+// ──────────────────────────────────────────
+const QUESTIONS = [
+  /* 1 */
+  {
+    type: "Cuestionamiento directo",
+    html: `<p>¿Cuál es el carácter que debe tener la educación impartida por el Estado, según la Ley General de Educación?</p>`,
+    opts: {
+      A: "Universal, inclusiva, pública, gratuita y laica.",
+      B: "Selectiva, privada, laica, regional y obligatoria.",
+      C: "Opcional, confesional, arancelada, exclusiva y técnica."
+    },
+    ans: "A",
+    fb: "La LGE establece que la educación impartida por el Estado debe ser <strong>universal, inclusiva, pública, gratuita y laica</strong>, garantizando el acceso sin distinción a todas las personas."
+  },
+  /* 2 */
+  {
+    type: "Cuestionamiento directo",
+    html: `<p>¿Qué niveles educativos se consideran <strong>obligatorios</strong> según la Ley General de Educación?</p>`,
+    opts: {
+      A: "Solo la educación primaria y la secundaria.",
+      B: "La educación básica (preescolar, primaria y secundaria) y la media superior.",
+      C: "Únicamente la educación preescolar y primaria en zonas rurales."
+    },
+    ans: "B",
+    fb: "La LGE establece que son <strong>obligatorias</strong> la educación básica (preescolar, primaria y secundaria) y la media superior, siendo responsabilidad legal de los padres garantizar la asistencia de sus hijos."
+  },
+  /* 3 */
+  {
+    type: "Completamiento",
+    html: `<p>Según el <strong>Artículo 78</strong> de la LGE, las madres, padres o tutores son corresponsables en el proceso educativo de sus hijos menores de dieciocho años y tienen el deber de…</p>`,
+    opts: {
+      A: "…transferir la responsabilidad formativa exclusivamente a los docentes y directivos del plantel.",
+      B: "…supervisar únicamente el promedio académico al final de cada ciclo escolar.",
+      C: "…apoyar su aprendizaje y revisar continuamente su progreso, desempeño y conducta."
+    },
+    ans: "C",
+    fb: "El <strong>Art. 78</strong> establece que la corresponsabilidad familiar implica <strong>apoyar el aprendizaje</strong> de sus hijos y <strong>revisar continuamente</strong> su progreso, desempeño y conducta."
+  },
+  /* 4 */
+  {
+    type: "Cuestionamiento directo",
+    html: `<p>¿Cuáles son los criterios que deben orientar la educación según el <strong>Artículo 16</strong> de la Ley General de Educación?</p>`,
+    opts: {
+      A: "Democrática, nacional, humanista, equitativa, inclusiva, intercultural, integral y de excelencia.",
+      B: "Técnica, regional, productiva, selectiva, laica, bilingüe, comunitaria y federal.",
+      C: "Científica, artística, deportiva, cívica, digital, histórica, rural y urbana."
+    },
+    ans: "A",
+    fb: "El <strong>Artículo 16</strong> de la LGE establece que la educación debe ser <strong>democrática, nacional, humanista, equitativa, inclusiva, intercultural, integral y de excelencia</strong>."
+  },
+  /* 5 */
+  {
+    type: "Relación de elementos",
+    html: `<p>Relacione cada <strong>derecho de la familia</strong> con su descripción, conforme al <strong>Artículo 128</strong> de la LGE:</p>
+    <table class="rt">
+      <tr><th>Derecho</th><th>Descripción</th></tr>
+      <tr><td>1. Participación activa</td><td>a) Conocer criterios y resultados de las evaluaciones</td></tr>
+      <tr><td>2. Acceso a la información</td><td>b) Colaborar con las autoridades escolares para solucionar problemas</td></tr>
+      <tr><td>3. Integración a órganos</td><td>c) Formar parte de las asociaciones de padres de familia</td></tr>
+    </table>`,
+    opts: {
+      A: "1c, 2a, 3b",
+      B: "1b, 2a, 3c",
+      C: "1a, 2c, 3b"
+    },
+    ans: "B",
+    fb: "Según el <strong>Art. 128</strong>, la participación activa implica colaborar con las autoridades <strong>(b)</strong>, el acceso a la información incluye conocer criterios de evaluación <strong>(a)</strong>, y la integración a órganos corresponde a las asociaciones de padres <strong>(c)</strong>."
+  },
+  /* 6 */
+  {
+    type: "Caso aplicado",
+    html: `<p>Una directora observa que su escuela atiende a niños de familias con alta marginación económica. Para atender esta situación conforme a la LGE, ¿cuál es la acción prioritaria que debe promover?</p>`,
+    opts: {
+      A: "Aplicar exámenes de diagnóstico para separar a los alumnos por nivel de conocimiento.",
+      B: "Solicitar a los padres de familia cuotas adicionales para mejorar los materiales educativos.",
+      C: "Dirigir las medidas educativas prioritariamente a los grupos con mayor rezago o vulnerabilidad socioeconómica."
+    },
+    ans: "C",
+    fb: "La LGE establece que el Estado debe prestar los servicios educativos con <strong>equidad y excelencia</strong>, dirigiendo sus medidas <strong>prioritariamente</strong> a grupos y regiones con mayor rezago o vulnerabilidad socioeconómica."
+  },
+  /* 7 */
+  {
+    type: "Completamiento",
+    html: `<p>Según el <strong>Artículo 15</strong> de la LGE, uno de los fines de la educación es formar a los estudiantes en una cultura de la paz, lo cual implica…</p>`,
+    opts: {
+      A: "…la solución no violenta de conflictos y el respeto irrestricto a la dignidad humana.",
+      B: "…la participación activa en actividades deportivas y recreativas dentro de la escuela.",
+      C: "…el cumplimiento estricto del reglamento escolar y la obediencia a las autoridades educativas."
+    },
+    ans: "A",
+    fb: "El <strong>Art. 15</strong> señala que la educación debe formar en una <strong>cultura de la paz</strong> y la <strong>solución no violenta de conflictos</strong>, vinculada al respeto irrestricto a la dignidad humana."
+  },
+  /* 8 */
+  {
+    type: "Caso aplicado",
+    html: `<p>Un maestro de secundaria organiza actividades que buscan fomentar el <strong>pensamiento crítico</strong> y fortalecer el tejido social en su grupo. ¿Con cuál principio de la Nueva Escuela Mexicana está alineada esta práctica?</p>`,
+    opts: {
+      A: "Con el principio de obligatoriedad escolar establecido en los artículos 5° al 9°.",
+      B: "Con el desarrollo humano integral que impulsa la NEM para evitar la corrupción y combatir la discriminación.",
+      C: "Con el principio de laicidad que rige la educación impartida por el Estado."
+    },
+    ans: "B",
+    fb: "La <strong>Nueva Escuela Mexicana</strong> impulsa el <strong>desarrollo humano integral</strong> que contribuye a la formación del pensamiento crítico, fortalece el tejido social, evita la corrupción y combate las causas de discriminación y violencias."
+  },
+  /* 9 */
+  {
+    type: "Ordenamiento",
+    html: `<p>Ordene de manera <strong>cronológica</strong> (del primero al último nivel) los niveles de educación obligatoria establecidos en la LGE:</p>
+    <ul style="margin:12px 0 12px 22px;line-height:2.0;font-weight:700;">
+      <li>1. Primaria</li>
+      <li>2. Preescolar</li>
+      <li>3. Secundaria</li>
+      <li>4. Media superior</li>
+    </ul>`,
+    opts: {
+      A: "1, 2, 3, 4",
+      B: "2, 3, 1, 4",
+      C: "2, 1, 3, 4"
+    },
+    ans: "C",
+    fb: "El orden correcto según la LGE es: <strong>preescolar (2) → primaria (1) → secundaria (3) → media superior (4)</strong>."
+  },
+  /* 10 */
+  {
+    type: "Caso aplicado",
+    html: `<p>Una madre acude a la escuela a preguntar sobre el presupuesto asignado al plantel y el director se niega a informarle. ¿Qué derecho del <strong>Artículo 128</strong> de la LGE está siendo vulnerado?</p>`,
+    opts: {
+      A: "El derecho de las familias a conocer el presupuesto asignado a la escuela y su aplicación.",
+      B: "El derecho de participación en el Consejo Técnico Escolar de la institución.",
+      C: "El derecho a inscribir a sus hijos en cualquier escuela pública del sistema educativo nacional."
+    },
+    ans: "A",
+    fb: "El <strong>Art. 128</strong> garantiza a las familias el derecho de conocer el <strong>presupuesto asignado a la escuela y su aplicación</strong>, lo cual es un derecho de transparencia que no puede negarse."
+  },
+  /* 11 */
+  {
+    type: "Relación de elementos",
+    html: `<p>Relacione cada <strong>fin de la educación</strong> con su descripción, conforme al <strong>Artículo 15</strong> de la LGE:</p>
+    <table class="rt">
+      <tr><th>Fin educativo</th><th>Descripción</th></tr>
+      <tr><td>1. Desarrollo integral</td><td>a) Contribuir a la formación personal y social del educando</td></tr>
+      <tr><td>2. Amor a la Patria</td><td>b) Fomentar el sentido de pertenencia e identidad nacional</td></tr>
+      <tr><td>3. Respeto a la naturaleza</td><td>c) Inculcar el cuidado y protección del medio ambiente</td></tr>
+    </table>`,
+    opts: {
+      A: "1c, 2a, 3b",
+      B: "1a, 2b, 3c",
+      C: "1b, 2c, 3a"
+    },
+    ans: "B",
+    fb: "Según el <strong>Art. 15</strong>, el desarrollo integral contribuye a la formación personal/social <strong>(a)</strong>, el amor a la Patria fomenta la identidad nacional <strong>(b)</strong>, y el respeto a la naturaleza inculca el cuidado del medio ambiente <strong>(c)</strong>."
+  },
+  /* 12 */
+  {
+    type: "Completamiento",
+    html: `<p>Conforme al <strong>Artículo 16</strong> de la LGE, la educación nacional luchará contra la ignorancia, sus causas y efectos. Además, deberá combatir…</p>`,
+    opts: {
+      A: "…la influencia política de grupos particulares sobre el sistema educativo nacional.",
+      B: "…el uso de tecnología no supervisada en los planteles de educación básica del país.",
+      C: "…los fanatismos, los prejuicios, la formación de estereotipos, la discriminación y la violencia."
+    },
+    ans: "C",
+    fb: "El <strong>Art. 16</strong> de la LGE señala que la educación luchará contra la ignorancia y sus causas, así como contra los <strong>fanatismos, prejuicios, estereotipos, discriminación y violencia</strong>."
+  },
+  /* 13 */
+  {
+    type: "Caso aplicado",
+    html: `<p>En una junta escolar, se invita a los padres de familia a participar activamente en la solución de un conflicto entre alumnos. ¿Qué artículo de la LGE respalda directamente esta participación?</p>`,
+    opts: {
+      A: "El Artículo 128, que establece el derecho de las familias de participar activamente con las autoridades escolares para solucionar problemas.",
+      B: "El Artículo 16, que define los criterios que deben orientar la educación democrática e inclusiva.",
+      C: "El Artículo 15, que establece los fines de la educación orientados a la formación en cultura de paz."
+    },
+    ans: "A",
+    fb: "El <strong>Art. 128</strong> de la LGE establece expresamente el <strong>derecho de los padres de familia</strong> de participar activamente con las autoridades escolares para <strong>solucionar problemas</strong> educativos."
+  },
+  /* 14 */
+  {
+    type: "Cuestionamiento directo",
+    html: `<p>¿Qué obligación establece el <strong>Artículo 129</strong> de la LGE respecto a los hábitos saludables de los menores a cargo de madres, padres o tutores?</p>`,
+    opts: {
+      A: "Garantizar que los menores asistan a clases de educación física dentro del plantel escolar.",
+      B: "Promover en sus hijos la práctica de actividades físicas, recreativas y deportivas.",
+      C: "Supervisar la alimentación de los menores durante el horario escolar en el comedor."
+    },
+    ans: "B",
+    fb: "El <strong>Art. 129</strong> establece que las familias deben <strong>promover en sus hijos la práctica de actividades físicas, recreativas y deportivas</strong> como parte de sus obligaciones de corresponsabilidad educativa."
+  },
+  /* 15 */
+  {
+    type: "Ordenamiento",
+    html: `<p>Un docente planea actividades para desarrollar los <strong>valores de responsabilidad ciudadana</strong> que promueve la NEM. Ordene dichos valores según el orden en que los menciona la LGE:</p>
+    <ul style="margin:12px 0 12px 22px;line-height:2.0;font-weight:700;">
+      <li>1. Solidaridad</li>
+      <li>2. Honestidad</li>
+      <li>3. Justicia</li>
+    </ul>`,
+    opts: {
+      A: "3, 1, 2",
+      B: "1, 2, 3",
+      C: "2, 3, 1"
+    },
+    ans: "C",
+    fb: "La LGE menciona los valores de responsabilidad ciudadana en el siguiente orden: <strong>honestidad (2), justicia (3) y solidaridad (1)</strong>, como parte de los valores que la NEM busca cultivar en los educandos."
+  },
+  /* 16 */
+  {
+    type: "Caso aplicado",
+    html: `<p>Una supervisora detecta en su zona comunidades indígenas cuyos niños presentan altos índices de inasistencia escolar. Según la LGE, ¿cuál debe ser la orientación prioritaria de las acciones educativas?</p>`,
+    opts: {
+      A: "Dirigir las medidas prioritariamente a grupos con mayor rezago, incluyendo comunidades con vulnerabilidad socioeconómica y cultural.",
+      B: "Aplicar el mismo modelo educativo nacional sin modificaciones para garantizar la igualdad formal entre todos los alumnos.",
+      C: "Remitir el caso a la autoridad estatal para que diseñe un programa especial de cobertura regional."
+    },
+    ans: "A",
+    fb: "La LGE establece que el Estado debe prestar servicios con <strong>equidad</strong>, dirigiendo sus medidas <strong>prioritariamente</strong> a grupos y regiones con mayor rezago o vulnerabilidad socioeconómica, garantizando el acceso real a la educación."
+  },
+  /* 17 */
+  {
+    type: "Completamiento",
+    html: `<p>Según la LGE, la Nueva Escuela Mexicana fomenta la <strong>igualdad sustantiva</strong> entre mujeres y hombres, lo que significa…</p>`,
+    opts: {
+      A: "…que todos los alumnos recibirán exactamente los mismos materiales y apoyos sin considerar sus diferencias.",
+      B: "…garantizar condiciones reales de igualdad, reconociendo y eliminando las brechas estructurales que impiden la equidad.",
+      C: "…que los contenidos curriculares serán idénticos para todas las regiones del territorio nacional."
+    },
+    ans: "B",
+    fb: "La <strong>igualdad sustantiva</strong>, a diferencia de la formal, implica <strong>garantizar condiciones reales de igualdad</strong>, reconociendo y eliminando las brechas estructurales que impiden a las personas acceder a las mismas oportunidades."
+  },
+  /* 18 */
+  {
+    type: "Caso aplicado",
+    html: `<p>Un padre solicita conocer los criterios de evaluación aplicados por los docentes. El director alega que esa información es confidencial. Conforme al <strong>Artículo 128</strong> de la LGE, ¿cuál es la postura correcta?</p>`,
+    opts: {
+      A: "El director tiene razón: los criterios de evaluación son responsabilidad exclusiva del cuerpo docente.",
+      B: "La familia puede conocer solo los resultados finales, pero no los criterios ni los instrumentos de evaluación.",
+      C: "El padre tiene el derecho de conocer los criterios y resultados de las evaluaciones, conforme al Art. 128."
+    },
+    ans: "C",
+    fb: "El <strong>Art. 128</strong> garantiza a las familias el derecho de conocer los <strong>criterios y resultados de las evaluaciones</strong>, lo que implica transparencia plena y corresponsabilidad en el proceso educativo."
+  },
+  /* 19 */
+  {
+    type: "Relación de elementos",
+    html: `<p>Relacione cada <strong>principio de la NEM</strong> con la acción docente que le corresponde, conforme a la LGE:</p>
+    <table class="rt">
+      <tr><th>Principio NEM</th><th>Acción docente</th></tr>
+      <tr><td>1. Equidad</td><td>a) Priorizar el apoyo a alumnos en situación de rezago</td></tr>
+      <tr><td>2. Inclusión</td><td>b) Diseñar actividades que atiendan la diversidad cultural del grupo</td></tr>
+      <tr><td>3. Excelencia</td><td>c) Orientar la práctica pedagógica hacia la mejora continua de aprendizajes</td></tr>
+    </table>`,
+    opts: {
+      A: "1a, 2b, 3c",
+      B: "1b, 2c, 3a",
+      C: "1c, 2a, 3b"
+    },
+    ans: "A",
+    fb: "La <strong>equidad</strong> implica priorizar a quienes están en rezago <strong>(a)</strong>, la <strong>inclusión</strong> requiere atender la diversidad cultural <strong>(b)</strong>, y la <strong>excelencia</strong> orienta hacia la mejora continua de los aprendizajes <strong>(c)</strong>."
+  },
+  /* 20 */
+  {
+    type: "Cuestionamiento directo",
+    html: `<p>¿Hasta qué edad tienen los padres o tutores la <strong>obligación legal</strong> de garantizar que sus hijos asistan a la escuela, de acuerdo con la Ley General de Educación?</p>`,
+    opts: {
+      A: "Hasta los 15 años de edad.",
+      B: "Hasta los 18 años de edad.",
+      C: "Hasta los 16 años de edad."
+    },
+    ans: "B",
+    fb: "La LGE establece que es obligación legal de los padres o tutores hacer que sus hijos <strong>menores de dieciocho años</strong> asistan a las escuelas y reciban la educación obligatoria."
+  },
+  /* 21 */
+  {
+    type: "Caso aplicado",
+    html: `<p>Durante una sesión del CTE, los docentes detectan cambios preocupantes en la actitud de varios alumnos. Conforme a la LGE, la autoridad escolar debe…</p>`,
+    opts: {
+      A: "…registrar internamente los casos sin informar a las familias para no generar alarma en la comunidad escolar.",
+      B: "…enviar un comunicado general a todos los padres sin especificar los casos individuales observados.",
+      C: "…convocar a las familias, ya que los tutores tienen la obligación de acudir a los llamados de las autoridades escolares."
+    },
+    ans: "C",
+    fb: "El <strong>Art. 129</strong> establece que las familias tienen la <strong>obligación de acudir a los llamados</strong> de las autoridades escolares, y el <strong>Art. 78</strong> les exige estar atentos al progreso, desempeño y conducta de sus hijos."
+  },
+  /* 22 */
+  {
+    type: "Cuestionamiento directo",
+    html: `<p>¿Qué implica el concepto de <strong>educación humanista</strong> establecido como criterio en el Artículo 16 de la LGE?</p>`,
+    opts: {
+      A: "Una formación centrada en el respeto a la dignidad humana, el pensamiento crítico y el desarrollo integral de la persona.",
+      B: "La incorporación exclusiva de contenidos de filosofía y humanidades en los planes de estudio de todos los niveles.",
+      C: "La reducción de contenidos científicos para priorizar el desarrollo artístico y cultural de los educandos."
+    },
+    ans: "A",
+    fb: "El <strong>humanismo educativo</strong> en la LGE coloca al ser humano en el centro, promoviendo el <strong>respeto a la dignidad, el pensamiento crítico y el desarrollo integral</strong> de la persona, no solo el conocimiento académico."
+  },
+  /* 23 */
+  {
+    type: "Ordenamiento",
+    html: `<p>Ordene las siguientes <strong>obligaciones de las familias</strong> del <strong>Artículo 129</strong> de la LGE de <strong>mayor a menor jerarquía jurídica</strong>:</p>
+    <ul style="margin:12px 0 12px 22px;line-height:2.0;font-weight:700;">
+      <li>1. Promover actividades físicas y deportivas en sus hijos</li>
+      <li>2. Asegurar que sus hijos reciban la educación obligatoria</li>
+      <li>3. Informar a las autoridades sobre cambios en la conducta de los menores</li>
+      <li>4. Colaborar con las instituciones educativas</li>
+    </ul>`,
+    opts: {
+      A: "3, 2, 4, 1",
+      B: "2, 4, 3, 1",
+      C: "1, 3, 2, 4"
+    },
+    ans: "B",
+    fb: "El <strong>Art. 129</strong> jerarquiza: primero <strong>garantizar la educación obligatoria (2)</strong>, luego <strong>colaborar con las instituciones (4)</strong>, después <strong>informar sobre cambios de conducta (3)</strong>, y finalmente <strong>promover actividades físicas (1)</strong>."
+  },
+  /* 24 */
+  {
+    type: "Completamiento",
+    html: `<p>Según la Ley General de Educación, la educación es un <strong>derecho fundamental</strong> porque…</p>`,
+    opts: {
+      A: "…permite a los ciudadanos acceder a empleos mejor remunerados en el mercado laboral nacional.",
+      B: "…garantiza la formación de cuadros técnicos especializados para el desarrollo económico del país.",
+      C: "…es el medio fundamental para adquirir conocimientos, alcanzar el desarrollo personal y contribuir a la transformación de la sociedad."
+    },
+    ans: "C",
+    fb: "La LGE define la educación como un <strong>medio fundamental</strong> para <strong>adquirir conocimientos, alcanzar el desarrollo personal</strong> y contribuir a la <strong>transformación y mejoramiento de la sociedad</strong>."
+  },
+  /* 25 */
+  {
+    type: "Caso aplicado",
+    html: `<p>Una escuela recibe a una alumna con discapacidad auditiva. Conforme a los criterios del <strong>Artículo 16</strong> de la LGE, ¿qué principio debe guiar prioritariamente la respuesta institucional?</p>`,
+    opts: {
+      A: "El principio de inclusión, que exige atender la diversidad y garantizar el acceso pleno al aprendizaje para todos los educandos.",
+      B: "El principio de excelencia, que orienta a buscar los mejores resultados académicos del grupo en su conjunto.",
+      C: "El principio de laicidad, que garantiza que la educación no esté influenciada por criterios religiosos o ideológicos."
+    },
+    ans: "A",
+    fb: "El <strong>Art. 16</strong> establece que la educación debe ser <strong>inclusiva</strong>, lo que implica garantizar el acceso y la participación plena de <strong>todos los estudiantes</strong>, incluyendo a quienes presentan alguna discapacidad."
+  },
+  /* 26 */
+  {
+    type: "Cuestionamiento directo",
+    html: `<p>¿Cuál es la finalidad principal de implementar acciones como <strong>becas, libros de texto gratuitos y escuelas de tiempo completo</strong>, según los Artículos 5°–9° de la LGE?</p>`,
+    opts: {
+      A: "Incrementar la matrícula escolar y elevar el índice de cobertura educativa en todos los niveles.",
+      B: "Lograr la igualdad sustantiva y atender prioritariamente a los grupos con mayor rezago socioeconómico.",
+      C: "Fortalecer la relación entre las escuelas y el sector productivo para mejorar la empleabilidad futura."
+    },
+    ans: "B",
+    fb: "Según la LGE, estas acciones son instrumentos de <strong>equidad</strong> para lograr la <strong>igualdad sustantiva</strong>, dirigidas prioritariamente a grupos y regiones con mayor <strong>rezago o vulnerabilidad socioeconómica</strong>."
+  },
+  /* 27 */
+  {
+    type: "Relación de elementos",
+    html: `<p>Relacione cada <strong>artículo de la LGE</strong> con el tema que aborda:</p>
+    <table class="rt">
+      <tr><th>Artículo</th><th>Tema</th></tr>
+      <tr><td>1. Artículo 78</td><td>a) Derechos de las familias en el ámbito escolar</td></tr>
+      <tr><td>2. Artículo 128</td><td>b) Fines de la educación nacional</td></tr>
+      <tr><td>3. Artículo 15</td><td>c) Corresponsabilidad de madres, padres o tutores</td></tr>
+      <tr><td>4. Artículo 16</td><td>d) Criterios que orientan la educación</td></tr>
+    </table>`,
+    opts: {
+      A: "1b, 2a, 3d, 4c",
+      B: "1a, 2c, 3b, 4d",
+      C: "1c, 2a, 3b, 4d"
+    },
+    ans: "C",
+    fb: "El <strong>Art. 78</strong> trata la corresponsabilidad familiar <strong>(c)</strong>, el <strong>128</strong> los derechos de las familias <strong>(a)</strong>, el <strong>15</strong> los fines de la educación <strong>(b)</strong>, y el <strong>16</strong> los criterios educativos <strong>(d)</strong>."
+  },
+  /* 28 */
+  {
+    type: "Caso aplicado",
+    html: `<p>Una maestra organiza una asamblea donde sus alumnos debaten sobre el uso responsable del agua y proponen soluciones comunitarias. ¿Qué principio de la NEM está poniendo en práctica?</p>`,
+    opts: {
+      A: "El desarrollo humano integral, que promueve el pensamiento crítico, el tejido social y el respeto y cuidado al medio ambiente.",
+      B: "La obligatoriedad de la educación básica, que exige actividades dentro del currículo nacional prescrito.",
+      C: "La rectoría del Estado sobre la educación, que orienta el uso de estrategias pedagógicas estandarizadas."
+    },
+    ans: "A",
+    fb: "La <strong>NEM</strong> impulsa el <strong>desarrollo humano integral</strong>, que incluye la formación del <strong>pensamiento crítico, el tejido social y el respeto al medio ambiente</strong>. Esta práctica docente refleja con exactitud dicho principio."
+  },
+  /* 29 */
+  {
+    type: "Completamiento",
+    html: `<p>Según el <strong>Artículo 129</strong> de la LGE, además de asegurar la educación obligatoria, los padres o tutores deben colaborar con las instituciones e informar a las autoridades sobre…</p>`,
+    opts: {
+      A: "…los problemas económicos que afectan el rendimiento escolar de sus hijos en el hogar.",
+      B: "…cambios en la conducta o actitud de los menores, y acudir a los llamados de las autoridades escolares.",
+      C: "…las necesidades de infraestructura que impiden el buen funcionamiento de la escuela en su comunidad."
+    },
+    ans: "B",
+    fb: "El <strong>Art. 129</strong> establece que los padres deben <strong>informar a las autoridades sobre cambios en la conducta o actitud de los menores</strong> y <strong>acudir a los llamados</strong> de las autoridades escolares cuando así se requiera."
+  },
+  /* 30 */
+  {
+    type: "Ordenamiento",
+    html: `<p>Ordene las etapas del proceso por el que la educación contribuye al bienestar individual y social, según el planteamiento de la LGE:</p>
+    <ul style="margin:12px 0 12px 22px;line-height:2.0;font-weight:700;">
+      <li>1. Transformación y mejoramiento de la sociedad</li>
+      <li>2. Adquisición de conocimientos</li>
+      <li>3. Alcanzar el desarrollo personal</li>
+    </ul>`,
+    opts: {
+      A: "3, 1, 2",
+      B: "1, 3, 2",
+      C: "2, 3, 1"
+    },
+    ans: "C",
+    fb: "La LGE describe el proceso en tres etapas: primero la <strong>adquisición de conocimientos (2)</strong>, que permite <strong>alcanzar el desarrollo personal (3)</strong>, y culmina en la <strong>transformación y mejoramiento de la sociedad (1)</strong>."
+  }
+];
+
+// ──────────────────────────────────────────
+// ESTADO DE LA APLICACIÓN
+// ──────────────────────────────────────────
+let state = {
+  name: '',
+  idx: 0,
+  score: 0,
+  answered: false
+};
+
+// ──────────────────────────────────────────
+// FUNCIONES PRINCIPALES
+// ──────────────────────────────────────────
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function startQuiz() {
+  const inp = document.getElementById('student-name');
+  const name = inp.value.trim();
+  if (!name) {
+    inp.classList.add('error');
+    inp.value = '';
+    inp.placeholder = '⚠️ Por favor, escribe tu nombre para continuar';
+    inp.focus();
+    setTimeout(() => {
+      inp.classList.remove('error');
+      inp.placeholder = 'Escribe tu nombre completo aquí...';
+    }, 3000);
+    return;
+  }
+  state = { name, idx: 0, score: 0, answered: false };
+  showScreen('screen-quiz');
+  renderQ();
+}
+
+function renderQ() {
+  const q = QUESTIONS[state.idx];
+  state.answered = false;
+
+  // Progreso
+  const pct = Math.round((state.idx / QUESTIONS.length) * 100);
+  document.getElementById('prog-label').textContent = `Pregunta ${state.idx + 1} de ${QUESTIONS.length}`;
+  document.getElementById('prog-pct').textContent   = `${pct}%`;
+  document.getElementById('prog-fill').style.width  = pct + '%';
+  document.getElementById('q-num').textContent  = state.idx + 1;
+  document.getElementById('q-tag').textContent  = q.type;
+
+  // Pregunta
+  document.getElementById('q-text').innerHTML = q.html;
+
+  // Opciones
+  const optsCont = document.getElementById('opts');
+  optsCont.innerHTML = '';
+  ['A','B','C'].forEach(l => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.id = 'opt-' + l;
+    btn.onclick = () => pickOpt(l);
+    btn.innerHTML = `<span class="opt-letter">${l}</span><span>${q.opts[l]}</span>`;
+    optsCont.appendChild(btn);
+  });
+
+  // Ocultar feedback y botón
+  const fb = document.getElementById('fb');
+  fb.className = 'feedback-box';
+  fb.style.display = 'none';
+  document.getElementById('next-wrap').style.display = 'none';
+
+  // Animación
+  const card = document.getElementById('q-card');
+  card.style.animation = 'none';
+  void card.offsetWidth;
+  card.style.animation = 'qSlideIn 0.38s cubic-bezier(.4,0,.2,1)';
+
+  // Texto del botón según si es la última
+  document.getElementById('btn-next').innerHTML =
+    state.idx === QUESTIONS.length - 1 ? '🏁 Ver mis resultados' : 'Siguiente pregunta →';
+}
+
+function pickOpt(sel) {
+  if (state.answered) return;
+  state.answered = true;
+  const q = QUESTIONS[state.idx];
+  const ok = (sel === q.ans);
+  if (ok) state.score++;
+
+  // Estilizar opciones
+  ['A','B','C'].forEach(l => {
+    const btn = document.getElementById('opt-' + l);
+    btn.disabled = true;
+    if (l === q.ans)           btn.classList.add('correct');
+    else if (l === sel && !ok) btn.classList.add('incorrect');
+  });
+
+  // Feedback
+  const fb   = document.getElementById('fb');
+  const icon = document.getElementById('fb-icon');
+  const txt  = document.getElementById('fb-text');
+  if (ok) {
+    fb.className  = 'feedback-box correct';
+    icon.textContent = '✅';
+    txt.innerHTML = `<strong>¡Respuesta correcta!</strong> ${q.fb}`;
+  } else {
+    fb.className  = 'feedback-box incorrect';
+    icon.textContent = '❌';
+    txt.innerHTML = `<strong>Respuesta incorrecta.</strong> La opción correcta es <strong>${q.ans}</strong>. ${q.fb}`;
+  }
+  fb.style.display = 'flex';
+  document.getElementById('next-wrap').style.display = 'block';
+}
+
+function nextQ() {
+  state.idx++;
+  if (state.idx >= QUESTIONS.length) {
+    showResults();
+  } else {
+    renderQ();
+  }
+}
+
+function showResults() {
+  showScreen('screen-results');
+  const pct = Math.round((state.score / QUESTIONS.length) * 100);
+
+  document.getElementById('res-name').textContent = state.name;
+  document.getElementById('res-ok').textContent   = state.score;
+  document.getElementById('res-err').textContent  = QUESTIONS.length - state.score;
+  document.getElementById('res-pct').textContent  = pct + '%';
+
+  // Trofeo dinámico
+  document.getElementById('res-trophy').textContent =
+    pct >= 90 ? '🏆' : pct >= 70 ? '🎓' : pct >= 50 ? '📚' : '💪';
+
+  // Animar anillo (circumference = 2π×72 ≈ 452.39)
+  const CIRC = 2 * Math.PI * 72;
+  const offset = CIRC - (pct / 100) * CIRC;
+  setTimeout(() => {
+    document.getElementById('ring-fill').style.strokeDashoffset = offset;
+  }, 120);
+
+  // Mensaje motivador
+  const icon = document.getElementById('moti-icon');
+  const txt  = document.getElementById('moti-text');
+  if (pct >= 90) {
+    icon.textContent = '🏆';
+    txt.textContent  = '¡Excelente desempeño! Dominas los contenidos de la LGE con alto nivel. Sigue adelante.';
+  } else if (pct >= 70) {
+    icon.textContent = '⭐';
+    txt.textContent  = 'Buen trabajo. Tienes una base sólida. Refuerza los temas donde tuviste errores para consolidar tu aprendizaje.';
+  } else if (pct >= 50) {
+    icon.textContent = '📚';
+    txt.textContent  = 'Vas por buen camino. Revisa la guía de estudio, identifica tus áreas de oportunidad y vuelve a practicar.';
+  } else {
+    icon.textContent = '💪';
+    txt.textContent  = 'No te rindas. Cada intento es una oportunidad de aprender. Consulta la guía de estudio y vuelve a intentarlo. ¡Tú puedes!';
+  }
+}
+
+function restartQuiz() {
+  document.getElementById('student-name').value = '';
+  showScreen('screen-start');
+}
+
+// ── MODAL GUÍA ──
+function openGuide() {
+  document.getElementById('modal-guide').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeGuide() {
+  document.getElementById('modal-guide').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('modal-guide').addEventListener('click', function(e) {
+  if (e.target === this) closeGuide();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeGuide();
+});
+</script>
+</body>
+</html>

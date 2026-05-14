@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador – Programa Sintético Fase 3 | Prof. Francisco De Jesús Luna Benítez</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --c1: #ff6b6b;
+    --c2: #ffa36c;
+    --c3: #ffd166;
+    --c4: #06d6a0;
+    --c5: #118ab2;
+    --c6: #5e60ce;
+    --white: #ffffff;
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-700: #334155;
+    --gray-900: #0f172a;
+    --correct: #06d6a0;
+    --wrong: #ff6b6b;
+    --shadow: 0 20px 60px rgba(94,96,206,0.15);
+    --shadow-sm: 0 4px 20px rgba(0,0,0,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #f0f4ff 0%, #fef3f2 40%, #f0fdf8 80%, #fefce8 100%);
+    min-height: 100vh;
+    color: var(--gray-900);
+  }
+
+  /* ─── TABS ─── */
+  .tab-bar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 2px solid var(--gray-200);
+    display: flex; justify-content: center; gap: 0;
+    padding: 0 16px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+  }
+  .tab-btn {
+    padding: 16px 24px; border: none; background: none;
+    font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 700;
+    color: var(--gray-700); cursor: pointer; border-bottom: 3px solid transparent;
+    transition: all .25s; white-space: nowrap;
+  }
+  .tab-btn.active { color: var(--c6); border-bottom-color: var(--c6); }
+  .tab-btn:hover:not(.active) { color: var(--c5); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ─── HEADER ─── */
+  .sim-header {
+    text-align: center; padding: 40px 20px 32px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    position: relative; overflow: hidden;
+  }
+  .sim-header::before {
+    content: ''; position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .header-badge {
+    display: inline-block; background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.4); border-radius: 50px;
+    padding: 6px 18px; font-size: 0.78rem; font-weight: 700;
+    color: #fff; letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .sim-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.5rem, 4vw, 2.4rem);
+    color: #fff; font-weight: 800; line-height: 1.2;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.2);
+    margin-bottom: 8px;
+  }
+  .sim-header p {
+    color: rgba(255,255,255,0.88); font-size: 0.9rem; font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .header-deco {
+    display: flex; justify-content: center; gap: 8px; margin-top: 18px;
+  }
+  .header-deco span {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    animation: pulse-dot 1.5s ease-in-out infinite;
+  }
+  .header-deco span:nth-child(2) { animation-delay: .2s; background: rgba(255,255,255,0.7); }
+  .header-deco span:nth-child(3) { animation-delay: .4s; }
+  @keyframes pulse-dot { 0%,100%{transform:scale(1);opacity:.5} 50%{transform:scale(1.4);opacity:1} }
+
+  /* ─── MAIN CONTAINER ─── */
+  .container { max-width: 780px; margin: 0 auto; padding: 32px 16px 60px; }
+
+  /* ─── WELCOME SCREEN ─── */
+  .welcome-card {
+    background: #fff; border-radius: 24px; padding: 48px 40px;
+    box-shadow: var(--shadow); text-align: center;
+    animation: slideUp .5s ease;
+  }
+  .welcome-icon {
+    width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px;
+    background: linear-gradient(135deg, var(--c6), var(--c5));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem; box-shadow: 0 8px 30px rgba(94,96,206,0.35);
+  }
+  .welcome-card h2 {
+    font-family: 'Playfair Display', serif; font-size: 1.8rem;
+    color: var(--gray-900); margin-bottom: 10px;
+  }
+  .welcome-card p { color: #64748b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 32px; }
+  .info-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 36px; }
+  .chip {
+    background: var(--gray-100); border-radius: 50px;
+    padding: 8px 16px; font-size: 0.82rem; font-weight: 700; color: var(--c6);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .input-wrap { margin-bottom: 24px; text-align: left; }
+  .input-wrap label { display: block; font-weight: 700; color: var(--gray-700); margin-bottom: 8px; font-size: 0.9rem; }
+  .input-wrap input {
+    width: 100%; padding: 14px 20px; border: 2px solid var(--gray-200);
+    border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 1rem;
+    font-weight: 600; color: var(--gray-900); outline: none; transition: border-color .2s;
+    background: var(--gray-50);
+  }
+  .input-wrap input:focus { border-color: var(--c6); background: #fff; }
+  .btn-primary {
+    width: 100%; padding: 16px; background: linear-gradient(135deg, var(--c6), var(--c5));
+    color: #fff; border: none; border-radius: 14px; font-family: 'Nunito', sans-serif;
+    font-size: 1.05rem; font-weight: 800; cursor: pointer; letter-spacing: 0.5px;
+    transition: all .25s; box-shadow: 0 8px 25px rgba(94,96,206,0.4);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(94,96,206,0.5); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+  /* ─── PROGRESS ─── */
+  .progress-wrap { margin-bottom: 24px; animation: slideUp .4s ease; }
+  .progress-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .progress-label { font-size: 0.85rem; font-weight: 700; color: var(--gray-700); }
+  .progress-count { font-size: 0.85rem; font-weight: 800; color: var(--c6); }
+  .progress-bar-bg {
+    height: 10px; background: var(--gray-200); border-radius: 50px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; border-radius: 50px;
+    background: linear-gradient(90deg, var(--c6), var(--c5));
+    transition: width .5s cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 0 10px rgba(94,96,206,0.4);
+  }
+
+  /* ─── QUESTION CARD ─── */
+  .question-card {
+    background: #fff; border-radius: 24px; padding: 36px 36px 28px;
+    box-shadow: var(--shadow); margin-bottom: 16px;
+    animation: slideUp .4s ease;
+  }
+  .q-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+  .q-badge {
+    padding: 5px 14px; border-radius: 50px; font-size: 0.75rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .badge-directo { background: #ede9fe; color: #7c3aed; }
+  .badge-completamiento { background: #fef3c7; color: #d97706; }
+  .badge-ordenamiento { background: #dcfce7; color: #16a34a; }
+  .badge-relacion { background: #fee2e2; color: #dc2626; }
+  .q-num { font-size: 0.85rem; font-weight: 700; color: #94a3b8; }
+  .q-text {
+    font-size: 1.05rem; font-weight: 700; color: var(--gray-900);
+    line-height: 1.65; margin-bottom: 8px;
+  }
+  .q-table {
+    width: 100%; border-collapse: collapse; margin: 16px 0;
+    font-size: 0.9rem;
+  }
+  .q-table th {
+    background: linear-gradient(135deg, var(--c6), var(--c5));
+    color: #fff; padding: 10px 14px; text-align: left; font-weight: 700;
+  }
+  .q-table td { border: 1px solid var(--gray-200); padding: 9px 14px; }
+  .q-table tr:nth-child(even) td { background: var(--gray-50); }
+
+  /* ─── OPTIONS ─── */
+  .options-list { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+  .option-item {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 16px 20px; border: 2px solid var(--gray-200);
+    border-radius: 14px; cursor: pointer; transition: all .2s;
+    background: var(--gray-50);
+  }
+  .option-item:hover:not(.disabled) {
+    border-color: var(--c6); background: #f0f4ff; transform: translateX(4px);
+  }
+  .option-item.selected { border-color: var(--c6); background: #f0f4ff; }
+  .option-item.correct { border-color: var(--correct); background: #f0fdf8; }
+  .option-item.wrong { border-color: var(--wrong); background: #fff5f5; }
+  .option-item.disabled { cursor: not-allowed; }
+  .option-letter {
+    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; font-weight: 800; border: 2px solid var(--gray-200);
+    background: #fff; color: var(--gray-700); transition: all .2s;
+  }
+  .option-item.selected .option-letter { border-color: var(--c6); color: var(--c6); background: #e0e7ff; }
+  .option-item.correct .option-letter { border-color: var(--correct); color: var(--correct); background: #d1fae5; }
+  .option-item.wrong .option-letter { border-color: var(--wrong); color: var(--wrong); background: #fee2e2; }
+  .option-text { font-size: 0.95rem; font-weight: 600; color: var(--gray-700); line-height: 1.5; padding-top: 4px; }
+
+  /* ─── FEEDBACK ─── */
+  .feedback-box {
+    border-radius: 14px; padding: 16px 20px; margin-top: 16px;
+    display: none; animation: slideUp .3s ease;
+    font-size: 0.9rem; font-weight: 600; line-height: 1.55;
+  }
+  .feedback-box.correct { display: block; background: #d1fae5; border: 2px solid #6ee7b7; color: #065f46; }
+  .feedback-box.wrong { display: block; background: #fee2e2; border: 2px solid #fca5a5; color: #991b1b; }
+  .feedback-box strong { display: block; margin-bottom: 4px; font-size: 0.95rem; }
+
+  /* ─── NEXT BUTTON ─── */
+  .btn-next {
+    width: 100%; padding: 15px; background: linear-gradient(135deg, var(--c4), var(--c5));
+    color: #fff; border: none; border-radius: 14px; font-family: 'Nunito', sans-serif;
+    font-size: 1rem; font-weight: 800; cursor: pointer; margin-top: 16px;
+    transition: all .25s; box-shadow: 0 6px 20px rgba(6,214,160,0.35); display: none;
+    letter-spacing: 0.3px;
+  }
+  .btn-next:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(6,214,160,0.45); }
+  .btn-next:active { transform: translateY(0); }
+
+  /* ─── RESULTS ─── */
+  .results-card {
+    background: #fff; border-radius: 24px; padding: 48px 36px;
+    box-shadow: var(--shadow); text-align: center;
+    animation: slideUp .6s ease;
+  }
+  .results-icon {
+    width: 90px; height: 90px; border-radius: 50%; margin: 0 auto 20px;
+    display: flex; align-items: center; justify-content: center; font-size: 2.5rem;
+  }
+  .results-icon.excelente { background: linear-gradient(135deg, #ffd166, #ff9a3c); box-shadow: 0 8px 30px rgba(255,154,60,.4); }
+  .results-icon.bien { background: linear-gradient(135deg, #06d6a0, #118ab2); box-shadow: 0 8px 30px rgba(6,214,160,.4); }
+  .results-icon.regular { background: linear-gradient(135deg, #5e60ce, #764ba2); box-shadow: 0 8px 30px rgba(94,96,206,.4); }
+  .results-icon.bajo { background: linear-gradient(135deg, #ff6b6b, #ee0979); box-shadow: 0 8px 30px rgba(255,107,107,.4); }
+  .results-name {
+    font-family: 'Playfair Display', serif; font-size: 1.5rem;
+    color: var(--gray-900); margin-bottom: 6px;
+  }
+  .results-title { font-size: 1.1rem; font-weight: 700; color: #64748b; margin-bottom: 28px; }
+  .score-ring {
+    width: 140px; height: 140px; border-radius: 50%; margin: 0 auto 28px;
+    background: conic-gradient(var(--c6) calc(var(--pct)*1%), var(--gray-200) 0);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow-sm); position: relative;
+  }
+  .score-ring::before {
+    content: ''; position: absolute; inset: 12px; border-radius: 50%; background: #fff;
+  }
+  .score-ring span {
+    position: relative; z-index: 1;
+    font-family: 'Playfair Display', serif; font-size: 2rem;
+    font-weight: 800; color: var(--c6);
+  }
+  .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
+  .score-cell {
+    background: var(--gray-50); border-radius: 16px; padding: 18px 12px; border: 2px solid var(--gray-200);
+  }
+  .score-cell .sc-val { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 800; }
+  .score-cell .sc-label { font-size: 0.82rem; font-weight: 700; color: #64748b; margin-top: 4px; }
+  .sc-val.green { color: var(--correct); }
+  .sc-val.red { color: var(--wrong); }
+  .sc-val.blue { color: var(--c5); }
+  .sc-val.purple { color: var(--c6); }
+  .msg-motivador {
+    background: linear-gradient(135deg, #f0f4ff, #fef3f2);
+    border-radius: 16px; padding: 20px 24px; margin-bottom: 24px;
+    font-size: 1rem; font-weight: 700; color: var(--gray-700);
+    border: 2px solid var(--gray-200); line-height: 1.55;
+  }
+  .btn-restart {
+    width: 100%; padding: 16px; background: linear-gradient(135deg, var(--c6), var(--c5));
+    color: #fff; border: none; border-radius: 14px; font-family: 'Nunito', sans-serif;
+    font-size: 1.05rem; font-weight: 800; cursor: pointer; transition: all .25s;
+    box-shadow: 0 8px 25px rgba(94,96,206,0.4); letter-spacing: 0.5px;
+  }
+  .btn-restart:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(94,96,206,0.5); }
+
+  /* ─── GUIA SCREEN ─── */
+  .guide-card {
+    background: #fff; border-radius: 24px; padding: 36px;
+    box-shadow: var(--shadow); animation: slideUp .4s ease;
+  }
+  .guide-card h2 {
+    font-family: 'Playfair Display', serif; font-size: 1.6rem;
+    color: var(--gray-900); margin-bottom: 10px;
+  }
+  .guide-card p { color: #64748b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 24px; }
+  .btn-open-guide {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 28px; background: linear-gradient(135deg, #ee0979, var(--c1));
+    color: #fff; border: none; border-radius: 14px; font-family: 'Nunito', sans-serif;
+    font-size: 1rem; font-weight: 800; cursor: pointer; transition: all .25s;
+    box-shadow: 0 6px 20px rgba(238,9,121,0.35); text-decoration: none;
+    margin-bottom: 24px;
+  }
+  .btn-open-guide:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(238,9,121,0.45); }
+  .guide-iframe-wrap {
+    border-radius: 16px; overflow: hidden; border: 2px solid var(--gray-200);
+    height: 520px; background: var(--gray-100);
+  }
+  .guide-iframe-wrap iframe { width: 100%; height: 100%; border: none; }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes slideUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+
+  /* ─── RESPONSIVE ─── */
+  @media(max-width:600px){
+    .welcome-card, .question-card, .results-card, .guide-card { padding: 28px 20px; }
+    .score-grid { grid-template-columns: 1fr 1fr; }
+    .tab-btn { padding: 14px 14px; font-size: 0.82rem; }
+    .q-text { font-size: 0.97rem; }
+    .option-text { font-size: 0.9rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="sim-header">
+  <div class="header-badge">Simulador Interactivo de Evaluación</div>
+  <h1>Programa Sintético – Fase 3</h1>
+  <p>Prof. Francisco De Jesús Luna Benítez &nbsp;|&nbsp; Plan de Estudio 2022 / NEM</p>
+  <div class="header-deco">
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showTab('simulador')">🎯 Simulador</button>
+  <button class="tab-btn" onclick="showTab('guia')">📖 Guía de Estudio</button>
+</div>
+
+<!-- TAB: SIMULADOR -->
+<div id="tab-simulador" class="tab-panel active">
+  <div class="container">
+
+    <!-- WELCOME -->
+    <div id="screen-welcome">
+      <div class="welcome-card">
+        <div class="welcome-icon">🎓</div>
+        <h2>Bienvenido al Simulador</h2>
+        <p>Evalúa tus conocimientos sobre el <strong>Programa Sintético de la Fase 3</strong>: Campos formativos, Contenidos, Procesos de aprendizaje, Programa Analítico y Codiseño.</p>
+        <div class="info-chips">
+          <div class="chip">📝 30 preguntas</div>
+          <div class="chip">⚖️ 4 tipos de reactivos</div>
+          <div class="chip">✅ Retroalimentación inmediata</div>
+          <div class="chip">📊 Resultados detallados</div>
+        </div>
+        <div class="input-wrap">
+          <label for="student-name">Nombre del estudiante</label>
+          <input type="text" id="student-name" placeholder="Escribe tu nombre completo..." />
+        </div>
+        <button class="btn-primary" id="btn-start" onclick="startSimulator()">Iniciar Simulador ▶</button>
+      </div>
+    </div>
+
+    <!-- QUIZ -->
+    <div id="screen-quiz" style="display:none;">
+      <div class="progress-wrap">
+        <div class="progress-info">
+          <span class="progress-label">Progreso del examen</span>
+          <span class="progress-count" id="progress-count">1 / 30</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progress-fill" style="width:3.33%"></div>
+        </div>
+      </div>
+      <div class="question-card">
+        <div class="q-meta">
+          <span class="q-badge" id="q-badge">Cuestionamiento Directo</span>
+          <span class="q-num" id="q-num">Pregunta 1 de 30</span>
+        </div>
+        <div class="q-text" id="q-text"></div>
+        <div id="q-extra"></div>
+        <ul class="options-list" id="options-list"></ul>
+        <div class="feedback-box" id="feedback-box"></div>
+      </div>
+      <button class="btn-next" id="btn-next" onclick="nextQuestion()">Siguiente pregunta →</button>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="screen-results" style="display:none;"></div>
+
+  </div>
+</div>
+
+<!-- TAB: GUÍA -->
+<div id="tab-guia" class="tab-panel">
+  <div class="container">
+    <div class="guide-card">
+      <h2>📖 Guía de Estudio</h2>
+      <p>Consulta el material de apoyo en PDF directamente aquí o ábrelo en una nueva pestaña para una mejor experiencia de lectura.</p>
+      <a class="btn-open-guide" href="https://drive.google.com/file/d/1KPUsG0CROa9zTzJs1t1nn7dmC9fUzxzV/view?usp=sharing" target="_blank">
+        📄 Abrir PDF en nueva pestaña
+      </a>
+      <div class="guide-iframe-wrap">
+        <iframe src="https://drive.google.com/file/d/1KPUsG0CROa9zTzJs1t1nn7dmC9fUzxzV/preview" allow="autoplay" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─── DATA ─── */
+const preguntas = [
+  {
+    tipo: "Cuestionamiento directo",
+    badge: "badge-directo",
+    texto: "¿Qué representa el Programa Sintético en el proceso de diseño y desarrollo curricular?",
+    opciones: [
+      "El primer nivel de concreción curricular que presenta los elementos centrales para el trabajo docente.",
+      "El tercer nivel de concreción donde se elaboran las planeaciones didácticas del aula.",
+      "Un formato administrativo que sustituye al Programa Analítico en las escuelas."
+    ],
+    correcta: 0,
+    justificacion: "El Programa Sintético representa el primer nivel de concreción curricular. Presenta los elementos centrales para el trabajo docente y permite que el colectivo docente, con autonomía profesional, determine contenidos y procesos de desarrollo de aprendizaje."
+  },
+  {
+    tipo: "Cuestionamiento directo",
+    badge: "badge-directo",
+    texto: "¿Cuál es la función principal de los Campos formativos en el nuevo currículo del Plan de estudio 2022?",
+    opciones: [
+      "Organizar los aprendizajes por asignaturas para facilitar la evaluación disciplinar.",
+      "Ser organizadores que abordan temas y problemáticas desde una perspectiva complementaria entre disciplinas.",
+      "Sustituir el trabajo por proyectos con actividades individuales en cada área del conocimiento."
+    ],
+    correcta: 1,
+    justificacion: "Los Campos formativos son organizadores que establecen objetos de aprendizaje con el propósito de abordar temas o problemáticas desde una perspectiva complementaria entre las disciplinas o áreas de conocimiento que los conforman, impulsando una menor fragmentación de los saberes."
+  },
+  {
+    tipo: "Cuestionamiento directo",
+    badge: "badge-directo",
+    texto: "¿Qué característica esencial distingue a los Procesos de desarrollo de aprendizaje?",
+    opciones: [
+      "Son secuencias fijas que todos los docentes deben seguir de manera idéntica.",
+      "Son instrumentos de evaluación que miden el desempeño al final de cada fase.",
+      "Representan recorridos o rutas posibles en los que las y los estudiantes se apropian de aprendizajes que les permiten comprender el mundo."
+    ],
+    correcta: 2,
+    justificacion: "Los Procesos de desarrollo de aprendizaje representan recorridos o rutas posibles que dan cuenta de las formas en las que niñas, niños y adolescentes se apropian de aprendizajes que les permiten comprender el mundo que les rodea e intervenir en distintas situaciones."
+  },
+  {
+    tipo: "Cuestionamiento directo",
+    badge: "badge-directo",
+    texto: "¿Qué nivel de concreción curricular representa el Programa Analítico?",
+    opciones: [
+      "El segundo nivel, resultado de la contextualización que realiza el colectivo docente a partir de los Programas Sintéticos.",
+      "El primer nivel, donde se definen los Contenidos nacionales para la Educación Básica.",
+      "El tercer nivel, donde se desarrollan las planeaciones didácticas por sesión de clase."
+    ],
+    correcta: 0,
+    justificacion: "El Programa Analítico es el segundo nivel de concreción del currículo. Es el resultado del ejercicio en el que las y los docentes, como colectivo escolar, contextualizan y sitúan los procesos formativos a partir de los Programas Sintéticos."
+  },
+  {
+    tipo: "Cuestionamiento directo",
+    badge: "badge-directo",
+    texto: "¿Cuál es la temporalidad del Programa Analítico según el Programa Sintético Fase 3?",
+    opciones: [
+      "Semestral, revisada y ajustada al inicio y al final de cada semestre escolar.",
+      "Anual, construido por ciclo escolar para cada grado e incorporando los cuatro Campos formativos.",
+      "Bimestral, definida conforme al calendario de sesiones del Consejo Técnico Escolar."
+    ],
+    correcta: 1,
+    justificacion: "La temporalidad del Programa Analítico es anual. Se construye por ciclo escolar de manera anual, para cada grado, e incorpora los cuatro Campos formativos."
+  },
+  {
+    tipo: "Cuestionamiento directo",
+    badge: "badge-directo",
+    texto: "¿Qué son los Contenidos nuevos en el marco del Programa Analítico?",
+    opciones: [
+      "Contenidos del Programa Sintético que se incorporan sin ningún cambio ni ajuste.",
+      "Contenidos que existen en el Programa Sintético y que requieren adaptación al contexto particular.",
+      "Contenidos locales o regionales no presentes en el Programa Sintético que el colectivo docente incorpora al Programa Analítico."
+    ],
+    correcta: 2,
+    justificacion: "Los Contenidos nuevos son aquellos que no están presentes en el Programa Sintético y que corresponden a contenidos locales o regionales que será necesario incorporar al Programa Analítico, a partir del análisis que realizó el colectivo docente."
+  },
+  {
+    tipo: "Ordenamiento",
+    badge: "badge-ordenamiento",
+    texto: "Ordene los tres planos del Programa Analítico según su secuencia lógica de construcción:",
+    extra: `<div style="margin:14px 0 4px; font-size:.88rem; font-weight:700; color:#64748b;">Planos a ordenar:</div>
+    <div style="background:var(--gray-50);border-radius:12px;padding:14px 18px;border:2px solid var(--gray-200);font-size:.9rem;font-weight:600;line-height:1.9;">
+      1. Contextualización e interpretación de contenidos curriculares<br>
+      2. Formulación del Programa Analítico (secuenciación y temporalidad)<br>
+      3. Lectura de la realidad escuela-comunidad-región-país
+    </div>`,
+    opciones: [
+      "3 → Lectura de la realidad, luego 1 → Contextualización, luego 2 → Formulación.",
+      "1 → Contextualización, luego 3 → Lectura de la realidad, luego 2 → Formulación.",
+      "2 → Formulación, luego 1 → Contextualización, luego 3 → Lectura de la realidad."
+    ],
+    correcta: 0,
+    justificacion: "El Programa Analítico se configura en tres planos: primero la Lectura de la realidad (punto de partida), segundo la Contextualización (toma de decisiones sobre contenidos) y tercero la Formulación del Programa Analítico (concreción con secuenciación y temporalidad)."
+  },
+  {
+    tipo: "Cuestionamiento directo",
+    badge: "badge-directo",
+    texto: "¿Cómo se entiende correctamente la integración de conocimientos a través de los Campos formativos?",
+    opciones: [
+      "Como la suma de asignaturas presentadas de manera paralela en el ciclo escolar.",
+      "Como un proceso en el que el estudiante aprende, resignifica, rearticula y expresa saberes, y no solo como un producto final.",
+      "Como la evaluación conjunta de disciplinas al término del ciclo escolar."
+    ],
+    correcta: 1,
+    justificacion: "La integración de los conocimientos a través de los Campos formativos debe entenderse como el proceso durante el cual la y el estudiante aprende, resignifica, rearticula y expresa los saberes del periodo correspondiente, y no la manifestación concreta al final del proceso. Integrar saberes es un proceso, no solo su manifestación en un producto final."
+  },
+  {
+    tipo: "Completamiento",
+    badge: "badge-completamiento",
+    texto: "El Programa Sintético concreta para cada Fase los Contenidos y los Procesos de desarrollo de aprendizaje, los cuales mantienen una relación directa con…",
+    opciones: [
+      "…el Perfil de egreso y los Ejes articuladores.",
+      "…el formato de planeación didáctica y el libro de texto del alumno.",
+      "…el reglamento escolar y el calendario de evaluaciones nacionales."
+    ],
+    correcta: 0,
+    justificacion: "Según el Programa Sintético Fase 3, los Contenidos y Procesos de desarrollo de aprendizaje mantienen una relación directa con el Perfil de egreso y los Ejes articuladores, de manera que docentes de primero y segundo grado encuentren insumos para diseñar actividades didácticas pertinentes."
+  },
+  {
+    tipo: "Completamiento",
+    badge: "badge-completamiento",
+    texto: "El Programa Analítico no es un formato específico que se llene por cuestiones administrativas, sino un documento que se construye y reconstruye de manera permanente porque…",
+    opciones: [
+      "…cada docente lo elabora de forma independiente sin consultar al colectivo escolar.",
+      "…reemplaza completamente al Programa Sintético una vez iniciado el ciclo escolar.",
+      "…es un instrumento dinámico que sirve de base para el trabajo docente, junto con el Plan y los Programas Sintéticos."
+    ],
+    correcta: 2,
+    justificacion: "El Programa Analítico es un instrumento dinámico que organiza y reorienta las acciones escolares. Es fundamental que sea revisado cada tanto en las sesiones del CTE, para hacer las reorientaciones, adaptaciones y ajustes que la realidad le devuelva, ya que sirve de base para el trabajo docente junto con el Plan y los Programas Sintéticos."
+  },
+  {
+    tipo: "Completamiento",
+    badge: "badge-completamiento",
+    texto: "Los Contenidos poseen distintos niveles de concreción y se incorporan y complejizan en cada fase dependiendo de las características de desarrollo de niñas, niños y adolescentes, dando pauta a…",
+    opciones: [
+      "…una evaluación estandarizada que garantiza el mismo nivel de aprendizaje en todo el país.",
+      "…un abordaje en espiral que profundiza y complejiza los saberes conforme avanza la fase.",
+      "…una fragmentación disciplinar que facilita la evaluación por asignatura al término del ciclo."
+    ],
+    correcta: 1,
+    justificacion: "Los Contenidos poseen distintos niveles de concreción, por lo que se incorporan y complejizan en cada fase dependiendo de las características de desarrollo de niñas, niños y adolescentes, dando pauta a un abordaje en espiral."
+  },
+  {
+    tipo: "Completamiento",
+    badge: "badge-completamiento",
+    texto: "El segundo plano del Programa Analítico, la Contextualización, permite al colectivo escolar…",
+    opciones: [
+      "…interpretar y resignificar los Contenidos curriculares del Programa Sintético desde sus propios términos y referencias para promover un aprendizaje situacional.",
+      "…aplicar los contenidos nacionales de manera uniforme a todos los grupos sin ninguna adaptación.",
+      "…elaborar los formatos de evaluación que se reportarán a las autoridades educativas superiores."
+    ],
+    correcta: 0,
+    justificacion: "El segundo plano, la Contextualización, permite al colectivo escolar interpretar y resignificar los Contenidos curriculares del Programa Sintético desde sus propios términos y referencias, para promover un aprendizaje situacional. Los contenidos adquieren un sentido particular al responder a las necesidades del contexto."
+  },
+  {
+    tipo: "Completamiento",
+    badge: "badge-completamiento",
+    texto: "Al considerar la situación educativa de los estudiantes para construir el Programa Analítico, además de lo que saben al inicio del ciclo y los recursos con que cuentan, el colectivo docente debe identificar también…",
+    opciones: [
+      "…la calificación obtenida en el ciclo escolar anterior como único indicador de avance académico.",
+      "…el número de libros de texto disponibles en el aula para cada área de conocimiento.",
+      "…las expectativas que tienen sobre la escuela, es decir qué esperan y quieren aprender."
+    ],
+    correcta: 2,
+    justificacion: "Para orientar la construcción del Programa Analítico se sugiere considerar la situación educativa de los estudiantes: lo que saben al inicio del ciclo, con qué frecuencia asisten, los recursos con los que cuentan o requieren, qué lengua hablan, y las expectativas que tienen sobre la escuela —qué esperan y quieren aprender."
+  },
+  {
+    tipo: "Completamiento",
+    badge: "badge-completamiento",
+    texto: "Los Contenidos contextualizados son aquellos que, manteniendo su esencia, requieren adaptación al contexto particular de los estudiantes; un ejemplo que describe claramente esto es…",
+    opciones: [
+      "…seguir el libro de texto sin ninguna modificación para garantizar la cobertura curricular nacional.",
+      "…incorporar el aprendizaje de la Lengua de Señas Mexicana para grupos con estudiantes con discapacidad auditiva.",
+      "…eliminar los contenidos del Programa Sintético que no corresponden al contexto geográfico de la escuela."
+    ],
+    correcta: 1,
+    justificacion: "Los Contenidos contextualizados mantienen su esencia pero se adaptan de manera más pertinente a las condiciones particulares de los estudiantes. El documento ejemplifica esto con la incorporación del aprendizaje de la Lengua de Señas Mexicana para grupos con estudiantes con discapacidad auditiva, o la inclusión de variantes lingüísticas."
+  },
+  {
+    tipo: "Completamiento",
+    badge: "badge-completamiento",
+    texto: "En el tercer plano del Programa Analítico, el colectivo docente organiza la secuenciación y temporalidad de los contenidos dado que…",
+    opciones: [
+      "…el Programa Sintético no presenta los Contenidos en una secuenciación y orden definido.",
+      "…el Programa Sintético ya establece un orden fijo que únicamente puede modificarse según las características del grupo.",
+      "…la SEP define la dosificación semanal de todos los contenidos para las escuelas del país."
+    ],
+    correcta: 0,
+    justificacion: "En el tercer plano de la Formulación del Programa Analítico, dado que el Programa Sintético no establece una secuenciación para abordar los Contenidos en cada Fase, será el colectivo docente quien deberá organizar la secuenciación y la temporalidad para definir cómo se abordarán a lo largo del ciclo escolar."
+  },
+  {
+    tipo: "Completamiento",
+    badge: "badge-completamiento",
+    texto: "Al trabajar con los Campos formativos se produce el desplazamiento de una educación basada en asignaturas hacia un modelo que contempla…",
+    opciones: [
+      "…la evaluación por competencias y habilidades medibles al término de cada bimestre.",
+      "…la enseñanza individualizada adaptada exclusivamente a los ritmos de cada alumno.",
+      "…la interacción del conocimiento de diversas disciplinas con menor fragmentación de los saberes."
+    ],
+    correcta: 2,
+    justificacion: "Trabajar un currículo con Campos formativos implica el desplazamiento de una educación basada en asignaturas —que propicia una fragmentación de la enseñanza y el aprendizaje— hacia un modelo que contempla la interacción del conocimiento de diversas disciplinas, impulsando una menor fragmentación de los saberes."
+  },
+  {
+    tipo: "Relación de elementos",
+    badge: "badge-relacion",
+    texto: "Seleccione la opción que relacione correctamente cada tipo de contenido del Programa Analítico con su descripción:",
+    extra: `<table class="q-table">
+      <tr><th>Tipo de contenido</th><th>Descripción</th></tr>
+      <tr><td>1. Sin ajustes</td><td>a) Corresponden a temas locales o regionales no presentes en el Programa Sintético</td></tr>
+      <tr><td>2. Contextualizados</td><td>b) Se incorporan al Programa Analítico tal como aparecen en el Programa Sintético</td></tr>
+      <tr><td>3. Nuevos</td><td>c) Mantienen su esencia pero requieren adaptación pertinente al contexto particular</td></tr>
+    </table>`,
+    opciones: [
+      "1b, 2c, 3a",
+      "1a, 2b, 3c",
+      "1c, 2a, 3b"
+    ],
+    correcta: 0,
+    justificacion: "La relación correcta es: Contenidos sin ajustes (1b) se incorporan tal como aparecen en el Programa Sintético; Contenidos contextualizados (2c) mantienen su esencia pero requieren adaptación; Contenidos nuevos (3a) corresponden a temas locales o regionales no presentes en el Programa Sintético."
+  },
+  {
+    tipo: "Relación de elementos",
+    badge: "badge-relacion",
+    texto: "Seleccione la opción que relacione correctamente cada plano del Programa Analítico con su descripción:",
+    extra: `<table class="q-table">
+      <tr><th>Plano</th><th>Descripción</th></tr>
+      <tr><td>1. Primer plano</td><td>a) Formulación: organización de secuenciación, temporalidad y vinculaciones metodológicas</td></tr>
+      <tr><td>2. Segundo plano</td><td>b) Lectura de la realidad escuela-comunidad-región-país</td></tr>
+      <tr><td>3. Tercer plano</td><td>c) Contextualización: interpretación y resignificación de los contenidos curriculares</td></tr>
+    </table>`,
+    opciones: [
+      "1c, 2b, 3a",
+      "1b, 2c, 3a",
+      "1a, 2c, 3b"
+    ],
+    correcta: 1,
+    justificacion: "La relación correcta es: Primer plano (1b) = Lectura de la realidad; Segundo plano (2c) = Contextualización: interpretación y resignificación; Tercer plano (3a) = Formulación del Programa Analítico con secuenciación y temporalidad."
+  },
+  {
+    tipo: "Relación de elementos",
+    badge: "badge-relacion",
+    texto: "Seleccione la opción que relacione correctamente cada elemento curricular del Programa Sintético con su definición:",
+    extra: `<table class="q-table">
+      <tr><th>Elemento</th><th>Definición</th></tr>
+      <tr><td>1. Campos formativos</td><td>a) Disposición de conocimientos que cobran sentido en relación con los Ejes articuladores</td></tr>
+      <tr><td>2. Contenidos</td><td>b) Organizadores que establecen objetos de aprendizaje desde perspectiva complementaria entre disciplinas</td></tr>
+      <tr><td>3. Procesos de desarrollo de aprendizaje</td><td>c) Recorridos posibles en los que los estudiantes se apropian de aprendizajes para comprender el mundo</td></tr>
+    </table>`,
+    opciones: [
+      "1a, 2b, 3c",
+      "1b, 2c, 3a",
+      "1b, 2a, 3c"
+    ],
+    correcta: 2,
+    justificacion: "La relación correcta es: Campos formativos (1b) = organizadores con perspectiva complementaria entre disciplinas; Contenidos (2a) = disposición de conocimientos en relación con los Ejes articuladores; Procesos de desarrollo de aprendizaje (3c) = recorridos posibles para apropiarse de aprendizajes."
+  },
+  {
+    tipo: "Relación de elementos",
+    badge: "badge-relacion",
+    texto: "En el proceso de codiseño, seleccione la opción que relacione correctamente cada elemento con su nivel o función:",
+    extra: `<table class="q-table">
+      <tr><th>Elemento</th><th>Nivel / Función</th></tr>
+      <tr><td>1. Consejo Técnico Escolar (CTE)</td><td>a) Espacio de análisis, reflexión y organización de contenidos para el Programa Analítico</td></tr>
+      <tr><td>2. Programa Sintético</td><td>b) Primer nivel de concreción curricular con elementos centrales para el trabajo docente</td></tr>
+      <tr><td>3. Programa Analítico</td><td>c) Segundo nivel de concreción que contextualiza contenidos nacionales según necesidades escolares</td></tr>
+    </table>`,
+    opciones: [
+      "1a, 2b, 3c",
+      "1b, 2c, 3a",
+      "1c, 2a, 3b"
+    ],
+    correcta: 0,
+    justificacion: "La relación correcta es: CTE (1a) = espacio de análisis y organización de contenidos; Programa Sintético (2b) = primer nivel de concreción con los elementos centrales para el trabajo docente; Programa Analítico (3c) = segundo nivel de concreción que contextualiza contenidos nacionales."
+  },
+  {
+    tipo: "Ordenamiento",
+    badge: "badge-ordenamiento",
+    texto: "Ordene los niveles de concreción curricular del Plan de estudio 2022, del más general al más específico:",
+    extra: `<div style="background:var(--gray-50);border-radius:12px;padding:14px 18px;border:2px solid var(--gray-200);font-size:.9rem;font-weight:600;line-height:1.9;margin:14px 0 4px;">
+      1. Planeación didáctica del docente<br>
+      2. Plan de estudio 2022<br>
+      3. Programa Analítico (colectivo docente)<br>
+      4. Programa Sintético (primer nivel de concreción)
+    </div>`,
+    opciones: [
+      "1 → 4 → 3 → 2",
+      "4 → 2 → 1 → 3",
+      "2 → 4 → 3 → 1"
+    ],
+    correcta: 2,
+    justificacion: "El orden correcto del más general al más específico es: Plan de estudio 2022 (marco nacional más general) → Programa Sintético (primer nivel de concreción) → Programa Analítico (segundo nivel, colectivo docente) → Planeación didáctica del docente (nivel más específico de concreción en el aula)."
+  },
+  {
+    tipo: "Ordenamiento",
+    badge: "badge-ordenamiento",
+    texto: "Ordene las acciones sugeridas para el Primer plano (Lectura de la realidad), de la más inicial a la más integradora:",
+    extra: `<div style="background:var(--gray-50);border-radius:12px;padding:14px 18px;border:2px solid var(--gray-200);font-size:.9rem;font-weight:600;line-height:1.9;margin:14px 0 4px;">
+      1. Analizar el impacto del país, entidad federativa y localidad en la vida escolar<br>
+      2. Indagar características personales, socioculturales y académicas de los estudiantes<br>
+      3. Identificar fortalezas del colectivo docente<br>
+      4. Analizar el contexto social, económico y cultural de la comunidad
+    </div>`,
+    opciones: [
+      "2 → 3 → 4 → 1",
+      "3 → 1 → 2 → 4",
+      "1 → 4 → 3 → 2"
+    ],
+    correcta: 0,
+    justificacion: "La secuencia lógica inicia con el diagnóstico de los estudiantes (2), continúa con el reconocimiento de las fortalezas del colectivo docente (3), avanza al análisis del contexto comunitario (4) y culmina con la consideración del impacto del entorno más amplio —país, entidad, localidad— en la vida escolar (1)."
+  },
+  {
+    tipo: "Cuestionamiento directo",
+    badge: "badge-directo",
+    texto: "¿Cuál es la función del Consejo Técnico Escolar (CTE) en relación con el Programa Analítico?",
+    opciones: [
+      "Elaborar la planeación didáctica semanal de cada docente del plantel educativo.",
+      "Revisar periódicamente el Programa Analítico para realizar reorientaciones, adaptaciones y ajustes necesarios.",
+      "Determinar la calificación final de los alumnos al concluir el ciclo escolar."
+    ],
+    correcta: 1,
+    justificacion: "Es fundamental que el Programa Analítico sea revisado cada tanto en las sesiones del Consejo Técnico Escolar, para hacer las reorientaciones, adaptaciones, adecuaciones y ajustes que la realidad le devuelva a la estrategia de Contextualización, ya que se trata de un instrumento dinámico."
+  },
+  {
+    tipo: "Cuestionamiento directo",
+    badge: "badge-directo",
+    texto: "En la Fase 3, ¿a qué grados escolares de educación primaria corresponde el Programa Sintético?",
+    opciones: [
+      "Tercero y cuarto grados de educación primaria.",
+      "Quinto y sexto grados de educación primaria.",
+      "Primero y segundo grados de educación primaria."
+    ],
+    correcta: 2,
+    justificacion: "El Programa Sintético Fase 3 corresponde a los primero y segundo grados de primaria. El documento indica que las maestras y maestros que impartan el primer y segundo grados de primaria encontrarán insumos y elementos para diseñar actividades didácticas pertinentes para niñas y niños."
+  },
+  {
+    tipo: "Cuestionamiento directo",
+    badge: "badge-directo",
+    texto: "¿Qué implica entender lo nacional en el Programa Sintético como 'espacio de lo común desde la diversidad'?",
+    opciones: [
+      "Que todos los docentes deben aplicar exactamente los mismos contenidos sin ninguna adaptación posible.",
+      "Que los contenidos nacionales son el punto de partida y no contenidos universales acabados o 'aplicables a cualquier contexto'.",
+      "Que las escuelas rurales y urbanas requieren programas completamente distintos en todos sus componentes."
+    ],
+    correcta: 1,
+    justificacion: "El Programa Sintético consiste en un planteamiento de Contenidos nacionales para la Educación Básica, entendido lo nacional como espacio de lo común desde la diversidad que nos caracteriza como país. La Contextualización implica la resignificación y apropiación del currículo nacional, entendido lo nacional como punto de partida y no como contenidos universales, acabados o aplicables a cualquier contexto."
+  },
+  {
+    tipo: "Cuestionamiento directo",
+    badge: "badge-directo",
+    texto: "¿Qué tipo de autonomía profesional docente impulsan los Procesos de desarrollo de aprendizaje?",
+    opciones: [
+      "La posibilidad de que los docentes decidan no seguir el Plan de estudio 2022.",
+      "El diseño de propuestas contextualizadas que problematicen la realidad y atiendan las características, necesidades e intereses de los estudiantes.",
+      "La libertad de evaluar a los alumnos con criterios propios sin considerar el Perfil de egreso."
+    ],
+    correcta: 1,
+    justificacion: "Esta organización impulsa una mayor autonomía profesional que fomenta el diseño de propuestas contextualizadas en las que se problematice la realidad y se atienda a las características, necesidades e intereses de niñas, niños y adolescentes."
+  },
+  {
+    tipo: "Relación de elementos",
+    badge: "badge-relacion",
+    texto: "En el Primer plano del Programa Analítico, seleccione la opción que relacione correctamente la acción con el elemento diagnóstico correspondiente:",
+    extra: `<table class="q-table">
+      <tr><th>Acción</th><th>Elemento diagnóstico</th></tr>
+      <tr><td>1. Indagar características personales y académicas de los estudiantes</td><td>a) Diagnóstico inicial y evaluación de inicio del ciclo escolar</td></tr>
+      <tr><td>2. Analizar el contexto social y cultural de la comunidad</td><td>b) Análisis de las condiciones del entorno comunitario</td></tr>
+      <tr><td>3. Considerar el impacto del país y la localidad en la escuela</td><td>c) Identificación del contexto macro que influye en la vida escolar</td></tr>
+    </table>`,
+    opciones: [
+      "1a, 2b, 3c",
+      "1b, 2c, 3a",
+      "1c, 2a, 3b"
+    ],
+    correcta: 0,
+    justificacion: "La relación correcta es: Indagar características de los estudiantes (1a) se vincula con el diagnóstico inicial y evaluación de inicio de ciclo; Analizar el contexto comunitario (2b) corresponde al análisis de las condiciones del entorno; Considerar el impacto del país y la localidad (3c) refiere a la identificación del contexto macro que influye en la vida escolar."
+  },
+  {
+    tipo: "Completamiento",
+    badge: "badge-completamiento",
+    texto: "El Plan de estudio 2022 señala a la integración curricular como uno de los aspectos primordiales a impulsar, con la intención de…",
+    opciones: [
+      "…reducir el número de asignaturas evaluadas en los exámenes nacionales estandarizados.",
+      "…alcanzar los rasgos del Perfil de egreso e incorporar los Ejes articuladores a lo largo del trayecto formativo de la Educación Básica.",
+      "…establecer un calendario único de contenidos para todas las escuelas del país."
+    ],
+    correcta: 1,
+    justificacion: "El Plan de estudio 2022 señala a la integración curricular como uno de los aspectos primordiales que han de impulsarse, con la intención de alcanzar los rasgos del Perfil de egreso e incorporar los Ejes articuladores a lo largo del trayecto formativo de la Educación Básica."
+  },
+  {
+    tipo: "Ordenamiento",
+    badge: "badge-ordenamiento",
+    texto: "Un colectivo docente construye el Programa Analítico. Ordene las etapas del proceso de codiseño según su lógica de desarrollo:",
+    extra: `<div style="background:var(--gray-50);border-radius:12px;padding:14px 18px;border:2px solid var(--gray-200);font-size:.9rem;font-weight:600;line-height:1.9;margin:14px 0 4px;">
+      1. Formular el Programa Analítico con secuenciación, temporalidad y metodologías<br>
+      2. Contextualizar y resignificar los contenidos del Programa Sintético<br>
+      3. Realizar la lectura de la realidad escuela-comunidad-región<br>
+      4. Revisar y ajustar en sesiones de CTE durante el ciclo escolar
+    </div>`,
+    opciones: [
+      "3 → 2 → 1 → 4",
+      "1 → 3 → 2 → 4",
+      "2 → 1 → 4 → 3"
+    ],
+    correcta: 0,
+    justificacion: "La secuencia lógica del codiseño es: primero la Lectura de la realidad (3) como punto de partida; luego la Contextualización (2) para resignificar contenidos; después la Formulación del Programa Analítico (1) con secuenciación y metodologías; y finalmente la revisión y ajuste en sesiones de CTE (4) durante el ciclo escolar, pues es un instrumento dinámico."
+  },
+  {
+    tipo: "Cuestionamiento directo",
+    badge: "badge-directo",
+    texto: "¿Cuál de las siguientes situaciones describe correctamente el proceso de codiseño en la construcción del Programa Analítico?",
+    opciones: [
+      "Una maestra elabora su planeación de manera individual, tomando como única referencia el libro de texto del alumno.",
+      "Las autoridades educativas federales determinan el Programa Analítico de cada escuela con base en evaluaciones nacionales estandarizadas.",
+      "El colectivo docente del CTE contextualiza los contenidos del Programa Sintético incorporando problemáticas locales y regionales pertinentes al contexto escolar."
+    ],
+    correcta: 2,
+    justificacion: "El Programa Analítico surge del análisis, reflexión, selección y organización de los contenidos propuestos en los Programas Sintéticos, en el Consejo Técnico Escolar y las academias. Implica que el colectivo docente contextualiza y sitúa los procesos formativos incorporando problemáticas, temas y asuntos comunitarios locales y regionales como contenidos necesarios, de acuerdo con las condiciones de la situación comunitaria y escolar."
+  }
+];
+
+/* ─── STATE ─── */
+let currentQ = 0, score = 0, errors = 0, studentName = '', answered = false;
+
+/* ─── TABS ─── */
+function showTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+/* ─── START ─── */
+function startSimulator() {
+  const input = document.getElementById('student-name').value.trim();
+  if (!input) {
+    document.getElementById('student-name').focus();
+    document.getElementById('student-name').style.borderColor = '#ff6b6b';
+    setTimeout(() => document.getElementById('student-name').style.borderColor = '', 1500);
+    return;
+  }
+  studentName = input;
+  currentQ = 0; score = 0; errors = 0;
+  document.getElementById('screen-welcome').style.display = 'none';
+  document.getElementById('screen-quiz').style.display = 'block';
+  renderQuestion();
+}
+
+/* ─── RENDER QUESTION ─── */
+function renderQuestion() {
+  answered = false;
+  const q = preguntas[currentQ];
+  const pct = ((currentQ + 1) / 30) * 100;
+
+  document.getElementById('progress-count').textContent = `${currentQ + 1} / 30`;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('q-badge').textContent = q.tipo;
+  document.getElementById('q-badge').className = 'q-badge ' + q.badge;
+  document.getElementById('q-num').textContent = `Pregunta ${currentQ + 1} de 30`;
+  document.getElementById('q-text').textContent = q.texto;
+  document.getElementById('q-extra').innerHTML = q.extra || '';
+
+  const list = document.getElementById('options-list');
+  list.innerHTML = '';
+  const letters = ['A', 'B', 'C'];
+  q.opciones.forEach((op, i) => {
+    const li = document.createElement('li');
+    li.className = 'option-item';
+    li.innerHTML = `<span class="option-letter">${letters[i]}</span><span class="option-text">${op}</span>`;
+    li.onclick = () => selectOption(i, li);
+    list.appendChild(li);
+  });
+
+  const fb = document.getElementById('feedback-box');
+  fb.className = 'feedback-box';
+  fb.innerHTML = '';
+  document.getElementById('btn-next').style.display = 'none';
+
+  // scroll
+  document.getElementById('screen-quiz').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ─── SELECT OPTION ─── */
+function selectOption(idx, el) {
+  if (answered) return;
+  answered = true;
+  const q = preguntas[currentQ];
+  const items = document.querySelectorAll('.option-item');
+  items.forEach(i => i.classList.add('disabled'));
+
+  const fb = document.getElementById('feedback-box');
+
+  if (idx === q.correcta) {
+    score++;
+    el.classList.add('correct');
+    fb.className = 'feedback-box correct';
+    fb.innerHTML = `<strong>✅ ¡Correcto!</strong> ${q.justificacion}`;
+  } else {
+    errors++;
+    el.classList.add('wrong');
+    items[q.correcta].classList.add('correct');
+    fb.className = 'feedback-box wrong';
+    const letters = ['A', 'B', 'C'];
+    fb.innerHTML = `<strong>❌ Respuesta incorrecta.</strong> La opción correcta es <strong>${letters[q.correcta]}</strong>. ${q.justificacion}`;
+  }
+
+  const btnNext = document.getElementById('btn-next');
+  btnNext.style.display = 'block';
+  btnNext.textContent = currentQ < 29 ? 'Siguiente pregunta →' : 'Ver resultados 🎉';
+}
+
+/* ─── NEXT ─── */
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= 30) showResults();
+  else renderQuestion();
+}
+
+/* ─── RESULTS ─── */
+function showResults() {
+  document.getElementById('screen-quiz').style.display = 'none';
+  const pct = Math.round((score / 30) * 100);
+
+  let icon, iconClass, mensaje;
+  if (pct >= 90)      { icon = '🏆'; iconClass = 'excelente'; mensaje = 'Desempeño sobresaliente. Dominas los conceptos del Programa Sintético Fase 3. ¡Excelente trabajo, sigue así!'; }
+  else if (pct >= 70) { icon = '🌟'; iconClass = 'bien';       mensaje = 'Buen desempeño. Demuestras comprensión sólida del contenido. Repasa los reactivos con error para fortalecer tu aprendizaje.'; }
+  else if (pct >= 50) { icon = '📚'; iconClass = 'regular';    mensaje = 'Desempeño en proceso. Estás avanzando. Consulta la Guía de Estudio y practica nuevamente para mejorar tus resultados.'; }
+  else                { icon = '💪'; iconClass = 'bajo';        mensaje = 'Sigue practicando. El aprendizaje es un proceso continuo. Revisa el material con calma y vuelve a intentarlo. ¡Tú puedes!'; }
+
+  const html = `
+    <div class="results-card">
+      <div class="results-icon ${iconClass}">${icon}</div>
+      <div class="results-name">${studentName}</div>
+      <div class="results-title">Programa Sintético – Fase 3</div>
+      <div class="score-ring" style="--pct:${pct}"><span>${pct}%</span></div>
+      <div class="score-grid">
+        <div class="score-cell"><div class="sc-val green">${score}</div><div class="sc-label">Respuestas correctas</div></div>
+        <div class="score-cell"><div class="sc-val red">${errors}</div><div class="sc-label">Respuestas incorrectas</div></div>
+        <div class="score-cell"><div class="sc-val blue">30</div><div class="sc-label">Total de preguntas</div></div>
+        <div class="score-cell"><div class="sc-val purple">${pct}%</div><div class="sc-label">Porcentaje de desempeño</div></div>
+      </div>
+      <div class="msg-motivador">💬 ${mensaje}</div>
+      <button class="btn-restart" onclick="restartSimulator()">🔄 Volver a intentar</button>
+    </div>`;
+
+  const res = document.getElementById('screen-results');
+  res.innerHTML = html;
+  res.style.display = 'block';
+  res.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ─── RESTART ─── */
+function restartSimulator() {
+  document.getElementById('screen-results').style.display = 'none';
+  document.getElementById('screen-results').innerHTML = '';
+  currentQ = 0; score = 0; errors = 0; answered = false;
+  document.getElementById('student-name').value = '';
+  document.getElementById('screen-welcome').style.display = 'block';
+  document.getElementById('screen-welcome').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Simulador LGDNNA – Prof. Francisco De Jesus Luna Benitez</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --azul:#1976d2;
+    --azul-claro:#42a5f5;
+    --teal:#00897b;
+    --teal-claro:#4db6ac;
+    --coral:#f4511e;
+    --amarillo:#f9a825;
+    --verde:#2e7d32;
+    --rojo:#c62828;
+    --gris-bg:#f0f4f8;
+    --blanco:#ffffff;
+    --sombra:0 8px 32px rgba(25,118,210,.15);
+    --radio:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Nunito',sans-serif;
+    background:linear-gradient(135deg,#e3f2fd 0%,#e0f7fa 40%,#f3e5f5 100%);
+    min-height:100vh;
+    color:#1a237e;
+  }
+
+  /* ══ ENCABEZADO ══ */
+  header{
+    background:linear-gradient(135deg,#1565c0 0%,#0097a7 60%,#00897b 100%);
+    padding:28px 20px 22px;
+    text-align:center;
+    box-shadow:0 4px 20px rgba(0,0,0,.25);
+    position:relative;
+    overflow:hidden;
+  }
+  header::before{
+    content:'';
+    position:absolute;inset:0;
+    background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events:none;
+  }
+  .header-badge{
+    display:inline-block;
+    background:rgba(255,255,255,.15);
+    color:#fff;
+    font-size:.75rem;
+    font-weight:700;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    padding:4px 14px;
+    border-radius:50px;
+    margin-bottom:10px;
+    border:1px solid rgba(255,255,255,.3);
+  }
+  header h1{
+    font-family:'Montserrat',sans-serif;
+    font-size:clamp(1.3rem,4vw,2.1rem);
+    font-weight:900;
+    color:#fff;
+    letter-spacing:.5px;
+    text-shadow:0 2px 8px rgba(0,0,0,.2);
+    line-height:1.2;
+  }
+  header h2{
+    font-family:'Nunito',sans-serif;
+    font-size:clamp(.8rem,2.5vw,1rem);
+    font-weight:700;
+    color:rgba(255,255,255,.85);
+    margin-top:6px;
+    letter-spacing:.5px;
+  }
+  .header-ley{
+    display:inline-block;
+    margin-top:10px;
+    font-size:.8rem;
+    font-weight:700;
+    color:rgba(255,255,255,.7);
+    letter-spacing:1px;
+  }
+
+  /* ══ CONTENEDOR PRINCIPAL ══ */
+  .app{max-width:780px;margin:0 auto;padding:30px 16px 60px}
+
+  /* ══ TARJETA BASE ══ */
+  .card{
+    background:#fff;
+    border-radius:var(--radio);
+    box-shadow:var(--sombra);
+    padding:36px 32px;
+    margin-bottom:24px;
+    animation:slideUp .5s ease;
+  }
+  @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+
+  /* ══ PANTALLA INICIO ══ */
+  #screen-inicio{text-align:center}
+  .inicio-icon{font-size:4rem;margin-bottom:14px}
+  #screen-inicio h3{
+    font-family:'Montserrat',sans-serif;
+    font-size:1.4rem;font-weight:900;
+    color:#1565c0;margin-bottom:6px;
+  }
+  #screen-inicio p{color:#546e7a;font-size:.95rem;margin-bottom:24px;line-height:1.6}
+  .input-group{margin-bottom:20px;text-align:left}
+  .input-group label{
+    display:block;font-weight:800;font-size:.9rem;
+    color:#1565c0;margin-bottom:8px;letter-spacing:.3px;
+  }
+  .input-group input{
+    width:100%;padding:14px 18px;border:2px solid #b3c6e0;
+    border-radius:12px;font-family:'Nunito',sans-serif;
+    font-size:1rem;font-weight:600;color:#1a237e;
+    transition:border-color .3s,box-shadow .3s;outline:none;
+  }
+  .input-group input:focus{border-color:#1976d2;box-shadow:0 0 0 3px rgba(25,118,210,.15)}
+  .info-box{
+    background:linear-gradient(135deg,#e3f2fd,#e0f7fa);
+    border-radius:12px;padding:16px 20px;margin-bottom:24px;
+    border-left:4px solid #1976d2;text-align:left;
+  }
+  .info-box p{font-size:.87rem;color:#1565c0;margin-bottom:4px;font-weight:600}
+  .info-box span{font-size:.83rem;color:#546e7a;font-weight:600}
+
+  /* ══ BOTONES ══ */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    padding:14px 32px;border:none;border-radius:50px;
+    font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800;
+    cursor:pointer;transition:all .25s;text-decoration:none;
+    letter-spacing:.3px;
+  }
+  .btn-primary{
+    background:linear-gradient(135deg,#1565c0,#0097a7);
+    color:#fff;box-shadow:0 4px 15px rgba(21,101,192,.35);
+  }
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(21,101,192,.4)}
+  .btn-success{
+    background:linear-gradient(135deg,#2e7d32,#00897b);
+    color:#fff;box-shadow:0 4px 15px rgba(46,125,50,.35);
+  }
+  .btn-success:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(46,125,50,.4)}
+  .btn-outline{
+    background:#fff;color:#1565c0;
+    border:2px solid #1976d2;box-shadow:none;
+  }
+  .btn-outline:hover{background:#e3f2fd}
+  .btn-lg{padding:16px 40px;font-size:1.1rem}
+  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+
+  /* ══ BARRA DE PROGRESO ══ */
+  .prog-wrap{margin-bottom:20px}
+  .prog-info{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:8px;
+  }
+  .prog-label{font-weight:800;font-size:.9rem;color:#1565c0}
+  .prog-counter{
+    font-weight:900;font-size:.95rem;
+    color:#0097a7;background:#e0f7fa;
+    padding:2px 12px;border-radius:50px;
+  }
+  .prog-bar-bg{
+    background:#e3f2fd;border-radius:50px;height:10px;overflow:hidden;
+  }
+  .prog-bar{
+    height:100%;border-radius:50px;
+    background:linear-gradient(90deg,#1976d2,#0097a7);
+    transition:width .5s ease;
+  }
+
+  /* ══ TARJETA PREGUNTA ══ */
+  .tipo-badge{
+    display:inline-block;
+    font-size:.72rem;font-weight:800;letter-spacing:1.5px;
+    text-transform:uppercase;padding:4px 12px;
+    border-radius:50px;margin-bottom:14px;
+  }
+  .tipo-directo{background:#e3f2fd;color:#1565c0}
+  .tipo-completamiento{background:#e8f5e9;color:#2e7d32}
+  .tipo-ordenamiento{background:#fff8e1;color:#f57f17}
+  .tipo-relacion{background:#fce4ec;color:#880e4f}
+  .tipo-aplicado{background:#f3e5f5;color:#6a1b9a}
+
+  .pregunta-num{
+    font-size:.82rem;font-weight:800;color:#90a4ae;
+    margin-bottom:10px;letter-spacing:.5px;
+  }
+  .pregunta-texto{
+    font-size:1.05rem;font-weight:700;color:#1a237e;
+    line-height:1.65;margin-bottom:22px;
+  }
+
+  /* tabla relación */
+  .tabla-relacion{
+    width:100%;border-collapse:collapse;
+    margin-bottom:18px;font-size:.9rem;
+  }
+  .tabla-relacion th{
+    background:linear-gradient(135deg,#1565c0,#0097a7);
+    color:#fff;padding:10px 14px;font-weight:800;font-size:.82rem;
+    letter-spacing:.5px;text-align:left;
+  }
+  .tabla-relacion td{
+    padding:9px 14px;border-bottom:1px solid #e3f2fd;
+    font-weight:600;color:#1a237e;
+  }
+  .tabla-relacion tr:nth-child(even) td{background:#f5f9ff}
+
+  /* ══ OPCIONES ══ */
+  .opciones{display:flex;flex-direction:column;gap:12px;margin-bottom:22px}
+  .opcion{
+    display:flex;align-items:flex-start;gap:14px;
+    padding:14px 18px;border:2px solid #cfd8dc;
+    border-radius:14px;cursor:pointer;
+    transition:all .22s;background:#fff;
+  }
+  .opcion:hover:not(.disabled){
+    border-color:#42a5f5;background:#f0f8ff;
+    transform:translateX(4px);
+  }
+  .opcion.selected{border-color:#1976d2;background:#e3f2fd}
+  .opcion.correcta{border-color:#2e7d32;background:#e8f5e9}
+  .opcion.incorrecta{border-color:#c62828;background:#ffebee}
+  .opcion.disabled{cursor:default}
+  .letra{
+    flex-shrink:0;width:34px;height:34px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:900;font-size:.95rem;
+    background:#e3f2fd;color:#1565c0;
+    transition:all .22s;
+  }
+  .opcion.selected .letra{background:#1976d2;color:#fff}
+  .opcion.correcta .letra{background:#2e7d32;color:#fff}
+  .opcion.incorrecta .letra{background:#c62828;color:#fff}
+  .opcion-texto{font-weight:600;font-size:.95rem;color:#1a237e;line-height:1.5;padding-top:5px}
+  .opcion-icono{margin-left:auto;font-size:1.1rem;flex-shrink:0;padding-top:4px}
+
+  /* ══ RETROALIMENTACIÓN ══ */
+  .retro{
+    border-radius:14px;padding:16px 20px;
+    margin-bottom:18px;
+    animation:fadeIn .4s ease;
+    display:flex;gap:12px;align-items:flex-start;
+  }
+  @keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+  .retro-ok{background:linear-gradient(135deg,#e8f5e9,#f1f8e9);border-left:4px solid #2e7d32}
+  .retro-err{background:linear-gradient(135deg,#ffebee,#fff8e1);border-left:4px solid #c62828}
+  .retro-icon{font-size:1.5rem;flex-shrink:0}
+  .retro-title{font-weight:900;font-size:.95rem;margin-bottom:4px}
+  .retro-ok .retro-title{color:#2e7d32}
+  .retro-err .retro-title{color:#c62828}
+  .retro-desc{font-size:.87rem;font-weight:600;color:#37474f;line-height:1.55}
+
+  /* ══ PANTALLA RESULTADOS ══ */
+  #screen-resultado{text-align:center}
+  .resultado-header{
+    background:linear-gradient(135deg,#1565c0,#0097a7);
+    border-radius:16px;padding:28px;margin-bottom:24px;color:#fff;
+  }
+  .resultado-header h3{
+    font-family:'Montserrat',sans-serif;
+    font-size:1.5rem;font-weight:900;margin-bottom:6px;
+  }
+  .resultado-nombre{font-size:1.1rem;font-weight:700;opacity:.9}
+  .resultado-pct{
+    font-family:'Montserrat',sans-serif;
+    font-size:4rem;font-weight:900;
+    margin:16px 0 4px;letter-spacing:-2px;
+  }
+  .resultado-nivel{
+    display:inline-block;font-size:.85rem;font-weight:800;
+    background:rgba(255,255,255,.2);padding:4px 16px;
+    border-radius:50px;letter-spacing:1px;text-transform:uppercase;
+  }
+  .stats-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:14px;
+    margin-bottom:24px;
+  }
+  .stat-card{
+    background:#fff;border-radius:14px;padding:18px;
+    box-shadow:0 3px 12px rgba(0,0,0,.08);
+  }
+  .stat-icon{font-size:1.8rem;margin-bottom:6px}
+  .stat-num{
+    font-family:'Montserrat',sans-serif;
+    font-size:2.2rem;font-weight:900;
+  }
+  .stat-label{font-size:.8rem;font-weight:700;color:#78909c;letter-spacing:.5px}
+  .stat-aciertos .stat-num{color:#2e7d32}
+  .stat-errores .stat-num{color:#c62828}
+  .mensaje-final{
+    background:linear-gradient(135deg,#e0f7fa,#e3f2fd);
+    border-radius:14px;padding:20px;margin-bottom:24px;
+    border-left:4px solid #0097a7;text-align:left;
+  }
+  .mensaje-final p{font-size:.97rem;font-weight:700;color:#1565c0;line-height:1.6}
+
+  /* ══ GUÍA PDF ══ */
+  #screen-guia{}
+  .guia-header{
+    background:linear-gradient(135deg,#4a148c,#1565c0);
+    border-radius:16px;padding:22px 24px;margin-bottom:20px;
+    color:#fff;display:flex;align-items:center;gap:16px;
+  }
+  .guia-header-icon{font-size:2.5rem}
+  .guia-header h3{
+    font-family:'Montserrat',sans-serif;
+    font-size:1.2rem;font-weight:900;margin-bottom:4px;
+  }
+  .guia-header p{font-size:.85rem;opacity:.85;font-weight:600}
+  .pdf-frame{
+    width:100%;height:600px;border:none;
+    border-radius:14px;box-shadow:var(--sombra);
+    background:#f5f5f5;
+  }
+  .pdf-fallback{
+    text-align:center;padding:40px 20px;
+    background:#f5f9ff;border-radius:14px;
+    border:2px dashed #b3c6e0;
+  }
+  .pdf-fallback p{color:#546e7a;font-size:.95rem;font-weight:600;margin-bottom:16px}
+
+  /* ══ NAV INFERIOR ══ */
+  .nav-bottom{
+    display:flex;gap:12px;justify-content:center;
+    flex-wrap:wrap;margin-top:10px;
+  }
+  .nav-tab{
+    padding:10px 22px;border-radius:50px;
+    font-family:'Nunito',sans-serif;font-weight:800;
+    font-size:.88rem;cursor:pointer;border:2px solid transparent;
+    transition:all .25s;
+  }
+  .nav-tab.activo{
+    background:linear-gradient(135deg,#1565c0,#0097a7);
+    color:#fff;box-shadow:0 4px 12px rgba(21,101,192,.3);
+  }
+  .nav-tab:not(.activo){
+    background:#fff;color:#1565c0;border-color:#1976d2;
+  }
+  .nav-tab:not(.activo):hover{background:#e3f2fd}
+
+  /* ══ ESCONDIDOS ══ */
+  .hidden{display:none!important}
+
+  /* ══ RESPONSIVE ══ */
+  @media(max-width:560px){
+    .card{padding:24px 18px}
+    .stats-grid{grid-template-columns:1fr 1fr}
+    .btn-lg{width:100%;padding:15px 20px}
+    .pdf-frame{height:450px}
+    header h1{font-size:1.15rem}
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ ENCABEZADO ══ -->
+<header>
+  <div class="header-badge">LGDNNA · Simulador Interactivo</div>
+  <h1>Simulador Interactivo de Evaluación</h1>
+  <h2>Prof. Francisco De Jesus Luna Benitez</h2>
+  <span class="header-ley">Ley General de los Derechos de Niñas, Niños y Adolescentes</span>
+</header>
+
+<!-- ══ APP ══ -->
+<div class="app">
+
+  <!-- NAV TABS -->
+  <div class="nav-bottom" id="nav-tabs" style="margin-bottom:20px">
+    <button class="nav-tab activo" onclick="mostrarSeccion('examen')">📝 Simulador</button>
+    <button class="nav-tab" onclick="mostrarSeccion('guia')">📚 Guía de Estudio</button>
+  </div>
+
+  <!-- ══ SECCIÓN EXAMEN ══ -->
+  <div id="seccion-examen">
+
+    <!-- PANTALLA INICIO -->
+    <div id="screen-inicio" class="card">
+      <div class="inicio-icon">📋</div>
+      <h3>Evaluación de Conocimientos</h3>
+      <p>Pon a prueba tus conocimientos sobre la Ley General de los Derechos de Niñas, Niños y Adolescentes (LGDNNA).</p>
+      <div class="info-box">
+        <p>📌 El simulador contiene:</p>
+        <span>• 30 preguntas de opción múltiple (A, B, C)<br/>
+        • Formatos: cuestionamiento directo, completamiento, ordenamiento y relación de elementos<br/>
+        • Retroalimentación inmediata en cada pregunta<br/>
+        • Resultados detallados al finalizar</span>
+      </div>
+      <div class="input-group">
+        <label>👤 Nombre del estudiante</label>
+        <input type="text" id="input-nombre" placeholder="Escribe tu nombre completo..." maxlength="80"/>
+      </div>
+      <button class="btn btn-primary btn-lg" onclick="iniciarSimulador()">🚀 Iniciar Simulador</button>
+    </div>
+
+    <!-- PANTALLA EXAMEN -->
+    <div id="screen-examen" class="hidden">
+      <!-- Progreso -->
+      <div class="card" style="padding:20px 24px">
+        <div class="prog-info">
+          <span class="prog-label">📊 Progreso del simulador</span>
+          <span class="prog-counter" id="prog-texto">1 / 30</span>
+        </div>
+        <div class="prog-bar-bg"><div class="prog-bar" id="prog-bar" style="width:3.3%"></div></div>
+      </div>
+
+      <!-- Pregunta -->
+      <div class="card" id="card-pregunta">
+        <div id="tipo-badge" class="tipo-badge"></div>
+        <div class="pregunta-num" id="pregunta-num"></div>
+        <div class="pregunta-texto" id="pregunta-texto"></div>
+        <div id="tabla-container"></div>
+        <div class="opciones" id="opciones-container"></div>
+        <div id="retro-container"></div>
+        <div style="text-align:right">
+          <button class="btn btn-success" id="btn-siguiente" onclick="siguientePregunta()" disabled>
+            Siguiente pregunta →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANTALLA RESULTADO -->
+    <div id="screen-resultado" class="hidden">
+      <div class="card">
+        <div class="resultado-header">
+          <h3>🎓 Resultados del Simulador</h3>
+          <div class="resultado-nombre" id="res-nombre"></div>
+          <div class="resultado-pct" id="res-pct"></div>
+          <div class="resultado-nivel" id="res-nivel"></div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card stat-aciertos">
+            <div class="stat-icon">✅</div>
+            <div class="stat-num" id="res-aciertos"></div>
+            <div class="stat-label">ACIERTOS</div>
+          </div>
+          <div class="stat-card stat-errores">
+            <div class="stat-icon">❌</div>
+            <div class="stat-num" id="res-errores"></div>
+            <div class="stat-label">ERRORES</div>
+          </div>
+        </div>
+        <div class="mensaje-final">
+          <p id="res-mensaje"></p>
+        </div>
+        <div class="nav-bottom">
+          <button class="btn btn-primary" onclick="reiniciarSimulador()">🔄 Reintentar simulador</button>
+          <button class="btn btn-outline" onclick="mostrarSeccion('guia')">📚 Ver Guía de Estudio</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /seccion-examen -->
+
+  <!-- ══ SECCIÓN GUÍA ══ -->
+  <div id="seccion-guia" class="hidden">
+    <div class="card">
+      <div class="guia-header">
+        <div class="guia-header-icon">📖</div>
+        <div>
+          <h3>Guía de Estudio – LGDNNA</h3>
+          <p>Material de consulta oficial para preparar tu evaluación</p>
+        </div>
+      </div>
+      <iframe class="pdf-frame"
+        src="https://drive.google.com/file/d/1urXmuKRKOpFYTkVnJrSaVys_2sB1NDJf/preview"
+        allow="autoplay" allowfullscreen
+        title="Guía de Estudio LGDNNA">
+      </iframe>
+      <div style="text-align:center;margin-top:16px">
+        <a class="btn btn-outline"
+           href="https://drive.google.com/file/d/1urXmuKRKOpFYTkVnJrSaVys_2sB1NDJf/view?usp=sharing"
+           target="_blank">
+          🔗 Abrir en Google Drive
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+// ══════════════════════════════════════════
+//  BANCO DE 30 PREGUNTAS – LGDNNA
+// ══════════════════════════════════════════
+const PREGUNTAS = [
+  // ── Q1 ──────────────────────────────
+  {
+    tipo:"Cuestionamiento directo",
+    tipoCss:"tipo-directo",
+    num:1,
+    texto:"¿Qué principio debe considerarse de manera primordial al tomar decisiones que afecten a niñas, niños y adolescentes, según el Artículo 2° de la LGDNNA?",
+    tabla:null,
+    ops:[
+      {letra:"A", texto:"El principio de federalismo y coordinación entre autoridades de los distintos órdenes de gobierno."},
+      {letra:"B", texto:"El interés superior de la niñez, el cual debe orientar todas las decisiones que les afecten."},
+      {letra:"C", texto:"El principio de equidad presupuestal entre los diferentes niveles de gobierno del país."}
+    ],
+    correcta:"B",
+    argumento:"El Artículo 2° de la LGDNNA establece que el interés superior de la niñez debe ser considerado de manera primordial en todas las decisiones que les afecten, obligando a las autoridades a incorporar este principio como eje rector de sus acciones, junto con un enfoque integral, transversal y de derechos humanos."
+  },
+  // ── Q2 ──────────────────────────────
+  {
+    tipo:"Completamiento",
+    tipoCss:"tipo-completamiento",
+    num:2,
+    texto:"Según el Artículo 3° de la LGDNNA, la Federación, las entidades federativas, los municipios y las demarcaciones territoriales tienen la responsabilidad de concurrir en el diseño, ejecución y evaluación de políticas públicas…",
+    tabla:null,
+    ops:[
+      {letra:"A", texto:"…con perspectiva de género para asegurar el máximo bienestar posible de los menores."},
+      {letra:"B", texto:"…de seguridad y justicia enfocadas exclusivamente a la protección de menores en situación de riesgo."},
+      {letra:"C", texto:"…educativas y de salud orientadas únicamente a la reducción de la pobreza en comunidades vulnerables."}
+    ],
+    correcta:"A",
+    argumento:"El Artículo 3° establece que todos los niveles de gobierno deben concurrir en el diseño, ejecución y evaluación de políticas públicas con perspectiva de género, con el fin de asegurar el máximo bienestar posible de las niñas, niños y adolescentes."
+  },
+  // ── Q3 ──────────────────────────────
+  {
+    tipo:"Cuestionamiento directo",
+    tipoCss:"tipo-directo",
+    num:3,
+    texto:"¿Cuántos derechos reconoce el Artículo 13° de la LGDNNA para niñas, niños y adolescentes?",
+    tabla:null,
+    ops:[
+      {letra:"A", texto:"15 derechos, entre los que se encuentran la vida, la educación y la salud."},
+      {letra:"B", texto:"18 derechos, incluyendo los derechos civiles, sociales y culturales de los menores."},
+      {letra:"C", texto:"20 derechos, como el derecho a la vida, identidad, educación, salud, no discriminación y acceso a tecnologías."}
+    ],
+    correcta:"C",
+    argumento:"El Artículo 13° de la LGDNNA enumera 20 derechos reconocidos para niñas, niños y adolescentes, entre los que destacan el derecho a la vida, la prioridad, la identidad, vivir en familia, la igualdad sustantiva, la no discriminación, la salud, la educación, el descanso y el acceso a las tecnologías."
+  },
+  // ── Q4 ──────────────────────────────
+  {
+    tipo:"Cuestionamiento directo",
+    tipoCss:"tipo-directo",
+    num:4,
+    texto:"De acuerdo con el Artículo 17° de la LGDNNA, ¿qué implica el derecho de prioridad para niñas, niños y adolescentes?",
+    tabla:null,
+    ops:[
+      {letra:"A", texto:"Deben recibir protección y socorro preferente, y ser atendidos antes que los adultos en todos los servicios."},
+      {letra:"B", texto:"Deben ser considerados como grupo prioritario únicamente en situaciones de emergencia o desastre natural."},
+      {letra:"C", texto:"Las autoridades deben destinar recursos presupuestales prioritarios exclusivamente al sector educativo."}
+    ],
+    correcta:"A",
+    argumento:"El Artículo 17° consagra el derecho de prioridad, que significa que las niñas, niños y adolescentes deben recibir protección y socorro preferente en todas las circunstancias, siendo atendidos antes que los adultos en todos los servicios y programas sin excepción."
+  },
+  // ── Q5 ──────────────────────────────
+  {
+    tipo:"Completamiento",
+    tipoCss:"tipo-completamiento",
+    num:5,
+    texto:"Según el Artículo 22° de la LGDNNA sobre el derecho a vivir en familia, la falta de recursos económicos…",
+    tabla:null,
+    ops:[
+      {letra:"A", texto:"…puede ser motivo justificado para la separación temporal de un menor de su familia, siempre que exista resolución judicial."},
+      {letra:"B", texto:"…no es motivo para separar a una niña, niño o adolescente de su familia."},
+      {letra:"C", texto:"…obliga al Estado a brindar apoyo económico, pero no impide la separación si las condiciones persisten por más de seis meses."}
+    ],
+    correcta:"B",
+    argumento:"El Artículo 22° es categórico: la falta de recursos económicos no es, por sí sola, motivo suficiente para separar a un menor de su familia. La separación solo puede ocurrir mediante el debido proceso y por orden de autoridad competente, velando siempre por el interés superior de la niñez."
+  },
+  // ── Q6 ──────────────────────────────
+  {
+    tipo:"Caso aplicado",
+    tipoCss:"tipo-aplicado",
+    num:6,
+    texto:"Una maestra impone castigos físicos a sus alumnos cuando no cumplen con la tarea. Desde la perspectiva de la LGDNNA, ¿qué artículo se vulnera directamente con esta práctica?",
+    tabla:null,
+    ops:[
+      {letra:"A", texto:"El Artículo 46°, que reconoce el derecho a la igualdad sustantiva en el ámbito escolar de todos los menores."},
+      {letra:"B", texto:"El Artículo 43°, que garantiza el derecho a un medio ambiente sano dentro de las instituciones educativas."},
+      {letra:"C", texto:"El Artículo 57°, que prohíbe el castigo corporal y exige erradicar prácticas pedagógicas discriminatorias o violentas."}
+    ],
+    correcta:"C",
+    argumento:"El Artículo 57° establece el derecho a una educación de calidad basada en los derechos humanos y prohíbe expresamente el castigo corporal en los centros educativos. La práctica descrita vulnera directamente este precepto legal, que también exige erradicar prácticas pedagógicas discriminatorias."
+  },
+  // ── Q7 ──────────────────────────────
+  {
+    tipo:"Relación de elementos",
+    tipoCss:"tipo-relacion",
+    num:7,
+    texto:"Seleccione la opción que relaciona correctamente cada artículo de la LGDNNA con el derecho que le corresponde.",
+    tabla:{
+      cols:["Artículo","Derecho"],
+      rows:[
+        ["1. Art. 36° y 37°","a) Igualdad sustantiva y eliminación de estereotipos sexistas"],
+        ["2. Art. 39°","b) Medio ambiente sano y sustentable"],
+        ["3. Art. 43°","c) No discriminación por ninguna condición"]
+      ]
+    },
+    ops:[
+      {letra:"A", texto:"1a, 2c, 3b"},
+      {letra:"B", texto:"1c, 2a, 3b"},
+      {letra:"C", texto:"1b, 2c, 3a"}
+    ],
+    correcta:"A",
+    argumento:"Los artículos 36° y 37° establecen el derecho a la igualdad sustantiva y la eliminación de estereotipos (1a); el artículo 39° garantiza el derecho a no ser discriminado por ninguna condición (2c); y el artículo 43° reconoce el derecho a un medio ambiente sano y sustentable (3b)."
+  },
+  // ── Q8 ──────────────────────────────
+  {
+    tipo:"Cuestionamiento directo",
+    tipoCss:"tipo-directo",
+    num:8,
+    texto:"¿Qué concepto protege el Artículo 39° de la LGDNNA cuando un menor enfrenta discriminación por más de una condición simultáneamente (por ejemplo, ser indígena y tener discapacidad)?",
+    tabla:null,
+    ops:[
+      {letra:"A", texto:"Discriminación estructural múltiple, derivada de condicionantes históricas y sociales acumuladas."},
+      {letra:"B", texto:"Discriminación Múltiple, que ocurre cuando un menor es discriminado por más de una condición al mismo tiempo."},
+      {letra:"C", texto:"Interseccionalidad jurídica, reconocida en los tratados internacionales de derechos humanos ratificados por México."}
+    ],
+    correcta:"B",
+    argumento:"El Artículo 39° garantiza el derecho a no ser discriminado por ninguna condición —origen étnico, género, discapacidad, religión, situación económica, entre otras— y protege expresamente contra la Discriminación Múltiple, que se presenta cuando un menor es discriminado simultáneamente por más de una condición."
+  },
+  // ── Q9 ──────────────────────────────
+  {
+    tipo:"Completamiento",
+    tipoCss:"tipo-completamiento",
+    num:9,
+    texto:"De acuerdo con el Artículo 44° de la LGDNNA, quienes ejerzan la patria potestad están obligados a proporcionar condiciones de vida suficientes para el sano desarrollo de los menores y a adoptar…",
+    tabla:null,
+    ops:[
+      {letra:"A", texto:"…medidas de vigilancia continua para garantizar la seguridad física del menor en todo momento y circunstancia."},
+      {letra:"B", texto:"…estrategias de comunicación asertiva conforme a los protocolos establecidos por las autoridades de salud pública."},
+      {letra:"C", texto:"…prácticas de crianza positiva en el cuidado y desarrollo de niñas, niños y adolescentes bajo su responsabilidad."}
+    ],
+    correcta:"C",
+    argumento:"El Artículo 44° establece expresamente que quienes ejerzan la patria potestad tienen la obligación de proporcionar condiciones de vida suficientes para el sano desarrollo y de adoptar prácticas de crianza positiva, las cuales favorecen el bienestar integral de los menores."
+  },
+  // ── Q10 ──────────────────────────────
+  {
+    tipo:"Caso aplicado",
+    tipoCss:"tipo-aplicado",
+    num:10,
+    texto:"En una escuela secundaria, un grupo de estudiantes somete a un compañero a acoso reiterado que afecta su integridad emocional y física. ¿Qué derecho consagrado en la LGDNNA se vulnera principalmente?",
+    tabla:null,
+    ops:[
+      {letra:"A", texto:"El derecho a una vida libre de violencia y al resguardo de su integridad personal, establecido en el Artículo 46°."},
+      {letra:"B", texto:"El derecho a la participación activa en los asuntos de su interés, reconocido en el Artículo 71°."},
+      {letra:"C", texto:"El derecho a la identidad y preservación de sus relaciones familiares, señalado en los Artículos 19° al 21°."}
+    ],
+    correcta:"A",
+    argumento:"El Artículo 46° de la LGDNNA reconoce el derecho de niñas, niños y adolescentes a una vida libre de violencia y al resguardo de su integridad personal. El acoso escolar descrito vulnera directamente este derecho fundamental, que el Artículo 57° complementa al exigir protocolos contra el acoso en las escuelas."
+  },
+  // ── Q11 ──────────────────────────────
+  {
+    tipo:"Cuestionamiento directo",
+    tipoCss:"tipo-directo",
+    num:11,
+    texto:"¿Cuál de las siguientes acciones corresponde al contenido del Artículo 50° de la LGDNNA sobre el derecho a la protección de la salud y seguridad social?",
+    tabla:null,
+    ops:[
+      {letra:"A", texto:"Garantizar el acceso universal de los menores a internet de banda ancha para fines educativos y de salud digital."},
+      {letra:"B", texto:"Prohibir la esterilización forzada, la violencia obstétrica y garantizar atención a la salud mental de los menores."},
+      {letra:"C", texto:"Establecer protocolos de evacuación escolar en situaciones de riesgo para preservar la integridad física de los estudiantes."}
+    ],
+    correcta:"B",
+    argumento:"El Artículo 50° detalla el derecho a la protección de la salud e incluye prohibir la esterilización forzada y la violencia obstétrica, garantizar atención a la salud mental, a personas con discapacidad, fomentar la lactancia materna, combatir la desnutrición y la obesidad, y garantizar servicios de salud sexual y reproductiva."
+  },
+  // ── Q12 ──────────────────────────────
+  {
+    tipo:"Ordenamiento",
+    tipoCss:"tipo-ordenamiento",
+    num:12,
+    texto:"Ordene las acciones que deben realizarse cuando un menor se encuentra en el contexto de la comisión de un delito, conforme a la LGDNNA y sus principios rectores.",
+    tabla:{
+      cols:["N°","Acción"],
+      rows:[
+        ["1","Notificar a quienes ejercen la patria potestad del menor."],
+        ["2","Identificar si el menor es víctima o si está involucrado en la situación."],
+        ["3","Notificar a la Procuraduría de Protección competente."],
+        ["4","Garantizar el debido proceso y la seguridad jurídica del menor."],
+        ["5","Aplicar medidas de protección conforme al interés superior de la niñez."]
+      ]
+    },
+    ops:[
+      {letra:"A", texto:"1, 3, 2, 4, 5"},
+      {letra:"B", texto:"3, 1, 4, 2, 5"},
+      {letra:"C", texto:"2, 1, 3, 4, 5"}
+    ],
+    correcta:"C",
+    argumento:"Conforme al Artículo 87° y los principios de la LGDNNA, el procedimiento correcto inicia con la identificación de la situación del menor (2), seguido de la notificación a quienes ejercen la patria potestad (1), luego a la Procuraduría de Protección (3), garantizando el debido proceso (4) y aplicando medidas de protección conforme al interés superior de la niñez (5)."
+  },
+  // ── Q13 ──────────────────────────────
+  {
+    tipo:"Cuestionamiento directo",
+    tipoCss:"tipo-directo",
+    num:13,
+    texto:"¿Qué establece el Artículo 53° de la LGDNNA respecto a los menores con discapacidad?",
+    tabla:null,
+    ops:[
+      {letra:"A", texto:"Asegura su igualdad sustantiva y su derecho a vivir incluidos en la comunidad, garantizando una inclusión plena."},
+      {letra:"B", texto:"Establece que deberán ser atendidos exclusivamente en instituciones especializadas para garantizar su desarrollo óptimo."},
+      {letra:"C", texto:"Reconoce que las autoridades educativas deben crear escuelas especiales separadas para atender sus necesidades."}
+    ],
+    correcta:"A",
+    argumento:"El Artículo 53° establece el derecho a la inclusión de menores con discapacidad, asegurando su igualdad sustantiva y su derecho a vivir incluidos en la comunidad. Esto implica una educación y convivencia integradas, rechazando cualquier forma de segregación."
+  },
+  // ── Q14 ──────────────────────────────
+  {
+    tipo:"Completamiento",
+    tipoCss:"tipo-completamiento",
+    num:14,
+    texto:"El Artículo 60° de la LGDNNA establece el derecho al descanso, al esparcimiento y al juego, y prohíbe expresamente…",
+    tabla:null,
+    ops:[
+      {letra:"A", texto:"…que las instituciones educativas ocupen los periodos de recreo para actividades académicas de recuperación curricular."},
+      {letra:"B", texto:"…imponerles regímenes de estudio o trabajo desproporcionados a su edad."},
+      {letra:"C", texto:"…que los menores participen en actividades laborales de cualquier tipo, incluyendo las de carácter artístico o cultural."}
+    ],
+    correcta:"B",
+    argumento:"El Artículo 60° protege el derecho al descanso, esparcimiento y juego, y prohíbe que se impongan a niñas, niños y adolescentes regímenes de estudio o trabajo desproporcionados a su edad, reconociendo que el juego y el descanso son elementos esenciales para su desarrollo integral."
+  },
+  // ── Q15 ──────────────────────────────
+  {
+    tipo:"Caso aplicado",
+    tipoCss:"tipo-aplicado",
+    num:15,
+    texto:"Una niña de 10 años proveniente de Guatemala llega sin documentos a territorio mexicano. Las autoridades migratorias pretenden negarle atención médica por no tener regularizada su situación. ¿Qué principio de la LGDNNA vulneran?",
+    tabla:null,
+    ops:[
+      {letra:"A", texto:"El principio de universalidad educativa, ya que toda menor tiene derecho a inscribirse en una escuela pública nacional."},
+      {letra:"B", texto:"El principio de igualdad sustantiva, pues la menor debe recibir el mismo trato que cualquier ciudadana mexicana de su edad."},
+      {letra:"C", texto:"El interés superior de la niñez, pues el Artículo 89° obliga a las autoridades a dar servicios independientemente de la nacionalidad o condición migratoria."}
+    ],
+    correcta:"C",
+    argumento:"El Artículo 89° de la LGDNNA establece que las autoridades deben proporcionar servicios a niñas, niños y adolescentes independientemente de su nacionalidad o condición migratoria, considerando siempre el interés superior de la niñez en cualquier procedimiento administrativo y aplicando medidas de protección especial."
+  },
+  // ── Q16 ──────────────────────────────
+  {
+    tipo:"Cuestionamiento directo",
+    tipoCss:"tipo-directo",
+    num:16,
+    texto:"Según el Artículo 43° de la LGDNNA, ¿cuál es el derecho que se reconoce en relación con el entorno en el que deben desarrollarse los menores?",
+    tabla:null,
+    ops:[
+      {letra:"A", texto:"El derecho a vivir en un medio ambiente sano y sustentable, en condiciones que permitan su bienestar y crecimiento armonioso."},
+      {letra:"B", texto:"El derecho a recibir educación ambiental en todos los niveles del sistema educativo nacional del país."},
+      {letra:"C", texto:"El derecho a participar en programas de reforestación y cuidado del entorno coordinados por autoridades municipales."}
+    ],
+    correcta:"A",
+    argumento:"El Artículo 43° reconoce el derecho de niñas, niños y adolescentes a vivir en un medio ambiente sano y sustentable, en condiciones que les permitan alcanzar su bienestar y un crecimiento armonioso, como parte integral de sus derechos fundamentales garantizados por la LGDNNA."
+  },
+  // ── Q17 ──────────────────────────────
+  {
+    tipo:"Relación de elementos",
+    tipoCss:"tipo-relacion",
+    num:17,
+    texto:"Seleccione la opción que relaciona correctamente cada artículo de la LGDNNA con su contenido en materia de tecnologías de la información.",
+    tabla:{
+      cols:["Artículo","Contenido"],
+      rows:[
+        ["1. Art. 101 Bis","a) Derecho al uso seguro de Internet para ejercer derechos de información, educación, salud y esparcimiento."],
+        ["2. Art. 101 Bis 1","b) Derecho al acceso universal a las TICs y al internet de banda ancha."],
+        ["3. Art. 101 Bis 2","c) El Estado debe garantizar integración a la sociedad de la información mediante políticas de inclusión digital universal."]
+      ]
+    },
+    ops:[
+      {letra:"A", texto:"1c, 2b, 3a"},
+      {letra:"B", texto:"1b, 2c, 3a"},
+      {letra:"C", texto:"1a, 2b, 3c"}
+    ],
+    correcta:"B",
+    argumento:"El Artículo 101 Bis establece el derecho al acceso universal a las TICs e internet de banda ancha (1b); el 101 Bis 1 obliga al Estado a garantizar la integración a la sociedad de la información mediante políticas de inclusión digital (2c); y el 101 Bis 2 reconoce el derecho al uso seguro de Internet para ejercer derechos fundamentales (3a)."
+  },
+  // ── Q18 ──────────────────────────────
+  {
+    tipo:"Cuestionamiento directo",
+    tipoCss:"tipo-directo",
+    num:18,
+    texto:"¿Cuál de los siguientes elementos forma parte de los fines de la educación establecidos en el Artículo 58° de la LGDNNA?",
+    tabla:null,
+    ops:[
+      {letra:"A", texto:"Desarrollar habilidades digitales avanzadas y orientar a los menores hacia carreras relacionadas con la tecnología de punta."},
+      {letra:"B", texto:"Fortalecer la identidad nacional y garantizar que los contenidos curriculares promuevan los valores de la soberanía mexicana."},
+      {letra:"C", texto:"Fomentar la cultura de la paz, promover la educación sexual integral y orientar vocacionalmente a los menores."}
+    ],
+    correcta:"C",
+    argumento:"El Artículo 58° establece que entre los fines de la educación se encuentran fomentar la cultura de la paz, promover la educación sexual integral, orientar vocacionalmente a los estudiantes y promover el bienestar de los animales, como parte de una formación humanista e integral."
+  },
+  // ── Q19 ──────────────────────────────
+  {
+    tipo:"Caso aplicado",
+    tipoCss:"tipo-aplicado",
+    num:19,
+    texto:"Durante un proceso administrativo, a un adolescente de 15 años no se le informa sobre los cargos que se le imputan, ni se le permite presentar su defensa. ¿Qué derecho de la LGDNNA se vulnera?",
+    tabla:null,
+    ops:[
+      {letra:"A", texto:"El derecho a la seguridad jurídica y al debido proceso, consagrado en el Artículo 82° de la LGDNNA."},
+      {letra:"B", texto:"El derecho a la participación e inclusión en procesos que le afecten, establecido en el Artículo 71°."},
+      {letra:"C", texto:"El derecho a la intimidad y protección de datos personales, protegido por los Artículos 76° y 77°."}
+    ],
+    correcta:"A",
+    argumento:"El Artículo 82° de la LGDNNA garantiza el derecho a la seguridad jurídica y al debido proceso, lo que implica que todo menor sujeto a un procedimiento debe ser informado de los cargos, tener oportunidad de defensa y recibir un trato conforme a sus derechos fundamentales."
+  },
+  // ── Q20 ──────────────────────────────
+  {
+    tipo:"Completamiento",
+    tipoCss:"tipo-completamiento",
+    num:20,
+    texto:"Los Artículos 71°, 73° y 74° de la LGDNNA reconocen el derecho a la participación de niñas, niños y adolescentes, lo que implica que deben ser escuchados y tomados en cuenta…",
+    tabla:null,
+    ops:[
+      {letra:"A", texto:"…únicamente en los asuntos relacionados con su educación formal y actividades extracurriculares organizadas por la escuela."},
+      {letra:"B", texto:"…en los asuntos de su interés, así como en los procesos judiciales o administrativos que los afecten directamente."},
+      {letra:"C", texto:"…cuando las autoridades competentes lo consideren pertinente conforme al nivel de desarrollo cognitivo del menor."}
+    ],
+    correcta:"B",
+    argumento:"Los artículos mencionados establecen que el derecho a la participación no es discrecional: niñas, niños y adolescentes deben ser escuchados y tomados en cuenta en los asuntos de su interés y en cualquier proceso judicial o administrativo que los afecte, sin que la autoridad pueda limitarlo arbitrariamente."
+  },
+  // ── Q21 ──────────────────────────────
+  {
+    tipo:"Cuestionamiento directo",
+    tipoCss:"tipo-directo",
+    num:21,
+    texto:"¿Qué derecho reconoce el Artículo 75° de la LGDNNA para niñas, niños y adolescentes?",
+    tabla:null,
+    ops:[
+      {letra:"A", texto:"El derecho a recibir información sobre sus derechos civiles y políticos mediante programas educativos especiales del Estado."},
+      {letra:"B", texto:"El derecho a ser representados por sus tutores legales en todos los procesos de toma de decisiones colectivas institucionales."},
+      {letra:"C", texto:"El derecho a asociarse y reunirse legalmente, como parte del conjunto de sus libertades fundamentales reconocidas."}
+    ],
+    correcta:"C",
+    argumento:"El Artículo 75° de la LGDNNA reconoce expresamente el derecho de niñas, niños y adolescentes a asociarse y reunirse de manera legal, como parte del conjunto de libertades y derechos fundamentales que les son reconocidos por la ley."
+  },
+  // ── Q22 ──────────────────────────────
+  {
+    tipo:"Cuestionamiento directo",
+    tipoCss:"tipo-directo",
+    num:22,
+    texto:"Según los Artículos 76° y 77° de la LGDNNA, ¿qué se prohíbe en relación con la vida privada y la imagen de los menores?",
+    tabla:null,
+    ops:[
+      {letra:"A", texto:"Las injerencias arbitrarias en su vida privada y la exhibición de su imagen en medios cuando menoscabe su honra o los ponga en riesgo."},
+      {letra:"B", texto:"La difusión de información personal de los menores en redes sociales sin autorización expresa de las autoridades educativas."},
+      {letra:"C", texto:"El uso de datos académicos de los menores con fines comerciales o de investigación sin el consentimiento formal de sus tutores."}
+    ],
+    correcta:"A",
+    argumento:"Los Artículos 76° y 77° protegen el derecho a la intimidad de los menores y sus datos personales, prohibiendo expresamente las injerencias arbitrarias en su vida privada y la exhibición de su imagen en medios de comunicación cuando ello menoscabe su honra, reputación o los ponga en riesgo."
+  },
+  // ── Q23 ──────────────────────────────
+  {
+    tipo:"Ordenamiento",
+    tipoCss:"tipo-ordenamiento",
+    num:23,
+    texto:"Ordene los elementos que integran el derecho a la identidad de niñas, niños y adolescentes, conforme a los Artículos 19° al 21° de la LGDNNA, de lo más básico a lo más específico.",
+    tabla:{
+      cols:["N°","Elemento del derecho a la identidad"],
+      rows:[
+        ["1","Preservar su identidad cultural y relaciones familiares."],
+        ["2","Tener un nombre y apellidos propios."],
+        ["3","Conocer su filiación."],
+        ["4","Tener una nacionalidad reconocida."],
+        ["5","Derecho de menores extranjeros a comprobar su identidad."]
+      ]
+    },
+    ops:[
+      {letra:"A", texto:"2, 4, 1, 3, 5"},
+      {letra:"B", texto:"2, 4, 3, 1, 5"},
+      {letra:"C", texto:"4, 2, 3, 5, 1"}
+    ],
+    correcta:"B",
+    argumento:"El derecho a la identidad se construye progresivamente: primero el nombre y apellidos (2), luego la nacionalidad (4), el conocimiento de la filiación (3), la preservación de la identidad cultural y relaciones familiares (1), y finalmente el derecho específico de menores extranjeros a comprobar su identidad (5)."
+  },
+  // ── Q24 ──────────────────────────────
+  {
+    tipo:"Cuestionamiento directo",
+    tipoCss:"tipo-directo",
+    num:24,
+    texto:"¿Cuál de las siguientes situaciones está expresamente prohibida por los Artículos 14° al 16° de la LGDNNA, relacionados con el derecho a la vida y la supervivencia?",
+    tabla:null,
+    ops:[
+      {letra:"A", texto:"La aplicación de medidas correctivas de carácter educativo que afecten el desempeño académico de los menores en la escuela."},
+      {letra:"B", texto:"La separación de los menores de su entorno familiar por razones de carácter exclusivamente económico o social del contexto."},
+      {letra:"C", texto:"La utilización de niñas, niños o adolescentes en conflictos armados de cualquier naturaleza o ámbito geográfico."}
+    ],
+    correcta:"C",
+    argumento:"Los Artículos 14° al 16° establecen el derecho a la vida, la supervivencia y el desarrollo pleno, e incluyen expresamente la prohibición de que los menores sean utilizados en conflictos armados, protegiendo así su integridad en cualquier situación de conflicto bélico o armado."
+  },
+  // ── Q25 ──────────────────────────────
+  {
+    tipo:"Cuestionamiento directo",
+    tipoCss:"tipo-directo",
+    num:25,
+    texto:"¿Cuál de los siguientes elementos está expresamente incluido en el Artículo 57° de la LGDNNA sobre el derecho a la educación de calidad?",
+    tabla:null,
+    ops:[
+      {letra:"A", texto:"La conformación de protocolos contra el acoso escolar y acciones para mantener en el sistema a menores embarazadas."},
+      {letra:"B", texto:"La obligación de las escuelas de impartir educación en lengua indígena a todos los menores de comunidades originarias."},
+      {letra:"C", texto:"El derecho a acceder a becas y apoyos económicos que garanticen la permanencia de los menores en el sistema educativo."}
+    ],
+    correcta:"A",
+    argumento:"El Artículo 57° establece que el derecho a la educación de calidad basada en derechos humanos incluye la conformación de protocolos contra el acoso escolar, la erradicación de prácticas pedagógicas discriminatorias, la prohibición del castigo corporal y acciones para mantener en el sistema a menores embarazadas."
+  },
+  // ── Q26 ──────────────────────────────
+  {
+    tipo:"Completamiento",
+    tipoCss:"tipo-completamiento",
+    num:26,
+    texto:"Los Artículos 36° y 37° de la LGDNNA exigen a las autoridades transversalizar la perspectiva de género, eliminar roles y estereotipos sexistas, y establecer acciones afirmativas para quienes…",
+    tabla:null,
+    ops:[
+      {letra:"A", texto:"…se encuentren en situación migratoria irregular o en contextos de desplazamiento forzado dentro del territorio nacional."},
+      {letra:"B", texto:"…enfrentan desventajas económicas o rezago educativo, como parte del derecho a la igualdad sustantiva reconocido en la ley."},
+      {letra:"C", texto:"…presenten condiciones de discapacidad física o mental que limiten su acceso a los servicios educativos formales del sistema."}
+    ],
+    correcta:"B",
+    argumento:"Los Artículos 36° y 37° establecen el derecho a la igualdad sustantiva y exigen que las autoridades tomen acciones afirmativas específicamente para quienes enfrentan desventajas económicas o rezago educativo, garantizando así condiciones reales de igualdad más allá de la igualdad formal."
+  },
+  // ── Q27 ──────────────────────────────
+  {
+    tipo:"Caso aplicado",
+    tipoCss:"tipo-aplicado",
+    num:27,
+    texto:"Una directora escolar debe decidir si un menor con discapacidad motriz puede participar en una actividad extracurricular que implica desplazamiento físico. ¿Qué le exige primordialmente la LGDNNA al tomar su decisión?",
+    tabla:null,
+    ops:[
+      {letra:"A", texto:"Considerar las condiciones de infraestructura de la institución y los recursos disponibles para realizar la actividad de forma segura."},
+      {letra:"B", texto:"Seguir las indicaciones del médico escolar y las políticas internas de la institución educativa sobre actividades extracurriculares."},
+      {letra:"C", texto:"Considerar el interés superior del menor con un enfoque integral, transversal y de derechos humanos, conforme al Artículo 2°."}
+    ],
+    correcta:"C",
+    argumento:"El Artículo 2° de la LGDNNA establece que el interés superior de la niñez debe ser considerado de manera primordial en todas las decisiones que les afecten, con un enfoque integral, transversal y de derechos humanos. Esto aplica a todas las autoridades, incluyendo al personal directivo de centros escolares."
+  },
+  // ── Q28 ──────────────────────────────
+  {
+    tipo:"Relación de elementos",
+    tipoCss:"tipo-relacion",
+    num:28,
+    texto:"Relacione cada situación escolar con el artículo de la LGDNNA que la tutela directamente.",
+    tabla:{
+      cols:["Situación escolar","Artículo"],
+      rows:[
+        ["1. Una alumna embarazada solicita continuar sus estudios.","a) Art. 57°"],
+        ["2. Un alumno con discapacidad visual pide materiales accesibles.","b) Art. 53°"],
+        ["3. Un docente niega participar a un alumno por su origen étnico.","c) Art. 39°"]
+      ]
+    },
+    ops:[
+      {letra:"A", texto:"1a, 2b, 3c"},
+      {letra:"B", texto:"1c, 2a, 3b"},
+      {letra:"C", texto:"1b, 2c, 3a"}
+    ],
+    correcta:"A",
+    argumento:"El Artículo 57° protege el derecho a la educación e incluye acciones para mantener en el sistema a menores embarazadas (1a); el Artículo 53° garantiza la inclusión de menores con discapacidad y su acceso igualitario (2b); y el Artículo 39° protege contra la discriminación por origen étnico o cualquier otra condición (3c)."
+  },
+  // ── Q29 ──────────────────────────────
+  {
+    tipo:"Cuestionamiento directo",
+    tipoCss:"tipo-directo",
+    num:29,
+    texto:"¿Qué libertades protegen los Artículos 62° al 65° de la LGDNNA para niñas, niños y adolescentes?",
+    tabla:null,
+    ops:[
+      {letra:"A", texto:"El derecho a recibir orientación religiosa dentro de las instituciones educativas públicas conforme a las creencias familiares."},
+      {letra:"B", texto:"La libertad de convicciones éticas, pensamiento, conciencia, religión, cultura y el derecho a la libre expresión e información."},
+      {letra:"C", texto:"El derecho a participar en organizaciones políticas juveniles reconocidas y avaladas por el Estado mexicano vigente."}
+    ],
+    correcta:"B",
+    argumento:"Los Artículos 62° al 65° protegen la libertad de convicciones éticas, pensamiento, conciencia, religión y cultura de los menores, asegurando también su derecho a la libre expresión, a ser escuchados y a buscar y recibir información que propicie su bienestar ético y cultural."
+  },
+  // ── Q30 ──────────────────────────────
+  {
+    tipo:"Cuestionamiento directo",
+    tipoCss:"tipo-directo",
+    num:30,
+    texto:"Según el Artículo 101 Bis 2 de la LGDNNA, ¿cuál es la función que se le reconoce al Internet para niñas, niños y adolescentes?",
+    tabla:null,
+    ops:[
+      {letra:"A", texto:"Una herramienta de entretenimiento cuyo acceso debe regularse según la edad y el criterio exclusivo de los padres de familia."},
+      {letra:"B", texto:"Un recurso tecnológico cuya administración corresponde exclusivamente a las autoridades educativas en el entorno escolar."},
+      {letra:"C", texto:"Una herramienta efectiva para ejercer derechos de información, educación, salud y esparcimiento, a través de su uso seguro."}
+    ],
+    correcta:"C",
+    argumento:"El Artículo 101 Bis 2 reconoce el derecho al uso seguro de Internet como una herramienta efectiva para ejercer derechos de información, educación, salud y esparcimiento, elevando el acceso digital a rango de derecho fundamental para las niñas, niños y adolescentes."
+  }
+];
+
+// ══════════════════════════════════════════
+//  ESTADO
+// ══════════════════════════════════════════
+let estado = {
+  nombre: "",
+  preguntaActual: 0,
+  aciertos: 0,
+  errores: 0,
+  respondida: false
+};
+
+// ══════════════════════════════════════════
+//  NAVEGACIÓN ENTRE SECCIONES
+// ══════════════════════════════════════════
+function mostrarSeccion(sec){
+  document.getElementById('seccion-examen').classList.add('hidden');
+  document.getElementById('seccion-guia').classList.add('hidden');
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('activo'));
+
+  if(sec==='examen'){
+    document.getElementById('seccion-examen').classList.remove('hidden');
+    document.querySelectorAll('.nav-tab')[0].classList.add('activo');
+  } else {
+    document.getElementById('seccion-guia').classList.remove('hidden');
+    document.querySelectorAll('.nav-tab')[1].classList.add('activo');
+  }
+}
+
+// ══════════════════════════════════════════
+//  INICIAR
+// ══════════════════════════════════════════
+function iniciarSimulador(){
+  const inp = document.getElementById('input-nombre').value.trim();
+  if(!inp){
+    document.getElementById('input-nombre').style.borderColor='#c62828';
+    document.getElementById('input-nombre').placeholder='⚠️ Por favor, escribe tu nombre...';
+    return;
+  }
+  estado.nombre = inp;
+  estado.preguntaActual = 0;
+  estado.aciertos = 0;
+  estado.errores = 0;
+  estado.respondida = false;
+
+  document.getElementById('screen-inicio').classList.add('hidden');
+  document.getElementById('screen-resultado').classList.add('hidden');
+  document.getElementById('screen-examen').classList.remove('hidden');
+  mostrarPregunta();
+}
+
+// ══════════════════════════════════════════
+//  MOSTRAR PREGUNTA
+// ══════════════════════════════════════════
+function mostrarPregunta(){
+  estado.respondida = false;
+  const p = PREGUNTAS[estado.preguntaActual];
+  const idx = estado.preguntaActual;
+  const total = PREGUNTAS.length;
+
+  // Progreso
+  document.getElementById('prog-texto').textContent = (idx+1) + ' / ' + total;
+  document.getElementById('prog-bar').style.width = ((idx+1)/total*100).toFixed(1)+'%';
+
+  // Badge tipo
+  const badge = document.getElementById('tipo-badge');
+  badge.textContent = p.tipo;
+  badge.className = 'tipo-badge ' + p.tipoCss;
+
+  // Num
+  document.getElementById('pregunta-num').textContent = 'Pregunta ' + (idx+1) + ' de ' + total;
+
+  // Texto
+  document.getElementById('pregunta-texto').textContent = p.texto;
+
+  // Tabla
+  const tablaC = document.getElementById('tabla-container');
+  tablaC.innerHTML = '';
+  if(p.tabla){
+    let html = '<table class="tabla-relacion"><thead><tr>';
+    p.tabla.cols.forEach(c => html += '<th>'+c+'</th>');
+    html += '</tr></thead><tbody>';
+    p.tabla.rows.forEach(r => {
+      html += '<tr>';
+      r.forEach(cel => html += '<td>'+cel+'</td>');
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    tablaC.innerHTML = html;
+  }
+
+  // Opciones
+  const opC = document.getElementById('opciones-container');
+  opC.innerHTML = '';
+  p.ops.forEach(op => {
+    const div = document.createElement('div');
+    div.className = 'opcion';
+    div.id = 'op-'+op.letra;
+    div.innerHTML = `
+      <div class="letra">${op.letra}</div>
+      <div class="opcion-texto">${op.texto}</div>
+      <div class="opcion-icono" id="ico-${op.letra}"></div>
+    `;
+    div.addEventListener('click', ()=>seleccionarOpcion(op.letra));
+    opC.appendChild(div);
+  });
+
+  // Retroalimentación
+  document.getElementById('retro-container').innerHTML = '';
+
+  // Botón siguiente
+  const btn = document.getElementById('btn-siguiente');
+  btn.disabled = true;
+  btn.textContent = estado.preguntaActual < PREGUNTAS.length-1
+    ? 'Siguiente pregunta →'
+    : 'Ver resultados 🏆';
+
+  // Animación
+  const card = document.getElementById('card-pregunta');
+  card.style.animation = 'none';
+  card.offsetHeight;
+  card.style.animation = 'slideUp .45s ease';
+}
+
+// ══════════════════════════════════════════
+//  SELECCIONAR OPCIÓN
+// ══════════════════════════════════════════
+function seleccionarOpcion(letra){
+  if(estado.respondida) return;
+  estado.respondida = true;
+
+  const p = PREGUNTAS[estado.preguntaActual];
+  const correcta = p.correcta;
+
+  // Deshabilitar todas
+  document.querySelectorAll('.opcion').forEach(el=>{
+    el.classList.add('disabled');
+    el.style.pointerEvents='none';
+  });
+
+  // Marcar seleccionada
+  const opSel = document.getElementById('op-'+letra);
+  if(letra === correcta){
+    opSel.classList.add('correcta');
+    document.getElementById('ico-'+letra).textContent = '✅';
+    estado.aciertos++;
+    mostrarRetro(true, p.argumento);
+  } else {
+    opSel.classList.add('incorrecta');
+    document.getElementById('ico-'+letra).textContent = '❌';
+    const opCorr = document.getElementById('op-'+correcta);
+    opCorr.classList.add('correcta');
+    document.getElementById('ico-'+correcta).textContent = '✅';
+    estado.errores++;
+    mostrarRetro(false, p.argumento);
+  }
+
+  document.getElementById('btn-siguiente').disabled = false;
+}
+
+// ══════════════════════════════════════════
+//  RETROALIMENTACIÓN
+// ══════════════════════════════════════════
+function mostrarRetro(ok, arg){
+  const c = document.getElementById('retro-container');
+  c.innerHTML = `
+    <div class="retro ${ok?'retro-ok':'retro-err'}">
+      <div class="retro-icon">${ok?'🎉':'💡'}</div>
+      <div>
+        <div class="retro-title">${ok?'¡Respuesta correcta!':'Respuesta incorrecta'}</div>
+        <div class="retro-desc">${arg}</div>
+      </div>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════
+//  SIGUIENTE PREGUNTA
+// ══════════════════════════════════════════
+function siguientePregunta(){
+  if(estado.preguntaActual < PREGUNTAS.length - 1){
+    estado.preguntaActual++;
+    mostrarPregunta();
+  } else {
+    mostrarResultados();
+  }
+}
+
+// ══════════════════════════════════════════
+//  RESULTADOS FINALES
+// ══════════════════════════════════════════
+function mostrarResultados(){
+  document.getElementById('screen-examen').classList.add('hidden');
+  document.getElementById('screen-resultado').classList.remove('hidden');
+
+  const pct = Math.round(estado.aciertos / PREGUNTAS.length * 100);
+
+  document.getElementById('res-nombre').textContent = '👤 ' + estado.nombre;
+  document.getElementById('res-pct').textContent = pct + '%';
+  document.getElementById('res-aciertos').textContent = estado.aciertos;
+  document.getElementById('res-errores').textContent = estado.errores;
+
+  let nivel, mensaje;
+  if(pct >= 90){
+    nivel = '🏆 Desempeño Sobresaliente';
+    mensaje = '¡Excelente trabajo, ' + estado.nombre.split(' ')[0] + '! Demostraste un dominio sólido de la LGDNNA. Tu preparación es una herramienta poderosa para garantizar los derechos de niñas, niños y adolescentes.';
+  } else if(pct >= 70){
+    nivel = '⭐ Buen Desempeño';
+    mensaje = 'Buen trabajo, ' + estado.nombre.split(' ')[0] + '. Tienes una base firme sobre la LGDNNA. Repasa los temas en los que tuviste dificultades y consulta la Guía de Estudio para fortalecer tu preparación.';
+  } else if(pct >= 50){
+    nivel = '📈 Desempeño en Desarrollo';
+    mensaje = 'Vas por buen camino, ' + estado.nombre.split(' ')[0] + '. Sigue practicando y consulta la Guía de Estudio para reforzar los artículos de la LGDNNA que aún requieren mayor atención.';
+  } else {
+    nivel = '📚 Requiere Reforzamiento';
+    mensaje = 'No te desanimes, ' + estado.nombre.split(' ')[0] + '. El aprendizaje es un proceso continuo. Revisa la Guía de Estudio disponible en este simulador y vuelve a intentarlo. ¡Puedes lograrlo!';
+  }
+
+  document.getElementById('res-nivel').textContent = nivel;
+  document.getElementById('res-mensaje').textContent = mensaje;
+
+  const card = document.getElementById('screen-resultado').querySelector('.card');
+  card.style.animation = 'none';
+  card.offsetHeight;
+  card.style.animation = 'slideUp .5s ease';
+}
+
+// ══════════════════════════════════════════
+//  REINICIAR
+// ══════════════════════════════════════════
+function reiniciarSimulador(){
+  document.getElementById('screen-resultado').classList.add('hidden');
+  document.getElementById('screen-inicio').classList.remove('hidden');
+  document.getElementById('input-nombre').value = '';
+}
+</script>
+</body>
+</html>

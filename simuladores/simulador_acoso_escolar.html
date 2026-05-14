@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador – Anatomía del Acoso Escolar</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary:   #2563eb;
+    --primary-l: #eff6ff;
+    --accent:    #f97316;
+    --accent-l:  #fff7ed;
+    --success:   #16a34a;
+    --success-l: #f0fdf4;
+    --error:     #dc2626;
+    --error-l:   #fef2f2;
+    --neutral:   #64748b;
+    --bg:        #f8fafc;
+    --card:      #ffffff;
+    --border:    #e2e8f0;
+    --text:      #1e293b;
+    --text-sm:   #475569;
+    --radius:    16px;
+    --shadow:    0 4px 24px rgba(37,99,235,.10);
+    --shadow-lg: 0 8px 40px rgba(37,99,235,.16);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ─── HEADER ─── */
+  .site-header {
+    background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 45%, #0ea5e9 100%);
+    padding: 28px 20px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .site-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .site-header h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(1.3rem, 4vw, 2rem);
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.2;
+    position: relative;
+  }
+  .site-header p {
+    color: rgba(255,255,255,.85);
+    font-size: clamp(.8rem, 2.5vw, 1rem);
+    margin-top: 6px;
+    font-weight: 500;
+    position: relative;
+  }
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,.2);
+    border: 1px solid rgba(255,255,255,.35);
+    border-radius: 50px;
+    padding: 4px 14px;
+    color: #fff;
+    font-size: .78rem;
+    font-weight: 600;
+    margin-top: 10px;
+    position: relative;
+  }
+
+  /* ─── NAV TABS ─── */
+  .nav-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 20px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .nav-tab {
+    padding: 8px 20px;
+    border-radius: 50px;
+    font-size: .85rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: 2px solid var(--border);
+    background: transparent;
+    color: var(--neutral);
+    transition: all .25s;
+  }
+  .nav-tab.active, .nav-tab:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+  }
+
+  /* ─── SCREENS ─── */
+  .screen { display: none; animation: fadeUp .45s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── CONTAINER ─── */
+  .container {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 28px 16px 60px;
+  }
+
+  /* ─── CARD ─── */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 32px;
+    border: 1px solid var(--border);
+  }
+  @media (max-width: 480px) { .card { padding: 20px 16px; } }
+
+  /* ─── WELCOME SCREEN ─── */
+  .welcome-icon {
+    width: 80px; height: 80px;
+    background: linear-gradient(135deg, #2563eb, #0ea5e9);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 2.2rem;
+  }
+  .welcome-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(1.3rem,4vw,1.7rem);
+    font-weight: 800;
+    text-align: center;
+    color: var(--primary);
+    margin-bottom: 8px;
+  }
+  .welcome-sub {
+    text-align: center;
+    color: var(--text-sm);
+    font-size: .95rem;
+    margin-bottom: 28px;
+    line-height: 1.6;
+  }
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .info-card {
+    background: var(--primary-l);
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+    border: 1px solid #bfdbfe;
+  }
+  .info-card .num {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--primary);
+  }
+  .info-card .lbl {
+    font-size: .78rem;
+    color: var(--neutral);
+    font-weight: 600;
+    margin-top: 2px;
+  }
+  .input-group { margin-bottom: 20px; }
+  .input-group label {
+    display: block;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+    font-size: .95rem;
+  }
+  .input-group input {
+    width: 100%;
+    padding: 13px 16px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: 'Nunito', sans-serif;
+    transition: border-color .2s;
+    outline: none;
+    color: var(--text);
+    background: var(--bg);
+  }
+  .input-group input:focus { border-color: var(--primary); background: #fff; }
+
+  /* ─── BUTTONS ─── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px 28px;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+    border: none;
+    transition: all .25s;
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #2563eb, #0ea5e9);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(37,99,235,.35);
+    width: 100%;
+    font-size: 1.05rem;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(37,99,235,.45); }
+  .btn-secondary {
+    background: var(--card);
+    color: var(--primary);
+    border: 2px solid var(--primary);
+  }
+  .btn-secondary:hover { background: var(--primary-l); }
+  .btn-accent {
+    background: linear-gradient(135deg, #f97316, #fb923c);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(249,115,22,.35);
+  }
+  .btn-accent:hover { transform: translateY(-2px); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; transform: none !important; }
+
+  /* ─── PROGRESS ─── */
+  .progress-bar-wrap {
+    background: var(--border);
+    border-radius: 50px;
+    height: 8px;
+    margin-bottom: 6px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 50px;
+    background: linear-gradient(90deg, #2563eb, #0ea5e9);
+    transition: width .5s cubic-bezier(.4,0,.2,1);
+  }
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: .78rem;
+    color: var(--neutral);
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+  .progress-stats {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .stat-pill {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 50px;
+    font-size: .8rem;
+    font-weight: 700;
+  }
+  .stat-pill.correct { background: var(--success-l); color: var(--success); border: 1px solid #bbf7d0; }
+  .stat-pill.wrong   { background: var(--error-l);   color: var(--error);   border: 1px solid #fecaca; }
+
+  /* ─── QUESTION CARD ─── */
+  .q-type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--primary-l);
+    color: var(--primary);
+    border-radius: 50px;
+    padding: 4px 12px;
+    font-size: .75rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+    border: 1px solid #bfdbfe;
+  }
+  .q-number {
+    font-family: 'Poppins', sans-serif;
+    font-size: .85rem;
+    color: var(--neutral);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .q-text {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(.95rem, 2.5vw, 1.1rem);
+    font-weight: 700;
+    line-height: 1.55;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+
+  /* ─── RELATION TABLE ─── */
+  .relation-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-size: .88rem;
+  }
+  .relation-table th {
+    background: var(--primary);
+    color: #fff;
+    padding: 9px 12px;
+    text-align: left;
+    font-weight: 700;
+  }
+  .relation-table td {
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    vertical-align: top;
+  }
+  .relation-table tr:nth-child(even) td { background: var(--primary-l); }
+
+  /* ─── OPTIONS ─── */
+  .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all .2s;
+    background: var(--bg);
+    text-align: left;
+    width: 100%;
+    font-family: 'Nunito', sans-serif;
+    font-size: .95rem;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .option:hover:not(:disabled) {
+    border-color: var(--primary);
+    background: var(--primary-l);
+    transform: translateX(4px);
+  }
+  .option.selected { border-color: var(--primary); background: var(--primary-l); }
+  .option.correct  { border-color: var(--success); background: var(--success-l); color: var(--success); }
+  .option.wrong    { border-color: var(--error);   background: var(--error-l);   color: var(--error); }
+  .option:disabled { cursor: default; }
+  .opt-letter {
+    min-width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 800;
+    font-size: .85rem;
+    flex-shrink: 0;
+    transition: all .2s;
+  }
+  .option.selected .opt-letter { background: var(--primary); color: #fff; }
+  .option.correct  .opt-letter { background: var(--success); color: #fff; }
+  .option.wrong    .opt-letter { background: var(--error);   color: #fff; }
+
+  /* ─── FEEDBACK ─── */
+  .feedback {
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    font-size: .9rem;
+    line-height: 1.6;
+    display: none;
+    animation: fadeUp .3s ease;
+  }
+  .feedback.show { display: flex; gap: 10px; }
+  .feedback.correct { background: var(--success-l); border: 1px solid #bbf7d0; color: #15803d; }
+  .feedback.wrong   { background: var(--error-l);   border: 1px solid #fecaca; color: #b91c1c; }
+  .feedback-icon { font-size: 1.2rem; flex-shrink: 0; }
+
+  /* ─── RESULTS ─── */
+  .score-ring {
+    width: 140px; height: 140px;
+    margin: 0 auto 20px;
+    position: relative;
+  }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-ring .ring-bg { fill: none; stroke: var(--border); stroke-width: 10; }
+  .score-ring .ring-fill {
+    fill: none;
+    stroke-width: 10;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1);
+  }
+  .score-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .score-label .pct {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--primary);
+  }
+  .score-label .pct-sub { font-size: .75rem; color: var(--neutral); font-weight: 600; }
+  .result-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .student-name-display {
+    text-align: center;
+    font-size: 1.05rem;
+    color: var(--primary);
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .result-item {
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+  .result-item.hits { background: var(--success-l); border: 1px solid #bbf7d0; }
+  .result-item.miss { background: var(--error-l);   border: 1px solid #fecaca; }
+  .result-item.pct  { background: var(--primary-l); border: 1px solid #bfdbfe; }
+  .result-item .r-num {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+  }
+  .result-item.hits .r-num { color: var(--success); }
+  .result-item.miss .r-num { color: var(--error); }
+  .result-item.pct  .r-num { color: var(--primary); }
+  .result-item .r-lbl { font-size: .78rem; font-weight: 700; color: var(--neutral); margin-top: 2px; }
+  .motivator {
+    background: linear-gradient(135deg, #eff6ff, #fff7ed);
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    font-size: .95rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  .result-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+  .result-btns .btn { flex: 1; min-width: 140px; }
+
+  /* ─── STUDY GUIDE ─── */
+  .guide-header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .guide-header h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .guide-header p {
+    color: var(--text-sm);
+    font-size: .9rem;
+    line-height: 1.6;
+  }
+  .guide-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .guide-actions .btn { flex: 1; min-width: 160px; }
+  .pdf-frame-wrap {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid var(--border);
+    background: #e2e8f0;
+  }
+  .pdf-frame-wrap iframe {
+    width: 100%;
+    height: 640px;
+    border: none;
+    display: block;
+  }
+  @media (max-width: 600px) {
+    .pdf-frame-wrap iframe { height: 420px; }
+  }
+
+  /* ─── DIVIDER ─── */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 24px 0;
+  }
+
+  /* ─── TRANSITIONS ─── */
+  .slide-exit   { animation: slideOut .3s ease forwards; }
+  .slide-enter  { animation: fadeUp  .35s ease forwards; }
+  @keyframes slideOut {
+    to { opacity: 0; transform: translateX(-30px); }
+  }
+
+  /* ─── MISC ─── */
+  .text-center { text-align: center; }
+  .mt-8 { margin-top: 8px; }
+  .mb-16 { margin-bottom: 16px; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ HEADER ══════════════ -->
+<header class="site-header">
+  <h1>🎓 Simulador Interactivo de Evaluación</h1>
+  <p>Guía de Campo: Anatomía del Acoso Escolar</p>
+  <span class="header-badge">✍️ Prof. Francisco De Jesus Luna Benitez</span>
+</header>
+
+<!-- ══════════════ NAV TABS ══════════════ -->
+<nav class="nav-tabs">
+  <button class="nav-tab active" onclick="showSection('sim')">📝 Simulador</button>
+  <button class="nav-tab" onclick="showSection('guide')">📚 Guía de Estudio</button>
+</nav>
+
+<!-- ══════════════ SIMULATOR SECTION ══════════════ -->
+<section id="sec-sim">
+  <div class="container">
+
+    <!-- WELCOME -->
+    <div id="screen-welcome" class="screen active">
+      <div class="card">
+        <div class="welcome-icon">🛡️</div>
+        <h2 class="welcome-title">Examen de Conocimientos</h2>
+        <p class="welcome-sub">Evalúa tu comprensión sobre la detección, prevención e intervención del acoso escolar conforme a la Guía de Campo.</p>
+        <div class="info-grid">
+          <div class="info-card"><div class="num">30</div><div class="lbl">Preguntas</div></div>
+          <div class="info-card"><div class="num">3</div><div class="lbl">Opciones c/u</div></div>
+          <div class="info-card"><div class="num">4</div><div class="lbl">Formatos</div></div>
+        </div>
+        <div class="input-group">
+          <label for="studentName">👤 Tu nombre completo</label>
+          <input type="text" id="studentName" placeholder="Escribe tu nombre aquí…" maxlength="80">
+        </div>
+        <button class="btn btn-primary" onclick="startExam()">🚀 Iniciar Simulador</button>
+      </div>
+    </div>
+
+    <!-- EXAM -->
+    <div id="screen-exam" class="screen">
+      <div class="card">
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+        </div>
+        <div class="progress-meta">
+          <span id="progressLabel">Pregunta 1 de 30</span>
+          <span id="progressPct">0%</span>
+        </div>
+        <div class="progress-stats">
+          <span class="stat-pill correct">✅ <span id="scoreCorrect">0</span> correctas</span>
+          <span class="stat-pill wrong">❌ <span id="scoreWrong">0</span> incorrectas</span>
+        </div>
+        <div id="qTypeBadge" class="q-type-badge"></div>
+        <div id="qNumber"  class="q-number"></div>
+        <div id="qText"    class="q-text"></div>
+        <div id="qExtra"   class="mb-16"></div>
+        <div id="qOptions" class="options"></div>
+        <div id="qFeedback" class="feedback"></div>
+        <button id="btnNext" class="btn btn-primary" onclick="nextQuestion()" disabled>
+          Siguiente pregunta →
+        </button>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="screen-results" class="screen">
+      <div class="card">
+        <div class="score-ring">
+          <svg viewBox="0 0 100 100" width="140" height="140">
+            <circle class="ring-bg" cx="50" cy="50" r="42"/>
+            <circle class="ring-fill" id="ringFill" cx="50" cy="50" r="42"
+                    stroke-dasharray="263.9"
+                    stroke-dashoffset="263.9"/>
+          </svg>
+          <div class="score-label">
+            <div class="pct" id="resPct">0%</div>
+            <div class="pct-sub">Aciertos</div>
+          </div>
+        </div>
+        <h2 class="result-title">¡Examen completado!</h2>
+        <p class="student-name-display" id="resName"></p>
+        <div class="result-grid">
+          <div class="result-item hits"><div class="r-num" id="resHits">0</div><div class="r-lbl">✅ Correctas</div></div>
+          <div class="result-item miss"><div class="r-num" id="resMiss">0</div><div class="r-lbl">❌ Incorrectas</div></div>
+          <div class="result-item pct" ><div class="r-num" id="resPct2">0%</div><div class="r-lbl">📊 Desempeño</div></div>
+        </div>
+        <div class="motivator" id="motivatorMsg"></div>
+        <div class="result-btns">
+          <button class="btn btn-secondary" onclick="restartExam()">🔄 Volver a intentar</button>
+          <button class="btn btn-accent"    onclick="showSection('guide')">📚 Ver Guía de Estudio</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════ STUDY GUIDE SECTION ══════════════ -->
+<section id="sec-guide" style="display:none">
+  <div class="container">
+    <div class="card">
+      <div class="guide-header">
+        <h2>📚 Guía de Estudio</h2>
+        <p>Guía de Campo: Anatomía del Acoso Escolar — herramientas de detección, prevención y acción para un entorno educativo seguro.</p>
+      </div>
+      <div class="guide-actions">
+        <a class="btn btn-primary" href="https://drive.google.com/file/d/18JTQO7RxA3OtRhld2xuwTA9rs8itstc4/view?usp=drive_link" target="_blank">
+          🔗 Abrir PDF en nueva pestaña
+        </a>
+        <a class="btn btn-secondary" href="https://drive.google.com/uc?export=download&id=18JTQO7RxA3OtRhld2xuwTA9rs8itstc4" target="_blank">
+          ⬇️ Descargar PDF
+        </a>
+      </div>
+      <div class="pdf-frame-wrap">
+        <iframe
+          src="https://drive.google.com/file/d/18JTQO7RxA3OtRhld2xuwTA9rs8itstc4/preview"
+          allow="autoplay"
+          title="Guía de Campo: Anatomía del Acoso Escolar">
+        </iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ═══════════════════════════════════════════════
+   BANK OF 30 QUESTIONS
+═══════════════════════════════════════════════ */
+const QUESTIONS = [
+  {
+    type: "📋 Cuestionamiento Directo",
+    text: "¿Cuáles son los tres elementos que, según la Guía de Campo, deben estar presentes simultáneamente para que una situación sea clasificada como acoso escolar?",
+    extra: null,
+    options: [
+      "Intencionalidad, repetición y desigualdad de poder.",
+      "Violencia, conflicto y mediación pedagógica.",
+      "Agresión, víctima y espectador presente."
+    ],
+    correct: 0,
+    feedback: "El acoso escolar requiere la combinación de conducta deliberada (intencionalidad), frecuencia sostenida (repetición) y desequilibrio entre las partes (desigualdad de poder)."
+  },
+  {
+    type: "✏️ Completamiento",
+    text: "En el contexto del acoso escolar en preescolar, cuando una conducta no muestra intención clara pero sí es repetitiva y causa daño, el docente debe…",
+    extra: null,
+    options: [
+      "…ignorarla hasta que los niños resuelvan el conflicto de manera autónoma, pues a esta edad no existe el acoso.",
+      "…atenderla como acoso escolar, dado que aunque la intención no sea clara, la repetición y el daño son suficientes para intervenir.",
+      "…esperar a que se presente una agresión física visible antes de documentar el caso en el expediente del alumno."
+    ],
+    correct: 1,
+    feedback: "La guía establece que en preescolar la intención puede no ser clara, pero si la conducta es repetitiva y causa daño, debe atenderse como acoso escolar."
+  },
+  {
+    type: "🔗 Relación de Elementos",
+    text: "Seleccione la opción que relacione correctamente cada tipo de acoso con la acción que le corresponde.",
+    extra: `<table class="relation-table">
+      <tr><th>Tipo</th><th>Acción</th></tr>
+      <tr><td>1. Físico</td><td>a) Difusión de imágenes sin permiso</td></tr>
+      <tr><td>2. Verbal</td><td>b) Aislar y divulgar rumores</td></tr>
+      <tr><td>3. Ciberacoso</td><td>c) Insultos directos</td></tr>
+      <tr><td>4. Socioemocional</td><td>d) Robo de dinero o refrigerio</td></tr>
+    </table>`,
+    options: [
+      "1c, 2d, 3a, 4b",
+      "1d, 2c, 3b, 4a",
+      "1d, 2c, 3a, 4b"
+    ],
+    correct: 2,
+    feedback: "El acoso físico incluye robo de pertenencias (d), el verbal comprende insultos directos (c), el ciberacoso involucra difusión no autorizada de imágenes (a), y el socioemocional abarca aislar y difundir rumores (b)."
+  },
+  {
+    type: "📋 Cuestionamiento Directo",
+    text: "Un estudiante de primer grado llegó golpeado un día, pero la semana siguiente ambos niños juegan juntos sin problemas. Según la guía, ¿cómo se clasifica esta situación?",
+    extra: null,
+    options: [
+      "No es acoso escolar; se trata de un golpe aislado que no cumple el criterio de repetición.",
+      "Sí es acoso escolar porque hubo una agresión física intencional hacia otro estudiante.",
+      "Es acoso escolar porque implica una desigualdad de poder entre los estudiantes involucrados."
+    ],
+    correct: 0,
+    feedback: "Un golpe aislado no cumple con el criterio de repetición que exige la definición de acoso escolar. La guía lo clasifica explícitamente como 'no acoso escolar.'"
+  },
+  {
+    type: "🔢 Ordenamiento",
+    text: "Ordene los pasos del Protocolo de Acción Nivel 1 (Ruta Docente) en el orden correcto:\n1. Documentar el proceso de incidencia y resolución\n2. Detener la agresión y proteger a la víctima\n3. Citar a madres, padres o tutores de los involucrados\n4. Avisar por escrito a la autoridad inmediata (Director)",
+    extra: null,
+    options: [
+      "2, 3, 4, 1",
+      "2, 4, 3, 1",
+      "4, 2, 3, 1"
+    ],
+    correct: 1,
+    feedback: "La ruta docente establece: primero detener y proteger (inmediato), luego informar al director (notificación), después citar a familias (atención), y finalmente documentar todo el proceso."
+  },
+  {
+    type: "📋 Cuestionamiento Directo",
+    text: "¿Cuál es la consecuencia compartida que enfrentan tanto los espectadores pasivos como los activos, según la Guía de Campo?",
+    extra: null,
+    options: [
+      "Desarrollan habilidades de liderazgo al observar cómo el agresor maneja situaciones de conflicto.",
+      "Se convierten en víctimas potenciales al ser identificados por el agresor como posibles amenazas.",
+      "Gradualmente interiorizan actitudes violentas y pierden la capacidad de reaccionar ante injusticias."
+    ],
+    correct: 2,
+    feedback: "La guía señala que tanto los espectadores pasivos como los activos normalizan la violencia y pierden sensibilidad ante las injusticias como consecuencia compartida."
+  },
+  {
+    type: "✏️ Completamiento",
+    text: "Un alumno de tercer grado ha bajado su rendimiento, evita ir a la escuela y muestra dificultad para integrarse a los equipos. Según la Guía de Campo, estos son indicadores de alerta de tipo…",
+    extra: null,
+    options: [
+      "…académico y social, los cuales deben activar el radar de detección temprana del docente.",
+      "…fisiológico y emocional, que requieren intervención médica antes de cualquier acción pedagógica.",
+      "…conductual y psicomotriz, propios de un trastorno de aprendizaje sin relación con el acoso escolar."
+    ],
+    correct: 0,
+    feedback: "El descenso en rendimiento y la evasión escolar son indicadores académicos; la dificultad para integrarse es un indicador social. Ambos son señales de alerta del radar de detección."
+  },
+  {
+    type: "🔗 Relación de Elementos",
+    text: "Relacione a cada protagonista con su característica principal según la Guía de Campo.",
+    extra: `<table class="relation-table">
+      <tr><th>Protagonista</th><th>Característica</th></tr>
+      <tr><td>1. Agresor</td><td>a) Rara vez cuenta la situación a adultos por vergüenza y miedo</td></tr>
+      <tr><td>2. Víctima</td><td>b) Ve el acoso pero no lo comunica por miedo o normalización</td></tr>
+      <tr><td>3. Espectador pasivo</td><td>c) Autoestima artificialmente alta o muy baja</td></tr>
+    </table>`,
+    options: [
+      "1a, 2c, 3b",
+      "1c, 2a, 3b",
+      "1b, 2c, 3a"
+    ],
+    correct: 1,
+    feedback: "El agresor tiene autoestima artificialmente alta o muy baja (c); la víctima rara vez cuenta la situación (a); el espectador pasivo ve el acoso pero no lo reporta (b)."
+  },
+  {
+    type: "📋 Cuestionamiento Directo",
+    text: "Un docente comenta: 'Eres niño, aguántate; las niñas no acosan.' ¿Qué señala la Guía de Campo respecto a esta afirmación?",
+    extra: null,
+    options: [
+      "Es una afirmación correcta porque el acoso físico es predominante en los varones.",
+      "Es parcialmente válida porque las niñas acosan con menor frecuencia que los niños.",
+      "Es un prejuicio de género tóxico; todos tienen derecho a ser respetados y las niñas también ejercen violencia."
+    ],
+    correct: 2,
+    feedback: "La guía desmonta este mito al señalar que refuerza prejuicios de género tóxicos. El acoso no tiene género: todos tienen derecho a ser respetados y las niñas también pueden ejercer violencia."
+  },
+  {
+    type: "📋 Cuestionamiento Directo",
+    text: "¿Cuál es la característica que distingue al ciberacoso de otros tipos de acoso escolar, según la Guía de Campo?",
+    extra: null,
+    options: [
+      "Ocurre a espaldas del docente, se viraliza rápidamente en redes sociales y juegos, y busca humillar mediante la tecnología.",
+      "Se caracteriza por el contacto físico directo entre el agresor y la víctima a través de dispositivos compartidos.",
+      "Solo afecta a estudiantes de secundaria y preparatoria, ya que los niños pequeños no tienen acceso a dispositivos digitales."
+    ],
+    correct: 0,
+    feedback: "La guía define el ciberacoso por su medio tecnológico, su capacidad de viralizarse rápidamente y su objetivo de humillar a la víctima fuera del alcance directo del docente."
+  },
+  {
+    type: "✏️ Completamiento",
+    text: "La víctima de acoso escolar experimenta vergüenza, inferioridad y miedo. Según la Guía de Campo, esto explica por qué…",
+    extra: null,
+    options: [
+      "…suele denunciar de inmediato a las autoridades escolares para detener la situación cuanto antes.",
+      "…rara vez cuenta la situación a adultos, lo que dificulta la detección temprana del docente.",
+      "…desarrolla estrategias de resiliencia que le permiten superar el acoso sin intervención institucional."
+    ],
+    correct: 1,
+    feedback: "El estado emocional de la víctima (vergüenza, inferioridad y miedo) es precisamente el factor que le impide buscar ayuda de adultos, dificultando la detección del acoso."
+  },
+  {
+    type: "📋 Cuestionamiento Directo",
+    text: "Según la Guía de Campo, ¿cuál es la función principal del Colegiado (Cuerpo Institucional) en el Protocolo de Acción Nivel 2?",
+    extra: null,
+    options: [
+      "Llamar al número de emergencias (911) y gestionar la presencia policial dentro del plantel.",
+      "Entrevistar individualmente a los estudiantes involucrados para determinar quién es el responsable.",
+      "Implementar prácticas restaurativas para recuperar la convivencia armónica y verificar el cumplimiento de acuerdos."
+    ],
+    correct: 2,
+    feedback: "El colegiado tiene como función implementar prácticas restaurativas y dar seguimiento a los acuerdos, integrando el expediente en los casos que requieran canalización."
+  },
+  {
+    type: "📋 Cuestionamiento Directo",
+    text: "Un estudiante que ejerce acoso busca constantemente el reconocimiento y la atención de sus compañeros. Según la Guía de Campo, esto corresponde a:",
+    extra: null,
+    options: [
+      "La motivación oculta del agresor, relacionada con una búsqueda constante de reconocimiento y atención.",
+      "Un indicador de liderazgo positivo que el docente debe canalizar hacia actividades deportivas o artísticas.",
+      "Una conducta propia del espectador activo que colabora con el agresor para obtener reconocimiento social."
+    ],
+    correct: 0,
+    feedback: "La guía identifica la búsqueda constante de reconocimiento y atención como la motivación oculta que impulsa la conducta del estudiante agresor."
+  },
+  {
+    type: "📋 Cuestionamiento Directo",
+    text: "Según la Guía de Campo, ¿cuál de los siguientes indicadores corresponde específicamente a una señal de alerta de tipo fisiológico?",
+    extra: null,
+    options: [
+      "Descenso significativo del rendimiento escolar y evasión frecuente de la escuela.",
+      "Incontinencia urinaria y cambios notorios en el apetito del estudiante.",
+      "Crisis de llanto sin explicación aparente y sensibilidad extrema ante situaciones cotidianas."
+    ],
+    correct: 1,
+    feedback: "Los indicadores fisiológicos incluyen manifestaciones corporales como incontinencia urinaria y cambios en el apetito. Los otros dos corresponden a indicadores académicos y emocionales."
+  },
+  {
+    type: "🔗 Relación de Elementos",
+    text: "Relacione cada indicador específico con el tipo de acoso escolar al que pertenece según la Guía de Campo.",
+    extra: `<table class="relation-table">
+      <tr><th>Indicador</th><th>Tipo</th></tr>
+      <tr><td>1. Apodos denigrantes constantes</td><td>a) Socioemocional</td></tr>
+      <tr><td>2. Creación de perfiles falsos en redes</td><td>b) Físico</td></tr>
+      <tr><td>3. Ser excluido de equipos y fiestas</td><td>c) Verbal</td></tr>
+      <tr><td>4. Uniforme sucio o roto frecuentemente</td><td>d) Ciberacoso</td></tr>
+    </table>`,
+    options: [
+      "1d, 2c, 3a, 4b",
+      "1c, 2a, 3d, 4b",
+      "1c, 2d, 3a, 4b"
+    ],
+    correct: 2,
+    feedback: "Los apodos denigrantes son acoso verbal (c); los perfiles falsos corresponden a ciberacoso (d); la exclusión de grupos es acoso socioemocional (a); y el uniforme dañado indica acoso físico (b)."
+  },
+  {
+    type: "✏️ Completamiento",
+    text: "Un docente afirma: 'Tú eres el que provoca que te traten así.' Según la Guía de Campo, esta actitud es un ejemplo de…",
+    extra: null,
+    options: [
+      "…revictimización, pues la culpa nunca es de quien sufre el acoso; la necesidad de dominio es del agresor.",
+      "…mediación eficaz, pues invita al estudiante a reflexionar sobre sus propias acciones.",
+      "…prevención del acoso, ya que enseña al estudiante a identificar conductas que generan conflictos."
+    ],
+    correct: 0,
+    feedback: "La guía desmonta este mito señalando que culpar a la víctima constituye revictimización. La responsabilidad siempre recae en el agresor y su necesidad de ejercer dominio."
+  },
+  {
+    type: "📋 Cuestionamiento Directo",
+    text: "¿Cuál es el rol que desempeñan los espectadores activos dentro de la dinámica del acoso escolar, según la Guía de Campo?",
+    extra: null,
+    options: [
+      "Denuncian el acoso a las autoridades escolares para detener la conducta del agresor oportunamente.",
+      "Intervienen colaborando con el agresor, en menor grado, y fomentan la impunidad al no detener la situación.",
+      "Protegen a la víctima al interponerse físicamente entre ella y el agresor durante los episodios de violencia."
+    ],
+    correct: 1,
+    feedback: "Los espectadores activos son 'colaboradores' del agresor; participan en la dinámica de acoso en menor medida y, al hacerlo, contribuyen a generar impunidad."
+  },
+  {
+    type: "📋 Cuestionamiento Directo",
+    text: "Según la Guía de Campo, ¿qué debe hacer un padre o tutor si detecta que las autoridades escolares muestran inacción o negligencia ante un caso de acoso reportado?",
+    extra: null,
+    options: [
+      "Retirar temporalmente al estudiante de la escuela hasta que la situación sea resuelta.",
+      "Confrontar directamente al estudiante agresor y a su familia para llegar a un acuerdo.",
+      "Reportar el caso a otras instancias externas al plantel educativo, escalando la denuncia a niveles superiores."
+    ],
+    correct: 2,
+    feedback: "La guía establece que si la escuela muestra inacción o negligencia, los padres y tutores tienen el derecho y la responsabilidad de reportar el caso a otras instancias externas."
+  },
+  {
+    type: "📋 Cuestionamiento Directo",
+    text: "¿Qué característica distingue al acoso socioemocional de los otros tipos, según la Guía de Campo?",
+    extra: null,
+    options: [
+      "Su énfasis está en el objeto de agresión: busca aislar, ignorar, marginar y lesionar la autoestima de la víctima.",
+      "Su énfasis está en el medio utilizado, ya que se vale principalmente de tecnología para ejercer la violencia.",
+      "Su énfasis está en la forma física de la agresión, manifestándose a través del contacto corporal directo."
+    ],
+    correct: 0,
+    feedback: "La guía describe el acoso socioemocional como aquel que tiene énfasis en el objeto de agresión: sus acciones buscan aislar, ignorar, marginar y lesionar la autoestima."
+  },
+  {
+    type: "✏️ Completamiento",
+    text: "Cuando los espectadores no reportan el acoso por considerarlo normal en el entorno escolar, la Guía de Campo señala que están…",
+    extra: null,
+    options: [
+      "…ejerciendo su derecho a la no intervención, lo cual debe ser respetado por las autoridades escolares.",
+      "…aceptando la violencia como parte del entorno, convirtiéndose en observadores mudos que sostienen el acoso.",
+      "…desarrollando madurez social al aprender a distinguir entre conflictos normales y situaciones de acoso real."
+    ],
+    correct: 1,
+    feedback: "La guía identifica esta actitud como propia de los espectadores pasivos: aceptan la violencia como parte del entorno y, al no reportarla, sostienen la dinámica del acoso."
+  },
+  {
+    type: "📋 Cuestionamiento Directo",
+    text: "Según la Guía de Campo, ¿cuál es la primera acción que debe realizar el Director o Subdirector al activarse el Protocolo de Acción Nivel 2?",
+    extra: null,
+    options: [
+      "Suspender al estudiante agresor de manera preventiva hasta que concluya la investigación del caso.",
+      "Contactar directamente a los medios de comunicación para transparentar la situación ante la comunidad.",
+      "Conformar un equipo colegiado integrado por orientadores, docentes y tutores para elaborar el plan de intervención."
+    ],
+    correct: 2,
+    feedback: "El Nivel 2 del protocolo indica que el Director debe conformar un equipo colegiado (orientadores, docentes, tutores) para diseñar conjuntamente el plan de intervención."
+  },
+  {
+    type: "🔗 Relación de Elementos",
+    text: "Relacione cada protagonista del acoso con la consecuencia a futuro que le corresponde, según la Guía de Campo.",
+    extra: `<table class="relation-table">
+      <tr><th>Protagonista</th><th>Consecuencia</th></tr>
+      <tr><td>1. Agresor</td><td>a) Aprende a relacionarse abusando del poder; riesgo de incapacidad para establecer relaciones sanas en la adultez</td></tr>
+      <tr><td>2. Espectador (pasivo/activo)</td><td>b) Interioriza actitudes violentas y pierde la capacidad de reaccionar ante injusticias</td></tr>
+    </table>`,
+    options: [
+      "1a, 2b",
+      "1b, 2a",
+      "Las consecuencias son iguales para ambos protagonistas según la guía"
+    ],
+    correct: 0,
+    feedback: "El agresor aprende a relacionarse abusando del poder (a), arriesgando su capacidad de relaciones sanas en la adultez. Los espectadores interiorizan actitudes violentas y pierden sensibilidad ante las injusticias (b)."
+  },
+  {
+    type: "📋 Cuestionamiento Directo",
+    text: "Según la Guía de Campo, ¿cuál de las siguientes situaciones NO constituye acoso escolar?",
+    extra: null,
+    options: [
+      "Un estudiante que insulta diariamente a su compañero con apodos denigrantes relacionados con su apariencia.",
+      "Dos amigas que dejan de hablarse después de una discusión y se reconcilian días después.",
+      "Un grupo de alumnos que excluye sistemáticamente a un compañero de los equipos de trabajo y recreo."
+    ],
+    correct: 1,
+    feedback: "La guía especifica que dos amigas que dejan de hablarse no constituye acoso escolar: es un conflicto interpersonal puntual sin los elementos de intencionalidad, repetición y desigualdad de poder."
+  },
+  {
+    type: "✏️ Completamiento",
+    text: "Según la Guía de Campo, el acoso escolar prospera en el silencio y la desconexión; por ello, para crear un ecosistema educativo seguro es necesario…",
+    extra: null,
+    options: [
+      "…centrarse exclusivamente en sancionar a los agresores, ya que la disciplina es el único mecanismo eficaz de prevención.",
+      "…responsabilizar a los padres de familia de la formación en valores, evitando que la escuela intervenga en conflictos privados.",
+      "…deconstruir los mitos, identificar los síntomas a tiempo y seguir rigurosamente los protocolos para transformar espectadores pasivos en defensores activos."
+    ],
+    correct: 2,
+    feedback: "La guía concluye que la protección del entorno educativo requiere tres acciones articuladas: deconstruir mitos, detección temprana de síntomas y aplicación rigurosa de protocolos."
+  },
+  {
+    type: "📋 Cuestionamiento Directo",
+    text: "Un docente observa que durante el recreo un alumno siempre empuja, esconde las cosas y golpea al mismo compañero. ¿Qué tipo de acoso está ocurriendo y cuál es el paso inmediato según la Guía de Campo?",
+    extra: null,
+    options: [
+      "Es acoso físico; el docente debe detener la agresión sin prejuzgar y garantizar la integridad física de la víctima de inmediato.",
+      "Es acoso verbal; el docente debe registrar los incidentes en un diario antes de intervenir directamente.",
+      "Es un conflicto normal entre pares; el docente debe dejar que los alumnos lo resuelvan de manera autónoma primero."
+    ],
+    correct: 0,
+    feedback: "Golpear, empujar y esconder cosas son acciones del acoso físico. La primera acción del protocolo docente es detener la agresión sin prejuzgar, garantizando la integridad de la víctima."
+  },
+  {
+    type: "🔢 Ordenamiento",
+    text: "Una madre de familia sospecha que su hijo es víctima de acoso. Según la Guía de Campo, ¿en qué orden debe actuar?\n1. Reportar a instancias externas si detecta negligencia escolar\n2. Entregar evidencias documentales o digitales disponibles\n3. Informar inmediatamente a las autoridades del plantel",
+    extra: null,
+    options: [
+      "2, 3, 1",
+      "3, 2, 1",
+      "1, 3, 2"
+    ],
+    correct: 1,
+    feedback: "La guía establece que el padre o tutor debe: primero informar a las autoridades del plantel (3), luego entregar evidencias disponibles (2), y si hay inacción o negligencia, reportar a instancias externas (1)."
+  },
+  {
+    type: "📋 Cuestionamiento Directo",
+    text: "Según la Guía de Campo, ¿cuál de los siguientes indicadores específicos corresponde al acoso de tipo ciberacoso?",
+    extra: null,
+    options: [
+      "Uniforme frecuentemente sucio o roto, golpes visibles y pérdida constante de útiles escolares.",
+      "Exclusión sistemática de equipos de trabajo y ser objeto frecuente de rumores entre compañeros.",
+      "Creación de perfiles falsos, difusión de imágenes sin permiso y envío de mensajes hirientes."
+    ],
+    correct: 2,
+    feedback: "La guía describe como indicadores específicos del ciberacoso: crear perfiles falsos, difundir imágenes sin permiso, bloquear cuentas y enviar mensajes hirientes mediante tecnología."
+  },
+  {
+    type: "📋 Cuestionamiento Directo",
+    text: "Según la Guía de Campo, ¿cuál es el principal riesgo a futuro para el estudiante que ejerce el rol de agresor?",
+    extra: null,
+    options: [
+      "Puede aprender a relacionarse únicamente abusando del poder, lo que puede incapacitarlo para establecer relaciones sociales sanas en la adultez.",
+      "Corre el riesgo de convertirse en víctima de acoso en niveles educativos superiores al cambiar de escuela.",
+      "Desarrolla dependencia emocional hacia sus espectadores, lo que dificulta su adaptación a nuevos entornos sociales."
+    ],
+    correct: 0,
+    feedback: "La guía señala que el agresor aprende a relacionarse abusando del poder, generando un riesgo real de incapacidad para establecer relaciones sociales sanas en la adultez."
+  },
+  {
+    type: "✏️ Completamiento",
+    text: "Cuando un estudiante víctima de acoso experimenta miedo de ir al baño, crisis de llanto sin explicación y sensibilidad extrema, la Guía de Campo clasifica estas señales como indicadores de alerta de tipo…",
+    extra: null,
+    options: [
+      "…académico, que requieren ajuste en los métodos de evaluación y atención diferenciada dentro del aula.",
+      "…emocional, que forman parte del radar de detección temprana que todo docente debe activar ante estas manifestaciones.",
+      "…fisiológico, asociados a condiciones médicas que deben ser atendidas exclusivamente por el servicio de salud escolar."
+    ],
+    correct: 1,
+    feedback: "El miedo al baño, las crisis de llanto inexplicables y la hipersensibilidad son indicadores emocionales de alerta incluidos en el radar de detección temprana del docente."
+  },
+  {
+    type: "🔗 Relación de Elementos",
+    text: "Relacione cada mito sobre el acoso escolar con la realidad que lo desmonta, según la Guía de Campo.",
+    extra: `<table class="relation-table">
+      <tr><th>Mito</th><th>Realidad</th></tr>
+      <tr><td>1. "Ahorita ni aguantan nada, de todo se quejan."</td><td>a) Revictimización: la culpa nunca es de quien sufre el acoso</td></tr>
+      <tr><td>2. "Tú eres el que provoca que te traten así."</td><td>b) La violencia emocional desgasta tanto como la física</td></tr>
+    </table>`,
+    options: [
+      "1a, 2b",
+      "1b, 2b",
+      "1b, 2a"
+    ],
+    correct: 2,
+    feedback: "El mito de 'no aguantan nada' invisibiliza daños graves, pues la violencia emocional es tan dañina como la física (b). El mito 'tú lo provocas' es revictimización: la responsabilidad es siempre del agresor (a)."
+  },
+  {
+    type: "📋 Cuestionamiento Directo",
+    text: "Según la Guía de Campo, el perfil psicológico del estudiante agresor se caracteriza por tener autoestima artificialmente alta o muy baja. ¿Qué otra característica psicológica se menciona sobre este protagonista?",
+    extra: null,
+    options: [
+      "Empatía elevada que le permite anticipar el dolor de sus víctimas y actuar de forma calculada.",
+      "Dificultad para expresar sus deseos y negociar, lo que lo lleva a relacionarse mediante el poder.",
+      "Alta capacidad de autorregulación emocional que le permite ocultar completamente sus conductas agresivas."
+    ],
+    correct: 1,
+    feedback: "La guía describe que además de la autoestima distorsionada, el agresor presenta dificultad para expresar sus deseos y negociar, lo que lo lleva a imponer su voluntad mediante el poder."
+  }
+];
+
+/* ══════════════════════════════════════
+   STATE
+══════════════════════════════════════ */
+let currentQ   = 0;
+let score      = 0;
+let wrong      = 0;
+let answered   = false;
+let studentName = "";
+
+/* ══════════════════════════════════════
+   NAV
+══════════════════════════════════════ */
+function showSection(sec) {
+  document.querySelectorAll('.nav-tab').forEach((t,i) => {
+    t.classList.toggle('active', (sec==='sim' && i===0) || (sec==='guide' && i===1));
+  });
+  document.getElementById('sec-sim').style.display   = sec==='sim'   ? '' : 'none';
+  document.getElementById('sec-guide').style.display = sec==='guide' ? '' : 'none';
+}
+
+/* ══════════════════════════════════════
+   EXAM LOGIC
+══════════════════════════════════════ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+}
+
+function startExam() {
+  const n = document.getElementById('studentName').value.trim();
+  if (!n) {
+    document.getElementById('studentName').focus();
+    document.getElementById('studentName').style.borderColor = '#dc2626';
+    return;
+  }
+  document.getElementById('studentName').style.borderColor = '';
+  studentName = n;
+  currentQ = 0; score = 0; wrong = 0;
+  showScreen('exam');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[currentQ];
+  answered = false;
+
+  /* progress */
+  const pct = Math.round((currentQ / QUESTIONS.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `Pregunta ${currentQ+1} de ${QUESTIONS.length}`;
+  document.getElementById('progressPct').textContent   = pct + '%';
+  document.getElementById('scoreCorrect').textContent  = score;
+  document.getElementById('scoreWrong').textContent    = wrong;
+
+  /* content */
+  document.getElementById('qTypeBadge').textContent = q.type;
+  document.getElementById('qNumber').textContent    = `Pregunta ${currentQ + 1}`;
+  document.getElementById('qText').textContent      = q.text;
+  document.getElementById('qExtra').innerHTML       = q.extra || '';
+
+  /* options */
+  const letters = ['A','B','C'];
+  const optsEl  = document.getElementById('qOptions');
+  optsEl.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.innerHTML = `<span class="opt-letter">${letters[i]}</span><span>${opt}</span>`;
+    btn.onclick = () => selectOption(i);
+    optsEl.appendChild(btn);
+  });
+
+  /* feedback + next */
+  const fb = document.getElementById('qFeedback');
+  fb.className = 'feedback';
+  fb.innerHTML = '';
+  document.getElementById('btnNext').disabled = true;
+
+  /* animate in */
+  const card = document.querySelector('#screen-exam .card');
+  card.style.animation = 'none';
+  card.offsetHeight;
+  card.style.animation = 'fadeUp .35s ease';
+}
+
+function selectOption(idx) {
+  if (answered) return;
+  answered = true;
+
+  const q      = QUESTIONS[currentQ];
+  const opts   = document.querySelectorAll('.option');
+  const isRight = idx === q.correct;
+
+  opts.forEach((o, i) => {
+    o.disabled = true;
+    if (i === q.correct) o.classList.add('correct');
+    else if (i === idx)  o.classList.add('wrong');
+  });
+
+  if (isRight) score++; else wrong++;
+  document.getElementById('scoreCorrect').textContent = score;
+  document.getElementById('scoreWrong').textContent   = wrong;
+
+  const fb = document.getElementById('qFeedback');
+  fb.className  = `feedback show ${isRight ? 'correct' : 'wrong'}`;
+  fb.innerHTML  = `<span class="feedback-icon">${isRight ? '✅' : '❌'}</span>
+    <span><strong>${isRight ? '¡Correcto!' : 'Respuesta incorrecta.'}</strong> ${q.feedback}</span>`;
+
+  document.getElementById('btnNext').disabled = false;
+  if (currentQ === QUESTIONS.length - 1) {
+    document.getElementById('btnNext').textContent = '📊 Ver resultados';
+  }
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= QUESTIONS.length) {
+    showResults();
+  } else {
+    renderQuestion();
+    document.getElementById('btnNext').textContent = 'Siguiente pregunta →';
+  }
+}
+
+function showResults() {
+  showScreen('results');
+  const total = QUESTIONS.length;
+  const pct   = Math.round((score / total) * 100);
+
+  document.getElementById('resName').textContent = '👤 ' + studentName;
+  document.getElementById('resHits').textContent = score;
+  document.getElementById('resMiss').textContent = wrong;
+  document.getElementById('resPct').textContent  = pct + '%';
+  document.getElementById('resPct2').textContent = pct + '%';
+
+  /* ring animation */
+  const circumference = 263.9;
+  const offset = circumference - (pct / 100) * circumference;
+  const ring = document.getElementById('ringFill');
+  ring.style.stroke =
+    pct >= 80 ? '#16a34a' :
+    pct >= 60 ? '#f97316' : '#dc2626';
+  setTimeout(() => { ring.style.strokeDashoffset = offset; }, 200);
+
+  /* motivator */
+  let msg = '';
+  if (pct >= 90) msg = '🏆 ¡Excelente desempeño! Dominas los contenidos de la Guía de Campo sobre acoso escolar. ¡Sigue siendo un defensor activo del entorno educativo seguro!';
+  else if (pct >= 80) msg = '⭐ ¡Muy bien! Tienes una comprensión sólida del tema. Repasa los reactivos incorrectos para alcanzar la excelencia.';
+  else if (pct >= 60) msg = '💪 Buen trabajo. Tienes bases importantes; sin embargo, te recomendamos revisar la Guía de Campo para reforzar los temas con menor puntaje.';
+  else if (pct >= 40) msg = '📖 Vas por buen camino. Consulta la Guía de Estudio, enfócate en los protocolos de acción y los tipos de acoso escolar. ¡Tú puedes mejorar!';
+  else msg = '🌱 No te desanimes. Cada error es una oportunidad de aprendizaje. Te recomendamos estudiar la Guía de Campo completa y volver a intentarlo.';
+  document.getElementById('motivatorMsg').textContent = msg;
+}
+
+function restartExam() {
+  currentQ = 0; score = 0; wrong = 0;
+  showScreen('welcome');
+}
+
+/* init */
+document.getElementById('studentName').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') startExam();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador | Comunicación y Expresión Comunitaria</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&family=Nunito:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde-oscuro: #1B5E3B;
+    --verde-medio: #2D6A4F;
+    --verde-claro: #52B788;
+    --verde-suave: #D8F3DC;
+    --dorado: #E9C46A;
+    --naranja: #F4A261;
+    --naranja-oscuro: #E76F51;
+    --crema: #FEFAE0;
+    --crema2: #F8F3E6;
+    --blanco: #FFFFFF;
+    --texto-oscuro: #1B3A2D;
+    --texto-medio: #3D6B55;
+    --gris-suave: #F0EDE5;
+    --sombra: rgba(27, 94, 59, 0.15);
+    --sombra-fuerte: rgba(27, 94, 59, 0.25);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--crema);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== FONDO ANIMADO ===== */
+  .fondo-decorativo {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .fondo-decorativo::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(82,183,136,0.12) 0%, transparent 70%);
+    top: -200px; right: -200px;
+    border-radius: 50%;
+    animation: pulsar 8s ease-in-out infinite;
+  }
+  .fondo-decorativo::after {
+    content: '';
+    position: absolute;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(233,196,106,0.12) 0%, transparent 70%);
+    bottom: -100px; left: -100px;
+    border-radius: 50%;
+    animation: pulsar 10s ease-in-out infinite reverse;
+  }
+  @keyframes pulsar {
+    0%,100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.2); opacity: 1; }
+  }
+
+  /* ===== ENCABEZADO ===== */
+  .encabezado {
+    background: linear-gradient(135deg, var(--verde-oscuro) 0%, var(--verde-medio) 50%, #1a7a4a 100%);
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 4px 20px var(--sombra-fuerte);
+  }
+  .encabezado::after {
+    content: '';
+    position: absolute;
+    bottom: -3px; left: 0;
+    width: 100%; height: 3px;
+    background: linear-gradient(90deg, var(--dorado), var(--naranja), var(--dorado));
+  }
+  .encabezado-titulo {
+    text-align: center;
+    flex: 1;
+  }
+  .encabezado-titulo h1 {
+    font-family: 'Lexend', sans-serif;
+    font-size: clamp(0.9rem, 2.5vw, 1.3rem);
+    font-weight: 700;
+    color: var(--blanco);
+    letter-spacing: 0.5px;
+    line-height: 1.3;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .encabezado-titulo p {
+    font-size: clamp(0.7rem, 1.8vw, 0.85rem);
+    color: var(--dorado);
+    font-weight: 500;
+    margin-top: 2px;
+    letter-spacing: 0.3px;
+  }
+  .encabezado-badge {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 30px;
+    padding: 6px 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--blanco);
+    font-size: 0.75rem;
+    font-weight: 600;
+    backdrop-filter: blur(4px);
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+  }
+  .encabezado-badge:hover {
+    background: rgba(255,255,255,0.25);
+    transform: translateY(-1px);
+  }
+  .encabezado-badge .icono { font-size: 1rem; }
+
+  /* ===== CONTENEDOR PRINCIPAL ===== */
+  .contenedor {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+    position: relative;
+    z-index: 5;
+  }
+
+  /* ===== SCREENS ===== */
+  .pantalla { display: none; }
+  .pantalla.activa { display: block; }
+
+  /* ===== PANTALLA INICIO ===== */
+  .tarjeta-inicio {
+    background: var(--blanco);
+    border-radius: 24px;
+    padding: clamp(32px, 6vw, 56px) clamp(24px, 5vw, 48px);
+    box-shadow: 0 16px 48px var(--sombra);
+    text-align: center;
+    margin-top: 24px;
+    position: relative;
+    overflow: hidden;
+    animation: entrada 0.6s ease-out;
+  }
+  .tarjeta-inicio::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--verde-claro), var(--dorado), var(--naranja));
+  }
+  @keyframes entrada {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .inicio-icono {
+    font-size: clamp(3rem, 8vw, 5rem);
+    margin-bottom: 16px;
+    display: block;
+    animation: flotando 3s ease-in-out infinite;
+  }
+  @keyframes flotando {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .inicio-titulo {
+    font-family: 'Lexend', sans-serif;
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    font-weight: 800;
+    color: var(--verde-oscuro);
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .inicio-subtitulo {
+    font-size: clamp(0.85rem, 2.5vw, 1rem);
+    color: var(--texto-medio);
+    margin-bottom: 28px;
+    font-weight: 500;
+  }
+
+  .chips-info {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+  .chip {
+    background: var(--verde-suave);
+    color: var(--verde-medio);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    border: 1.5px solid rgba(82,183,136,0.3);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .campo-nombre-label {
+    font-family: 'Lexend', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--texto-oscuro);
+    margin-bottom: 10px;
+    display: block;
+    text-align: left;
+  }
+  .campo-nombre {
+    width: 100%;
+    padding: 14px 20px;
+    border: 2.5px solid rgba(82,183,136,0.3);
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    color: var(--texto-oscuro);
+    background: var(--crema2);
+    transition: all 0.3s;
+    outline: none;
+    margin-bottom: 20px;
+  }
+  .campo-nombre:focus {
+    border-color: var(--verde-claro);
+    background: var(--blanco);
+    box-shadow: 0 0 0 4px rgba(82,183,136,0.15);
+  }
+  .campo-nombre::placeholder { color: #9abaad; }
+
+  .btn-iniciar {
+    background: linear-gradient(135deg, var(--verde-medio), var(--verde-claro));
+    color: var(--blanco);
+    border: none;
+    border-radius: 50px;
+    padding: 16px 48px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 6px 24px rgba(45,106,79,0.35);
+    letter-spacing: 0.5px;
+    width: 100%;
+    max-width: 320px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .btn-iniciar:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 32px rgba(45,106,79,0.45);
+    background: linear-gradient(135deg, var(--verde-oscuro), var(--verde-medio));
+  }
+  .btn-iniciar:active { transform: translateY(-1px); }
+  .btn-iniciar .btn-flecha { font-size: 1.2rem; transition: transform 0.3s; }
+  .btn-iniciar:hover .btn-flecha { transform: translateX(4px); }
+
+  /* ===== PANTALLA QUIZ ===== */
+  .barra-progreso-wrap {
+    margin-bottom: 20px;
+    animation: entrada 0.4s ease-out;
+  }
+  .barra-progreso-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .barra-progreso-info span {
+    font-family: 'Lexend', sans-serif;
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: var(--texto-medio);
+  }
+  .barra-progreso-info .puntaje-mini {
+    background: var(--verde-suave);
+    color: var(--verde-oscuro);
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+  .barra-progreso {
+    width: 100%;
+    height: 8px;
+    background: rgba(82,183,136,0.2);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .barra-progreso-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--verde-claro), var(--dorado));
+    border-radius: 10px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    position: relative;
+  }
+  .barra-progreso-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: brillo 2s infinite;
+  }
+  @keyframes brillo {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(300%); }
+  }
+
+  .tarjeta-pregunta {
+    background: var(--blanco);
+    border-radius: 20px;
+    padding: clamp(24px, 5vw, 40px);
+    box-shadow: 0 12px 40px var(--sombra);
+    position: relative;
+    overflow: hidden;
+    animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(40px) scale(0.97); }
+    to { opacity: 1; transform: translateX(0) scale(1); }
+  }
+  @keyframes slideOut {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(-40px); }
+  }
+  .tarjeta-pregunta.saliendo { animation: slideOut 0.25s ease-in forwards; }
+
+  .pregunta-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .pregunta-num {
+    background: linear-gradient(135deg, var(--verde-medio), var(--verde-claro));
+    color: var(--blanco);
+    border-radius: 50%;
+    width: 42px; height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Lexend', sans-serif;
+    font-weight: 800;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(45,106,79,0.3);
+  }
+  .pregunta-tipo-badge {
+    background: linear-gradient(135deg, var(--dorado), #f0c040);
+    color: var(--texto-oscuro);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: 'Lexend', sans-serif;
+    letter-spacing: 0.3px;
+    box-shadow: 0 2px 8px rgba(233,196,106,0.4);
+  }
+
+  .pregunta-texto {
+    font-size: clamp(0.93rem, 2.5vw, 1.05rem);
+    line-height: 1.65;
+    color: var(--texto-oscuro);
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+
+  /* Tabla de relación */
+  .tabla-relacion {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 18px;
+    font-size: 0.88rem;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px var(--sombra);
+  }
+  .tabla-relacion th {
+    background: linear-gradient(135deg, var(--verde-medio), var(--verde-claro));
+    color: var(--blanco);
+    padding: 10px 14px;
+    font-family: 'Lexend', sans-serif;
+    font-weight: 600;
+    font-size: 0.8rem;
+    letter-spacing: 0.3px;
+  }
+  .tabla-relacion td {
+    padding: 9px 14px;
+    border-bottom: 1px solid rgba(82,183,136,0.15);
+    vertical-align: middle;
+    line-height: 1.5;
+  }
+  .tabla-relacion tr:nth-child(even) td { background: var(--crema2); }
+  .tabla-relacion tr:last-child td { border-bottom: none; }
+  .tabla-relacion .num-col { font-weight: 700; color: var(--verde-medio); min-width: 24px; }
+  .tabla-relacion .let-col { font-weight: 700; color: var(--naranja-oscuro); min-width: 24px; }
+
+  .opciones-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .opcion-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 18px;
+    border: 2.5px solid rgba(82,183,136,0.2);
+    border-radius: 14px;
+    background: var(--crema2);
+    cursor: pointer;
+    transition: all 0.25s;
+    text-align: left;
+    width: 100%;
+    font-family: 'Nunito', sans-serif;
+  }
+  .opcion-btn:hover:not(:disabled) {
+    border-color: var(--verde-claro);
+    background: rgba(82,183,136,0.08);
+    transform: translateX(4px);
+    box-shadow: 0 4px 16px var(--sombra);
+  }
+  .opcion-btn.seleccionada {
+    border-color: var(--verde-medio);
+    background: rgba(82,183,136,0.1);
+    transform: translateX(4px);
+  }
+  .opcion-btn.correcta {
+    border-color: var(--verde-claro) !important;
+    background: rgba(82,183,136,0.15) !important;
+    box-shadow: 0 4px 16px rgba(82,183,136,0.3);
+  }
+  .opcion-btn.incorrecta {
+    border-color: #E63946 !important;
+    background: rgba(230,57,70,0.08) !important;
+  }
+  .opcion-btn.mostrar-correcta {
+    border-color: var(--verde-claro) !important;
+    background: rgba(82,183,136,0.12) !important;
+    box-shadow: 0 4px 16px rgba(82,183,136,0.25);
+  }
+  .opcion-btn:disabled { cursor: default; }
+
+  .opcion-letra {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Lexend', sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    background: rgba(45,106,79,0.12);
+    color: var(--verde-medio);
+    transition: all 0.25s;
+    margin-top: 1px;
+  }
+  .opcion-btn.seleccionada .opcion-letra { background: var(--verde-medio); color: var(--blanco); }
+  .opcion-btn.correcta .opcion-letra { background: var(--verde-claro); color: var(--blanco); }
+  .opcion-btn.incorrecta .opcion-letra { background: #E63946; color: var(--blanco); }
+  .opcion-btn.mostrar-correcta .opcion-letra { background: var(--verde-claro); color: var(--blanco); }
+
+  .opcion-texto {
+    font-size: clamp(0.87rem, 2.2vw, 0.95rem);
+    color: var(--texto-oscuro);
+    line-height: 1.55;
+    font-weight: 500;
+  }
+  .opcion-icono-resultado {
+    margin-left: auto;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  /* ===== FEEDBACK ===== */
+  .feedback-box {
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-bottom: 18px;
+    display: none;
+    animation: aparecer 0.35s ease-out;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  @keyframes aparecer {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .feedback-box.visible { display: flex; }
+  .feedback-box.correcto {
+    background: linear-gradient(135deg, rgba(82,183,136,0.15), rgba(82,183,136,0.08));
+    border: 2px solid rgba(82,183,136,0.4);
+  }
+  .feedback-box.incorrecto {
+    background: linear-gradient(135deg, rgba(230,57,70,0.1), rgba(230,57,70,0.05));
+    border: 2px solid rgba(230,57,70,0.35);
+  }
+  .feedback-icono { font-size: 1.5rem; flex-shrink: 0; }
+  .feedback-texto { font-size: 0.88rem; line-height: 1.55; font-weight: 600; }
+  .feedback-box.correcto .feedback-texto { color: var(--verde-oscuro); }
+  .feedback-box.incorrecto .feedback-texto { color: #9B1E26; }
+
+  .btn-siguiente {
+    background: linear-gradient(135deg, var(--verde-medio), var(--verde-claro));
+    color: var(--blanco);
+    border: none;
+    border-radius: 50px;
+    padding: 14px 40px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 6px 20px rgba(45,106,79,0.35);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 auto;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(8px);
+  }
+  .btn-siguiente.visible {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateY(0);
+    transition: all 0.35s ease-out;
+  }
+  .btn-siguiente:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(45,106,79,0.45);
+  }
+
+  /* ===== PANTALLA RESULTADOS ===== */
+  .tarjeta-resultados {
+    background: var(--blanco);
+    border-radius: 24px;
+    padding: clamp(32px, 6vw, 52px) clamp(24px, 5vw, 44px);
+    box-shadow: 0 16px 48px var(--sombra);
+    text-align: center;
+    animation: entrada 0.6s ease-out;
+    position: relative;
+    overflow: hidden;
+  }
+  .tarjeta-resultados::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--verde-claro), var(--dorado), var(--naranja));
+  }
+  .confetti {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .confetti-piece {
+    position: absolute;
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    animation: caer 3s ease-in forwards;
+    opacity: 0;
+  }
+  @keyframes caer {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(400px) rotate(720deg); opacity: 0; }
+  }
+
+  .resultado-emoji { font-size: clamp(3rem, 8vw, 5rem); display: block; margin-bottom: 12px; }
+  .resultado-nombre {
+    font-family: 'Lexend', sans-serif;
+    font-size: clamp(1.3rem, 4vw, 1.9rem);
+    font-weight: 800;
+    color: var(--verde-oscuro);
+    margin-bottom: 4px;
+  }
+  .resultado-subtitulo {
+    font-size: 0.9rem;
+    color: var(--texto-medio);
+    margin-bottom: 28px;
+  }
+
+  .marcador-circular {
+    width: clamp(140px, 30vw, 170px);
+    height: clamp(140px, 30vw, 170px);
+    margin: 0 auto 28px;
+    position: relative;
+  }
+  .marcador-circular svg { transform: rotate(-90deg); }
+  .marcador-circular circle {
+    fill: none;
+    stroke-width: 10;
+    stroke-linecap: round;
+  }
+  .circulo-fondo { stroke: rgba(82,183,136,0.15); }
+  .circulo-progreso {
+    stroke: var(--verde-claro);
+    stroke-dasharray: 408;
+    stroke-dashoffset: 408;
+    transition: stroke-dashoffset 1.5s cubic-bezier(0.4,0,0.2,1);
+  }
+  .marcador-texto {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .marcador-porcentaje {
+    font-family: 'Lexend', sans-serif;
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
+    font-weight: 800;
+    color: var(--verde-oscuro);
+    display: block;
+    line-height: 1;
+  }
+  .marcador-label {
+    font-size: 0.72rem;
+    color: var(--texto-medio);
+    font-weight: 600;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    border-radius: 16px;
+    padding: 18px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .stat-card.aciertos {
+    background: linear-gradient(135deg, rgba(82,183,136,0.15), rgba(82,183,136,0.08));
+    border: 2px solid rgba(82,183,136,0.3);
+  }
+  .stat-card.errores {
+    background: linear-gradient(135deg, rgba(230,57,70,0.1), rgba(230,57,70,0.05));
+    border: 2px solid rgba(230,57,70,0.25);
+  }
+  .stat-card.total {
+    background: linear-gradient(135deg, rgba(233,196,106,0.2), rgba(233,196,106,0.1));
+    border: 2px solid rgba(233,196,106,0.4);
+  }
+  .stat-icono { font-size: 1.8rem; }
+  .stat-num {
+    font-family: 'Lexend', sans-serif;
+    font-size: clamp(1.4rem, 4vw, 1.9rem);
+    font-weight: 800;
+  }
+  .stat-card.aciertos .stat-num { color: var(--verde-oscuro); }
+  .stat-card.errores .stat-num { color: #C0242E; }
+  .stat-card.total .stat-num { color: #8a6800; }
+  .stat-etiqueta { font-size: 0.78rem; font-weight: 700; color: var(--texto-medio); }
+
+  .mensaje-motivador {
+    background: linear-gradient(135deg, var(--verde-suave), rgba(233,196,106,0.15));
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    font-size: 0.92rem;
+    color: var(--verde-oscuro);
+    font-weight: 600;
+    font-style: italic;
+    border: 1.5px solid rgba(82,183,136,0.25);
+    line-height: 1.6;
+  }
+
+  .btns-resultado {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+  .btn-reiniciar {
+    background: linear-gradient(135deg, var(--verde-medio), var(--verde-claro));
+    color: var(--blanco);
+    border: none;
+    border-radius: 50px;
+    padding: 13px 32px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 6px 20px rgba(45,106,79,0.35);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .btn-reiniciar:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(45,106,79,0.45); }
+
+  .btn-guia {
+    background: linear-gradient(135deg, var(--dorado), #d4a840);
+    color: var(--texto-oscuro);
+    border: none;
+    border-radius: 50px;
+    padding: 13px 32px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 6px 20px rgba(233,196,106,0.4);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .btn-guia:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(233,196,106,0.5); }
+
+  /* ===== PANTALLA GUÍA ===== */
+  .guia-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .btn-volver {
+    background: rgba(45,106,79,0.1);
+    border: 2px solid rgba(45,106,79,0.2);
+    color: var(--verde-oscuro);
+    border-radius: 50px;
+    padding: 8px 20px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s;
+    display: flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+  }
+  .btn-volver:hover { background: rgba(45,106,79,0.18); transform: translateX(-2px); }
+
+  .guia-titulo {
+    font-family: 'Lexend', sans-serif;
+    font-size: clamp(1.1rem, 3vw, 1.5rem);
+    font-weight: 800;
+    color: var(--verde-oscuro);
+  }
+
+  .guia-info {
+    background: var(--verde-suave);
+    border-radius: 12px;
+    padding: 12px 18px;
+    margin-bottom: 16px;
+    font-size: 0.85rem;
+    color: var(--verde-medio);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1.5px solid rgba(82,183,136,0.3);
+  }
+  .btn-abrir-nueva {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--dorado), #d4a840);
+    color: var(--texto-oscuro);
+    border: none;
+    border-radius: 50px;
+    padding: 12px 28px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 6px 20px rgba(233,196,106,0.4);
+    margin-bottom: 16px;
+    text-decoration: none;
+  }
+  .btn-abrir-nueva:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(233,196,106,0.5); }
+
+  .iframe-container {
+    background: var(--blanco);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px var(--sombra);
+    border: 2px solid rgba(82,183,136,0.2);
+  }
+  .iframe-container iframe {
+    width: 100%;
+    height: clamp(400px, 65vh, 680px);
+    border: none;
+    display: block;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 480px) {
+    .encabezado { padding: 12px 16px; }
+    .chips-info .chip { font-size: 0.75rem; padding: 5px 12px; }
+    .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .stat-card { padding: 14px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="fondo-decorativo"></div>
+
+<!-- ENCABEZADO -->
+<header class="encabezado">
+  <div class="encabezado-badge" onclick="mostrarGuia()">
+    <span class="icono">📄</span>
+    <span>Guía de Estudio</span>
+  </div>
+  <div class="encabezado-titulo">
+    <h1>Simulador Interactivo de Evaluación</h1>
+    <p>Prof. Francisco De Jesus Luna Benitez</p>
+  </div>
+  <div class="encabezado-badge" id="badge-progreso" style="visibility:hidden;">
+    <span class="icono">📊</span>
+    <span id="badge-num">0/30</span>
+  </div>
+</header>
+
+<div class="contenedor">
+
+  <!-- ===== PANTALLA 1: INICIO ===== -->
+  <div class="pantalla activa" id="pantalla-inicio">
+    <div class="tarjeta-inicio">
+      <span class="inicio-icono">🏫</span>
+      <h2 class="inicio-titulo">Comunicación y Expresión Comunitaria</h2>
+      <p class="inicio-subtitulo">Simulador de Evaluación · Fase 6 – Secundaria · NEM</p>
+      <div class="chips-info">
+        <span class="chip">📝 30 preguntas</span>
+        <span class="chip">⚡ 3 opciones c/u</span>
+        <span class="chip">💡 Retroalimentación inmediata</span>
+        <span class="chip">📊 Resultado final</span>
+      </div>
+      <label class="campo-nombre-label" for="nombre-input">✏️ Ingresa tu nombre para comenzar:</label>
+      <input type="text" id="nombre-input" class="campo-nombre" placeholder="Escribe tu nombre completo aquí..." maxlength="60" autocomplete="off">
+      <button class="btn-iniciar" onclick="iniciarSimulador()">
+        Iniciar Simulador <span class="btn-flecha">→</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== PANTALLA 2: QUIZ ===== -->
+  <div class="pantalla" id="pantalla-quiz">
+    <div class="barra-progreso-wrap">
+      <div class="barra-progreso-info">
+        <span id="progreso-texto">Pregunta 1 de 30</span>
+        <span class="puntaje-mini" id="puntaje-mini">✅ 0 aciertos</span>
+      </div>
+      <div class="barra-progreso">
+        <div class="barra-progreso-fill" id="barra-fill" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <div class="tarjeta-pregunta" id="tarjeta-pregunta">
+      <div class="pregunta-header">
+        <div class="pregunta-num" id="pregunta-num">1</div>
+        <div class="pregunta-tipo-badge" id="pregunta-tipo">Cuestionamiento directo</div>
+      </div>
+      <p class="pregunta-texto" id="pregunta-texto"></p>
+      <div id="tabla-container"></div>
+      <div class="opciones-lista" id="opciones-lista"></div>
+      <div class="feedback-box" id="feedback-box">
+        <span class="feedback-icono" id="feedback-icono"></span>
+        <span class="feedback-texto" id="feedback-texto"></span>
+      </div>
+      <div style="text-align:center;">
+        <button class="btn-siguiente" id="btn-siguiente" onclick="siguientePregunta()">
+          Siguiente pregunta <span>→</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PANTALLA 3: RESULTADOS ===== -->
+  <div class="pantalla" id="pantalla-resultados">
+    <div class="tarjeta-resultados">
+      <div class="confetti" id="confetti"></div>
+      <span class="resultado-emoji" id="resultado-emoji">🎉</span>
+      <h2 class="resultado-nombre" id="resultado-nombre">¡Felicidades!</h2>
+      <p class="resultado-subtitulo" id="resultado-subtitulo">Has completado el simulador</p>
+
+      <div class="marcador-circular">
+        <svg width="100%" height="100%" viewBox="0 0 140 140">
+          <circle class="circulo-fondo" cx="70" cy="70" r="65"/>
+          <circle class="circulo-progreso" id="circulo-progreso" cx="70" cy="70" r="65"/>
+        </svg>
+        <div class="marcador-texto">
+          <span class="marcador-porcentaje" id="marcador-porcentaje">0%</span>
+          <span class="marcador-label">Desempeño</span>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card aciertos">
+          <span class="stat-icono">✅</span>
+          <span class="stat-num" id="num-aciertos">0</span>
+          <span class="stat-etiqueta">Aciertos</span>
+        </div>
+        <div class="stat-card errores">
+          <span class="stat-icono">❌</span>
+          <span class="stat-num" id="num-errores">0</span>
+          <span class="stat-etiqueta">Errores</span>
+        </div>
+        <div class="stat-card total">
+          <span class="stat-icono">📋</span>
+          <span class="stat-num">30</span>
+          <span class="stat-etiqueta">Total</span>
+        </div>
+      </div>
+
+      <div class="mensaje-motivador" id="mensaje-motivador">
+        Sigue practicando para fortalecer tus conocimientos.
+      </div>
+
+      <div class="btns-resultado">
+        <button class="btn-reiniciar" onclick="reiniciarSimulador()">
+          🔁 Reintentar
+        </button>
+        <button class="btn-guia" onclick="mostrarGuia()">
+          📄 Ver Guía de Estudio
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PANTALLA 4: GUÍA ===== -->
+  <div class="pantalla" id="pantalla-guia">
+    <div class="guia-header">
+      <button class="btn-volver" id="btn-volver-guia" onclick="volverDesdeGuia()">← Volver</button>
+      <h2 class="guia-titulo">📄 Guía de Estudio</h2>
+    </div>
+    <div class="guia-info">
+      ℹ️ Guía: <strong>Comunicación y Expresión Comunitaria – Fase 6 Secundaria</strong> · Prof. Francisco De Jesus Luna Benitez
+    </div>
+    <div style="margin-bottom:14px;">
+      <a class="btn-abrir-nueva" href="https://drive.google.com/file/d/1b_Y5Aq_j_gw-mqDpG5Bmv28Vk6J7LCWL/view?usp=sharing" target="_blank" rel="noopener">
+        🔗 Abrir en nueva pestaña
+      </a>
+    </div>
+    <div class="iframe-container">
+      <iframe src="https://drive.google.com/file/d/1b_Y5Aq_j_gw-mqDpG5Bmv28Vk6J7LCWL/preview" allowfullscreen></iframe>
+    </div>
+  </div>
+
+</div><!-- /contenedor -->
+
+<script>
+// ============================================================
+// BANCO DE 30 PREGUNTAS
+// Distribución de respuestas correctas: A=10, B=10, C=10
+// Tipos: cuestionamiento directo, completamiento, ordenamiento, relación de elementos
+// ============================================================
+const preguntas = [
+  // ── Q1  Correcta: A ──
+  {
+    tipo: "Cuestionamiento directo",
+    base: "¿Cuál de las siguientes opciones describe correctamente la comunicación según la Nueva Escuela Mexicana?",
+    tabla: null,
+    opciones: [
+      "Un proceso de interacción social para analizar, debatir y construir significados compartidos.",
+      "Una técnica para transmitir información de manera unidireccional entre emisor y receptor.",
+      "Un método exclusivo para el aprendizaje formal dentro del aula."
+    ],
+    correcta: 0,
+    ok: "¡Excelente! La NEM concibe la comunicación como un proceso social bidireccional que construye significados compartidos.",
+    mal: "La respuesta correcta es A. La comunicación en la NEM supera el modelo emisor-receptor y se define como un proceso de interacción social para analizar, debatir y construir significados compartidos."
+  },
+  // ── Q2  Correcta: B ──
+  {
+    tipo: "Cuestionamiento directo",
+    base: "¿Cuál es el objetivo principal de la comunicación en el contexto de la Nueva Escuela Mexicana?",
+    tabla: null,
+    opciones: [
+      "Desarrollar exclusivamente las habilidades artísticas de los estudiantes.",
+      "Gestionar intercambios inclusivos para participar activamente en los asuntos de la comunidad y propiciar la convivencia.",
+      "Mejorar el rendimiento académico individual de cada alumno mediante la evaluación continua."
+    ],
+    correcta: 1,
+    ok: "¡Correcto! El objetivo de la comunicación en la NEM es gestionar intercambios inclusivos para la participación comunitaria.",
+    mal: "La respuesta correcta es B. El objetivo de la comunicación en la NEM es gestionar intercambios inclusivos para participar activamente en los asuntos de la comunidad y propiciar la convivencia."
+  },
+  // ── Q3  Correcta: C ──
+  {
+    tipo: "Completamiento",
+    base: "La expresión actúa como canal de empatía porque…",
+    tabla: null,
+    opciones: [
+      "…permite al docente evaluar únicamente la ortografía y sintaxis de los estudiantes.",
+      "…estimula la imaginación y las habilidades artísticas para diseñar propuestas técnicas.",
+      "…da voz a narrativas inclusivas y diversas, rompiendo estereotipos."
+    ],
+    correcta: 2,
+    ok: "¡Muy bien! La expresión como canal de empatía da voz a narrativas inclusivas y diversas, rompiendo estereotipos.",
+    mal: "La respuesta correcta es C. La expresión como canal de empatía da voz a narrativas inclusivas y diversas, rompiendo estereotipos y promoviendo la comprensión mutua."
+  },
+  // ── Q4  Correcta: A ──
+  {
+    tipo: "Cuestionamiento directo",
+    base: "¿Cuáles son las barreras de comunicación que se mencionan explícitamente en la guía de estudio?",
+    tabla: null,
+    opciones: [
+      "Los prejuicios, la ambigüedad y la falta de claridad.",
+      "El ruido, la distancia física y la falta de tecnología.",
+      "La timidez, el vocabulario limitado y la escritura deficiente."
+    ],
+    correcta: 0,
+    ok: "¡Correcto! La guía señala los prejuicios, la ambigüedad y la falta de claridad como las principales barreras de comunicación.",
+    mal: "La respuesta correcta es A. La guía identifica los prejuicios, la ambigüedad y la falta de claridad como las barreras que obstaculizan la comunicación efectiva."
+  },
+  // ── Q5  Correcta: B ──
+  {
+    tipo: "Cuestionamiento directo",
+    base: "Según la guía, ¿qué distingue fundamentalmente al diálogo del debate?",
+    tabla: null,
+    opciones: [
+      "El diálogo utiliza argumentos más elaborados y formales que el debate.",
+      "El diálogo busca comprender y colaborar, mientras que el debate busca vencer o persuadir.",
+      "El diálogo es una técnica exclusiva para resolver conflictos en espacios jurídicos."
+    ],
+    correcta: 1,
+    ok: "¡Excelente! Esa es la clave: el diálogo busca comprender y colaborar, no vencer.",
+    mal: "La respuesta correcta es B. La guía señala que, a diferencia del debate (que busca vencer o persuadir), el diálogo busca comprender y colaborar, siendo el puente principal para reducir la violencia."
+  },
+  // ── Q6  Correcta: C ──
+  {
+    tipo: "Relación de elementos",
+    base: "Seleccione la opción que relaciona correctamente cada herramienta didáctica del arsenal con su propósito:",
+    tabla: {
+      cols: ["Herramienta", "Propósito"],
+      filas: [
+        ["1. Acrósticos y Haikús", "a) Combinar realidad y ficción para abordar posibles soluciones."],
+        ["2. Cortometrajes", "b) Reinterpretar problemas comunitarios mediante recursos literarios."],
+        ["3. Fábulas y Asambleas", "c) Consensuar acciones y dejar enseñanzas sobre problemas sociales."]
+      ]
+    },
+    opciones: [
+      "1a, 2c, 3b",
+      "1c, 2b, 3a",
+      "1b, 2a, 3c"
+    ],
+    correcta: 2,
+    ok: "¡Perfecto! Acrósticos → recursos literarios, Cortometrajes → realidad y ficción, Fábulas → consenso y moralejas.",
+    mal: "La respuesta correcta es C (1b, 2a, 3c). Acrósticos y Haikús reinterpretan problemas mediante recursos literarios (b); Cortometrajes combinan realidad y ficción (a); Fábulas y Asambleas consensúan acciones y moralejas (c)."
+  },
+  // ── Q7  Correcta: A ──
+  {
+    tipo: "Cuestionamiento directo",
+    base: "¿Cuál es el propósito principal de la herramienta didáctica 'Campañas y Mesas de Diálogo'?",
+    tabla: null,
+    opciones: [
+      "Analizar frases populares para erradicar expresiones de violencia y crear un decálogo de buen trato.",
+      "Elaborar cortometrajes comunitarios con diferentes roles asumidos por los estudiantes.",
+      "Organizar lecturas públicas de poesía para generar reflexión colectiva en la comunidad."
+    ],
+    correcta: 0,
+    ok: "¡Correcto! Las Campañas y Mesas de Diálogo analizan expresiones violentas y construyen un decálogo de buen trato.",
+    mal: "La respuesta correcta es A. La herramienta 'Campañas y Mesas de Diálogo' tiene como propósito analizar frases populares para erradicar expresiones de violencia y crear colectivamente un decálogo de buen trato."
+  },
+  // ── Q8  Correcta: B ──
+  {
+    tipo: "Ordenamiento",
+    base: "Ordene correctamente las etapas del Ciclo del Cambio propuesto en la guía, de inicio a fin:",
+    tabla: {
+      cols: ["Etapas a ordenar"],
+      filas: [
+        ["1. El Aula (análisis crítico y asambleas)"],
+        ["2. La Solución (campañas, cortometrajes, literatura)"],
+        ["3. Los Lenguajes (herramientas de comunicación y expresión)"],
+        ["4. La Comunidad (detección de la problemática)"]
+      ]
+    },
+    opciones: [
+      "1, 3, 4, 2",
+      "4, 1, 3, 2",
+      "2, 4, 1, 3"
+    ],
+    correcta: 1,
+    ok: "¡Exacto! El ciclo inicia detectando el problema en la Comunidad, pasa al Aula, usa Los Lenguajes y llega a La Solución.",
+    mal: "La respuesta correcta es B (4, 1, 3, 2). El ciclo inicia en La Comunidad detectando la problemática, continúa en El Aula con análisis crítico, usa Los Lenguajes como herramientas y culmina con La Solución."
+  },
+  // ── Q9  Correcta: C ──
+  {
+    tipo: "Cuestionamiento directo",
+    base: "¿Cuál es el impacto comunitario de la Expresión según la matriz comparativa de la guía?",
+    tabla: null,
+    opciones: [
+      "Participación social y convivencia democrática.",
+      "Intercambio y entendimiento entre los miembros de la comunidad.",
+      "Generación de empatía y diseño de soluciones creativas."
+    ],
+    correcta: 2,
+    ok: "¡Muy bien! La Expresión genera empatía y permite diseñar soluciones creativas.",
+    mal: "La respuesta correcta es C. Según la matriz comparativa, el impacto comunitario de la Expresión es la generación de empatía y el diseño de soluciones creativas. La participación social y convivencia democrática corresponden a la Comunicación."
+  },
+  // ── Q10  Correcta: A ──
+  {
+    tipo: "Completamiento",
+    base: "En la evaluación formativa de la guía, el eje de 'Pensamiento Crítico' se refiere a…",
+    tabla: null,
+    opciones: [
+      "…la calidad de la argumentación, la viabilidad de las soluciones propuestas y el análisis de problemas.",
+      "…el uso pertinente de las convenciones de la lengua como ortografía y sintaxis.",
+      "…la empatía, el respeto en interacciones y la apertura al diálogo."
+    ],
+    correcta: 0,
+    ok: "¡Correcto! El Pensamiento Crítico evalúa la argumentación, la viabilidad de soluciones y el análisis de problemas.",
+    mal: "La respuesta correcta es A. El eje de Pensamiento Crítico valora la calidad de la argumentación, la viabilidad de las soluciones propuestas y el análisis de problemas. Las otras opciones corresponden a Conocimientos y Actitudes respectivamente."
+  },
+  // ── Q11  Correcta: B ──
+  {
+    tipo: "Cuestionamiento directo",
+    base: "¿Cuál es el instrumento de evaluación que se usa para registrar la evolución de actitudes y empatía de los estudiantes a lo largo del tiempo?",
+    tabla: null,
+    opciones: [
+      "La lista de cotejo.",
+      "El diario anecdótico.",
+      "La guía de observación."
+    ],
+    correcta: 1,
+    ok: "¡Excelente! El diario anecdótico es el instrumento para registrar la evolución de actitudes y empatía.",
+    mal: "La respuesta correcta es B. El diario anecdótico se utiliza para registrar la evolución de actitudes y empatía. La lista de cotejo valora textos y participación; la guía de observación se usa en asambleas y mesas de diálogo."
+  },
+  // ── Q12  Correcta: C ──
+  {
+    tipo: "Cuestionamiento directo",
+    base: "¿Qué herramienta didáctica tiene como impacto la organización de una lectura pública para generar reflexión colectiva?",
+    tabla: null,
+    opciones: [
+      "Cortometrajes.",
+      "Campañas y Mesas de Diálogo.",
+      "Acrósticos y Haikús."
+    ],
+    correcta: 2,
+    ok: "¡Correcto! Acrósticos y Haikús culminan con una lectura pública que genera reflexión colectiva.",
+    mal: "La respuesta correcta es C. La herramienta Acrósticos y Haikús tiene como impacto la organización de una lectura pública para generar reflexión colectiva en la comunidad."
+  },
+  // ── Q13  Correcta: A ──
+  {
+    tipo: "Cuestionamiento directo",
+    base: "¿Qué caracteriza al modelo educativo de la Nueva Escuela Mexicana en contraste con el modelo tradicional?",
+    tabla: null,
+    opciones: [
+      "El aprendizaje debe ser significativo y funcional, y los lenguajes son herramientas para resolver problemas sociales como la violencia o la desigualdad.",
+      "La educación se centra en la memorización de contenidos dentro del aula tradicional.",
+      "El docente es el único responsable del diseño curricular y las actividades de aprendizaje."
+    ],
+    correcta: 0,
+    ok: "¡Muy bien! La NEM apuesta por un aprendizaje significativo y funcional con impacto social.",
+    mal: "La respuesta correcta es A. La NEM propone que el aprendizaje sea significativo y funcional, y que los lenguajes sirvan como herramientas para resolver problemas sociales, superando el modelo centrado en la memorización."
+  },
+  // ── Q14  Correcta: B ──
+  {
+    tipo: "Relación de elementos",
+    base: "Seleccione la opción que relaciona correctamente cada instrumento de evaluación con su función:",
+    tabla: {
+      cols: ["Instrumento", "Función"],
+      filas: [
+        ["1. Rúbricas", "a) Para valorar la estructura de textos y participación."],
+        ["2. Listas de Cotejo", "b) Co-diseñadas con estudiantes para debates y campañas."],
+        ["3. Diario Anecdótico", "c) Para registrar la evolución de actitudes y empatía."]
+      ]
+    },
+    opciones: [
+      "1b, 2c, 3a",
+      "1b, 2a, 3c",
+      "1a, 2b, 3c"
+    ],
+    correcta: 1,
+    ok: "¡Exacto! Rúbricas → debates y campañas, Listas de Cotejo → estructura y participación, Diario → actitudes y empatía.",
+    mal: "La respuesta correcta es B (1b, 2a, 3c). Las Rúbricas son co-diseñadas para debates y campañas (b); las Listas de Cotejo valoran estructura de textos y participación (a); el Diario Anecdótico registra actitudes y empatía (c)."
+  },
+  // ── Q15  Correcta: C ──
+  {
+    tipo: "Completamiento",
+    base: "La sinergia entre comunicación y expresión permite que, juntas, estas herramientas…",
+    tabla: null,
+    opciones: [
+      "…los estudiantes aprendan gramática de forma lúdica dentro del aula.",
+      "…los docentes evalúen de manera más eficiente las competencias individuales.",
+      "…construyan propuestas de solución comunitaria."
+    ],
+    correcta: 2,
+    ok: "¡Perfecto! La sinergia de comunicación y expresión construye propuestas de solución comunitaria.",
+    mal: "La respuesta correcta es C. La guía establece que la sinergia entre comunicación y expresión les permite juntas construir propuestas de solución comunitaria, superando sus funciones individuales."
+  },
+  // ── Q16  Correcta: B ──
+  {
+    tipo: "Ordenamiento",
+    base: "Ordene correctamente las fases de acción del cortometraje tal como las presenta la guía:",
+    tabla: {
+      cols: ["Fases a ordenar"],
+      filas: [
+        ["1. Producción (grabación asumiendo diferentes roles)"],
+        ["2. Postproducción y Proyección (edición y exhibición comunitaria)"],
+        ["3. Preproducción (investigación de problemas y escritura del guion)"]
+      ]
+    },
+    opciones: [
+      "1, 3, 2",
+      "3, 1, 2",
+      "2, 1, 3"
+    ],
+    correcta: 1,
+    ok: "¡Correcto! Primero Preproducción (guion), luego Producción (grabación) y finalmente Postproducción (exhibición).",
+    mal: "La respuesta correcta es B (3, 1, 2). El proceso correcto es: Preproducción con investigación y guion (3), luego Producción con grabación (1) y finalmente Postproducción y Proyección (2)."
+  },
+  // ── Q17  Correcta: A ──
+  {
+    tipo: "Cuestionamiento directo",
+    base: "¿Cuál de las siguientes opciones describe correctamente el papel de la Expresión como 'motor de innovación' según la guía?",
+    tabla: null,
+    opciones: [
+      "Estimula la imaginación y las habilidades artísticas para diseñar propuestas creativas a los desafíos comunitarios.",
+      "Permite registrar y sistematizar los acuerdos alcanzados en una asamblea escolar.",
+      "Facilita únicamente la transmisión de información entre el docente y los alumnos."
+    ],
+    correcta: 0,
+    ok: "¡Excelente! La Expresión como motor de innovación estimula la imaginación para diseñar propuestas creativas.",
+    mal: "La respuesta correcta es A. La Expresión como motor de innovación estimula la imaginación y las habilidades artísticas para diseñar propuestas creativas ante los desafíos comunitarios."
+  },
+  // ── Q18  Correcta: C ──
+  {
+    tipo: "Cuestionamiento directo",
+    base: "¿Qué instrumento de evaluación se emplea específicamente para valorar el trabajo en asambleas y mesas de diálogo?",
+    tabla: null,
+    opciones: [
+      "El diario anecdótico.",
+      "Las listas de cotejo.",
+      "Las guías de observación."
+    ],
+    correcta: 2,
+    ok: "¡Correcto! Las guías de observación se usan para valorar el trabajo en asambleas y mesas de diálogo.",
+    mal: "La respuesta correcta es C. Las guías de observación están diseñadas específicamente para valorar asambleas y mesas de diálogo. El diario anecdótico registra actitudes; las listas de cotejo valoran estructura de textos."
+  },
+  // ── Q19  Correcta: B ──
+  {
+    tipo: "Completamiento",
+    base: "La herramienta 'Fábulas y Asambleas' incluye como acciones en el aula…",
+    tabla: null,
+    opciones: [
+      "…la grabación de videos con diferentes roles asumidos por los estudiantes.",
+      "…organizar una asamblea para definir un problema y registrar acuerdos en una minuta, así como redactar fábulas en equipos definiendo personajes y moralejas.",
+      "…diseñar carteles y lemas para una campaña de concientización comunitaria."
+    ],
+    correcta: 1,
+    ok: "¡Muy bien! Fábulas y Asambleas incluye la asamblea con minuta y la redacción colaborativa de fábulas.",
+    mal: "La respuesta correcta es B. La herramienta Fábulas y Asambleas contempla organizar una asamblea para definir un problema, registrar acuerdos en una minuta y redactar fábulas en equipos con personajes y moralejas pertinentes."
+  },
+  // ── Q20  Correcta: A ──
+  {
+    tipo: "Cuestionamiento directo",
+    base: "¿Cuál es el enfoque principal de la Comunicación según la matriz comparativa de la guía?",
+    tabla: null,
+    opciones: [
+      "El intercambio y entendimiento entre los participantes.",
+      "La manifestación y autoexpresión de emociones individuales.",
+      "La creación artística para resolver problemas sociales."
+    ],
+    correcta: 0,
+    ok: "¡Correcto! El enfoque de la Comunicación es el intercambio y entendimiento.",
+    mal: "La respuesta correcta es A. Según la matriz comparativa, el enfoque de la Comunicación es el intercambio y entendimiento. La manifestación y autoexpresión corresponde a la Expresión."
+  },
+  // ── Q21  Correcta: C ──
+  {
+    tipo: "Relación de elementos",
+    base: "Seleccione la opción que relaciona correctamente las etapas del diálogo como herramienta de resolución con su descripción:",
+    tabla: {
+      cols: ["Etapa", "Descripción"],
+      filas: [
+        ["1. Escucha Activa", "a) Llegar a acuerdos entre las partes."],
+        ["2. Comprensión de Perspectivas", "b) Ponerse en el lugar del otro."],
+        ["3. Empatía", "c) Atender con genuino interés las ideas del otro."],
+        ["4. Consenso", "d) Entender los distintos puntos de vista."]
+      ]
+    },
+    opciones: [
+      "1d, 2c, 3b, 4a",
+      "1a, 2b, 3d, 4c",
+      "1c, 2d, 3b, 4a"
+    ],
+    correcta: 2,
+    ok: "¡Excelente! Escucha Activa → atender con interés; Comprensión → entender puntos de vista; Empatía → ponerse en el lugar del otro; Consenso → llegar a acuerdos.",
+    mal: "La respuesta correcta es C (1c, 2d, 3b, 4a). La Escucha Activa es atender con interés (c); la Comprensión de Perspectivas es entender distintos puntos de vista (d); la Empatía es ponerse en el lugar del otro (b); y el Consenso es llegar a acuerdos (a)."
+  },
+  // ── Q22  Correcta: B ──
+  {
+    tipo: "Cuestionamiento directo",
+    base: "¿Cuál es el propósito principal de la herramienta 'Cortometrajes' dentro del arsenal didáctico?",
+    tabla: null,
+    opciones: [
+      "Desarrollar únicamente habilidades ortográficas mediante la escritura de guiones.",
+      "Combinar elementos de la realidad y la ficción para abordar posibles soluciones a problemas comunitarios.",
+      "Promover la lectura en voz alta dentro del aula para mejorar la expresión oral."
+    ],
+    correcta: 1,
+    ok: "¡Correcto! Los Cortometrajes combinan realidad y ficción para abordar soluciones comunitarias.",
+    mal: "La respuesta correcta es B. El propósito de los Cortometrajes es combinar elementos de la realidad y la ficción para abordar posibles soluciones a problemas de la comunidad, con impacto en encuestas y charlas con el público."
+  },
+  // ── Q23  Correcta: A ──
+  {
+    tipo: "Completamiento",
+    base: "Según la guía, en la Nueva Escuela Mexicana, los lenguajes son concebidos como…",
+    tabla: null,
+    opciones: [
+      "…herramientas para resolver problemas sociales como la violencia o la desigualdad.",
+      "…medios exclusivos para la enseñanza de gramática y redacción formal.",
+      "…recursos tecnológicos para facilitar el aprendizaje en línea."
+    ],
+    correcta: 0,
+    ok: "¡Exacto! En la NEM, los lenguajes son herramientas para resolver problemas sociales.",
+    mal: "La respuesta correcta es A. La guía establece que en la NEM los lenguajes son herramientas para resolver problemas sociales como la violencia o la desigualdad, trascendiendo su función gramatical."
+  },
+  // ── Q24  Correcta: C ──
+  {
+    tipo: "Ordenamiento",
+    base: "Ordene correctamente los pasos del proceso de la herramienta 'Fábulas y Asambleas' según la guía:",
+    tabla: {
+      cols: ["Pasos a ordenar"],
+      filas: [
+        ["1. Lectura en voz alta para invitar a la comunidad a acciones colectivas."],
+        ["2. Redactar fábulas en equipos definiendo personajes y moralejas."],
+        ["3. Organizar una asamblea comunitaria para definir el problema."],
+        ["4. Registrar los acuerdos en una minuta."]
+      ]
+    },
+    opciones: [
+      "3, 1, 2, 4",
+      "2, 3, 4, 1",
+      "3, 4, 2, 1"
+    ],
+    correcta: 2,
+    ok: "¡Perfecto! El orden correcto es: asamblea → minuta → redactar fábulas → lectura pública.",
+    mal: "La respuesta correcta es C (3, 4, 2, 1). Se inicia organizando la asamblea (3), se registran los acuerdos en una minuta (4), se redactan las fábulas (2) y finalmente se realiza la lectura pública (1)."
+  },
+  // ── Q25  Correcta: B ──
+  {
+    tipo: "Cuestionamiento directo",
+    base: "¿Cuál de las siguientes actitudes es evaluada dentro del eje 'Actitudes' de la evaluación formativa propuesta en la guía?",
+    tabla: null,
+    opciones: [
+      "La calidad argumentativa en los debates orales y escritos.",
+      "La empatía, el respeto en interacciones, la colaboración y la apertura al diálogo.",
+      "El uso correcto de la ortografía y la sintaxis en los textos producidos."
+    ],
+    correcta: 1,
+    ok: "¡Correcto! El eje Actitudes evalúa empatía, respeto, colaboración y apertura al diálogo.",
+    mal: "La respuesta correcta es B. El eje Actitudes evalúa empatía, respeto en interacciones, colaboración y apertura al diálogo. La calidad argumentativa corresponde a Pensamiento Crítico; la ortografía y sintaxis, a Conocimientos."
+  },
+  // ── Q26  Correcta: A ──
+  {
+    tipo: "Completamiento",
+    base: "Según la guía de estudio, el diálogo es el puente principal para…",
+    tabla: null,
+    opciones: [
+      "…reducir la violencia en todas sus manifestaciones dentro y fuera de la escuela.",
+      "…mejorar las calificaciones de los estudiantes en las evaluaciones formales.",
+      "…diseñar campañas de marketing educativo en la comunidad."
+    ],
+    correcta: 0,
+    ok: "¡Muy bien! El diálogo es el puente principal para reducir la violencia en todas sus manifestaciones.",
+    mal: "La respuesta correcta es A. La guía establece que el diálogo, a diferencia del debate, es el puente principal para reducir la violencia en todas sus manifestaciones, al buscar comprender y colaborar en lugar de vencer."
+  },
+  // ── Q27  Correcta: C ──
+  {
+    tipo: "Relación de elementos",
+    base: "Seleccione la opción que relaciona correctamente la fase del cortometraje con la acción didáctica que le corresponde:",
+    tabla: {
+      cols: ["Fase", "Acción didáctica"],
+      filas: [
+        ["1. Preproducción", "a) Edición y exhibición comunitaria."],
+        ["2. Producción", "b) Investigación de problemas y escritura del guion."],
+        ["3. Postproducción", "c) Grabación asumiendo diferentes roles."]
+      ]
+    },
+    opciones: [
+      "1c, 2b, 3a",
+      "1b, 2a, 3c",
+      "1b, 2c, 3a"
+    ],
+    correcta: 2,
+    ok: "¡Exacto! Preproducción → guion; Producción → grabación; Postproducción → edición y exhibición.",
+    mal: "La respuesta correcta es C (1b, 2c, 3a). La Preproducción es la investigación y escritura del guion (b); la Producción es la grabación asumiendo roles (c); la Postproducción es la edición y exhibición comunitaria (a)."
+  },
+  // ── Q28  Correcta: B ──
+  {
+    tipo: "Cuestionamiento directo",
+    base: "¿Cuál es el impacto esperado de la herramienta 'Campañas y Mesas de Diálogo' según la guía?",
+    tabla: null,
+    opciones: [
+      "La redacción colaborativa de fábulas con moralejas sobre problemas comunitarios.",
+      "El diseño e implementación de una campaña de concientización con lemas y recursos visuales para mitigar acciones violentas.",
+      "La grabación de un cortometraje para exhibir ante la comunidad y evaluar su recepción."
+    ],
+    correcta: 1,
+    ok: "¡Correcto! El impacto de las Campañas es el diseño de una campaña de concientización con lemas y recursos visuales.",
+    mal: "La respuesta correcta es B. El impacto de la herramienta Campañas y Mesas de Diálogo es el diseño e implementación de una campaña de concientización con lemas y recursos visuales para mitigar acciones violentas."
+  },
+  // ── Q29  Correcta: A ──
+  {
+    tipo: "Cuestionamiento directo",
+    base: "¿Qué instrumento de evaluación es co-diseñado con los propios estudiantes para valorar debates y campañas?",
+    tabla: null,
+    opciones: [
+      "Las rúbricas.",
+      "El diario anecdótico.",
+      "Las guías de observación."
+    ],
+    correcta: 0,
+    ok: "¡Excelente! Las rúbricas son co-diseñadas con los estudiantes para valorar debates y campañas.",
+    mal: "La respuesta correcta es A. Las rúbricas son co-diseñadas con los estudiantes para evaluar debates y campañas. Este co-diseño fortalece la evaluación formativa y el sentido de responsabilidad del alumno."
+  },
+  // ── Q30  Correcta: C ──
+  {
+    tipo: "Completamiento",
+    base: "El eje de 'Conocimientos' en la evaluación formativa propuesta en la guía valora…",
+    tabla: null,
+    opciones: [
+      "…la empatía y el respeto en las interacciones cotidianas dentro del aula.",
+      "…la calidad de los argumentos y la viabilidad de las soluciones propuestas.",
+      "…el uso pertinente de las convenciones de la lengua: ortografía, recursos retóricos y sintaxis."
+    ],
+    correcta: 2,
+    ok: "¡Perfecto! El eje Conocimientos valora el uso pertinente de convenciones lingüísticas: ortografía, retórica y sintaxis.",
+    mal: "La respuesta correcta es C. El eje Conocimientos evalúa el uso pertinente de las convenciones de la lengua (ortografía, recursos retóricos y sintaxis). La empatía corresponde a Actitudes; la calidad argumentativa, a Pensamiento Crítico."
+  }
+];
+
+// ============================================================
+// ESTADO DEL SIMULADOR
+// ============================================================
+let estado = {
+  nombre: "",
+  preguntaActual: 0,
+  aciertos: 0,
+  errores: 0,
+  respondida: false,
+  pantallaAnterior: "inicio"
+};
+
+const LETRAS = ["A", "B", "C"];
+
+// ============================================================
+// FUNCIONES PRINCIPALES
+// ============================================================
+function mostrarPantalla(id) {
+  document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+  document.getElementById(id).classList.add('activa');
+}
+
+function iniciarSimulador() {
+  const input = document.getElementById('nombre-input');
+  const nombre = input.value.trim();
+  if (!nombre) {
+    input.focus();
+    input.style.borderColor = '#E63946';
+    input.style.boxShadow = '0 0 0 4px rgba(230,57,70,0.15)';
+    setTimeout(() => {
+      input.style.borderColor = '';
+      input.style.boxShadow = '';
+    }, 1500);
+    return;
+  }
+  estado.nombre = nombre;
+  estado.preguntaActual = 0;
+  estado.aciertos = 0;
+  estado.errores = 0;
+  estado.respondida = false;
+  estado.pantallaAnterior = "pantalla-quiz";
+  document.getElementById('badge-progreso').style.visibility = 'visible';
+  mostrarPantalla('pantalla-quiz');
+  renderPregunta();
+}
+
+function renderPregunta() {
+  const q = preguntas[estado.preguntaActual];
+  const tarjeta = document.getElementById('tarjeta-pregunta');
+  tarjeta.classList.remove('saliendo');
+
+  // Actualizar progreso
+  const progreso = ((estado.preguntaActual) / 30) * 100;
+  document.getElementById('barra-fill').style.width = progreso + '%';
+  document.getElementById('progreso-texto').textContent = `Pregunta ${estado.preguntaActual + 1} de 30`;
+  document.getElementById('puntaje-mini').textContent = `✅ ${estado.aciertos} aciertos`;
+  document.getElementById('badge-num').textContent = `${estado.preguntaActual + 1}/30`;
+
+  // Encabezado pregunta
+  document.getElementById('pregunta-num').textContent = estado.preguntaActual + 1;
+  document.getElementById('pregunta-tipo').textContent = q.tipo;
+  document.getElementById('pregunta-texto').textContent = q.base;
+
+  // Tabla opcional
+  const tablaContainer = document.getElementById('tabla-container');
+  tablaContainer.innerHTML = '';
+  if (q.tabla) {
+    let html = '<table class="tabla-relacion"><thead><tr>';
+    q.tabla.cols.forEach(c => { html += `<th>${c}</th>`; });
+    html += '</tr></thead><tbody>';
+    q.tabla.filas.forEach((fila, i) => {
+      html += '<tr>';
+      fila.forEach((celda, j) => {
+        const cls = (q.tabla.cols.length > 1 && j === 0) ? 'num-col' :
+                    (q.tabla.cols.length > 1 && j === 1) ? 'let-col' : '';
+        html += `<td class="${cls}">${celda}</td>`;
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    tablaContainer.innerHTML = html;
+  }
+
+  // Opciones
+  const lista = document.getElementById('opciones-lista');
+  lista.innerHTML = '';
+  q.opciones.forEach((op, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opcion-btn';
+    btn.innerHTML = `
+      <span class="opcion-letra">${LETRAS[i]}</span>
+      <span class="opcion-texto">${op}</span>
+      <span class="opcion-icono-resultado"></span>
+    `;
+    btn.onclick = () => seleccionarOpcion(i);
+    lista.appendChild(btn);
+  });
+
+  // Feedback y botón
+  const fb = document.getElementById('feedback-box');
+  fb.className = 'feedback-box';
+  document.getElementById('btn-siguiente').classList.remove('visible');
+  estado.respondida = false;
+}
+
+function seleccionarOpcion(indice) {
+  if (estado.respondida) return;
+  estado.respondida = true;
+
+  const q = preguntas[estado.preguntaActual];
+  const botones = document.querySelectorAll('.opcion-btn');
+  const esCorrecta = (indice === q.correcta);
+
+  // Deshabilitar todos
+  botones.forEach(b => b.disabled = true);
+
+  // Marcar seleccionada
+  botones[indice].classList.add(esCorrecta ? 'correcta' : 'incorrecta');
+  const iconoSel = botones[indice].querySelector('.opcion-icono-resultado');
+  iconoSel.textContent = esCorrecta ? '✅' : '❌';
+
+  // Si incorrecta, mostrar correcta
+  if (!esCorrecta) {
+    botones[q.correcta].classList.add('mostrar-correcta');
+    const iconoCor = botones[q.correcta].querySelector('.opcion-icono-resultado');
+    iconoCor.textContent = '✅';
+    estado.errores++;
+  } else {
+    estado.aciertos++;
+  }
+
+  // Feedback
+  const fb = document.getElementById('feedback-box');
+  const fbIcono = document.getElementById('feedback-icono');
+  const fbTexto = document.getElementById('feedback-texto');
+  fb.className = 'feedback-box visible ' + (esCorrecta ? 'correcto' : 'incorrecto');
+  fbIcono.textContent = esCorrecta ? '🌟' : '💡';
+  fbTexto.textContent = esCorrecta ? q.ok : q.mal;
+
+  // Botón siguiente
+  const btnSig = document.getElementById('btn-siguiente');
+  btnSig.textContent = '';
+  btnSig.innerHTML = (estado.preguntaActual < 29)
+    ? 'Siguiente pregunta <span>→</span>'
+    : 'Ver mis resultados <span>🏆</span>';
+  btnSig.classList.add('visible');
+
+  // Actualizar mini puntaje
+  document.getElementById('puntaje-mini').textContent = `✅ ${estado.aciertos} aciertos`;
+}
+
+function siguientePregunta() {
+  if (estado.preguntaActual >= 29) {
+    mostrarResultados();
+    return;
+  }
+  const tarjeta = document.getElementById('tarjeta-pregunta');
+  tarjeta.classList.add('saliendo');
+  setTimeout(() => {
+    estado.preguntaActual++;
+    renderPregunta();
+    const progreso = ((estado.preguntaActual) / 30) * 100;
+    document.getElementById('barra-fill').style.width = progreso + '%';
+  }, 250);
+}
+
+function mostrarResultados() {
+  estado.pantallaAnterior = "pantalla-resultados";
+  document.getElementById('badge-progreso').style.visibility = 'hidden';
+  mostrarPantalla('pantalla-resultados');
+
+  const pct = Math.round((estado.aciertos / 30) * 100);
+
+  // Emoji y nombre
+  document.getElementById('resultado-emoji').textContent =
+    pct >= 90 ? '🏆' : pct >= 70 ? '🎉' : pct >= 50 ? '📚' : '💪';
+  document.getElementById('resultado-nombre').textContent =
+    `¡${estado.nombre}!`;
+  document.getElementById('resultado-subtitulo').textContent =
+    'Has completado el simulador · Comunicación y Expresión Comunitaria';
+
+  // Estadísticas
+  document.getElementById('num-aciertos').textContent = estado.aciertos;
+  document.getElementById('num-errores').textContent = estado.errores;
+  document.getElementById('marcador-porcentaje').textContent = pct + '%';
+
+  // Animar círculo
+  setTimeout(() => {
+    const circunferencia = 2 * Math.PI * 65;
+    const offset = circunferencia - (pct / 100) * circunferencia;
+    const circulo = document.getElementById('circulo-progreso');
+    circulo.style.strokeDashoffset = offset;
+    circulo.style.stroke = pct >= 70 ? '#52B788' : pct >= 50 ? '#E9C46A' : '#E76F51';
+  }, 300);
+
+  // Mensaje motivador
+  let msg = '';
+  if (pct >= 90) msg = '¡Felicitaciones! Dominas los contenidos de Comunicación y Expresión Comunitaria. ¡Sigue siendo un ejemplo para tu grupo!';
+  else if (pct >= 70) msg = '¡Buen trabajo! Tienes una sólida comprensión del tema. Repasa los puntos donde tuviste dificultades para alcanzar la excelencia.';
+  else if (pct >= 50) msg = 'Vas por buen camino. Te recomendamos repasar la guía de estudio para reforzar los conceptos que aún necesitas consolidar.';
+  else msg = 'No te desanimes. Cada error es una oportunidad de aprender. Revisa la guía de estudio y vuelve a intentarlo. ¡Tú puedes!';
+  document.getElementById('mensaje-motivador').textContent = msg;
+
+  // Confeti si pct >= 70
+  if (pct >= 70) lanzarConfeti();
+}
+
+function lanzarConfeti() {
+  const cont = document.getElementById('confetti');
+  cont.innerHTML = '';
+  const colores = ['#52B788','#E9C46A','#F4A261','#2D6A4F','#E76F51','#D8F3DC'];
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.cssText = `
+      left: ${Math.random() * 100}%;
+      background: ${colores[Math.floor(Math.random() * colores.length)]};
+      animation-delay: ${Math.random() * 2}s;
+      animation-duration: ${2 + Math.random() * 2}s;
+      width: ${6 + Math.random() * 8}px;
+      height: ${6 + Math.random() * 8}px;
+      border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+    `;
+    cont.appendChild(p);
+  }
+}
+
+function reiniciarSimulador() {
+  estado.preguntaActual = 0;
+  estado.aciertos = 0;
+  estado.errores = 0;
+  estado.respondida = false;
+  document.getElementById('nombre-input').value = estado.nombre;
+  document.getElementById('badge-progreso').style.visibility = 'visible';
+  mostrarPantalla('pantalla-quiz');
+  renderPregunta();
+}
+
+function mostrarGuia() {
+  const activa = document.querySelector('.pantalla.activa');
+  estado.pantallaAnterior = activa ? activa.id : 'pantalla-inicio';
+  mostrarPantalla('pantalla-guia');
+  document.getElementById('badge-progreso').style.visibility = 'hidden';
+}
+
+function volverDesdeGuia() {
+  const prev = estado.pantallaAnterior || 'pantalla-inicio';
+  mostrarPantalla(prev);
+  if (prev === 'pantalla-quiz') {
+    document.getElementById('badge-progreso').style.visibility = 'visible';
+  }
+}
+
+// Enter en el campo de nombre
+document.getElementById('nombre-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') iniciarSimulador();
+});
+</script>
+</body>
+</html>

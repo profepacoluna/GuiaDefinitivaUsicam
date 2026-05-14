@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador CTE – Comunidad de Aprendizaje</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  /* ──────────────────────── VARIABLES ──────────────────────── */
+  :root {
+    --teal-dark:   #0a5c6b;
+    --teal:        #0d7b8c;
+    --teal-mid:    #1a9eaf;
+    --teal-light:  #e0f4f7;
+    --amber:       #f59e0b;
+    --amber-light: #fef3c7;
+    --rose:        #e11d48;
+    --rose-light:  #ffe4e6;
+    --green:       #059669;
+    --green-light: #d1fae5;
+    --white:       #ffffff;
+    --gray-50:     #f8fafc;
+    --gray-100:    #f1f5f9;
+    --gray-200:    #e2e8f0;
+    --gray-400:    #94a3b8;
+    --gray-600:    #475569;
+    --gray-800:    #1e293b;
+    --shadow-sm:   0 2px 8px rgba(0,0,0,.08);
+    --shadow-md:   0 6px 24px rgba(0,0,0,.12);
+    --shadow-lg:   0 16px 48px rgba(0,0,0,.16);
+    --r-sm:        12px;
+    --r-md:        18px;
+    --r-lg:        24px;
+    --r-xl:        32px;
+  }
+
+  /* ──────────────────────── RESET / BASE ──────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #e0f4f7 0%, #f0fdf4 35%, #fef9ec 65%, #fce7f3 100%);
+    background-attachment: fixed;
+    color: var(--gray-800);
+    line-height: 1.6;
+  }
+
+  /* ──────────────────────── HEADER ──────────────────────── */
+  .site-header {
+    background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal) 50%, var(--teal-mid) 100%);
+    color: white;
+    text-align: center;
+    padding: 28px 20px 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+  }
+  .site-header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='30' cy='30' r='28' fill='none' stroke='rgba(255,255,255,.06)' stroke-width='2'/%3E%3C/svg%3E") center/60px;
+    pointer-events: none;
+  }
+  .header-badge {
+    display: inline-block;
+    background: rgba(255,255,255,.18);
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 999px;
+    padding: 4px 16px;
+    font-size: .78rem;
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .header-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(1.4rem, 4vw, 2.1rem);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -.01em;
+    text-shadow: 0 2px 8px rgba(0,0,0,.2);
+    margin-bottom: 6px;
+  }
+  .header-sub {
+    font-size: clamp(.85rem, 2.5vw, 1rem);
+    font-weight: 600;
+    opacity: .88;
+    font-family: 'Outfit', sans-serif;
+  }
+  .header-dots {
+    display: flex; justify-content: center; gap: 8px;
+    margin-top: 14px;
+  }
+  .header-dots span {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,.4);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  .header-dots span:nth-child(2) { animation-delay: .3s; }
+  .header-dots span:nth-child(3) { animation-delay: .6s; }
+  @keyframes pulse-dot {
+    0%,100% { opacity: .4; transform: scale(1); }
+    50%      { opacity: 1; transform: scale(1.3); }
+  }
+
+  /* ──────────────────────── TABS ──────────────────────── */
+  .tabs-nav {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 18px 20px 0;
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: .9rem;
+    padding: 10px 22px;
+    border-radius: 999px;
+    border: 2px solid var(--gray-200);
+    background: var(--white);
+    color: var(--gray-600);
+    cursor: pointer;
+    transition: all .25s ease;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .tab-btn:hover { border-color: var(--teal); color: var(--teal); }
+  .tab-btn.active {
+    background: var(--teal);
+    border-color: var(--teal);
+    color: white;
+    box-shadow: 0 4px 12px rgba(13,123,140,.3);
+  }
+  .tab-icon { font-size: 1rem; }
+
+  /* ──────────────────────── MAIN WRAPPER ──────────────────────── */
+  .main-wrap {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; animation: fadeIn .35s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+  /* ──────────────────────── WELCOME SCREEN ──────────────────────── */
+  .welcome-card {
+    background: var(--white);
+    border-radius: var(--r-xl);
+    padding: 48px 40px;
+    text-align: center;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+  }
+  .welcome-card::after {
+    content: '';
+    position: absolute; bottom:-60px; right:-60px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: var(--teal-light);
+    z-index: 0;
+  }
+  .welcome-card > * { position: relative; z-index: 1; }
+  .welcome-icon {
+    font-size: 4rem;
+    margin-bottom: 16px;
+    display: block;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
+  }
+  .welcome-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(1.3rem, 4vw, 1.75rem);
+    font-weight: 800;
+    color: var(--teal-dark);
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+  .welcome-desc {
+    color: var(--gray-600);
+    font-size: 1rem;
+    margin-bottom: 32px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 36px;
+  }
+  .stat-chip {
+    background: var(--teal-light);
+    color: var(--teal-dark);
+    border-radius: 999px;
+    padding: 8px 18px;
+    font-size: .85rem;
+    font-weight: 700;
+    font-family: 'Outfit', sans-serif;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .input-group {
+    max-width: 380px;
+    margin: 0 auto 28px;
+    text-align: left;
+  }
+  .input-label {
+    display: block;
+    font-weight: 700;
+    font-size: .9rem;
+    color: var(--gray-800);
+    margin-bottom: 8px;
+    font-family: 'Outfit', sans-serif;
+  }
+  .name-input {
+    width: 100%;
+    padding: 14px 20px;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--r-sm);
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    color: var(--gray-800);
+    background: var(--gray-50);
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .name-input:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(13,123,140,.15);
+    background: white;
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: 999px;
+    padding: 15px 40px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(13,92,107,.35);
+    transition: transform .2s, box-shadow .2s;
+    letter-spacing: .02em;
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(13,92,107,.45);
+  }
+  .btn-primary:active { transform: translateY(0); }
+
+  /* ──────────────────────── PROGRESS BAR ──────────────────────── */
+  .progress-wrap {
+    background: var(--white);
+    border-radius: var(--r-md);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+    display: flex; align-items: center; gap: 16px;
+  }
+  .progress-label {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: .9rem;
+    color: var(--teal-dark);
+    white-space: nowrap;
+    min-width: 90px;
+  }
+  .progress-bar-track {
+    flex: 1;
+    height: 10px;
+    background: var(--gray-200);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--teal) 0%, var(--teal-mid) 100%);
+    border-radius: 999px;
+    transition: width .5s cubic-bezier(.4,0,.2,1);
+  }
+  .progress-count {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: .9rem;
+    color: var(--gray-600);
+    white-space: nowrap;
+  }
+
+  /* ──────────────────────── QUESTION CARD ──────────────────────── */
+  .question-card {
+    background: var(--white);
+    border-radius: var(--r-xl);
+    padding: 36px 36px 28px;
+    box-shadow: var(--shadow-md);
+    animation: slideUp .3s ease;
+  }
+  @keyframes slideUp {
+    from { opacity:0; transform: translateY(16px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+  .question-meta {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .q-num-badge {
+    background: var(--teal-dark);
+    color: white;
+    border-radius: 999px;
+    padding: 4px 14px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: .85rem;
+  }
+  .q-type-badge {
+    background: var(--amber-light);
+    color: #92400e;
+    border-radius: 999px;
+    padding: 4px 14px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: .8rem;
+    border: 1px solid #fde68a;
+  }
+  .question-base {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 24px;
+    line-height: 1.65;
+  }
+  /* Table inside question */
+  .rel-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0 18px;
+    font-size: .93rem;
+  }
+  .rel-table th {
+    background: var(--teal-dark);
+    color: white;
+    padding: 10px 14px;
+    text-align: left;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: .85rem;
+  }
+  .rel-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--gray-200);
+    vertical-align: top;
+  }
+  .rel-table tr:nth-child(even) td { background: var(--gray-50); }
+  .rel-table tr:last-child td { border-bottom: none; }
+  .rel-table .num-col { font-weight: 700; color: var(--teal-dark); white-space: nowrap; }
+  .rel-table .letter-col { font-weight: 700; color: var(--amber); white-space: nowrap; }
+
+  /* Options */
+  .options-list { display: flex; flex-direction: column; gap: 12px; }
+  .option-btn {
+    display: flex; align-items: flex-start; gap: 14px;
+    background: var(--gray-50);
+    border: 2px solid var(--gray-200);
+    border-radius: var(--r-md);
+    padding: 16px 18px;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Nunito', sans-serif;
+    font-size: .97rem;
+    color: var(--gray-800);
+    transition: all .2s ease;
+    width: 100%;
+    line-height: 1.55;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--teal);
+    background: var(--teal-light);
+    transform: translateX(3px);
+  }
+  .option-btn.selected {
+    border-color: var(--teal);
+    background: var(--teal-light);
+  }
+  .option-btn.correct {
+    border-color: var(--green);
+    background: var(--green-light);
+    animation: correctPulse .4s ease;
+  }
+  .option-btn.incorrect {
+    border-color: var(--rose);
+    background: var(--rose-light);
+  }
+  .option-btn.show-correct {
+    border-color: var(--green);
+    background: var(--green-light);
+  }
+  .option-btn:disabled { cursor: default; }
+  @keyframes correctPulse {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+  .option-letter {
+    flex-shrink: 0;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--teal-dark);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: .88rem;
+    margin-top: 1px;
+  }
+  .option-btn.correct .option-letter  { background: var(--green); }
+  .option-btn.incorrect .option-letter { background: var(--rose); }
+  .option-btn.show-correct .option-letter { background: var(--green); }
+
+  /* Feedback */
+  .feedback-box {
+    margin-top: 18px;
+    border-radius: var(--r-md);
+    padding: 16px 20px;
+    font-size: .95rem;
+    line-height: 1.6;
+    display: none;
+    animation: fadeIn .3s ease;
+  }
+  .feedback-box.correct {
+    background: var(--green-light);
+    border-left: 4px solid var(--green);
+    color: #065f46;
+    display: block;
+  }
+  .feedback-box.incorrect {
+    background: var(--rose-light);
+    border-left: 4px solid var(--rose);
+    color: #881337;
+    display: block;
+  }
+  .feedback-title {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  /* Next button */
+  .question-footer {
+    display: flex; justify-content: flex-end;
+    margin-top: 24px;
+  }
+  .btn-next {
+    display: none;
+    align-items: center; gap: 8px;
+    background: linear-gradient(135deg, var(--amber) 0%, #d97706 100%);
+    color: white;
+    border: none;
+    border-radius: 999px;
+    padding: 13px 32px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(245,158,11,.4);
+    transition: transform .2s, box-shadow .2s;
+    letter-spacing: .02em;
+  }
+  .btn-next:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(245,158,11,.5);
+  }
+  .btn-next.visible { display: inline-flex; }
+
+  /* ──────────────────────── RESULTS ──────────────────────── */
+  .results-card {
+    background: var(--white);
+    border-radius: var(--r-xl);
+    padding: 48px 36px;
+    box-shadow: var(--shadow-md);
+    text-align: center;
+    animation: slideUp .4s ease;
+  }
+  .results-emoji { font-size: 4.5rem; margin-bottom: 12px; display: block; }
+  .results-name {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem;
+    color: var(--gray-600);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .results-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(1.4rem, 4vw, 2rem);
+    font-weight: 900;
+    color: var(--teal-dark);
+    margin-bottom: 32px;
+    line-height: 1.2;
+  }
+  .score-circle-wrap {
+    display: flex; justify-content: center;
+    margin-bottom: 32px;
+  }
+  .score-circle {
+    width: 150px; height: 150px;
+    border-radius: 50%;
+    background: conic-gradient(var(--teal) var(--pct), var(--gray-200) var(--pct));
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .score-inner {
+    width: 118px; height: 118px;
+    border-radius: 50%;
+    background: white;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .score-pct {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2.1rem;
+    font-weight: 900;
+    color: var(--teal-dark);
+    line-height: 1;
+  }
+  .score-pct-label {
+    font-size: .75rem;
+    color: var(--gray-400);
+    font-weight: 700;
+    font-family: 'Outfit', sans-serif;
+  }
+  .results-stats {
+    display: flex; justify-content: center; gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+  .stat-block {
+    padding: 18px 28px;
+    border-radius: var(--r-md);
+    min-width: 110px;
+  }
+  .stat-block.hits   { background: var(--green-light); color: var(--green); }
+  .stat-block.misses { background: var(--rose-light);  color: var(--rose); }
+  .stat-block .num {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2.4rem;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-block .lbl {
+    font-size: .82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    font-family: 'Outfit', sans-serif;
+  }
+  .motivational {
+    background: linear-gradient(135deg, var(--teal-light) 0%, #f0fdf4 100%);
+    border-radius: var(--r-md);
+    padding: 18px 24px;
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--teal-dark);
+    font-weight: 600;
+    margin-bottom: 28px;
+    border-left: 4px solid var(--teal);
+  }
+  .btn-retry {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+    color: white; border: none; border-radius: 999px;
+    padding: 14px 36px;
+    font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1rem;
+    cursor: pointer; box-shadow: 0 4px 16px rgba(13,92,107,.3);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .btn-retry:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(13,92,107,.4); }
+
+  /* Results hidden until needed */
+  #results-panel { display: none; }
+
+  /* ──────────────────────── GUÍA PDF ──────────────────────── */
+  .guide-card {
+    background: var(--white);
+    border-radius: var(--r-xl);
+    padding: 30px 28px;
+    box-shadow: var(--shadow-md);
+  }
+  .guide-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .guide-icon-wrap {
+    width: 52px; height: 52px; border-radius: var(--r-sm);
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+  }
+  .guide-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--teal-dark);
+  }
+  .guide-sub { font-size: .88rem; color: var(--gray-400); font-weight: 600; }
+  .guide-actions {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .btn-open-pdf {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+    color: white; border: none; border-radius: 999px;
+    padding: 11px 24px;
+    font-family: 'Outfit', sans-serif; font-weight: 700; font-size: .9rem;
+    cursor: pointer; text-decoration: none;
+    box-shadow: 0 4px 14px rgba(13,92,107,.3);
+    transition: transform .2s;
+  }
+  .btn-open-pdf:hover { transform: translateY(-2px); }
+  .pdf-frame {
+    width: 100%;
+    height: 600px;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--r-md);
+    background: var(--gray-50);
+  }
+
+  /* ──────────────────────── UTILITY ──────────────────────── */
+  .hidden { display: none !important; }
+  .error-msg {
+    color: var(--rose);
+    font-size: .88rem;
+    font-weight: 700;
+    margin-top: 8px;
+    text-align: center;
+  }
+
+  /* ──────────────────────── RESPONSIVE ──────────────────────── */
+  @media (max-width: 600px) {
+    .welcome-card   { padding: 32px 20px; }
+    .question-card  { padding: 24px 18px 20px; }
+    .results-card   { padding: 32px 20px; }
+    .guide-card     { padding: 22px 16px; }
+    .rel-table { font-size: .82rem; }
+    .rel-table th, .rel-table td { padding: 8px 10px; }
+    .pdf-frame { height: 420px; }
+    .stats-row { gap: 10px; }
+    .results-stats { gap: 14px; }
+    .stat-block { padding: 14px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ HEADER ═══════════════════════ -->
+<header class="site-header">
+  <div class="header-badge">🏫 Ciclo Escolar 2025–2026</div>
+  <h1 class="header-title">Simulador Interactivo de Evaluación</h1>
+  <p class="header-sub">Prof. Francisco De Jesús Luna Benítez</p>
+  <div class="header-dots"><span></span><span></span><span></span></div>
+</header>
+
+<!-- ═══════════════════════ TABS NAV ═══════════════════════ -->
+<div class="tabs-nav" id="tabsNav">
+  <button class="tab-btn active" data-tab="exam" onclick="switchTab('exam')">
+    <span class="tab-icon">📝</span> Examen
+  </button>
+  <button class="tab-btn" data-tab="guide" onclick="switchTab('guide')">
+    <span class="tab-icon">📖</span> Guía de Estudio
+  </button>
+</div>
+
+<!-- ═══════════════════════ MAIN WRAP ═══════════════════════ -->
+<div class="main-wrap">
+
+  <!-- ── TAB: EXAMEN ── -->
+  <div id="tab-exam" class="tab-panel active">
+
+    <!-- Welcome -->
+    <div id="welcome-screen">
+      <div class="welcome-card">
+        <span class="welcome-icon">🎓</span>
+        <h2 class="welcome-title">El CTE como Comunidad de Aprendizaje</h2>
+        <p class="welcome-desc">Evalúa tu dominio sobre los conceptos del Consejo Técnico Escolar como Comunidad de Aprendizaje. 30 reactivos en formato USICAMM.</p>
+        <div class="stats-row">
+          <div class="stat-chip">📋 30 Preguntas</div>
+          <div class="stat-chip">🔀 4 Formatos</div>
+          <div class="stat-chip">✅ Retroalimentación inmediata</div>
+        </div>
+        <div class="input-group">
+          <label class="input-label" for="studentName">Tu nombre completo</label>
+          <input type="text" id="studentName" class="name-input" placeholder="Escribe tu nombre aquí…" maxlength="80" />
+          <div id="nameError" class="error-msg hidden">Por favor ingresa tu nombre para continuar.</div>
+        </div>
+        <button class="btn-primary" onclick="startExam()">
+          🚀 Iniciar Simulador
+        </button>
+      </div>
+    </div>
+
+    <!-- Progress + Question -->
+    <div id="quiz-screen" class="hidden">
+      <div class="progress-wrap">
+        <div class="progress-label">Progreso</div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+        </div>
+        <div class="progress-count" id="progressCount">0 / 30</div>
+      </div>
+
+      <div class="question-card" id="questionCard">
+        <div class="question-meta">
+          <span class="q-num-badge" id="qNumBadge">Pregunta 1</span>
+          <span class="q-type-badge" id="qTypeBadge">Cuestionamiento directo</span>
+        </div>
+        <div class="question-base" id="questionBase"></div>
+        <div class="options-list" id="optionsList"></div>
+        <div class="feedback-box" id="feedbackBox"></div>
+        <div class="question-footer">
+          <button class="btn-next" id="btnNext" onclick="nextQuestion()">
+            Siguiente <span>→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="results-screen" class="hidden">
+      <div class="results-card" id="resultsCard">
+        <span class="results-emoji" id="resultsEmoji">🏆</span>
+        <p class="results-name" id="resultsName"></p>
+        <h2 class="results-title">Resultados de tu Evaluación</h2>
+        <div class="score-circle-wrap">
+          <div class="score-circle" id="scoreCircle">
+            <div class="score-inner">
+              <span class="score-pct" id="scorePct">0%</span>
+              <span class="score-pct-label">DESEMPEÑO</span>
+            </div>
+          </div>
+        </div>
+        <div class="results-stats">
+          <div class="stat-block hits">
+            <div class="num" id="hitsNum">0</div>
+            <div class="lbl">✅ Aciertos</div>
+          </div>
+          <div class="stat-block misses">
+            <div class="num" id="missesNum">0</div>
+            <div class="lbl">❌ Errores</div>
+          </div>
+        </div>
+        <div class="motivational" id="motivMsg"></div>
+        <button class="btn-retry" onclick="resetExam()">🔄 Volver a Intentarlo</button>
+      </div>
+    </div>
+
+  </div><!-- /tab-exam -->
+
+  <!-- ── TAB: GUÍA DE ESTUDIO ── -->
+  <div id="tab-guide" class="tab-panel">
+    <div class="guide-card">
+      <div class="guide-header">
+        <div class="guide-icon-wrap">📄</div>
+        <div>
+          <div class="guide-title">Guía de Estudio</div>
+          <div class="guide-sub">El CTE como Comunidad de Aprendizaje · SEP 2025–2026</div>
+        </div>
+      </div>
+      <div class="guide-actions">
+        <a class="btn-open-pdf" href="https://drive.google.com/file/d/1cWpln6aymW8iV_C_v8MaTNNO14blA4Jl/view?usp=sharing" target="_blank">
+          🔗 Abrir en nueva pestaña
+        </a>
+      </div>
+      <iframe class="pdf-frame" id="pdfFrame"
+        src="https://drive.google.com/file/d/1cWpln6aymW8iV_C_v8MaTNNO14blA4Jl/preview"
+        allow="autoplay"
+        title="Guía de Estudio PDF">
+      </iframe>
+    </div>
+  </div><!-- /tab-guide -->
+
+</div><!-- /main-wrap -->
+
+<!-- ═══════════════════════ JAVASCRIPT ═══════════════════════ -->
+<script>
+/* ─────────────────────── STATE ─────────────────────── */
+let studentName = '';
+let currentQ    = 0;
+let hits        = 0;
+let misses      = 0;
+let answered    = false;
+
+/* ─────────────────────── TABS ─────────────────────── */
+function switchTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelector('[data-tab="' + tab + '"]').classList.add('active');
+}
+
+/* ─────────────────────── BANK OF 30 QUESTIONS ─────────────────────── */
+const questions = [
+
+  // ── Q1 · Cuestionamiento directo · Correct: B
+  {
+    tipo: 'Cuestionamiento directo',
+    base: '¿Cuál es la finalidad principal del CTE como Comunidad de Aprendizaje según el documento del ciclo escolar 2025-2026?',
+    opts: [
+      'Cumplir eficientemente con los trámites administrativos y de organización escolar.',
+      'Que los docentes aborden problemáticas de sus prácticas de forma reflexiva y crítica para mejorar el aprendizaje de sus estudiantes y llegar a acuerdos que se implementen en el aula.',
+      'Implementar programas nacionales de evaluación estandarizada para medir el desempeño docente individualmente.'
+    ],
+    correcta: 1,
+    justif: 'El CTE como CA busca que los docentes aborden problemáticas asociadas a sus prácticas de manera reflexiva y crítica respecto a cómo mejorar el aprendizaje de sus estudiantes, para llegar a acuerdos que luego se implementen en el aula (Stoll et al., 2006; Liberman y Miller, 2011).'
+  },
+
+  // ── Q2 · Completamiento · Correct: A
+  {
+    tipo: 'Completamiento',
+    base: 'Una Comunidad de Aprendizaje (CA) es una oportunidad de mejora educativa que establece al aprendizaje dialógico como…',
+    opts: [
+      '…compromiso comunitario para la mejora educativa y para construir una sociedad más justa, crítica, solidaria, pacífica y sustentable.',
+      '…estrategia institucional para evaluar el desempeño docente mediante indicadores cuantitativos de rendimiento escolar.',
+      '…metodología individual que cada docente aplica en su práctica pedagógica sin necesidad de vincularse al colectivo.'
+    ],
+    correcta: 0,
+    justif: 'El documento define que la CA establece al aprendizaje dialógico como compromiso comunitario para la mejora educativa y para construir una sociedad más justa, crítica, solidaria, pacífica y sustentable.'
+  },
+
+  // ── Q3 · Relación de elementos · Correct: C
+  {
+    tipo: 'Relación de elementos',
+    base: `Seleccione la opción que relacione correctamente cada pilar de la conexión dialógica y colaborativa de las CA con los elementos que le corresponden.
+<table class="rel-table">
+  <tr><th>Pilar</th><th>Descripción</th></tr>
+  <tr><td class="num-col">1. Diálogo y confianza</td><td>a) Gestión de la participación con autonomía, foco de trabajo, principio de inclusión, clima de confianza y contar con un facilitador.</td></tr>
+  <tr><td class="num-col">2. Trabajo colaborativo</td><td>b) Orientar a los colectivos hacia la colaboración, el diálogo y la reflexión; conformar redes de apoyo y valorar avances.</td></tr>
+  <tr><td class="num-col">3. Acompañamiento Supervisión/Dirección</td><td>c) Articular las CA, definir grupos de trabajo, redes de apoyo, monitorear, construcción colaborativa y solidaridad y empatía.</td></tr>
+</table>`,
+    opts: [
+      'A) 1a, 2c, 3b',
+      'B) 1c, 2b, 3a',
+      'C) 1c, 2a, 3b'
+    ],
+    correcta: 2,
+    justif: 'Según el esquema del documento: Diálogo y confianza incluye articular las CA, definir grupos de trabajo, redes de apoyo, monitorear y construcción colaborativa. Trabajo colaborativo incluye gestión de participación con autonomía, foco de trabajo, principio de inclusión, clima de confianza y facilitador. Acompañamiento incluye orientar colectivos, redes de apoyo y valorar avances.'
+  },
+
+  // ── Q4 · Ordenamiento · Correct: A
+  {
+    tipo: 'Ordenamiento',
+    base: `Ordene los momentos que puede considerar el proceso de construcción o fortalecimiento de una CA en el contexto de cada escuela, según el documento.
+<table class="rel-table">
+  <tr><th>N.°</th><th>Momento</th></tr>
+  <tr><td class="num-col">1</td><td>Construcción de un objetivo compartido.</td></tr>
+  <tr><td class="num-col">2</td><td>Sensibilización.</td></tr>
+  <tr><td class="num-col">3</td><td>Construcción de un ambiente de confianza, respeto y apertura.</td></tr>
+  <tr><td class="num-col">4</td><td>Toma de decisiones para el trabajo colaborativo.</td></tr>
+</table>`,
+    opts: [
+      'A) 2, 1, 4, 3',
+      'B) 1, 2, 3, 4',
+      'C) 3, 2, 1, 4'
+    ],
+    correcta: 0,
+    justif: 'El documento señala que el proceso de construcción de una CA puede variar y considerar momentos de: sensibilización, construcción de un objetivo compartido, toma de decisiones para el trabajo colaborativo y construcción de un ambiente de confianza, respeto y apertura.'
+  },
+
+  // ── Q5 · Cuestionamiento directo · Correct: C
+  {
+    tipo: 'Cuestionamiento directo',
+    base: '¿Qué autor señala que el cambio hacia la mejora educativa inicia "de abajo hacia arriba, de adentro hacia afuera"?',
+    opts: [
+      'Santos Guerra (2006), en su obra La escuela que aprende.',
+      'Torres (2001), en su análisis de las CA y el desarrollo local.',
+      'Freire (2008), en La educación como práctica de la Libertad.'
+    ],
+    correcta: 2,
+    justif: 'De acuerdo con Freire (2008), el cambio hacia la mejora inicia de abajo hacia arriba, de adentro hacia afuera, y genera situaciones positivas en las escuelas y colectivos: mejor integración, mayor responsabilidad, capacidad de iniciativa y toma de decisiones democráticas.'
+  },
+
+  // ── Q6 · Completamiento · Correct: B
+  {
+    tipo: 'Completamiento',
+    base: 'Una maestra propone en CTE que el colectivo analice conjuntamente los resultados de aprendizaje y acuerde estrategias comunes para atender dificultades en lectoescritura. Esta acción refleja el CTE como CA porque…',
+    opts: [
+      '…permite al director evaluar el desempeño individual de cada docente y asignar responsabilidades escolares.',
+      '…favorece la colaboración entre docentes para la construcción del conocimiento colectivo que genere cambios en sus entornos escolares.',
+      '…cumple con los lineamientos administrativos de la SEP para la organización del ciclo escolar.'
+    ],
+    correcta: 1,
+    justif: 'El CTE como CA favorece la colaboración entre docentes para la construcción del conocimiento colectivo que genere cambios en sus entornos escolares que respondan a la transformación que se está impulsando desde la Nueva Escuela Mexicana.'
+  },
+
+  // ── Q7 · Cuestionamiento directo · Correct: A
+  {
+    tipo: 'Cuestionamiento directo',
+    base: '¿Cuáles son los tres pilares que permiten transitar hacia una Comunidad de Aprendizaje, según el documento?',
+    opts: [
+      'El diálogo colectivo, el trabajo colaborativo y las orientaciones pedagógicas del personal con funciones de acompañamiento.',
+      'La planeación didáctica, la evaluación formativa y la gestión escolar eficiente.',
+      'La autonomía docente, la infraestructura tecnológica y la capacitación permanente del personal.'
+    ],
+    correcta: 0,
+    justif: 'El documento establece que el diálogo junto con el trabajo colaborativo, así como las orientaciones pedagógicas que promueva el personal con funciones de acompañamiento, son los tres pilares para transitar a una Comunidad de Aprendizaje.'
+  },
+
+  // ── Q8 · Relación de elementos · Correct: B
+  {
+    tipo: 'Relación de elementos',
+    base: `Relacione cada autor con la aportación que le corresponde según el documento.
+<table class="rel-table">
+  <tr><th>Autor</th><th>Aportación</th></tr>
+  <tr><td class="num-col">1. Santos Guerra (2006)</td><td>a) Las CA se conforman para atender situaciones problemáticas y aspiraciones comunes mediante la reflexión y el diálogo.</td></tr>
+  <tr><td class="num-col">2. Torres (2001)</td><td>b) La finalidad esencial de la autonomía escolar es la mejora de la educación en el país, la escuela y el aprendizaje de NNA.</td></tr>
+  <tr><td class="num-col">3. CEMEJ (2021)</td><td>c) El trabajo en comunidad reta a mirar juntos la realidad desde la diversidad, dialogar reflexivamente y construir el futuro.</td></tr>
+</table>`,
+    opts: [
+      'A) 1c, 2a, 3b',
+      'B) 1b, 2a, 3c',
+      'C) 1a, 2c, 3b'
+    ],
+    correcta: 1,
+    justif: 'Santos Guerra (2006) concibe la autonomía escolar como mejora de la educación. Torres (2001) señala que las CA atienden situaciones problemáticas mediante reflexión y diálogo. CEMEJ (2021) plantea mirar juntos la realidad desde la diversidad para construir el futuro.'
+  },
+
+  // ── Q9 · Cuestionamiento directo · Correct: C
+  {
+    tipo: 'Cuestionamiento directo',
+    base: '¿Qué característica del diálogo colectivo en una CA permite contrastar puntos de vista y valorar a cada persona y sus aportaciones?',
+    opts: [
+      'La implementación de acuerdos mediante resoluciones formales y actas de sesión firmadas por todos los participantes.',
+      'La presentación unidireccional de información por parte del director escolar hacia el colectivo durante las sesiones de CTE.',
+      'Que sea una interacción crítica y continua donde se comparten ideas, conocimientos, experiencias, se argumentan posiciones y se debate.'
+    ],
+    correcta: 2,
+    justif: 'El diálogo colectivo en una CA es una interacción crítica y continua mediante la cual se comparten ideas, conocimientos, experiencias, razonamientos; se argumentan ideas, se debaten temas, se genera intercambio para contrastar puntos de vista y se valora a cada persona y sus aportaciones.'
+  },
+
+  // ── Q10 · Completamiento · Correct: A
+  {
+    tipo: 'Completamiento',
+    base: 'Las Comunidades de Aprendizaje promueven la autonomía profesional al crear entornos colaborativos que permiten…',
+    opts: [
+      '…tomar decisiones conjuntas y aprender de forma independiente sobre sus propios procesos educativos, necesidades y contextos específicos con un trabajo multidisciplinario y transversal.',
+      '…delegar funciones administrativas al personal directivo para que los docentes se centren exclusivamente en la enseñanza dentro del aula.',
+      '…aplicar de manera uniforme los programas nacionales de formación continua diseñados centralmente por la Secretaría de Educación Pública.'
+    ],
+    correcta: 0,
+    justif: 'Las CA promueven la autonomía profesional al crear entornos colaborativos para tomar decisiones conjuntas y aprender de forma independiente sobre sus propios procesos educativos, necesidades y contextos específicos con un trabajo multidisciplinario y transversal.'
+  },
+
+  // ── Q11 · Ordenamiento · Correct: B
+  {
+    tipo: 'Ordenamiento',
+    base: `Ordene los elementos que caracterizan el Trabajo colaborativo dentro de las Condiciones de una CA, según el esquema del documento.
+<table class="rel-table">
+  <tr><th>N.°</th><th>Elemento</th></tr>
+  <tr><td class="num-col">1</td><td>Principio de inclusión.</td></tr>
+  <tr><td class="num-col">2</td><td>Gestión de la participación con autonomía.</td></tr>
+  <tr><td class="num-col">3</td><td>Contar con un facilitador.</td></tr>
+  <tr><td class="num-col">4</td><td>Foco de trabajo.</td></tr>
+  <tr><td class="num-col">5</td><td>Clima de trabajo de confianza, respeto y colaboración.</td></tr>
+</table>`,
+    opts: [
+      'A) 3, 1, 5, 2, 4',
+      'B) 2, 4, 1, 5, 3',
+      'C) 1, 2, 3, 4, 5'
+    ],
+    correcta: 1,
+    justif: 'Según el esquema del documento, los elementos del Trabajo colaborativo dentro de las Condiciones están ordenados así: gestión de la participación con autonomía, foco de trabajo, principio de inclusión, clima de trabajo de confianza, respeto y colaboración, y contar con un facilitador.'
+  },
+
+  // ── Q12 · Cuestionamiento directo · Correct: A
+  {
+    tipo: 'Cuestionamiento directo',
+    base: '¿Cuál es la visión de la Nueva Escuela Mexicana que sustenta el enfoque comunitario del CTE como CA?',
+    opts: [
+      'Que en la escuela confluyen saberes, se intercambian valores, normas, culturas y formas de convivencia que se presentan en la comunidad y en el país.',
+      'Que el currículo nacional estandarizado debe aplicarse de manera uniforme en todas las escuelas sin incorporar saberes comunitarios.',
+      'Que la evaluación docente centrada en indicadores individuales de desempeño es el principal mecanismo de mejora educativa.'
+    ],
+    correcta: 0,
+    justif: 'La NEM está trascendiendo con un enfoque comunitario a partir de reconocer que en la escuela confluyen saberes, se intercambian valores, normas, culturas y formas de convivencia que se presentan en la comunidad y en el país.'
+  },
+
+  // ── Q13 · Relación de elementos · Correct: C
+  {
+    tipo: 'Relación de elementos',
+    base: `Relacione cada rasgo fundamental de las CA con su descripción correspondiente.
+<table class="rel-table">
+  <tr><th>Rasgo</th><th>Descripción</th></tr>
+  <tr><td class="num-col">1. Ambiente enriquecedor</td><td>a) Proceso mediante el cual el pensamiento crítico, la colaboración y el diálogo generan nuevo saber colectivo.</td></tr>
+  <tr><td class="num-col">2. Construcción social del conocimiento</td><td>b) Capacidad de las CA para identificar e implementar nuevas formas de conducirse de manera autogestiva e innovadora.</td></tr>
+  <tr><td class="num-col">3. Autonomía profesional</td><td>c) Espacio que favorece el trabajo colaborativo y el desarrollo profesional de los docentes.</td></tr>
+</table>`,
+    opts: [
+      'A) 1a, 2b, 3c',
+      'B) 1b, 2c, 3a',
+      'C) 1c, 2a, 3b'
+    ],
+    correcta: 2,
+    justif: 'Los rasgos fundamentales de las CA son: el ambiente enriquecedor (espacio para el trabajo colaborativo); la construcción social del conocimiento (mediante pensamiento crítico y diálogo colectivo); y la autonomía profesional (identificar e implementar nuevas formas de conducirse de manera autogestiva e innovadora).'
+  },
+
+  // ── Q14 · Ordenamiento · Correct: A
+  {
+    tipo: 'Ordenamiento',
+    base: `Ordene los elementos que integran las Orientaciones pedagógicas dentro del esquema de las CA, según el documento.
+<table class="rel-table">
+  <tr><th>N.°</th><th>Elemento</th></tr>
+  <tr><td class="num-col">1</td><td>Centralidad del aprendizaje.</td></tr>
+  <tr><td class="num-col">2</td><td>Participación.</td></tr>
+  <tr><td class="num-col">3</td><td>Autonomía profesional.</td></tr>
+  <tr><td class="num-col">4</td><td>Expectativas positivas.</td></tr>
+  <tr><td class="num-col">5</td><td>Progreso permanente.</td></tr>
+  <tr><td class="num-col">6</td><td>Transformación de mejora en los entornos educativos.</td></tr>
+</table>`,
+    opts: [
+      'A) 2, 1, 4, 5, 3, 6',
+      'B) 1, 2, 3, 4, 5, 6',
+      'C) 3, 1, 2, 4, 6, 5'
+    ],
+    correcta: 0,
+    justif: 'Las Orientaciones pedagógicas según el esquema del documento incluyen en orden: participación, centralidad del aprendizaje, expectativas positivas, progreso permanente, autonomía profesional y transformación de mejora en los entornos educativos.'
+  },
+
+  // ── Q15 · Cuestionamiento directo · Correct: B
+  {
+    tipo: 'Cuestionamiento directo',
+    base: '¿Cuál es la diferencia fundamental entre una CA que promueve la autonomía y un modelo educativo de gestión vertical?',
+    opts: [
+      'La CA delega las decisiones curriculares a los supervisores, mientras que el modelo vertical permite la participación docente en el diseño.',
+      'La CA genera cambios de abajo hacia arriba, de adentro hacia afuera, con mayor responsabilidad, iniciativa y toma de decisiones democráticas.',
+      'La CA estandariza los procesos de enseñanza para garantizar calidad uniforme, mientras que el modelo vertical permite la diversificación.'
+    ],
+    correcta: 1,
+    justif: 'De acuerdo con Freire (2008), el cambio hacia la mejora inicia de abajo hacia arriba, de adentro hacia afuera, y genera mayor responsabilidad de los distintos actores, capacidad de iniciativa y participación, así como toma de decisiones democráticas, en contraste con los modelos verticales.'
+  },
+
+  // ── Q16 · Completamiento · Correct: C
+  {
+    tipo: 'Completamiento',
+    base: 'En una sesión de CTE, el colectivo docente analiza dificultades en evaluación formativa, comparte estrategias y acuerda implementar una estrategia común en todos los grupos. Esta situación ilustra que el aprendizaje en las CA se construye sobre…',
+    opts: [
+      '…resultados de evaluaciones estandarizadas externas aplicadas por la autoridad educativa para identificar áreas de mejora institucional.',
+      '…directrices emitidas por la supervisión escolar que orientan a los docentes hacia prácticas pedagógicas previamente validadas.',
+      '…experiencias comunes, cotidianas, tanto de las prácticas de planeación didáctica, de enseñanza y aprendizaje, como de evaluación formativa.'
+    ],
+    correcta: 2,
+    justif: 'El aprendizaje que se favorece en las CA se construye sobre experiencias comunes, cotidianas, tanto de las prácticas que desarrollan en sus procesos de planeación didáctica, de enseñanza y aprendizaje, así como de evaluación formativa.'
+  },
+
+  // ── Q17 · Relación de elementos · Correct: B
+  {
+    tipo: 'Relación de elementos',
+    base: `Relacione cada elemento del Acompañamiento de Supervisión y Dirección con su función en la CA.
+<table class="rel-table">
+  <tr><th>Elemento</th><th>Función</th></tr>
+  <tr><td class="num-col">1. Articular las CA con objetivos comunes</td><td>a) Identificar y reconocer el trabajo realizado por el colectivo docente en su proceso de mejora.</td></tr>
+  <tr><td class="num-col">2. Conformar redes de apoyo</td><td>b) Establecer vínculos entre distintas CA para fortalecer el trabajo colectivo en red.</td></tr>
+  <tr><td class="num-col">3. Valorar avances y logros</td><td>c) Generar conexiones entre diferentes CA orientadas hacia metas de mejora compartidas.</td></tr>
+</table>`,
+    opts: [
+      'A) 1a, 2b, 3c',
+      'B) 1c, 2b, 3a',
+      'C) 1b, 2c, 3a'
+    ],
+    correcta: 1,
+    justif: 'Articular las CA implica generar conexiones entre comunidades hacia objetivos comunes de mejora. Conformar redes de apoyo implica establecer vínculos entre CA para fortalecer el trabajo colectivo. Valorar avances y logros implica reconocer el trabajo del colectivo docente en su proceso de mejora.'
+  },
+
+  // ── Q18 · Ordenamiento · Correct: C
+  {
+    tipo: 'Ordenamiento',
+    base: `Ordene la secuencia que describe cómo el trabajo en comunidad transforma la práctica docente, según CEMEJ (2021).
+<table class="rel-table">
+  <tr><th>N.°</th><th>Acción</th></tr>
+  <tr><td class="num-col">1</td><td>Trabajar juntos para construir el futuro.</td></tr>
+  <tr><td class="num-col">2</td><td>Imaginar el futuro.</td></tr>
+  <tr><td class="num-col">3</td><td>Mirar juntos la realidad desde la diversidad.</td></tr>
+  <tr><td class="num-col">4</td><td>Construir un lenguaje común.</td></tr>
+  <tr><td class="num-col">5</td><td>Dialogar reflexivamente.</td></tr>
+</table>`,
+    opts: [
+      'A) 1, 3, 5, 4, 2',
+      'B) 2, 1, 3, 5, 4',
+      'C) 3, 5, 4, 2, 1'
+    ],
+    correcta: 2,
+    justif: 'Según CEMEJ (2021), el trabajo en comunidad implica en secuencia: mirar juntos la realidad desde la diversidad, dialogar reflexivamente, construir un lenguaje común, imaginar el futuro y trabajar juntos para su construcción.'
+  },
+
+  // ── Q19 · Cuestionamiento directo · Correct: A
+  {
+    tipo: 'Cuestionamiento directo',
+    base: '¿Qué papel juegan las diferentes miradas y perspectivas de quienes participan en una CA?',
+    opts: [
+      'Enriquecen el conocimiento que se genera en la CA al aportar diversidad de experiencias y saberes.',
+      'Generan conflictos que deben resolverse mediante la intervención de la autoridad escolar para tomar decisiones uniformes.',
+      'Dificultan el logro de acuerdos colectivos porque cada docente privilegia su visión individual sobre la colectiva.'
+    ],
+    correcta: 0,
+    justif: 'El documento afirma que son justamente las diferentes miradas y perspectivas de quienes participan en la CA lo que enriquece el conocimiento que se genera en ellas, constituyendo una fortaleza y no un obstáculo.'
+  },
+
+  // ── Q20 · Completamiento · Correct: B
+  {
+    tipo: 'Completamiento',
+    base: 'El proceso por el cual las CA identifican e implementan nuevas formas de conducirse en los diferentes procesos educativos de manera innovadora y capaz de autoevaluarse de manera sostenible es un rasgo de…',
+    opts: [
+      '…la gestión escolar estandarizada, que busca uniformar los procesos institucionales conforme a los lineamientos de la SEP.',
+      '…el desarrollo autogestivo e innovador, rasgo de la autonomía profesional que promueven las Comunidades de Aprendizaje.',
+      '…la supervisión externa continua, mediante la cual la autoridad escolar verifica el cumplimiento de indicadores de calidad educativa.'
+    ],
+    correcta: 1,
+    justif: 'Las CA identifican e implementan nuevas formas de conducirse en los diferentes procesos que desarrollan de manera autogestiva e innovadora, capaces de autoevaluarse de manera sostenible. Este desarrollo autogestivo e innovador es un rasgo central de la autonomía profesional.'
+  },
+
+  // ── Q21 · Relación de elementos · Correct: A
+  {
+    tipo: 'Relación de elementos',
+    base: `Relacione cada tipo de experiencia sobre la que se construye el aprendizaje en las CA con su ejemplo correspondiente.
+<table class="rel-table">
+  <tr><th>Experiencia</th><th>Ejemplo</th></tr>
+  <tr><td class="num-col">1. Planeación didáctica</td><td>a) El colectivo analiza en CTE cómo organizar las secuencias de aprendizaje para abordar un contenido complejo del currículo.</td></tr>
+  <tr><td class="num-col">2. Enseñanza y aprendizaje</td><td>b) Las y los docentes reflexionan sobre las estrategias utilizadas en el aula y su impacto en la comprensión de los estudiantes.</td></tr>
+  <tr><td class="num-col">3. Evaluación formativa</td><td>c) El equipo docente revisa los registros de avance de los estudiantes para identificar quiénes requieren mayor apoyo.</td></tr>
+</table>`,
+    opts: [
+      'A) 1a, 2b, 3c',
+      'B) 1c, 2a, 3b',
+      'C) 1b, 2c, 3a'
+    ],
+    correcta: 0,
+    justif: 'La planeación didáctica implica organizar las secuencias de aprendizaje. La enseñanza y aprendizaje se refiere a las estrategias implementadas en el aula. La evaluación formativa implica revisar los registros de avance para identificar las necesidades de apoyo de los estudiantes.'
+  },
+
+  // ── Q22 · Ordenamiento · Correct: B
+  {
+    tipo: 'Ordenamiento',
+    base: `Ordene los pasos que describe el documento para que el CTE funcione como CA y genere acuerdos que se implementen en el aula.
+<table class="rel-table">
+  <tr><th>N.°</th><th>Paso</th></tr>
+  <tr><td class="num-col">1</td><td>Llegar a acuerdos colectivos.</td></tr>
+  <tr><td class="num-col">2</td><td>Abordar problemáticas de manera reflexiva y crítica.</td></tr>
+  <tr><td class="num-col">3</td><td>Implementar los acuerdos en el aula.</td></tr>
+  <tr><td class="num-col">4</td><td>Identificar problemáticas asociadas a las prácticas docentes.</td></tr>
+</table>`,
+    opts: [
+      'A) 2, 4, 1, 3',
+      'B) 4, 2, 1, 3',
+      'C) 1, 4, 2, 3'
+    ],
+    correcta: 1,
+    justif: 'El proceso del CTE como CA sigue este orden: primero identificar problemáticas asociadas a las prácticas, luego abordarlas de manera reflexiva y crítica, después llegar a acuerdos, y finalmente implementarlos en el aula.'
+  },
+
+  // ── Q23 · Cuestionamiento directo · Correct: C
+  {
+    tipo: 'Cuestionamiento directo',
+    base: '¿Cuál de las siguientes situaciones describe mejor cómo una CA transforma los conflictos en oportunidades de aprendizaje?',
+    opts: [
+      'El director resuelve unilateralmente los conflictos entre docentes para mantener el orden y la disciplina institucional.',
+      'Los docentes evitan hablar de conflictos en el CTE para mantener un ambiente armónico y no afectar las relaciones laborales.',
+      'El colectivo docente analiza colaborativamente una situación conflictiva de convivencia y diseña estrategias consensuadas para atenderla.'
+    ],
+    correcta: 2,
+    justif: 'Una CA tiene como cualidades el sentido de responsabilidad y la transformación de los conflictos en oportunidades de mejora. Esto implica que el colectivo aborde colaborativamente las situaciones problemáticas, no que las evite o que sean resueltas unilateralmente por la autoridad.'
+  },
+
+  // ── Q24 · Completamiento · Correct: A
+  {
+    tipo: 'Completamiento',
+    base: 'La Nueva Escuela Mexicana trasciende con un enfoque comunitario porque reconoce que la convergencia de saberes, valores, normas y formas de convivencia en la escuela…',
+    opts: [
+      '…aporta elementos para los aprendizajes de NNA, pero también implica diversos retos para las maestras y maestros en la construcción de un sistema educativo con apertura a la transformación.',
+      '…debe limitarse a la transmisión de conocimientos académicos establecidos en el currículo nacional sin incorporar saberes comunitarios locales.',
+      '…funciona de manera autónoma e independiente de los procesos comunitarios, centrada exclusivamente en el logro de aprendizajes individuales.'
+    ],
+    correcta: 0,
+    justif: 'Según el documento, la convergencia de saberes, valores, normas y formas de convivencia en la escuela aporta elementos para los aprendizajes de NNA, pero también implica diversos retos para las maestras y los maestros en esta construcción de un sistema educativo con apertura a la transformación educativa.'
+  },
+
+  // ── Q25 · Ordenamiento · Correct: C
+  {
+    tipo: 'Ordenamiento',
+    base: `Ordene los elementos que integran el Acompañamiento de Supervisión y Dirección en las CA, según el esquema del documento.
+<table class="rel-table">
+  <tr><th>N.°</th><th>Elemento</th></tr>
+  <tr><td class="num-col">1</td><td>Conformar redes de apoyo.</td></tr>
+  <tr><td class="num-col">2</td><td>Orientar a los colectivos hacia la colaboración, el diálogo y la reflexión.</td></tr>
+  <tr><td class="num-col">3</td><td>Valorar avances y logros.</td></tr>
+  <tr><td class="num-col">4</td><td>Articular las CA con objetivos comunes de mejora.</td></tr>
+</table>`,
+    opts: [
+      'A) 1, 4, 2, 3',
+      'B) 3, 1, 4, 2',
+      'C) 4, 2, 1, 3'
+    ],
+    correcta: 2,
+    justif: 'Según el esquema del documento, el Acompañamiento de Supervisión y Dirección incluye en orden: articular las CA con objetivos comunes de mejora, orientar a los colectivos hacia la colaboración, el diálogo y la reflexión, conformar redes de apoyo y valorar avances y logros.'
+  },
+
+  // ── Q26 · Cuestionamiento directo · Correct: B
+  {
+    tipo: 'Cuestionamiento directo',
+    base: '¿Qué implica que el desarrollo de las CA se concrete en el contexto de cada escuela y de cada comunidad?',
+    opts: [
+      'Que todas las escuelas del país deben seguir un mismo modelo de CA diseñado de forma centralizada por la SEP.',
+      'Que el proceso de construcción o fortalecimiento de una CA puede variar y considerar momentos de sensibilización, construcción de objetivos, toma de decisiones y creación de un ambiente de confianza.',
+      'Que las CA solo son viables en escuelas con alto grado de organización administrativa y plantilla docente completa.'
+    ],
+    correcta: 1,
+    justif: 'El desarrollo de las CA se concreta en el contexto de cada escuela y de cada comunidad; por lo tanto, su proceso de construcción o fortalecimiento puede variar y considerar momentos de sensibilización, de construcción de un objetivo compartido, de toma de decisiones para el trabajo colaborativo y de construcción de un ambiente de confianza, respeto y apertura.'
+  },
+
+  // ── Q27 · Relación de elementos · Correct: C
+  {
+    tipo: 'Relación de elementos',
+    base: `Relacione cada elemento del componente Diálogo y Confianza con su descripción correspondiente.
+<table class="rel-table">
+  <tr><th>Elemento</th><th>Descripción</th></tr>
+  <tr><td class="num-col">1. Articular las CA</td><td>a) Seguimiento sistemático a los procesos y resultados del colectivo docente para identificar avances y áreas de mejora.</td></tr>
+  <tr><td class="num-col">2. Definir grupos de trabajo</td><td>b) Impulsar entre los docentes el compromiso mutuo y la confianza para compartir experiencias y aprender juntos.</td></tr>
+  <tr><td class="num-col">3. Monitorear</td><td>c) Organizar subequipos dentro del colectivo que atiendan de manera específica temáticas o necesidades identificadas.</td></tr>
+</table>`,
+    opts: [
+      'A) 1b, 2c, 3a',
+      'B) 1c, 2b, 3a',
+      'C) 1b, 2c, 3a'
+    ],
+    correcta: 0,
+    justif: 'Articular las CA implica impulsar el compromiso mutuo y la confianza entre docentes. Definir grupos de trabajo implica organizar subequipos para atender temáticas específicas. Monitorear implica el seguimiento sistemático a los procesos y resultados del colectivo para identificar avances y áreas de mejora.'
+  },
+
+  // ── Q28 · Completamiento · Correct: A
+  {
+    tipo: 'Completamiento',
+    base: 'Un supervisor escolar que orienta a sus colectivos hacia la colaboración, el diálogo y la reflexión, conforma redes de apoyo y valora los avances del trabajo docente, está ejerciendo…',
+    opts: [
+      '…las funciones del Acompañamiento de Supervisión y Dirección, que es uno de los pilares para la transición hacia una Comunidad de Aprendizaje.',
+      '…acciones de control administrativo que buscan verificar el cumplimiento de los programas institucionales por parte de los docentes.',
+      '…tareas de evaluación del desempeño docente conforme a los criterios establecidos por USICAMM para la promoción profesional.'
+    ],
+    correcta: 0,
+    justif: 'El Acompañamiento de Supervisión y Dirección dentro del esquema de las CA incluye precisamente: orientar a los colectivos hacia la colaboración, el diálogo y la reflexión, conformar redes de apoyo y valorar avances y logros. Este es uno de los pilares para transitar a una CA.'
+  },
+
+  // ── Q29 · Cuestionamiento directo · Correct: B
+  {
+    tipo: 'Cuestionamiento directo',
+    base: '¿Cómo describe el documento el tránsito del aprendizaje individualista al aprendizaje en Comunidad de Aprendizaje?',
+    opts: [
+      'El aprendizaje individual permite mayor profundidad en los contenidos, mientras que el aprendizaje en CA es más superficial pero más rápido.',
+      'La CA rompe con la individualidad al permitir mirar juntos la realidad desde la diversidad, dialogar reflexivamente, construir un lenguaje común, imaginar el futuro y trabajar juntos para su construcción.',
+      'El aprendizaje individual garantiza mayor autonomía al docente, mientras que la CA impone una agenda colectiva que limita la libertad profesional.'
+    ],
+    correcta: 1,
+    justif: 'El trabajo en comunidad nos reta a romper con la individualidad y transitar hacia la oportunidad de mirar juntos la realidad desde la diversidad, dialogar reflexivamente, construir un lenguaje común, imaginar el futuro y trabajar juntos para su construcción (CEMEJ, 2021).'
+  },
+
+  // ── Q30 · Ordenamiento · Correct: C
+  {
+    tipo: 'Ordenamiento',
+    base: `Ordene las características del diálogo colectivo en una CA conforme a la secuencia lógica que describe el documento.
+<table class="rel-table">
+  <tr><th>N.°</th><th>Característica</th></tr>
+  <tr><td class="num-col">1</td><td>Argumentar ideas y debatir sobre temas de interés.</td></tr>
+  <tr><td class="num-col">2</td><td>Compartir ideas, conocimientos y experiencias.</td></tr>
+  <tr><td class="num-col">3</td><td>Generar intercambio para contrastar puntos de vista.</td></tr>
+  <tr><td class="num-col">4</td><td>Cuestionar y hacerse preguntas.</td></tr>
+  <tr><td class="num-col">5</td><td>Valorar a cada persona y sus aportaciones.</td></tr>
+</table>`,
+    opts: [
+      'A) 5, 3, 1, 4, 2',
+      'B) 1, 2, 3, 4, 5',
+      'C) 2, 4, 1, 3, 5'
+    ],
+    correcta: 2,
+    justif: 'El diálogo colectivo en una CA implica en orden: compartir ideas, conocimientos y experiencias; cuestionar y hacerse preguntas; argumentar ideas y debatir; generar intercambio para contrastar puntos de vista; y valorar a cada persona y sus aportaciones.'
+  }
+
+]; // end questions
+
+/* ─────────────────────── EXAM LOGIC ─────────────────────── */
+function startExam() {
+  const input = document.getElementById('studentName');
+  const err   = document.getElementById('nameError');
+  const name  = input.value.trim();
+  if (!name) {
+    err.classList.remove('hidden');
+    input.focus();
+    return;
+  }
+  err.classList.add('hidden');
+  studentName = name;
+  currentQ = 0; hits = 0; misses = 0;
+
+  document.getElementById('welcome-screen').classList.add('hidden');
+  document.getElementById('quiz-screen').classList.remove('hidden');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  if (currentQ >= questions.length) { showResults(); return; }
+  answered = false;
+  const q = questions[currentQ];
+
+  // Progress
+  const pct = Math.round((currentQ / questions.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressCount').textContent = currentQ + ' / ' + questions.length;
+
+  // Badges
+  document.getElementById('qNumBadge').textContent = 'Pregunta ' + (currentQ + 1);
+  document.getElementById('qTypeBadge').textContent = q.tipo;
+
+  // Base
+  document.getElementById('questionBase').innerHTML = q.base;
+
+  // Options
+  const letters = ['A', 'B', 'C'];
+  const list = document.getElementById('optionsList');
+  list.innerHTML = '';
+  q.opts.forEach((txt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = '<span class="option-letter">' + letters[i] + '</span><span>' + txt + '</span>';
+    btn.addEventListener('click', () => selectAnswer(i));
+    list.appendChild(btn);
+  });
+
+  // Reset feedback & next
+  const fb = document.getElementById('feedbackBox');
+  fb.className = 'feedback-box';
+  fb.innerHTML = '';
+
+  const btnNext = document.getElementById('btnNext');
+  btnNext.classList.remove('visible');
+  btnNext.textContent = currentQ === questions.length - 1 ? '🏁 Ver Resultados' : 'Siguiente →';
+
+  // Animate card
+  const card = document.getElementById('questionCard');
+  card.style.animation = 'none';
+  void card.offsetWidth;
+  card.style.animation = 'slideUp .3s ease';
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+
+  const q = questions[currentQ];
+  const btns = document.querySelectorAll('.option-btn');
+  const isCorrect = idx === q.correcta;
+
+  btns.forEach((b, i) => {
+    b.disabled = true;
+    if (i === idx && isCorrect)   b.classList.add('correct');
+    if (i === idx && !isCorrect)  b.classList.add('incorrect');
+    if (i === q.correcta && !isCorrect) b.classList.add('show-correct');
+  });
+
+  if (isCorrect) hits++;
+  else           misses++;
+
+  // Feedback
+  const fb = document.getElementById('feedbackBox');
+  if (isCorrect) {
+    fb.className = 'feedback-box correct';
+    fb.innerHTML = '<div class="feedback-title">✅ ¡Correcto!</div>' + q.justif;
+  } else {
+    fb.className = 'feedback-box incorrect';
+    fb.innerHTML = '<div class="feedback-title">❌ Respuesta incorrecta</div>' +
+      '<strong>Respuesta correcta: ' + ['A','B','C'][q.correcta] + '.</strong> ' + q.justif;
+  }
+
+  document.getElementById('btnNext').classList.add('visible');
+}
+
+function nextQuestion() {
+  currentQ++;
+  renderQuestion();
+}
+
+function showResults() {
+  document.getElementById('quiz-screen').classList.add('hidden');
+  const rs = document.getElementById('results-screen');
+  rs.classList.remove('hidden');
+  rs.style.display = 'block';
+
+  const pct = Math.round((hits / questions.length) * 100);
+
+  document.getElementById('resultsName').textContent = studentName;
+  document.getElementById('hitsNum').textContent   = hits;
+  document.getElementById('missesNum').textContent = misses;
+  document.getElementById('scorePct').textContent  = pct + '%';
+
+  // Conic gradient for circle
+  const deg = Math.round(pct * 3.6);
+  document.getElementById('scoreCircle').style.setProperty('--pct', deg + 'deg');
+
+  // Emoji & motivational
+  let emoji, msg;
+  if (pct >= 90) {
+    emoji = '🏆'; msg = '¡Excelente dominio del tema! Estás muy bien preparado/a para la evaluación. ¡Sigue así!';
+  } else if (pct >= 70) {
+    emoji = '🌟'; msg = 'Buen trabajo. Tienes una base sólida; revisa los temas donde tuviste errores para alcanzar la excelencia.';
+  } else if (pct >= 50) {
+    emoji = '💪'; msg = 'Vas por buen camino. Sigue practicando con la guía de estudio para fortalecer tus conocimientos.';
+  } else {
+    emoji = '📚'; msg = 'No te rindas. Consulta la guía de estudio, repasa el documento base e intenta de nuevo. ¡Tú puedes!';
+  }
+
+  document.getElementById('resultsEmoji').textContent = emoji;
+  document.getElementById('motivMsg').textContent = msg;
+}
+
+function resetExam() {
+  currentQ = 0; hits = 0; misses = 0; answered = false;
+  document.getElementById('results-screen').classList.add('hidden');
+  document.getElementById('welcome-screen').classList.remove('hidden');
+  document.getElementById('studentName').value = '';
+}
+
+/* ─────────────────────── INIT ─────────────────────── */
+document.getElementById('studentName').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') startExam();
+});
+</script>
+
+</body>
+</html>

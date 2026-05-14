@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador PMC – Prof. Francisco De Jesus Luna Benitez</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --coral:    #FF7B54;
+    --peach:    #FFB26B;
+    --sky:      #4FC3F7;
+    --mint:     #4DD9AC;
+    --lavender: #A78BFA;
+    --cream:    #FFF8F0;
+    --white:    #FFFFFF;
+    --gray-100: #F3F4F6;
+    --gray-300: #D1D5DB;
+    --gray-500: #6B7280;
+    --gray-700: #374151;
+    --gray-900: #111827;
+    --correct:  #22C55E;
+    --wrong:    #EF4444;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,.08);
+    --shadow-md: 0 8px 32px rgba(0,0,0,.12);
+    --shadow-lg: 0 20px 60px rgba(0,0,0,.15);
+    --radius:   18px;
+    --radius-sm:10px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #FFF0E6 0%, #E8F7FF 40%, #E6FFF5 80%, #F3EEFF 100%);
+    min-height: 100vh;
+    color: var(--gray-900);
+  }
+
+  /* ══════════════ HEADER ══════════════ */
+  .site-header {
+    background: linear-gradient(135deg, var(--coral) 0%, var(--peach) 50%, #FFD580 100%);
+    padding: 28px 20px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+  }
+  .site-header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FFFFFF' fill-opacity='0.06'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+    pointer-events: none;
+  }
+  .header-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.3);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.5);
+    border-radius: 30px;
+    padding: 5px 18px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #FFF;
+    margin-bottom: 10px;
+  }
+  .site-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    color: #FFF;
+    text-shadow: 0 2px 12px rgba(0,0,0,.2);
+    line-height: 1.2;
+  }
+  .site-header h1 span {
+    display: block;
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(0.75rem, 2vw, 0.95rem);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: rgba(255,255,255,0.9);
+    margin-top: 6px;
+  }
+  .nav-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .nav-tab {
+    background: rgba(255,255,255,0.25);
+    border: 1.5px solid rgba(255,255,255,0.5);
+    color: #FFF;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.8rem;
+    padding: 7px 18px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all .25s;
+  }
+  .nav-tab:hover, .nav-tab.active {
+    background: #FFF;
+    color: var(--coral);
+    border-color: #FFF;
+  }
+
+  /* ══════════════ CONTAINER ══════════════ */
+  .container {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 30px 16px 60px;
+  }
+
+  /* ══════════════ SCREEN ══════════════ */
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeUp .4s ease; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(22px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ══════════════ WELCOME SCREEN ══════════════ */
+  .welcome-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: clamp(28px, 5vw, 52px);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .welcome-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 5px;
+    background: linear-gradient(90deg, var(--coral), var(--peach), var(--sky), var(--mint));
+  }
+  .welcome-icon {
+    width: 88px; height: 88px;
+    background: linear-gradient(135deg, var(--peach), var(--coral));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.6rem;
+    margin: 0 auto 22px;
+    box-shadow: 0 8px 24px rgba(255,123,84,.35);
+  }
+  .welcome-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.4rem, 4vw, 1.9rem);
+    color: var(--gray-900);
+    margin-bottom: 10px;
+  }
+  .welcome-card p {
+    color: var(--gray-500);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    max-width: 520px;
+    margin: 0 auto 28px;
+  }
+  .info-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 32px;
+  }
+  .pill {
+    background: var(--gray-100);
+    border-radius: 30px;
+    padding: 6px 16px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--gray-700);
+    display: flex; align-items: center; gap: 5px;
+  }
+  .pill-icon { font-size: 1rem; }
+  .input-group { margin-bottom: 22px; text-align: left; }
+  .input-group label {
+    display: block;
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: var(--gray-700);
+    margin-bottom: 8px;
+  }
+  .input-group input {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid var(--gray-300);
+    border-radius: var(--radius-sm);
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .input-group input:focus {
+    border-color: var(--coral);
+    box-shadow: 0 0 0 3px rgba(255,123,84,.15);
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, var(--coral), var(--peach));
+    color: #FFF;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 800;
+    padding: 15px 36px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(255,123,84,.4);
+    transition: transform .2s, box-shadow .2s;
+    width: 100%;
+    justify-content: center;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(255,123,84,.5); }
+  .btn-primary:active { transform: translateY(0); }
+
+  /* ══════════════ QUIZ SCREEN ══════════════ */
+  .quiz-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .q-counter {
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: var(--gray-500);
+  }
+  .q-counter strong { color: var(--coral); font-size: 1.1rem; }
+  .tipo-badge {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+  .tipo-cd  { background: #FEE2E2; color: #DC2626; }
+  .tipo-comp{ background: #DBEAFE; color: #2563EB; }
+  .tipo-ord { background: #D1FAE5; color: #059669; }
+  .tipo-rel { background: #EDE9FE; color: #7C3AED; }
+
+  .progress-bar-wrap {
+    background: var(--gray-100);
+    border-radius: 10px;
+    height: 8px;
+    margin-bottom: 22px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--coral), var(--peach), var(--sky));
+    transition: width .5s cubic-bezier(.4,0,.2,1);
+  }
+
+  .question-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    padding: clamp(22px, 4vw, 40px);
+    margin-bottom: 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .question-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+    background: linear-gradient(180deg, var(--coral), var(--peach));
+    border-radius: 4px 0 0 4px;
+  }
+  .q-num-big {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--gray-100);
+    position: absolute; top: 10px; right: 20px;
+    line-height: 1;
+    user-select: none;
+  }
+  .q-text {
+    font-size: clamp(0.92rem, 2vw, 1.05rem);
+    font-weight: 700;
+    line-height: 1.65;
+    color: var(--gray-900);
+    padding-right: 50px;
+  }
+  .q-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 0.87rem;
+  }
+  .q-table th {
+    background: linear-gradient(135deg, var(--coral), var(--peach));
+    color: #FFF;
+    padding: 8px 12px;
+    font-weight: 800;
+    text-align: left;
+  }
+  .q-table td {
+    padding: 7px 12px;
+    border-bottom: 1px solid var(--gray-100);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .q-table tr:nth-child(even) td { background: var(--gray-100); }
+
+  .options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+  }
+  .option-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: var(--gray-100);
+    border: 2.5px solid transparent;
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.93rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    transition: all .2s;
+    width: 100%;
+  }
+  .option-btn:hover:not(:disabled) {
+    background: #FFF0E8;
+    border-color: var(--peach);
+    color: var(--gray-900);
+    transform: translateX(4px);
+  }
+  .option-btn .opt-letter {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; min-width: 30px;
+    background: var(--white);
+    border-radius: 50%;
+    font-weight: 900;
+    font-size: 0.85rem;
+    color: var(--gray-700);
+    box-shadow: var(--shadow-sm);
+    transition: all .2s;
+  }
+  .option-btn .opt-text { line-height: 1.55; padding-top: 2px; }
+  .option-btn.selected {
+    background: #E0F2FE;
+    border-color: var(--sky);
+    color: var(--gray-900);
+  }
+  .option-btn.selected .opt-letter {
+    background: var(--sky);
+    color: #FFF;
+  }
+  .option-btn.correct {
+    background: #DCFCE7;
+    border-color: var(--correct);
+    color: #166534;
+  }
+  .option-btn.correct .opt-letter {
+    background: var(--correct);
+    color: #FFF;
+  }
+  .option-btn.wrong {
+    background: #FEE2E2;
+    border-color: var(--wrong);
+    color: #991B1B;
+  }
+  .option-btn.wrong .opt-letter {
+    background: var(--wrong);
+    color: #FFF;
+  }
+
+  .feedback-box {
+    border-radius: var(--radius-sm);
+    padding: 16px 18px;
+    margin-top: 16px;
+    display: none;
+    animation: fadeUp .3s ease;
+  }
+  .feedback-box.show { display: flex; gap: 12px; align-items: flex-start; }
+  .feedback-box.correct-fb { background: #DCFCE7; border: 1.5px solid #86EFAC; }
+  .feedback-box.wrong-fb   { background: #FEF2F2; border: 1.5px solid #FCA5A5; }
+  .fb-icon { font-size: 1.4rem; line-height: 1; }
+  .fb-text { font-size: 0.88rem; line-height: 1.6; }
+  .fb-text strong { font-weight: 800; display: block; margin-bottom: 2px; }
+  .feedback-box.correct-fb .fb-text strong { color: #166534; }
+  .feedback-box.wrong-fb   .fb-text strong { color: #991B1B; }
+
+  .btn-next {
+    display: none;
+    margin-top: 20px;
+    background: linear-gradient(135deg, var(--sky), var(--mint));
+    color: #FFF;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.98rem;
+    font-weight: 800;
+    padding: 14px 32px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    width: 100%;
+    box-shadow: 0 6px 20px rgba(79,195,247,.4);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .btn-next.show { display: block; }
+  .btn-next:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(79,195,247,.5); }
+
+  /* ══════════════ RESULTS SCREEN ══════════════ */
+  .results-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: clamp(28px, 5vw, 52px);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .results-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 5px;
+    background: linear-gradient(90deg, var(--mint), var(--sky), var(--lavender), var(--coral));
+  }
+  .results-trophy {
+    font-size: 4.5rem;
+    display: block;
+    margin-bottom: 10px;
+    animation: bounce 1s ease 0.3s both;
+  }
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); }
+    40%      { transform: translateY(-18px); }
+    60%      { transform: translateY(-8px); }
+  }
+  .results-name {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.3rem, 4vw, 1.8rem);
+    color: var(--gray-900);
+    margin-bottom: 4px;
+  }
+  .results-subtitle {
+    color: var(--gray-500);
+    font-size: 0.9rem;
+    margin-bottom: 28px;
+  }
+  .score-circle-wrap {
+    display: flex; justify-content: center; margin-bottom: 28px;
+  }
+  .score-circle {
+    width: 150px; height: 150px;
+    border-radius: 50%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0,0,0,.12);
+  }
+  .score-circle::before {
+    content: '';
+    position: absolute; inset: -4px;
+    border-radius: 50%;
+    background: conic-gradient(var(--coral) 0% var(--pct), var(--gray-100) var(--pct) 100%);
+    z-index: -1;
+  }
+  .score-circle-inner {
+    background: #FFF;
+    width: 130px; height: 130px;
+    border-radius: 50%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    position: relative; z-index: 1;
+  }
+  .score-pct {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: var(--coral);
+    line-height: 1;
+  }
+  .score-label { font-size: 0.72rem; font-weight: 800; color: var(--gray-500); letter-spacing: 1px; }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .stat-box {
+    border-radius: var(--radius-sm);
+    padding: 18px;
+    text-align: center;
+  }
+  .stat-box.green { background: #DCFCE7; }
+  .stat-box.red   { background: #FEE2E2; }
+  .stat-box .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+  .stat-box.green .stat-num { color: var(--correct); }
+  .stat-box.red   .stat-num { color: var(--wrong); }
+  .stat-box .stat-lbl { font-size: 0.82rem; font-weight: 700; margin-top: 4px; }
+  .stat-box.green .stat-lbl { color: #166534; }
+  .stat-box.red   .stat-lbl { color: #991B1B; }
+
+  .motivational-msg {
+    background: linear-gradient(135deg, #FFF0E6, #E0F7FF);
+    border-radius: var(--radius-sm);
+    padding: 18px 22px;
+    font-size: 0.97rem;
+    font-weight: 700;
+    color: var(--gray-700);
+    line-height: 1.6;
+    border-left: 4px solid var(--peach);
+    text-align: left;
+    margin-bottom: 24px;
+  }
+  .results-btns {
+    display: flex; gap: 12px; flex-wrap: wrap;
+  }
+  .btn-secondary {
+    flex: 1; min-width: 140px;
+    background: var(--gray-100);
+    color: var(--gray-700);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.93rem;
+    font-weight: 800;
+    padding: 13px 22px;
+    border: 2px solid var(--gray-300);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .btn-secondary:hover { background: var(--gray-300); border-color: var(--gray-500); }
+
+  /* ══════════════ GUIDE SCREEN ══════════════ */
+  .guide-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+  }
+  .guide-header {
+    background: linear-gradient(135deg, var(--mint), var(--sky));
+    padding: 24px 28px;
+    color: #FFF;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .guide-header-icon {
+    width: 54px; height: 54px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem;
+  }
+  .guide-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+  }
+  .guide-header p { font-size: 0.85rem; opacity: 0.9; margin-top: 2px; }
+  .guide-body { padding: 24px; }
+  .guide-btns { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+  .btn-guide-open {
+    flex: 1; min-width: 160px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: linear-gradient(135deg, var(--mint), var(--sky));
+    color: #FFF;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.93rem;
+    font-weight: 800;
+    padding: 13px 22px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(77,217,172,.4);
+    transition: transform .2s, box-shadow .2s;
+    text-decoration: none;
+  }
+  .btn-guide-open:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(77,217,172,.5); }
+  .pdf-frame {
+    width: 100%;
+    height: 70vh;
+    min-height: 400px;
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--gray-300);
+  }
+
+  /* ══════════════ CONFETTI ══════════════ */
+  .confetti-piece {
+    position: fixed;
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    pointer-events: none;
+    animation: confettiDrop 1.4s ease forwards;
+    z-index: 9999;
+  }
+  @keyframes confettiDrop {
+    0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(120vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ══════════════ RESPONSIVE ══════════════ */
+  @media (max-width: 480px) {
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .q-text { padding-right: 0; }
+    .q-num-big { display: none; }
+    .results-btns { flex-direction: column; }
+    .guide-btns { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════ HEADER ═══════ -->
+<header class="site-header">
+  <div class="header-badge">📚 Instrumento de Evaluación USICAMM</div>
+  <h1>
+    Simulador Interactivo de Evaluación
+    <span>Prof. Francisco De Jesus Luna Benitez</span>
+  </h1>
+  <nav class="nav-tabs">
+    <button class="nav-tab active" onclick="showTab('quiz')">🎯 Simulador</button>
+    <button class="nav-tab" onclick="showTab('guide')">📖 Guía de Estudio</button>
+  </nav>
+</header>
+
+<!-- ═══════ CONTAINER ═══════ -->
+<div class="container">
+
+  <!-- ── TAB: QUIZ ── -->
+  <div id="tab-quiz">
+
+    <!-- WELCOME -->
+    <div id="screen-welcome" class="screen active">
+      <div class="welcome-card">
+        <div class="welcome-icon">🏫</div>
+        <h2>Proceso de Mejora Continua (PMC)</h2>
+        <p>Pon a prueba tus conocimientos sobre el PMC para escuelas de Educación Básica. El simulador incluye <strong>30 preguntas</strong> de opción múltiple con retroalimentación inmediata.</p>
+        <div class="info-pills">
+          <div class="pill"><span class="pill-icon">❓</span> 30 preguntas</div>
+          <div class="pill"><span class="pill-icon">🔤</span> Opciones A, B, C</div>
+          <div class="pill"><span class="pill-icon">💬</span> Retroalimentación</div>
+          <div class="pill"><span class="pill-icon">📊</span> Resultado final</div>
+        </div>
+        <div class="input-group">
+          <label for="student-name">✍️ Escribe tu nombre completo</label>
+          <input type="text" id="student-name" placeholder="Ej. María González Pérez" autocomplete="off">
+        </div>
+        <button class="btn-primary" onclick="startQuiz()">🚀 Iniciar Simulador</button>
+      </div>
+    </div>
+
+    <!-- QUIZ -->
+    <div id="screen-quiz" class="screen">
+      <div class="quiz-meta">
+        <span class="q-counter">Pregunta <strong id="q-num">1</strong> de 30</span>
+        <span class="tipo-badge" id="q-tipo-badge">Cuestionamiento directo</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <div class="question-card">
+        <span class="q-num-big" id="q-num-bg">01</span>
+        <p class="q-text" id="q-text"></p>
+        <div id="q-extra"></div>
+        <div class="options-list" id="options-list"></div>
+        <div class="feedback-box" id="feedback-box">
+          <span class="fb-icon" id="fb-icon"></span>
+          <div class="fb-text">
+            <strong id="fb-title"></strong>
+            <span id="fb-body"></span>
+          </div>
+        </div>
+      </div>
+      <button class="btn-next" id="btn-next" onclick="nextQuestion()">Siguiente pregunta →</button>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="screen-results" class="screen">
+      <div class="results-card">
+        <span class="results-trophy" id="res-trophy">🏆</span>
+        <h2 class="results-name" id="res-name">¡Felicidades!</h2>
+        <p class="results-subtitle">Has completado el simulador del PMC</p>
+        <div class="score-circle-wrap">
+          <div class="score-circle" id="score-circle">
+            <div class="score-circle-inner">
+              <span class="score-pct" id="res-pct">0%</span>
+              <span class="score-label">ACIERTOS</span>
+            </div>
+          </div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-box green">
+            <div class="stat-num" id="res-correct">0</div>
+            <div class="stat-lbl">✅ Aciertos</div>
+          </div>
+          <div class="stat-box red">
+            <div class="stat-num" id="res-wrong">0</div>
+            <div class="stat-lbl">❌ Errores</div>
+          </div>
+        </div>
+        <div class="motivational-msg" id="res-msg"></div>
+        <div class="results-btns">
+          <button class="btn-primary" onclick="restartQuiz()" style="flex:1">🔄 Intentar de nuevo</button>
+          <button class="btn-secondary" onclick="showTab('guide')">📖 Ver guía de estudio</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end tab-quiz -->
+
+  <!-- ── TAB: GUIDE ── -->
+  <div id="tab-guide" style="display:none">
+    <div class="guide-card">
+      <div class="guide-header">
+        <div class="guide-header-icon">📘</div>
+        <div>
+          <h2>Guía de Estudio – PMC</h2>
+          <p>El Proceso de Mejora Continua · Educación Básica</p>
+        </div>
+      </div>
+      <div class="guide-body">
+        <div class="guide-btns">
+          <a class="btn-guide-open" href="https://drive.google.com/file/d/1fZmQZi6lWRKgiMZ-4CvnYjVymP9haFQk/view?usp=sharing" target="_blank">
+            🔗 Abrir en nueva pestaña
+          </a>
+          <button class="btn-guide-open" onclick="togglePdfViewer()">
+            📄 Ver aquí dentro
+          </button>
+        </div>
+        <div id="pdf-viewer-wrap" style="display:none">
+          <iframe class="pdf-frame"
+            src="https://drive.google.com/file/d/1fZmQZi6lWRKgiMZ-4CvnYjVymP9haFQk/preview"
+            allow="autoplay"
+            title="Guía de Estudio PMC"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end container -->
+
+<script>
+/* ═══════════════════════════════════════════════
+   30 PREGUNTAS – PMC
+   Distribución correcta: A×10, B×10, C×10
+═══════════════════════════════════════════════ */
+const preguntas = [
+  /* ─── 1 Cuestionamiento directo → C ─── */
+  {
+    num: 1, tipo: "cd",
+    base: "¿Cuál de las siguientes afirmaciones describe correctamente la naturaleza del Proceso de Mejora Continua (PMC)?",
+    extra: null,
+    opciones: {
+      A: "Es un documento administrativo que se elabora al inicio del ciclo escolar, se entrega a la supervisión y se archiva al finalizar el año.",
+      B: "Es una estrategia de evaluación docente diseñada para medir el desempeño del personal educativo ante las autoridades.",
+      C: "Es el esfuerzo constante por ofrecer una educación humanista, integral, inclusiva, equitativa, democrática e intercultural, reconociendo que siempre hay algo que se puede hacer mejor."
+    },
+    correcta: "C",
+    explicacion: "El PMC es una búsqueda permanente y visión transformadora, no un trámite administrativo. Busca ofrecer una educación con todas esas cualidades y trasciende la idea del documento que se exige, se entrega y se olvida."
+  },
+  /* ─── 2 Completamiento → A ─── */
+  {
+    num: 2, tipo: "comp",
+    base: "Para que la mejora escolar no se quede solo en buenos deseos, el PMC requiere dos condiciones absolutamente nucleares: perspectiva compartida y…",
+    extra: null,
+    opciones: {
+      A: "…compromiso conjunto, donde todas y todos, a partir de sus atribuciones, hacen lo que les corresponde para enfrentar los retos.",
+      B: "…evaluación docente permanente que mida el cumplimiento de los objetivos institucionales trazados por la dirección.",
+      C: "…supervisión directiva continua que garantice el cumplimiento puntual de cada acción establecida en el programa."
+    },
+    correcta: "A",
+    explicacion: "Las dos condiciones nucleares son: perspectiva compartida (una idea común sobre la tarea de la escuela) y compromiso conjunto (todas y todos hacen lo que les corresponde según sus atribuciones)."
+  },
+  /* ─── 3 Cuestionamiento directo → B ─── */
+  {
+    num: 3, tipo: "cd",
+    base: "¿Qué característica del PMC señala que cada escuela tiene condiciones distintas y el proceso debe adaptarse a su propia realidad?",
+    extra: null,
+    opciones: {
+      A: "Territorial",
+      B: "Diferenciado",
+      C: "Gradual"
+    },
+    correcta: "B",
+    explicacion: "La característica 'Diferenciado' del PMC reconoce que cada escuela tiene condiciones distintas; por ello el proceso no puede ser idéntico para todas las instituciones educativas."
+  },
+  /* ─── 4 Relación de elementos → C ─── */
+  {
+    num: 4, tipo: "rel",
+    base: "Seleccione la opción que relacione correctamente cada característica del PMC con su descripción.",
+    extra: {
+      tipo: "tabla",
+      cols: ["Característica", "Descripción"],
+      filas: [
+        ["1. Sistemático", "a) Involucra a toda la comunidad escolar en el proceso"],
+        ["2. Dialógico",   "b) Reflexión y diálogo como base de la participación"],
+        ["3. Participativo","c) Sigue una serie de fases comunes para ordenar los esfuerzos"]
+      ]
+    },
+    opciones: {
+      A: "1b, 2a, 3c",
+      B: "1a, 2c, 3b",
+      C: "1c, 2b, 3a"
+    },
+    correcta: "C",
+    explicacion: "Sistemático = fases comunes para ordenar esfuerzos (c). Dialógico = reflexión y diálogo como base (b). Participativo = involucramiento de toda la comunidad (a). La combinación correcta es 1c, 2b, 3a."
+  },
+  /* ─── 5 Ordenamiento → A ─── */
+  {
+    num: 5, tipo: "ord",
+    base: "Ordene correctamente las 5 fases del Proceso de Mejora Continua según su secuencia lógica de desarrollo.",
+    extra: {
+      tipo: "lista",
+      items: [
+        "1. Implementación",
+        "2. Seguimiento y Evaluación",
+        "3. Diagnóstico Socioeducativo",
+        "4. Comunicación de avances y logros",
+        "5. Planeación (Programa de Mejora Continua)"
+      ]
+    },
+    opciones: {
+      A: "3 → 5 → 1 → 2 → 4",
+      B: "5 → 3 → 1 → 4 → 2",
+      C: "3 → 1 → 5 → 2 → 4"
+    },
+    correcta: "A",
+    explicacion: "El orden correcto es: Fase 1 Diagnóstico Socioeducativo → Fase 2 Planeación → Fase 3 Implementación → Fase 4 Seguimiento y Evaluación → Fase 5 Comunicación de avances y logros."
+  },
+  /* ─── 6 Cuestionamiento directo → B ─── */
+  {
+    num: 6, tipo: "cd",
+    base: "En el PMC, ¿qué implica la 'perspectiva compartida' como condición nuclear para la transformación escolar?",
+    extra: null,
+    opciones: {
+      A: "Que todos los docentes apliquen exactamente las mismas estrategias didácticas en sus respectivas aulas durante el ciclo.",
+      B: "Una idea común acerca de la tarea de la escuela, del trabajo docente y de los estudiantes, reconociendo dónde se encuentra la escuela y caminando hacia la educación que se quiere.",
+      C: "Que directivos y supervisores compartan los resultados de las evaluaciones con toda la comunidad al concluir el ciclo."
+    },
+    correcta: "B",
+    explicacion: "La perspectiva compartida implica construir una visión común sobre la tarea escolar, el trabajo docente y los estudiantes. Reconocer dónde se encuentra la escuela para caminar juntos hacia la educación que se desea."
+  },
+  /* ─── 7 Completamiento → C ─── */
+  {
+    num: 7, tipo: "comp",
+    base: "La característica 'progresivo' del Proceso de Mejora Continua significa que…",
+    extra: null,
+    opciones: {
+      A: "…el proceso avanza de manera lineal y sin retrocesos hacia los objetivos propuestos dentro del mismo ciclo escolar.",
+      B: "…todas las acciones deben completarse en el ciclo escolar en que fueron planeadas, sin excepción.",
+      C: "…representa un avance paulatino a mediano y largo plazo hacia el horizonte de mejora, sin pretender resultados inmediatos."
+    },
+    correcta: "C",
+    explicacion: "'Progresivo' en el PMC implica un avance gradual y sostenido a mediano y largo plazo. No se esperan transformaciones inmediatas, sino un camino continuo hacia el horizonte de mejora educativa."
+  },
+  /* ─── 8 Cuestionamiento directo → A ─── */
+  {
+    num: 8, tipo: "cd",
+    base: "¿Cuál es el propósito principal de la Fase 1 (Diagnóstico Socioeducativo) dentro del ciclo del PMC?",
+    extra: null,
+    opciones: {
+      A: "Realizar una lectura profunda de la realidad escolar, indagando y cuestionando las causas de raíz de las situaciones identificadas en múltiples ámbitos.",
+      B: "Elaborar el Programa de Mejora Continua estableciendo los objetivos, metas y acciones del ciclo escolar.",
+      C: "Comunicar a la comunidad los avances y logros obtenidos al término del proceso de mejora implementado."
+    },
+    correcta: "A",
+    explicacion: "La Fase 1 es la 'Lectura de la Realidad'. Su propósito es indagar y cuestionar cómo y por qué se originan las situaciones, buscando causas de raíz y analizando condiciones académicas, familiares, sociales y pedagógicas."
+  },
+  /* ─── 9 Relación de elementos → B ─── */
+  {
+    num: 9, tipo: "rel",
+    base: "Seleccione la opción que relacione correctamente cada fase del PMC con su descripción central.",
+    extra: {
+      tipo: "tabla",
+      cols: ["Fase", "Descripción"],
+      filas: [
+        ["1. Planeación",              "a) Revisión periódica de la ejecución de acciones para detectar obstáculos y ajustar la ruta"],
+        ["2. Seguimiento",             "b) Elaboración del Programa de Mejora Continua como documento de trabajo que surge desde y para la escuela"],
+        ["3. Comunicación de logros",  "c) Compartir con la comunidad los resultados, logros y nuevos desafíos del proceso"]
+      ]
+    },
+    opciones: {
+      A: "1c, 2a, 3b",
+      B: "1b, 2a, 3c",
+      C: "1a, 2c, 3b"
+    },
+    correcta: "B",
+    explicacion: "Planeación = construir el Programa de Mejora Continua (b). Seguimiento = revisión periódica para detectar obstáculos (a). Comunicación de logros = compartir resultados con la comunidad (c)."
+  },
+  /* ─── 10 Cuestionamiento directo → C ─── */
+  {
+    num: 10, tipo: "cd",
+    base: "Una directora convoca al Consejo Técnico Escolar para revisar si las acciones del PMC se están ejecutando en los tiempos acordados y detectar posibles obstáculos que impidan el avance. ¿En qué fase del PMC se encuentra esta acción?",
+    extra: null,
+    opciones: {
+      A: "Fase 2: Planeación",
+      B: "Fase 3: Implementación",
+      C: "Fase 4: Seguimiento y Evaluación"
+    },
+    correcta: "C",
+    explicacion: "Revisar el cumplimiento de plazos y detectar obstáculos a tiempo son acciones propias del Seguimiento (Fase 4). El seguimiento es el monitoreo periódico del proceso para poder ajustar la ruta cuando sea necesario."
+  },
+  /* ─── 11 Completamiento → A ─── */
+  {
+    num: 11, tipo: "comp",
+    base: "El Programa de Mejora Continua, producto de la Fase 2 de Planeación, no es un formato para fines administrativos; es…",
+    extra: null,
+    opciones: {
+      A: "…un documento de trabajo que surge desde, en y para la escuela, orientado a marcar el rumbo transformador, no las actividades cotidianas.",
+      B: "…un informe institucional que se entrega a la supervisión escolar al inicio de cada ciclo escolar para su autorización.",
+      C: "…un registro de evaluaciones que documenta el desempeño de los docentes y su impacto en los aprendizajes del ciclo."
+    },
+    correcta: "A",
+    explicacion: "El PMC es un documento de trabajo vivo: surge desde, en y para la escuela. Marca el rumbo transformador respondiendo qué queremos lograr, cuánto y cuándo, y cómo. No planea actividades cotidianas ni resuelve problemas inmediatos."
+  },
+  /* ─── 12 Cuestionamiento directo → B ─── */
+  {
+    num: 12, tipo: "cd",
+    base: "¿Qué diferencia conceptual existe entre el 'Seguimiento' y la 'Evaluación' dentro de la Fase 4 del PMC?",
+    extra: null,
+    opciones: {
+      A: "El seguimiento ocurre al final del ciclo y la evaluación se realiza de manera periódica durante el proceso de implementación.",
+      B: "El seguimiento es el monitoreo periódico del proceso para detectar obstáculos y ajustar la ruta; la evaluación es la valoración global reflexiva al final del ciclo.",
+      C: "El seguimiento lo realiza el supervisor de zona y la evaluación la realizan el director y los docentes al concluir el año escolar."
+    },
+    correcta: "B",
+    explicacion: "El seguimiento responde: ¿se cumplieron los plazos? ¿cómo sabemos que avanzamos? Es periódico y busca ajustar. La evaluación responde: ¿se lograron los objetivos trazados? ¿qué nuevas necesidades surgieron? Es al final del ciclo y promueve retroalimentación."
+  },
+  /* ─── 13 Ordenamiento → C ─── */
+  {
+    num: 13, tipo: "ord",
+    base: "Para priorizar problemáticas en el 'embudo de priorización' del PMC, ordene los criterios de filtro que deben aplicarse de primero a último.",
+    extra: {
+      tipo: "lista",
+      items: [
+        "1. ¿Requiere de una planeación a mediano o largo plazo?",
+        "2. ¿Afecta directamente el aprendizaje y desarrollo de los estudiantes?",
+        "3. ¿Está en nuestras manos resolverlo con nuestros recursos y atribuciones?"
+      ]
+    },
+    opciones: {
+      A: "3 → 1 → 2",
+      B: "1 → 3 → 2",
+      C: "2 → 3 → 1"
+    },
+    correcta: "C",
+    explicacion: "El embudo aplica primero: ¿afecta el aprendizaje? (filtro de relevancia educativa), luego ¿está en nuestras manos? (filtro de atribución), y finalmente ¿requiere planeación a mediano/largo plazo? (filtro de alcance del PMC)."
+  },
+  /* ─── 14 Cuestionamiento directo → A ─── */
+  {
+    num: 14, tipo: "cd",
+    base: "¿Qué característica del PMC se refleja cuando una escuela rural adapta sus estrategias de mejora considerando la geografía, la cultura local y el contexto socioeconómico particular de su comunidad?",
+    extra: null,
+    opciones: {
+      A: "Territorial",
+      B: "Integral",
+      C: "Diferenciado"
+    },
+    correcta: "A",
+    explicacion: "'Territorial' significa que el PMC parte de la realidad geográfica y cultural situada. Cada escuela está anclada a un territorio con características únicas que deben considerarse en el proceso de mejora."
+  },
+  /* ─── 15 Completamiento → B ─── */
+  {
+    num: 15, tipo: "comp",
+    base: "En la Fase 3 de Implementación, la 'flexibilidad operativa' del PMC significa que…",
+    extra: null,
+    opciones: {
+      A: "…las acciones planificadas pueden modificarse únicamente si el supervisor escolar lo autoriza expresamente por escrito.",
+      B: "…en el proceso de la vida real, las acciones pueden modificarse o ajustarse a partir de los tiempos, recursos o niveles de participación disponibles, y eso es normal.",
+      C: "…cada docente puede decidir de forma individual qué acciones del PMC implementar según sus preferencias pedagógicas y disponibilidad."
+    },
+    correcta: "B",
+    explicacion: "La flexibilidad operativa reconoce que en la vida real habrá cosas que no salgan exactamente como se planearon. Esto es normal y no implica fracaso; la reflexión permanente permite ajustar sin miedo al error."
+  },
+  /* ─── 16 Relación de elementos → C ─── */
+  {
+    num: 16, tipo: "rel",
+    base: "Seleccione la opción que relacione correctamente cada componente de la Fase 2 (Planeación) con la pregunta orientadora que responde.",
+    extra: {
+      tipo: "tabla",
+      cols: ["Componente", "Pregunta orientadora"],
+      filas: [
+        ["1. Objetivos", "a) ¿Cómo lo haremos y quiénes intervendrán?"],
+        ["2. Metas",     "b) ¿Qué queremos lograr?"],
+        ["3. Acciones",  "c) ¿Cuánto y cuándo?"]
+      ]
+    },
+    opciones: {
+      A: "1c, 2a, 3b",
+      B: "1a, 2b, 3c",
+      C: "1b, 2c, 3a"
+    },
+    correcta: "C",
+    explicacion: "Objetivos = ¿qué queremos lograr? (b). Metas = ¿cuánto y cuándo? (c). Acciones = ¿cómo lo haremos y quiénes intervendrán? (a). La combinación correcta es 1b, 2c, 3a."
+  },
+  /* ─── 17 Cuestionamiento directo → A ─── */
+  {
+    num: 17, tipo: "cd",
+    base: "¿Cuál de las siguientes situaciones describe correctamente la característica 'dialógico' del PMC en la práctica escolar?",
+    extra: null,
+    opciones: {
+      A: "El colectivo docente reflexiona conjuntamente sobre los resultados del diagnóstico antes de establecer las problemáticas prioritarias de mejora.",
+      B: "El director elabora el diagnóstico escolar de forma individual y lo presenta al personal para su conocimiento general.",
+      C: "Cada docente realiza su propia autoevaluación de manera independiente y la comparte con el director al término del ciclo."
+    },
+    correcta: "A",
+    explicacion: "'Dialógico' significa que la reflexión y el diálogo son la base de la participación. El colectivo docente analiza y reflexiona de manera conjunta, no de forma individual o jerárquica."
+  },
+  /* ─── 18 Cuestionamiento directo → B ─── */
+  {
+    num: 18, tipo: "cd",
+    base: "Según el PMC, ¿qué debe ocurrir cuando durante la implementación las condiciones del contexto escolar cambian significativamente y las acciones planificadas no están funcionando?",
+    extra: null,
+    opciones: {
+      A: "Se suspende todo el proceso y se espera al siguiente ciclo escolar para reiniciarlo desde la Fase 1 con un nuevo diagnóstico.",
+      B: "Es válido regresar a la fase de diagnóstico para reevaluar prioridades y ajustar el programa, ya que las fases no son lineales ni en un solo sentido.",
+      C: "El director debe solicitar autorización formal a la supervisión de zona antes de realizar cualquier ajuste al programa ya aprobado."
+    },
+    correcta: "B",
+    explicacion: "El PMC tiene flexibilidad inherente: las fases no se presentan de manera lineal ni en un solo sentido. Si las condiciones cambian, es válido recalcular la ruta y regresar al diagnóstico para reevaluar sin miedo al error."
+  },
+  /* ─── 19 Cuestionamiento directo → C ─── */
+  {
+    num: 19, tipo: "cd",
+    base: "¿Qué aspecto fundamental distingue al Diagnóstico Socioeducativo del PMC de un simple inventario o listado de problemas escolares?",
+    extra: null,
+    opciones: {
+      A: "Que se realiza únicamente con la participación de los docentes del plantel, excluyendo a familias y otros actores de la comunidad.",
+      B: "Que se enfoca exclusivamente en los resultados obtenidos en evaluaciones estandarizadas externas aplicadas a los estudiantes.",
+      C: "Que busca las causas de raíz cuestionando cómo y por qué se originan las situaciones, y analiza múltiples ámbitos: académico, familiar, social y pedagógico."
+    },
+    correcta: "C",
+    explicacion: "La Fase 1 va más allá de identificar situaciones: cuestiona cómo y por qué se originan. Implica revisar múltiples ámbitos (aulas, escuela y comunidad) para comprender la realidad en profundidad y encontrar causas de raíz."
+  },
+  /* ─── 20 Completamiento → A ─── */
+  {
+    num: 20, tipo: "comp",
+    base: "La característica 'integral' del PMC implica que…",
+    extra: null,
+    opciones: {
+      A: "…el proceso reconoce la complejidad y las múltiples dimensiones de la realidad escolar al analizar y abordar las problemáticas educativas.",
+      B: "…todos los docentes deben participar por igual en todas las fases del proceso sin excepción ni distinción de funciones.",
+      C: "…el programa debe abarcar obligatoriamente todas las asignaturas del currículo en cada uno de sus objetivos y metas planteadas."
+    },
+    correcta: "A",
+    explicacion: "'Integral' significa que el PMC reconoce la complejidad de la realidad escolar con sus múltiples dimensiones. No simplifica ni reduce los problemas a una sola causa; los aborda en su amplitud y profundidad."
+  },
+  /* ─── 21 Ordenamiento → B ─── */
+  {
+    num: 21, tipo: "ord",
+    base: "Ordene los elementos del Diagnóstico Socioeducativo (Fase 1) según su lógica interna de desarrollo, de primero a último.",
+    extra: {
+      tipo: "lista",
+      items: [
+        "1. Identificar problemáticas prioritarias mediante el embudo de priorización",
+        "2. Analizar condiciones en múltiples ámbitos: académicas, familiares, sociales y pedagógicas",
+        "3. Indagar las causas de raíz: cómo y por qué se originan las situaciones"
+      ]
+    },
+    opciones: {
+      A: "1 → 3 → 2",
+      B: "2 → 3 → 1",
+      C: "3 → 2 → 1"
+    },
+    correcta: "B",
+    explicacion: "Primero se analizan los múltiples ámbitos de la realidad escolar (2), luego se indagan las causas de raíz (3), y finalmente se aplica el embudo para identificar las problemáticas prioritarias (1) que guiarán el PMC."
+  },
+  /* ─── 22 Cuestionamiento directo → C ─── */
+  {
+    num: 22, tipo: "cd",
+    base: "¿Por qué la Fase 5 del PMC, 'Comunicación de Avances y Logros', está directamente relacionada con el principio de corresponsabilidad?",
+    extra: null,
+    opciones: {
+      A: "Porque permite a la supervisión escolar evaluar formalmente el desempeño del director y del colectivo docente durante el ciclo.",
+      B: "Porque facilita la rendición de cuentas administrativas exigidas por las autoridades educativas al concluir el ciclo escolar.",
+      C: "Porque el PMC es un esfuerzo participativo y quienes ayudaron a empujar el proceso deben conocer los resultados; comunicarlos fortalece a la comunidad y prepara el siguiente ciclo."
+    },
+    correcta: "C",
+    explicacion: "La corresponsabilidad implica que quienes participaron en el proceso deben conocer sus resultados. Comunicar periódicamente avances y logros fortalece a la comunidad escolar y prepara el terreno para el próximo ciclo de mejora."
+  },
+  /* ─── 23 Cuestionamiento directo → A ─── */
+  {
+    num: 23, tipo: "cd",
+    base: "Un colectivo docente detecta que la falta de alumbrado público en el exterior del plantel afecta la seguridad de los estudiantes al entrar y salir. Según el embudo de priorización del PMC, ¿qué criterio descarta esta problemática como prioritaria para el programa?",
+    extra: null,
+    opciones: {
+      A: "Que no está en manos de la escuela resolverla con sus propios recursos y atribuciones; corresponde a otra instancia.",
+      B: "Que no afecta directamente el aprendizaje y el desarrollo integral de los estudiantes dentro de la escuela.",
+      C: "Que no requiere una planeación a mediano o largo plazo, sino una solución inmediata de gestión."
+    },
+    correcta: "A",
+    explicacion: "El segundo filtro del embudo pregunta: ¿está en nuestras manos resolverlo con nuestros recursos y atribuciones? La falta de alumbrado público exterior no corresponde a la escuela; es competencia de la autoridad municipal u otra instancia."
+  },
+  /* ─── 24 Relación de elementos → B ─── */
+  {
+    num: 24, tipo: "rel",
+    base: "Seleccione la opción que relacione correctamente cada característica del PMC con su descripción.",
+    extra: {
+      tipo: "tabla",
+      cols: ["Característica", "Descripción"],
+      filas: [
+        ["1. Gradual",     "a) Avance paulatino a mediano y largo plazo hacia el horizonte de mejora"],
+        ["2. Progresivo",  "b) Esfuerzos continuos realizados en pequeños pasos sostenidos"],
+        ["3. Sistemático", "c) Sigue una serie de fases comunes para ordenar los esfuerzos colectivos"]
+      ]
+    },
+    opciones: {
+      A: "1a, 2c, 3b",
+      B: "1b, 2a, 3c",
+      C: "1c, 2b, 3a"
+    },
+    correcta: "B",
+    explicacion: "Gradual = pequeños pasos continuos (b). Progresivo = avance paulatino a largo plazo (a). Sistemático = serie de fases para ordenar los esfuerzos (c). La combinación correcta es 1b, 2a, 3c."
+  },
+  /* ─── 25 Completamiento → C ─── */
+  {
+    num: 25, tipo: "comp",
+    base: "La Fase 1 del PMC (Diagnóstico Socioeducativo) es llamada el punto de partida porque…",
+    extra: null,
+    opciones: {
+      A: "…establece directamente los objetivos y las metas que guiarán todas las acciones del Programa de Mejora Continua del ciclo.",
+      B: "…permite a los docentes autoevaluarse individualmente y determinar sus necesidades específicas de formación profesional.",
+      C: "…alimenta tanto la contextualización de los contenidos en el Programa Analítico como la gestión escolar en el Programa de Mejora Continua."
+    },
+    correcta: "C",
+    explicacion: "El Diagnóstico Socioeducativo es el punto de partida porque su información sirve para dos instrumentos fundamentales: el Programa Analítico (contextualización curricular) y el Programa de Mejora Continua (gestión escolar)."
+  },
+  /* ─── 26 Cuestionamiento directo → A ─── */
+  {
+    num: 26, tipo: "cd",
+    base: "¿Qué significa que el Proceso de Mejora Continua sea un proceso 'no lineal'?",
+    extra: null,
+    opciones: {
+      A: "Que las fases no se presentan de manera rígida ni en un solo sentido; es posible y válido regresar a fases anteriores cuando las condiciones del contexto así lo requieren.",
+      B: "Que cada escuela puede aplicar las fases del PMC en el orden que considere más conveniente, sin ninguna restricción metodológica.",
+      C: "Que el proceso no tiene una secuencia definida y cada colectivo docente construye libremente su propio modelo de mejora sin referencias comunes."
+    },
+    correcta: "A",
+    explicacion: "La no linealidad del PMC significa que ante cambios en las condiciones escolares o cuando las acciones no funcionan, se puede recalcular la ruta y regresar a fases anteriores. No es rigidez, sino flexibilidad reflexiva."
+  },
+  /* ─── 27 Cuestionamiento directo → B ─── */
+  {
+    num: 27, tipo: "cd",
+    base: "Según el PMC, ¿qué pregunta clave orienta específicamente el proceso de Seguimiento dentro de la Fase 4?",
+    extra: null,
+    opciones: {
+      A: "¿Se lograron los objetivos trazados al inicio del ciclo escolar con el impacto esperado en los estudiantes?",
+      B: "¿Se cumplieron los plazos establecidos y cómo sabemos que estamos avanzando hacia las metas?",
+      C: "¿Qué nuevas necesidades surgieron a partir de los logros obtenidos durante el ciclo de mejora?"
+    },
+    correcta: "B",
+    explicacion: "El Seguimiento (monitoreo del proceso) responde: ¿se cumplieron los plazos? ¿cómo sabemos que avanzamos? Su objetivo es detectar obstáculos a tiempo y ajustar la ruta. Las preguntas de las opciones A y C corresponden a la Evaluación."
+  },
+  /* ─── 28 Ordenamiento → C ─── */
+  {
+    num: 28, tipo: "ord",
+    base: "Ordene los tres componentes del Programa de Mejora Continua (Fase 2) según la secuencia lógica para su elaboración.",
+    extra: {
+      tipo: "lista",
+      items: [
+        "1. Definir las acciones: ¿cómo lo haremos y quiénes intervendrán?",
+        "2. Establecer los objetivos: ¿qué queremos lograr?",
+        "3. Determinar las metas: ¿cuánto y cuándo?"
+      ]
+    },
+    opciones: {
+      A: "1 → 3 → 2",
+      B: "3 → 1 → 2",
+      C: "2 → 3 → 1"
+    },
+    correcta: "C",
+    explicacion: "La secuencia lógica es: primero definir los objetivos (¿qué queremos lograr?) → luego las metas (¿cuánto y cuándo?) → finalmente las acciones (¿cómo y quiénes?). Los objetivos dan sentido a metas y acciones."
+  },
+  /* ─── 29 Cuestionamiento directo → A ─── */
+  {
+    num: 29, tipo: "cd",
+    base: "¿Cuál es el propósito principal de la retroalimentación en la Fase 5 del PMC (Comunicación de Avances y Logros)?",
+    extra: null,
+    opciones: {
+      A: "Fortalecer a la comunidad escolar compartiendo resultados, logros y nuevos desafíos, y preparar el terreno para el próximo ciclo de mejora.",
+      B: "Justificar ante las autoridades educativas el uso de los recursos pedagógicos y materiales asignados a la escuela.",
+      C: "Evaluar individualmente el desempeño de cada uno de los integrantes del colectivo docente durante el ciclo."
+    },
+    correcta: "A",
+    explicacion: "La Fase 5 tiene doble propósito: corresponsabilidad (quienes ayudaron deben conocer los resultados) y retroalimentación (comunicar periódicamente fortalece a la comunidad y prepara el siguiente ciclo). No es rendición de cuentas ni evaluación individual."
+  },
+  /* ─── 30 Cuestionamiento directo → B ─── */
+  {
+    num: 30, tipo: "cd",
+    base: "Una escuela que lleva tres ciclos trabajando el PMC decide que los aprendizajes y avances del ciclo que concluye servirán de base para el siguiente, sin partir de cero. ¿Qué principio o componente del PMC ilustra mejor esta situación?",
+    extra: null,
+    opciones: {
+      A: "La flexibilidad operativa de la Fase 3, que permite modificar acciones durante la implementación ante situaciones imprevistas.",
+      B: "La evaluación como diagnóstico reflexivo final que promueve retroalimentación para reiniciar el ciclo más fortalecidos, sin partir de cero.",
+      C: "La perspectiva compartida como condición nuclear para que todos reconozcan dónde se encuentra la escuela y qué han logrado."
+    },
+    correcta: "B",
+    explicacion: "La Evaluación (Fase 4) es un diagnóstico reflexivo final cuyo objetivo es promover retroalimentación para reiniciar el ciclo más fortalecidos. Sus preguntas clave son: ¿se lograron los objetivos? ¿qué nuevas necesidades surgieron? Esto permite la mejora continua acumulativa."
+  }
+];
+
+/* ═══════════ TIPOS ═══════════ */
+const tipoInfo = {
+  cd:   { label: "Cuestionamiento directo", cls: "tipo-cd" },
+  comp: { label: "Completamiento",           cls: "tipo-comp" },
+  ord:  { label: "Ordenamiento",             cls: "tipo-ord" },
+  rel:  { label: "Relación de elementos",    cls: "tipo-rel" }
+};
+
+/* ═══════════ STATE ═══════════ */
+let studentName = "";
+let currentQ    = 0;
+let correct     = 0;
+let answered    = false;
+
+/* ═══════════ NAVIGATION ═══════════ */
+function showTab(tab) {
+  document.getElementById("tab-quiz").style.display  = tab === "quiz"  ? "block" : "none";
+  document.getElementById("tab-guide").style.display = tab === "guide" ? "block" : "none";
+  document.querySelectorAll(".nav-tab").forEach((el, i) => {
+    el.classList.toggle("active", (i === 0 && tab === "quiz") || (i === 1 && tab === "guide"));
+  });
+}
+
+/* ═══════════ START ═══════════ */
+function startQuiz() {
+  const input = document.getElementById("student-name").value.trim();
+  if (!input) {
+    document.getElementById("student-name").style.borderColor = "var(--wrong)";
+    document.getElementById("student-name").focus();
+    return;
+  }
+  studentName = input;
+  currentQ = 0; correct = 0;
+  showScreen("screen-quiz");
+  renderQuestion();
+}
+
+/* ═══════════ RENDER QUESTION ═══════════ */
+function renderQuestion() {
+  answered = false;
+  const q = preguntas[currentQ];
+  const t = tipoInfo[q.tipo];
+
+  document.getElementById("q-num").textContent    = q.num;
+  document.getElementById("q-num-bg").textContent = String(q.num).padStart(2, "0");
+  document.getElementById("progress-fill").style.width = (q.num / 30 * 100) + "%";
+
+  const badge = document.getElementById("q-tipo-badge");
+  badge.textContent = t.label;
+  badge.className = "tipo-badge " + t.cls;
+
+  document.getElementById("q-text").textContent = q.base;
+
+  // Extra content
+  const extra = document.getElementById("q-extra");
+  extra.innerHTML = "";
+  if (q.extra) {
+    if (q.extra.tipo === "tabla") {
+      let html = `<table class="q-table"><thead><tr>`;
+      q.extra.cols.forEach(c => html += `<th>${c}</th>`);
+      html += `</tr></thead><tbody>`;
+      q.extra.filas.forEach(f => {
+        html += `<tr>`;
+        f.forEach(cell => html += `<td>${cell}</td>`);
+        html += `</tr>`;
+      });
+      html += `</tbody></table>`;
+      extra.innerHTML = html;
+    } else if (q.extra.tipo === "lista") {
+      let html = `<ul style="margin:12px 0 0 18px; font-size:.87rem; line-height:1.8; color:var(--gray-700);">`;
+      q.extra.items.forEach(item => html += `<li><strong>${item}</strong></li>`);
+      html += `</ul>`;
+      extra.innerHTML = html;
+    }
+  }
+
+  // Options
+  const list = document.getElementById("options-list");
+  list.innerHTML = "";
+  ["A","B","C"].forEach(letra => {
+    const btn = document.createElement("button");
+    btn.className = "option-btn";
+    btn.setAttribute("data-letra", letra);
+    btn.innerHTML = `<span class="opt-letter">${letra}</span><span class="opt-text">${q.opciones[letra]}</span>`;
+    btn.onclick = () => selectOption(letra);
+    list.appendChild(btn);
+  });
+
+  // Reset feedback
+  const fb = document.getElementById("feedback-box");
+  fb.className = "feedback-box";
+  fb.innerHTML = `<span class="fb-icon" id="fb-icon"></span><div class="fb-text"><strong id="fb-title"></strong><span id="fb-body"></span></div>`;
+
+  document.getElementById("btn-next").className = "btn-next";
+  document.getElementById("btn-next").textContent = currentQ < 29 ? "Siguiente pregunta →" : "Ver mis resultados →";
+}
+
+/* ═══════════ SELECT OPTION ═══════════ */
+function selectOption(letra) {
+  if (answered) return;
+  answered = true;
+  const q = preguntas[currentQ];
+  const isCorrect = letra === q.correcta;
+  if (isCorrect) { correct++; spawnConfetti(); }
+
+  // Style buttons
+  document.querySelectorAll(".option-btn").forEach(btn => {
+    btn.disabled = true;
+    const l = btn.getAttribute("data-letra");
+    if (l === q.correcta) btn.classList.add("correct");
+    else if (l === letra && !isCorrect) btn.classList.add("wrong");
+  });
+
+  // Feedback
+  const fb = document.getElementById("feedback-box");
+  fb.innerHTML = `
+    <span class="fb-icon">${isCorrect ? "✅" : "❌"}</span>
+    <div class="fb-text">
+      <strong style="color:${isCorrect ? "#166534":"#991B1B"}">${isCorrect ? "¡Correcto! Muy bien." : `Respuesta correcta: opción ${q.correcta}`}</strong>
+      <span>${q.explicacion}</span>
+    </div>`;
+  fb.className = "feedback-box show " + (isCorrect ? "correct-fb" : "wrong-fb");
+
+  document.getElementById("btn-next").className = "btn-next show";
+}
+
+/* ═══════════ NEXT ═══════════ */
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= 30) { showResults(); return; }
+  showScreen("screen-quiz");
+  renderQuestion();
+}
+
+/* ═══════════ RESULTS ═══════════ */
+function showResults() {
+  showScreen("screen-results");
+  const pct = Math.round(correct / 30 * 100);
+
+  document.getElementById("res-name").textContent    = studentName;
+  document.getElementById("res-correct").textContent = correct;
+  document.getElementById("res-wrong").textContent   = 30 - correct;
+  document.getElementById("res-pct").textContent     = pct + "%";
+
+  const circle = document.getElementById("score-circle");
+  circle.style.setProperty("--pct", pct + "%");
+
+  // Trophy & message
+  let trophy, msg;
+  if (pct >= 90) {
+    trophy = "🏆"; msg = `¡Excelente desempeño, ${studentName}! Dominas los fundamentos del PMC con gran solidez. Estás muy bien preparado(a). ¡Sigue así!`;
+  } else if (pct >= 70) {
+    trophy = "🌟"; msg = `¡Buen trabajo, ${studentName}! Tienes una comprensión sólida del PMC. Repasa los temas donde tuviste dificultades para alcanzar la excelencia.`;
+  } else if (pct >= 50) {
+    trophy = "📚"; msg = `Vas por buen camino, ${studentName}. Tienes bases del PMC, pero hay aspectos que requieren más estudio. Consulta la guía y vuelve a intentarlo.`;
+  } else {
+    trophy = "💪"; msg = `No te desanimes, ${studentName}. Todo aprendizaje requiere práctica constante. Estudia la guía de estudio del PMC y vuelve a presentar el simulador. ¡Tú puedes!`;
+  }
+  document.getElementById("res-trophy").textContent = trophy;
+  document.getElementById("res-msg").textContent = msg;
+
+  if (pct >= 70) spawnConfetti(60);
+}
+
+/* ═══════════ RESTART ═══════════ */
+function restartQuiz() {
+  currentQ = 0; correct = 0;
+  showScreen("screen-welcome");
+}
+
+/* ═══════════ SCREEN ═══════════ */
+function showScreen(id) {
+  ["screen-welcome","screen-quiz","screen-results"].forEach(s => {
+    document.getElementById(s).className = "screen" + (s === id ? " active" : "");
+  });
+}
+
+/* ═══════════ PDF VIEWER ═══════════ */
+function togglePdfViewer() {
+  const wrap = document.getElementById("pdf-viewer-wrap");
+  wrap.style.display = wrap.style.display === "none" ? "block" : "none";
+}
+
+/* ═══════════ CONFETTI ═══════════ */
+function spawnConfetti(count = 20) {
+  const colors = ["#FF7B54","#FFB26B","#4FC3F7","#4DD9AC","#A78BFA","#FFD580","#FF6B9D"];
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const el = document.createElement("div");
+      el.className = "confetti-piece";
+      el.style.cssText = `
+        left: ${Math.random()*100}vw;
+        top: -12px;
+        background: ${colors[Math.floor(Math.random()*colors.length)]};
+        transform: rotate(${Math.random()*360}deg);
+        animation-duration: ${0.9 + Math.random()*0.8}s;
+        animation-delay: ${Math.random()*0.3}s;
+        width: ${6 + Math.random()*8}px;
+        height: ${6 + Math.random()*8}px;
+      `;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 2000);
+    }, i * 30);
+  }
+}
+</script>
+</body>
+</html>

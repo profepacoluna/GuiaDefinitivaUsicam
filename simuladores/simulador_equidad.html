@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador Interactivo — Construyendo Equidad</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --terracota: #C0522E;
+    --terracota-light: #E07A55;
+    --dorado: #C8920A;
+    --dorado-light: #F0B429;
+    --verde: #2D7A6A;
+    --verde-light: #4EA899;
+    --crema: #F8F3EC;
+    --crema-dark: #EDE5D8;
+    --cafe: #6B3A2A;
+    --texto: #2C1F18;
+    --texto-suave: #6B5B52;
+    --blanco: #FFFFFF;
+    --sombra: rgba(100,50,20,0.12);
+    --sombra-fuerte: rgba(100,50,20,0.22);
+    --correcto: #2E7D5B;
+    --correcto-bg: #E8F7F0;
+    --incorrecto: #B0402A;
+    --incorrecto-bg: #FDE9E4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--crema);
+    color: var(--texto);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 15% 20%, rgba(192,82,46,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 80%, rgba(45,122,106,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(200,146,10,0.05) 0%, transparent 70%);
+  }
+
+  /* ─── HEADER ─── */
+  .header {
+    background: linear-gradient(135deg, var(--terracota) 0%, #A8421E 40%, var(--cafe) 100%);
+    padding: 28px 20px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px var(--sombra-fuerte);
+  }
+  .header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .header-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: rgba(255,255,255,0.9);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+  .header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(22px, 4vw, 36px);
+    color: #fff;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 6px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+  .header h1 em {
+    font-style: italic;
+    color: var(--dorado-light);
+  }
+  .header-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.78);
+    letter-spacing: 0.5px;
+  }
+  .header-autor {
+    margin-top: 8px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    font-weight: 500;
+  }
+
+  /* ─── NAV TABS ─── */
+  .nav-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 20px 0;
+    flex-wrap: wrap;
+  }
+  .nav-tab {
+    background: var(--blanco);
+    border: 2px solid var(--crema-dark);
+    color: var(--texto-suave);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 20px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    letter-spacing: 0.3px;
+  }
+  .nav-tab:hover { border-color: var(--terracota); color: var(--terracota); }
+  .nav-tab.active {
+    background: var(--terracota);
+    border-color: var(--terracota);
+    color: #fff;
+    box-shadow: 0 3px 12px rgba(192,82,46,0.35);
+  }
+
+  /* ─── MAIN CONTAINER ─── */
+  .main { max-width: 780px; margin: 0 auto; padding: 24px 16px 60px; }
+
+  /* ─── SCREENS ─── */
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeUp 0.5s ease both; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(22px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── WELCOME SCREEN ─── */
+  .welcome-card {
+    background: var(--blanco);
+    border-radius: 20px;
+    padding: 44px 36px;
+    text-align: center;
+    box-shadow: 0 8px 40px var(--sombra);
+    border: 1px solid var(--crema-dark);
+    margin-top: 20px;
+  }
+  .welcome-icon {
+    width: 80px; height: 80px;
+    background: linear-gradient(135deg, var(--terracota-light), var(--terracota));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 24px;
+    font-size: 36px;
+    box-shadow: 0 6px 20px rgba(192,82,46,0.3);
+  }
+  .welcome-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(20px, 3.5vw, 28px);
+    color: var(--cafe);
+    margin-bottom: 12px;
+  }
+  .welcome-desc {
+    font-size: 15px;
+    color: var(--texto-suave);
+    line-height: 1.7;
+    max-width: 480px;
+    margin: 0 auto 28px;
+  }
+  .info-chips {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+  .chip {
+    background: var(--crema);
+    border: 1px solid var(--crema-dark);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--texto-suave);
+    display: flex; align-items: center; gap: 5px;
+  }
+  .chip span { font-size: 14px; }
+
+  .input-group {
+    margin-bottom: 28px;
+    text-align: left;
+    max-width: 380px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .input-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--cafe);
+    margin-bottom: 8px;
+    letter-spacing: 0.3px;
+  }
+  .input-field {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid var(--crema-dark);
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--texto);
+    background: var(--crema);
+    transition: all 0.2s ease;
+    outline: none;
+  }
+  .input-field:focus {
+    border-color: var(--terracota);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(192,82,46,0.1);
+  }
+
+  /* ─── BUTTONS ─── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 14px 32px;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    letter-spacing: 0.3px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--terracota-light), var(--terracota));
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(192,82,46,0.35);
+    width: 100%;
+    max-width: 300px;
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(192,82,46,0.45);
+  }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-secondary {
+    background: var(--blanco);
+    color: var(--terracota);
+    border: 2px solid var(--terracota);
+    box-shadow: 0 2px 8px var(--sombra);
+  }
+  .btn-secondary:hover {
+    background: var(--terracota);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+  .btn-verde {
+    background: linear-gradient(135deg, var(--verde-light), var(--verde));
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(45,122,106,0.3);
+    width: 100%;
+    max-width: 300px;
+  }
+  .btn-verde:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(45,122,106,0.4);
+  }
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-wrap {
+    background: var(--blanco);
+    border-radius: 16px;
+    padding: 18px 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 12px var(--sombra);
+    border: 1px solid var(--crema-dark);
+  }
+  .progress-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .progress-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--texto-suave);
+  }
+  .progress-counter {
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--terracota);
+  }
+  .progress-bar-bg {
+    height: 8px;
+    background: var(--crema-dark);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--dorado-light), var(--terracota));
+    border-radius: 10px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  }
+  .score-mini {
+    display: flex;
+    gap: 14px;
+    margin-top: 10px;
+  }
+  .score-chip {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 10px;
+  }
+  .score-ok  { background: var(--correcto-bg); color: var(--correcto); }
+  .score-bad { background: var(--incorrecto-bg); color: var(--incorrecto); }
+
+  /* ─── QUESTION CARD ─── */
+  .question-card {
+    background: var(--blanco);
+    border-radius: 20px;
+    padding: 30px 28px;
+    box-shadow: 0 6px 30px var(--sombra);
+    border: 1px solid var(--crema-dark);
+    animation: fadeUp 0.4s ease both;
+  }
+  .q-type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+  .q-type-directo   { background: rgba(192,82,46,0.1);  color: var(--terracota); }
+  .q-type-completa  { background: rgba(200,146,10,0.1); color: var(--dorado); }
+  .q-type-ordena    { background: rgba(45,122,106,0.1); color: var(--verde); }
+  .q-type-relacion  { background: rgba(107,58,42,0.1); color: var(--cafe); }
+
+  .q-number {
+    font-family: 'Fraunces', serif;
+    font-size: 13px;
+    color: var(--texto-suave);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .q-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: clamp(15px, 2.5vw, 17px);
+    color: var(--texto);
+    line-height: 1.65;
+    margin-bottom: 22px;
+    font-weight: 500;
+  }
+
+  /* Table for relation/order questions */
+  .q-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-size: 14px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 6px var(--sombra);
+  }
+  .q-table th {
+    background: var(--terracota);
+    color: #fff;
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .q-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--crema-dark);
+    background: var(--crema);
+    color: var(--texto);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .q-table tr:last-child td { border-bottom: none; }
+  .q-table td:first-child { font-weight: 600; color: var(--cafe); white-space: nowrap; }
+
+  /* ─── OPTIONS ─── */
+  .options-list { display: flex; flex-direction: column; gap: 10px; }
+  .option-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 18px;
+    background: var(--crema);
+    border: 2px solid var(--crema-dark);
+    border-radius: 14px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s ease;
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--terracota);
+    background: rgba(192,82,46,0.05);
+    transform: translateX(4px);
+  }
+  .option-btn:disabled { cursor: default; }
+  .option-letter {
+    width: 32px; height: 32px;
+    min-width: 32px;
+    background: var(--blanco);
+    border: 2px solid var(--crema-dark);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--texto-suave);
+    transition: all 0.2s ease;
+  }
+  .option-text {
+    font-size: 14px;
+    color: var(--texto);
+    line-height: 1.55;
+    padding-top: 4px;
+    font-weight: 400;
+  }
+
+  /* Selected */
+  .option-btn.selected {
+    border-color: var(--terracota);
+    background: rgba(192,82,46,0.07);
+  }
+  .option-btn.selected .option-letter {
+    background: var(--terracota);
+    border-color: var(--terracota);
+    color: #fff;
+  }
+
+  /* Correct */
+  .option-btn.correct {
+    border-color: var(--correcto);
+    background: var(--correcto-bg);
+  }
+  .option-btn.correct .option-letter {
+    background: var(--correcto);
+    border-color: var(--correcto);
+    color: #fff;
+  }
+  .option-btn.correct .option-text { color: var(--correcto); font-weight: 500; }
+
+  /* Wrong */
+  .option-btn.wrong {
+    border-color: var(--incorrecto);
+    background: var(--incorrecto-bg);
+  }
+  .option-btn.wrong .option-letter {
+    background: var(--incorrecto);
+    border-color: var(--incorrecto);
+    color: #fff;
+  }
+  .option-btn.wrong .option-text { color: var(--incorrecto); }
+
+  /* ─── FEEDBACK ─── */
+  .feedback-box {
+    margin-top: 18px;
+    padding: 16px 20px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.6;
+    display: none;
+    animation: fadeUp 0.3s ease both;
+  }
+  .feedback-box.show { display: flex; gap: 12px; align-items: flex-start; }
+  .feedback-box.correcto {
+    background: var(--correcto-bg);
+    border: 1px solid rgba(46,125,91,0.25);
+    color: var(--correcto);
+  }
+  .feedback-box.incorrecto {
+    background: var(--incorrecto-bg);
+    border: 1px solid rgba(176,64,42,0.25);
+    color: var(--incorrecto);
+  }
+  .feedback-icon { font-size: 22px; flex-shrink: 0; }
+  .feedback-text strong { display: block; font-weight: 700; margin-bottom: 4px; }
+
+  /* ─── NEXT BUTTON ─── */
+  .next-wrap {
+    margin-top: 22px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .btn-next {
+    display: none;
+    background: linear-gradient(135deg, var(--terracota-light), var(--terracota));
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    padding: 12px 30px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 14px rgba(192,82,46,0.3);
+    gap: 8px;
+    align-items: center;
+  }
+  .btn-next.show { display: inline-flex; animation: fadeUp 0.3s ease both; }
+  .btn-next:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(192,82,46,0.4); }
+
+  /* ─── RESULTS SCREEN ─── */
+  .results-card {
+    background: var(--blanco);
+    border-radius: 24px;
+    padding: 40px 32px;
+    text-align: center;
+    box-shadow: 0 8px 40px var(--sombra);
+    border: 1px solid var(--crema-dark);
+    margin-top: 20px;
+  }
+  .results-trophy {
+    font-size: 64px;
+    margin-bottom: 12px;
+    animation: bounce 1s ease infinite alternate;
+  }
+  @keyframes bounce {
+    from { transform: translateY(0); }
+    to   { transform: translateY(-8px); }
+  }
+  .results-name {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(18px, 3vw, 24px);
+    color: var(--cafe);
+    margin-bottom: 6px;
+  }
+  .results-name em { color: var(--terracota); font-style: normal; }
+  .results-topic {
+    font-size: 13px;
+    color: var(--texto-suave);
+    margin-bottom: 28px;
+  }
+
+  .results-donut-wrap {
+    position: relative;
+    width: 160px; height: 160px;
+    margin: 0 auto 28px;
+  }
+  .results-donut-wrap svg { transform: rotate(-90deg); }
+  .donut-bg { fill: none; stroke: var(--crema-dark); stroke-width: 14; }
+  .donut-fill { fill: none; stroke-width: 14; stroke-linecap: round; transition: stroke-dashoffset 1.5s cubic-bezier(.4,0,.2,1); }
+  .donut-text {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .donut-pct {
+    font-family: 'Fraunces', serif;
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .donut-label { font-size: 11px; font-weight: 600; color: var(--texto-suave); margin-top: 2px; }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 28px;
+    max-width: 360px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .result-stat {
+    padding: 18px 14px;
+    border-radius: 16px;
+    text-align: center;
+  }
+  .result-stat.aciertos  { background: var(--correcto-bg); }
+  .result-stat.errores   { background: var(--incorrecto-bg); }
+  .result-stat .stat-num {
+    font-family: 'Fraunces', serif;
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .result-stat.aciertos .stat-num { color: var(--correcto); }
+  .result-stat.errores  .stat-num { color: var(--incorrecto); }
+  .result-stat .stat-lbl { font-size: 13px; font-weight: 600; color: var(--texto-suave); }
+
+  .results-msg {
+    background: linear-gradient(135deg, rgba(200,146,10,0.08), rgba(192,82,46,0.08));
+    border: 1px solid rgba(200,146,10,0.2);
+    border-radius: 14px;
+    padding: 18px 22px;
+    font-size: 15px;
+    font-style: italic;
+    color: var(--cafe);
+    line-height: 1.6;
+    margin-bottom: 28px;
+    font-family: 'Fraunces', serif;
+  }
+  .results-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* ─── GUIDE SCREEN ─── */
+  .guide-card {
+    background: var(--blanco);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 6px 30px var(--sombra);
+    border: 1px solid var(--crema-dark);
+    margin-top: 20px;
+  }
+  .guide-header {
+    background: linear-gradient(135deg, var(--verde), #1E5E52);
+    padding: 22px 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .guide-header-icon { font-size: 32px; }
+  .guide-header h2 {
+    font-family: 'Fraunces', serif;
+    color: #fff;
+    font-size: 20px;
+  }
+  .guide-header p { font-size: 13px; color: rgba(255,255,255,0.75); margin-top: 2px; }
+  .guide-actions {
+    padding: 20px 28px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--crema-dark);
+  }
+  .guide-iframe-wrap {
+    width: 100%;
+    background: var(--crema);
+  }
+  .guide-iframe-wrap iframe {
+    width: 100%;
+    height: 600px;
+    border: none;
+    display: block;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 540px) {
+    .welcome-card { padding: 30px 20px; }
+    .question-card { padding: 22px 18px; }
+    .results-card  { padding: 28px 20px; }
+    .results-grid  { gap: 10px; }
+    .q-table { font-size: 13px; }
+    .q-table td, .q-table th { padding: 8px 10px; }
+    .guide-iframe-wrap iframe { height: 450px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-badge">Simulador Interactivo de Evaluación</div>
+  <h1>Construyendo <em>Equidad</em></h1>
+  <div class="header-sub">Guía de Colaboración Escuela-Familia · Colección Ciudadanía</div>
+  <div class="header-autor">Prof. Francisco De Jesus Luna Benitez</div>
+</header>
+
+<!-- NAV TABS -->
+<div class="nav-tabs" id="navTabs">
+  <button class="nav-tab active" onclick="showTab('simulador')">📝 Simulador</button>
+  <button class="nav-tab" onclick="showTab('guia')">📖 Guía de Estudio</button>
+</div>
+
+<div class="main">
+
+  <!-- ══════════ TAB: SIMULADOR ══════════ -->
+  <div id="tabSimulador">
+
+    <!-- WELCOME SCREEN -->
+    <div id="screenWelcome" class="screen active">
+      <div class="welcome-card">
+        <div class="welcome-icon">📚</div>
+        <h2 class="welcome-title">Bienvenido al Simulador</h2>
+        <p class="welcome-desc">Pon a prueba tus conocimientos sobre equidad, colaboración escuela-familia, diálogo y convivencia. 30 preguntas, 3 opciones, un solo intento.</p>
+        <div class="info-chips">
+          <div class="chip"><span>📋</span> 30 preguntas</div>
+          <div class="chip"><span>🎯</span> Opción múltiple</div>
+          <div class="chip"><span>💬</span> Retroalimentación inmediata</div>
+          <div class="chip"><span>📊</span> Resultados detallados</div>
+        </div>
+        <div class="input-group">
+          <label>👤 Nombre del estudiante</label>
+          <input type="text" id="studentName" class="input-field" placeholder="Escribe tu nombre completo…" />
+        </div>
+        <button class="btn btn-primary" onclick="startSimulator()">Iniciar simulador →</button>
+      </div>
+    </div>
+
+    <!-- QUIZ SCREEN -->
+    <div id="screenQuiz" class="screen">
+      <div class="progress-wrap">
+        <div class="progress-top">
+          <span class="progress-label">Progreso del examen</span>
+          <span class="progress-counter" id="progressCounter">1 / 30</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressFill" style="width:3.33%"></div>
+        </div>
+        <div class="score-mini">
+          <span class="score-chip score-ok" id="scoreOk">✓ 0 correctas</span>
+          <span class="score-chip score-bad" id="scoreBad">✗ 0 incorrectas</span>
+        </div>
+      </div>
+      <div class="question-card" id="questionCard">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+
+    <!-- RESULTS SCREEN -->
+    <div id="screenResults" class="screen">
+      <div class="results-card">
+        <div class="results-trophy" id="resultsTrophy">🏆</div>
+        <p class="results-name">Excelente trabajo, <em id="resultsName"></em></p>
+        <p class="results-topic">Construyendo Equidad: Guía de Colaboración Escuela-Familia</p>
+
+        <div class="results-donut-wrap">
+          <svg viewBox="0 0 160 160" width="160" height="160">
+            <circle class="donut-bg" cx="80" cy="80" r="68"/>
+            <circle class="donut-fill" id="donutFill" cx="80" cy="80" r="68"
+              stroke-dasharray="427" stroke-dashoffset="427"/>
+          </svg>
+          <div class="donut-text">
+            <span class="donut-pct" id="donutPct">0%</span>
+            <span class="donut-label">Desempeño</span>
+          </div>
+        </div>
+
+        <div class="results-grid">
+          <div class="result-stat aciertos">
+            <div class="stat-num" id="resAciertos">0</div>
+            <div class="stat-lbl">✓ Aciertos</div>
+          </div>
+          <div class="result-stat errores">
+            <div class="stat-num" id="resErrores">0</div>
+            <div class="stat-lbl">✗ Errores</div>
+          </div>
+        </div>
+
+        <div class="results-msg" id="resultsMsg"></div>
+
+        <div class="results-actions">
+          <button class="btn btn-primary" onclick="restartSimulator()">🔄 Intentar de nuevo</button>
+          <button class="btn btn-verde" onclick="showTab('guia')">📖 Ver Guía de Estudio</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tabSimulador -->
+
+  <!-- ══════════ TAB: GUÍA ══════════ -->
+  <div id="tabGuia" style="display:none;">
+    <div class="guide-card">
+      <div class="guide-header">
+        <div class="guide-header-icon">📖</div>
+        <div>
+          <h2>Guía de Estudio</h2>
+          <p>Construyendo Equidad: Guía de Colaboración Escuela-Familia</p>
+        </div>
+      </div>
+      <div class="guide-actions">
+        <a href="https://drive.google.com/file/d/1sHLAnIGb4fHVLtQ0JXakPBpFWfUBaGcU/view?usp=sharing" target="_blank" class="btn btn-verde" style="text-decoration:none; max-width:none; width:auto;">
+          ↗ Abrir en nueva pestaña
+        </a>
+        <button class="btn btn-secondary" onclick="document.getElementById('guideFrame').style.display='block'; this.style.display='none';">
+          📄 Ver aquí dentro
+        </button>
+      </div>
+      <div class="guide-iframe-wrap">
+        <iframe id="guideFrame"
+          src="https://drive.google.com/file/d/1sHLAnIGb4fHVLtQ0JXakPBpFWfUBaGcU/preview"
+          allow="autoplay"
+          style="display:none;">
+        </iframe>
+      </div>
+    </div>
+  </div><!-- /tabGuia -->
+
+</div><!-- /main -->
+
+<script>
+// ══════════════════════════════════════════════
+//  BANK OF 30 QUESTIONS
+// ══════════════════════════════════════════════
+const questions = [
+  // ── Q1 · Cuestionamiento Directo · Correct: A ──
+  {
+    type:'directo', typeLabel:'Cuestionamiento directo',
+    text:'¿Cuál es el concepto que describe a la educación como un derecho que potencia simultáneamente la salud, la paz, la prosperidad y la justicia?',
+    options:['La educación como derecho multiplicador, porque al ejercerla se amplían otros derechos fundamentales de la humanidad.',
+             'La educación como proceso de socialización que transfiere conocimientos entre generaciones de manera sistemática.',
+             'La educación como herramienta institucional diseñada para preservar el orden social y la cultura nacional.'],
+    correct:0,
+    feedback:'La educación como <strong>Derecho Multiplicador</strong> es el concepto que describe cómo la educación, al ejercerse, potencia otros derechos como la salud (bienestar integral), la paz (convivencia libre de violencia), la prosperidad (desarrollo sostenible) y la justicia (igualdad de oportunidades).'
+  },
+  // ── Q2 · Cuestionamiento Directo · Correct: B ──
+  {
+    type:'directo', typeLabel:'Cuestionamiento directo',
+    text:'¿Cuáles son los tres cimientos sobre los que se construye la Comunidad Promotora de Equidad según la guía?',
+    options:['Identidad colectiva, participación ciudadana y valores compartidos.',
+             'Lazos afectivos, confianza y resiliencia.',
+             'Familia, escuela y comunidad como actores del proceso educativo.'],
+    correct:1,
+    feedback:'La <strong>Comunidad Promotora de Equidad</strong> se sustenta en tres cimientos: (1) Lazos Afectivos, que generan empatía y confianza mutua; (2) Confianza, entendida como seguridad en uno mismo y en el tejido social; y (3) Resiliencia, la capacidad de afrontar la adversidad con pensamientos positivos.'
+  },
+  // ── Q3 · Cuestionamiento Directo · Correct: C ──
+  {
+    type:'directo', typeLabel:'Cuestionamiento directo',
+    text:'Dentro de la Balanza de la Autoestima, ¿qué concepto actúa como punto de equilibrio entre el amor propio y el respeto por los demás?',
+    options:['El autoconcepto, porque permite reconocer los propios límites frente a las necesidades del grupo.',
+             'La autoeficacia, ya que impulsa al individuo a actuar con seguridad en contextos sociales adversos.',
+             'La inteligencia emocional, definida como la capacidad de equilibrar y dirigir las emociones.'],
+    correct:2,
+    feedback:'Según la guía, la <strong>Inteligencia Emocional</strong> es "la capacidad de equilibrar y dirigir las emociones". Actúa como el fiel de la balanza entre el Amor Propio (sin narcisismo) y el Respeto por los Demás (sin sumisión), logrando así una autoestima sana y funcional.'
+  },
+  // ── Q4 · Cuestionamiento Directo · Correct: A ──
+  {
+    type:'directo', typeLabel:'Cuestionamiento directo',
+    text:'Según el Prisma del Diálogo, ¿cuáles son las tres condiciones que convergen para generar una convivencia pacífica y justa?',
+    options:['Respeto, empatía y solidaridad, que al integrarse en el diálogo fortalecen el tejido social.',
+             'Democracia, participación y tolerancia, pilares del modelo de convivencia comunitaria.',
+             'Igualdad, inclusión y justicia, como valores fundamentales de la educación ciudadana.'],
+    correct:0,
+    feedback:'El <strong>Prisma del Diálogo</strong> plantea que Respeto (ver el bien de todos y de ti mismo), Empatía (ponerse en los zapatos del otro) y Solidaridad (apoyo mutuo frente a la adversidad) convergen en el diálogo —afectuoso, horizontal y mediado por la niñez— para producir convivencia pacífica y justa.'
+  },
+  // ── Q5 · Cuestionamiento Directo · Correct: B ──
+  {
+    type:'directo', typeLabel:'Cuestionamiento directo',
+    text:'¿Cuál es el principio rector que guía a una comunidad segura, según el tema de Seguridad y Cuidado Mutuo?',
+    options:['El cumplimiento de protocolos institucionales como primera línea de protección ante la violencia.',
+             'El cuidado del otro, entendido como el principio fundamental que articula toda red de protección comunitaria.',
+             'La vigilancia permanente de los espacios escolares como garantía de seguridad para el alumnado.'],
+    correct:1,
+    feedback:'La guía es explícita: "<strong>El cuidado del otro es el principio rector de una comunidad segura</strong>." Esto se expresa en tres componentes: Vigilancia Social, Apoyo Comunitario y Conexión de Recursos, todos orientados a proteger y sostener a cada integrante de la comunidad.'
+  },
+  // ── Q6 · Cuestionamiento Directo · Correct: C ──
+  {
+    type:'directo', typeLabel:'Cuestionamiento directo',
+    text:'¿Qué característica define específicamente a las Asambleas-Talleres como espacios de aprendizaje adulto?',
+    options:['Son reuniones donde directivos y docentes informan a las familias sobre los resultados académicos del periodo.',
+             'Son eventos esporádicos centrados en la revisión de conductas y calificaciones del alumnado.',
+             'Son reuniones periódicas donde la jerarquía desaparece y el diálogo horizontal predomina entre todos los participantes.'],
+    correct:2,
+    feedback:'Las <strong>Asambleas-Talleres</strong> se distinguen por ser reuniones periódicas donde "la jerarquía desaparece y el diálogo horizontal predomina." En ellas coexisten tres elementos: El Centro Intocable (bienestar de la niñez), Evaluación y Retroalimentación, y Acuerdos Visibles (compromisos colectivos públicos).'
+  },
+  // ── Q7 · Cuestionamiento Directo · Correct: A ──
+  {
+    type:'directo', typeLabel:'Cuestionamiento directo',
+    text:'Según el tema del Puente del Contexto, ¿cuál es el rol formativo que desempeña LA ESCUELA en la educación integral del alumnado?',
+    options:['La sistematización del aprendizaje, la atención a la diversidad social y la formación para la ciudadanía plena.',
+             'La socialización primaria, la formación ética y el desarrollo de vínculos afectivos con el entorno familiar.',
+             'La transmisión de la cultura nacional y el refuerzo de los valores establecidos por el sistema educativo.'],
+    correct:0,
+    feedback:'Según el <strong>Puente del Contexto</strong>, los roles son complementarios: La Familia brinda socialización primaria y formación ética-afectiva, mientras que La Escuela aporta la sistematización del aprendizaje, la diversidad social y la ciudadanía plena. Ninguna puede asumir en solitario el reto educativo.'
+  },
+  // ── Q8 · Cuestionamiento Directo · Correct: B ──
+  {
+    type:'directo', typeLabel:'Cuestionamiento directo',
+    text:'¿Qué aspecto diferencia el Momento Creativo del Ciclo Virtuoso respecto a las otras dos fases?',
+    options:['Es la fase inicial del ciclo, donde el docente introduce los valores que se trabajarán durante la semana.',
+             'Es la fase de cierre en el aula donde se integra la historia familiar en la vida escolar mediante el arte y el diálogo.',
+             'Es la fase realizada en casa, donde la familia colabora mediante narraciones, dibujos o historias de su contexto.'],
+    correct:1,
+    feedback:'El <strong>Momento Creativo</strong> es la tercera fase del Ciclo Virtuoso y ocurre en el Aula. Su característica distintiva es que integra lo vivido en casa —la historia familiar— de regreso a la vida escolar, usando el arte y el diálogo. Esto cierra el ciclo: Actividad Inicial (Aula) → Tarea Familiar (Casa) → Momento Creativo (Aula).'
+  },
+  // ── Q9 · Completamiento · Correct: C ──
+  {
+    type:'completa', typeLabel:'Completamiento',
+    text:'La Resiliencia, como tercer cimiento de la Comunidad Promotora de Equidad, se define como…',
+    options:['…la capacidad de generar empatía activa, cariño y confianza mutua entre los miembros de la comunidad.',
+             '…el proceso colectivo de identificación, análisis y resolución cooperativa de los problemas comunitarios.',
+             '…la capacidad de afrontar la adversidad y salir fortalecidos con buen humor y pensamientos positivos.'],
+    correct:2,
+    feedback:'La guía define la <strong>Resiliencia</strong> con precisión: "Capacidad de afrontar la adversidad y salir fortalecidos con buen humor y pensamientos positivos." Este tercer cimiento complementa a los Lazos Afectivos y a la Confianza en la construcción de la Comunidad Promotora de Equidad.'
+  },
+  // ── Q10 · Completamiento · Correct: A ──
+  {
+    type:'completa', typeLabel:'Completamiento',
+    text:'En la Balanza de la Autoestima, el equilibrio ideal se logra cuando…',
+    options:['…el amor propio (sin narcisismo) y el respeto por los demás (sin sumisión) se armonizan a través de la inteligencia emocional.',
+             '…el estudiante aprende a subordinar sus necesidades personales a los objetivos del grupo y de la institución.',
+             '…la familia refuerza en casa exactamente las normas y los valores establecidos por la institución escolar.'],
+    correct:0,
+    feedback:'Según la guía, la <strong>Balanza de la Autoestima</strong> representa un equilibrio entre Amor Propio (sin narcisismo) y Respeto por los Demás (sin sumisión), y es la Inteligencia Emocional —"la capacidad de equilibrar y dirigir las emociones"— la que actúa como pivote que mantiene ese equilibrio.'
+  },
+  // ── Q11 · Completamiento · Correct: B ──
+  {
+    type:'completa', typeLabel:'Completamiento',
+    text:'El Ciclo Virtuoso en la metodología de trabajo comienza cuando, dentro del aula,…',
+    options:['…la familia entrega narraciones, dibujos o historias que reflejan los valores trabajados durante la semana anterior.',
+             '…los alumnos inician el diálogo sobre valores positivos con la guía del docente en la Actividad Inicial.',
+             '…el momento creativo integra la historia familiar en la vida escolar mediante el arte y el diálogo colectivo.'],
+    correct:1,
+    feedback:'El Ciclo Virtuoso inicia con la <strong>Actividad Inicial (Aula)</strong>: "Los alumnos inician el diálogo sobre valores positivos con la guía del docente." Desde allí, el ciclo avanza a la Tarea Familiar (Casa) y concluye con el Momento Creativo (Aula), donde se integra la experiencia familiar al contexto escolar.'
+  },
+  // ── Q12 · Completamiento · Correct: C ──
+  {
+    type:'completa', typeLabel:'Completamiento',
+    text:'Dentro del tema Seguridad y Cuidado Mutuo, el componente "Apoyo Comunitario" se refiere a…',
+    options:['…la implementación de protocolos institucionales de emergencia para prevenir y atender situaciones de violencia.',
+             '…la vigilancia colectiva y alerta comunitaria frente a posibles peligros que amenacen a los integrantes del grupo.',
+             '…redes de contención que aminoran los efectos de la inequidad, como la violencia de género, sosteniendo a las personas vulnerables.'],
+    correct:2,
+    feedback:'Según la guía, el <strong>Apoyo Comunitario</strong> son "redes de contención que aminoran los efectos de la inequidad (e.g., violencia de género)." Se distingue de la Vigilancia Social (alerta colectiva ante peligros) y de la Conexión de Recursos (vinculación de saberes y capacidades locales).'
+  },
+  // ── Q13 · Completamiento · Correct: A ──
+  {
+    type:'completa', typeLabel:'Completamiento',
+    text:'En las Asambleas-Talleres, el elemento denominado "El Centro Intocable" establece que el enfoque absoluto de toda reunión…',
+    options:['…siempre debe ser el bienestar de las niñas, niños y adolescentes, sin excepción alguna.',
+             '…debe centrarse en la revisión de acuerdos previos y en la rendición de cuentas de los compromisos colectivos.',
+             '…tiene que priorizar los resultados académicos del período y las estrategias de mejora del aprendizaje.'],
+    correct:0,
+    feedback:'"<strong>El Centro Intocable</strong>" es uno de los tres elementos estructurales de las Asambleas-Talleres y establece que "el enfoque absoluto siempre debe ser el bienestar de las niñas, niños y adolescentes." Esto garantiza que todo acuerdo o proceso colectivo gire en torno a quienes más importan.'
+  },
+  // ── Q14 · Completamiento · Correct: B ──
+  {
+    type:'completa', typeLabel:'Completamiento',
+    text:'La práctica recomendada denominada "El Espejo del Respeto" consiste en una dinámica donde…',
+    options:['…el docente modela frente al grupo conductas de respeto y empatía para que sean imitadas por el alumnado.',
+             '…el individuo se observa mientras el grupo le refleja verbalmente sus virtudes positivas, fortaleciendo la introspección y el autoconcepto.',
+             '…cada alumno escribe en un papel sus fortalezas personales y las comparte de forma anónima con sus compañeros.'],
+    correct:1,
+    feedback:'<strong>El Espejo del Respeto</strong> es una dinámica donde "el individuo se observa mientras el grupo le refleja verbalmente sus virtudes positivas, fortaleciendo la introspección y el autoconcepto mediante la validación externa." Está vinculada directamente con la Balanza de la Autoestima.'
+  },
+  // ── Q15 · Completamiento · Correct: C ──
+  {
+    type:'completa', typeLabel:'Completamiento',
+    text:'Según el Puente del Contexto, escuela y familia necesitan trabajar juntas porque…',
+    options:['…la escuela carece de los recursos socioemocionales para cubrir la totalidad de las necesidades afectivas del alumnado.',
+             '…la familia no tiene las herramientas pedagógicas formales para guiar de manera autónoma el aprendizaje académico.',
+             '…ninguna de las dos puede afrontar en solitario el reto que supone la educación en nuestros días.'],
+    correct:2,
+    feedback:'La guía es categórica: "<strong>Ninguna de las dos puede afrontar en solitario el reto que supone la educación en nuestros días.</strong>" La familia aporta socialización primaria y formación ética; la escuela, sistematización del aprendizaje y ciudadanía. Solo juntas logran coherencia y continuidad.'
+  },
+  // ── Q16 · Completamiento · Correct: A ──
+  {
+    type:'completa', typeLabel:'Completamiento',
+    text:'La "Regla de Oro" del Ciclo Virtuoso, aplicada durante la Tarea Familiar, establece que en ese espacio…',
+    options:['…solo se admiten pensamientos positivos; no se permiten reproches ni regaños, fomentando un imaginario ideal de armonía.',
+             '…la familia debe seguir estrictamente las instrucciones del docente sin modificar el contenido de la actividad asignada.',
+             '…los padres tienen la obligación de evaluar el desempeño del hijo y reportar sus resultados al maestro al día siguiente.'],
+    correct:0,
+    feedback:'La guía denomina a este principio "<strong>La Regla de Oro: Sólo Pensamientos Positivos</strong>." Durante la Tarea Familiar, "No se admiten reproches ni regaños, fomentando un imaginario ideal de armonía." Esto crea un ambiente emocional seguro para que la familia colabore auténticamente en el proceso educativo.'
+  },
+  // ── Q17 · Ordenamiento · Correct: B ──
+  {
+    type:'ordena', typeLabel:'Ordenamiento',
+    text:'Ordene las tres fases del Ciclo Virtuoso según la secuencia correcta de aplicación en la metodología de trabajo:',
+    listItems:['1. Momento Creativo (Aula)', '2. Actividad Inicial (Aula)', '3. Tarea Familiar (Casa)'],
+    options:['1 → 2 → 3 (Momento Creativo, luego Actividad Inicial, luego Tarea Familiar)',
+             '2 → 3 → 1 (Actividad Inicial, luego Tarea Familiar, luego Momento Creativo)',
+             '3 → 2 → 1 (Tarea Familiar, luego Actividad Inicial, luego Momento Creativo)'],
+    correct:1,
+    feedback:'La secuencia correcta del <strong>Ciclo Virtuoso</strong> es: (1) <strong>Actividad Inicial en el Aula</strong> → (2) <strong>Tarea Familiar en Casa</strong> → (3) <strong>Momento Creativo en el Aula</strong>. El ciclo se inicia con el docente, continúa en el hogar y cierra integrando la experiencia familiar al espacio escolar.'
+  },
+  // ── Q18 · Ordenamiento · Correct: C ──
+  {
+    type:'ordena', typeLabel:'Ordenamiento',
+    text:'Ordene los tres cimientos de la Comunidad Promotora de Equidad tal como aparecen numerados en la guía de estudio:',
+    listItems:['1. Resiliencia', '2. Lazos Afectivos', '3. Confianza'],
+    options:['1 → 2 → 3 (Resiliencia, Lazos Afectivos, Confianza)',
+             '3 → 1 → 2 (Confianza, Resiliencia, Lazos Afectivos)',
+             '2 → 3 → 1 (Lazos Afectivos, Confianza, Resiliencia)'],
+    correct:2,
+    feedback:'La guía presenta los cimientos en este orden: <strong>1. Lazos Afectivos</strong> (generación activa de empatía, cariño y confianza mutua), <strong>2. Confianza</strong> (seguridad en uno mismo y en el tejido social), y <strong>3. Resiliencia</strong> (capacidad de afrontar la adversidad con buen humor y pensamientos positivos).'
+  },
+  // ── Q19 · Ordenamiento · Correct: A ──
+  {
+    type:'ordena', typeLabel:'Ordenamiento',
+    text:'Ordene los elementos del Prisma del Diálogo tal como se describen de arriba hacia abajo en la guía de estudio:',
+    listItems:['1. Solidaridad', '2. Respeto', '3. Empatía'],
+    options:['2 → 3 → 1 (Respeto, Empatía, Solidaridad)',
+             '1 → 2 → 3 (Solidaridad, Respeto, Empatía)',
+             '3 → 1 → 2 (Empatía, Solidaridad, Respeto)'],
+    correct:0,
+    feedback:'El <strong>Prisma del Diálogo</strong> presenta los elementos en este orden: <strong>1. Respeto</strong> (ver el bien de todos y de ti mismo) · <strong>2. Empatía</strong> (ponerse en los zapatos del otro) · <strong>3. Solidaridad</strong> (apoyo mutuo frente a la adversidad). Juntos producen convivencia pacífica y justa.'
+  },
+  // ── Q20 · Ordenamiento · Correct: B ──
+  {
+    type:'ordena', typeLabel:'Ordenamiento',
+    text:'Ordene las cuatro dimensiones de la educación como Derecho Multiplicador tal como aparecen en el esquema de la guía (de izquierda a derecha y de arriba hacia abajo):',
+    listItems:['1. Justicia', '2. Salud', '3. Paz', '4. Prosperidad'],
+    options:['1 → 3 → 4 → 2 (Justicia, Paz, Prosperidad, Salud)',
+             '2 → 4 → 3 → 1 (Salud, Prosperidad, Paz, Justicia)',
+             '4 → 2 → 1 → 3 (Prosperidad, Salud, Justicia, Paz)'],
+    correct:1,
+    feedback:'El esquema de la guía presenta: <strong>Salud</strong> (bienestar integral, arriba-izquierda), <strong>Prosperidad</strong> (desarrollo sostenible, arriba-derecha), <strong>Paz</strong> (convivencia libre de violencia, abajo-izquierda) y <strong>Justicia</strong> (igualdad de oportunidades, abajo-derecha). La educación es el vínculo que las interconecta.'
+  },
+  // ── Q21 · Ordenamiento · Correct: C ──
+  {
+    type:'ordena', typeLabel:'Ordenamiento',
+    text:'Ordene los tres elementos estructurales de las Asambleas-Talleres según aparecen descritos en la guía:',
+    listItems:['1. Acuerdos Visibles', '2. El Centro Intocable', '3. Evaluación y Retroalimentación'],
+    options:['3 → 1 → 2 (Evaluación, Acuerdos Visibles, El Centro Intocable)',
+             '1 → 3 → 2 (Acuerdos Visibles, Evaluación, El Centro Intocable)',
+             '2 → 3 → 1 (El Centro Intocable, Evaluación y Retroalimentación, Acuerdos Visibles)'],
+    correct:2,
+    feedback:'La guía presenta los elementos en este orden: <strong>1. El Centro Intocable</strong> (bienestar de la niñez, siempre primero), <strong>2. Evaluación y Retroalimentación</strong> (revisión de Tareas Familiares y Momentos Creativos), y <strong>3. Acuerdos Visibles</strong> (actas y compromisos comunitarios públicos).'
+  },
+  // ── Q22 · Ordenamiento · Correct: A ──
+  {
+    type:'ordena', typeLabel:'Ordenamiento',
+    text:'Ordene los tres componentes de Seguridad y Cuidado Mutuo tal como aparecen listados en la guía:',
+    listItems:['1. Conexión de Recursos', '2. Vigilancia Social', '3. Apoyo Comunitario'],
+    options:['2 → 3 → 1 (Vigilancia Social, Apoyo Comunitario, Conexión de Recursos)',
+             '3 → 1 → 2 (Apoyo Comunitario, Conexión de Recursos, Vigilancia Social)',
+             '1 → 2 → 3 (Conexión de Recursos, Vigilancia Social, Apoyo Comunitario)'],
+    correct:0,
+    feedback:'La guía organiza los componentes así: <strong>1. Vigilancia Social</strong> (cuidado colectivo y alerta comunitaria), <strong>2. Apoyo Comunitario</strong> (redes de contención contra la inequidad), <strong>3. Conexión de Recursos</strong> (vinculación de saberes, oficios y capacidades locales para la resiliencia).'
+  },
+  // ── Q23 · Ordenamiento · Correct: B ──
+  {
+    type:'ordena', typeLabel:'Ordenamiento',
+    text:'En el modelo de la Balanza de la Autoestima, ordene los tres elementos como aparecen descritos: primero el lado izquierdo, luego el lado derecho, y al final el pivote central:',
+    listItems:['1. Inteligencia Emocional (pivote)', '2. Respeto por los Demás (sin sumisión)', '3. Amor Propio (sin narcisismo)'],
+    options:['2 → 1 → 3 (Respeto, Inteligencia Emocional, Amor Propio)',
+             '3 → 2 → 1 (Amor Propio, Respeto por los Demás, Inteligencia Emocional)',
+             '1 → 3 → 2 (Inteligencia Emocional, Amor Propio, Respeto por los Demás)'],
+    correct:1,
+    feedback:'La <strong>Balanza de la Autoestima</strong> sitúa: Lado izquierdo → <strong>Amor Propio</strong> (sin narcisismo), Lado derecho → <strong>Respeto por los Demás</strong> (sin sumisión), y en el centro como pivote → <strong>Inteligencia Emocional</strong> (la capacidad de equilibrar y dirigir las emociones).'
+  },
+  // ── Q24 · Relación de elementos · Correct: C ──
+  {
+    type:'relacion', typeLabel:'Relación de elementos',
+    text:'Seleccione la opción que relaciona correctamente cada elemento del Prisma del Diálogo con su definición:',
+    tableHeaders:['Elemento','Definición'],
+    tableRows:[
+      ['1. Respeto','a) Apoyo mutuo frente a la adversidad'],
+      ['2. Empatía','b) Ver el bien de todos y de ti mismo'],
+      ['3. Solidaridad','c) Ponerse en los zapatos del otro']
+    ],
+    options:['1-c, 2-a, 3-b','1-a, 2-b, 3-c','1-b, 2-c, 3-a'],
+    correct:2,
+    feedback:'Las relaciones correctas son: <strong>Respeto</strong> → "Ver el bien de todos y de ti mismo" (b); <strong>Empatía</strong> → "Ponerse en los zapatos del otro" (c); <strong>Solidaridad</strong> → "Apoyo mutuo frente a la adversidad" (a). Así, la combinación correcta es <strong>1-b, 2-c, 3-a</strong>.'
+  },
+  // ── Q25 · Relación de elementos · Correct: A ──
+  {
+    type:'relacion', typeLabel:'Relación de elementos',
+    text:'Seleccione la opción que relaciona correctamente cada cimiento de la Comunidad Promotora de Equidad con su descripción:',
+    tableHeaders:['Cimiento','Descripción'],
+    tableRows:[
+      ['1. Lazos Afectivos','a) Generación activa de empatía, cariño y confianza mutua'],
+      ['2. Confianza','b) Seguridad en uno mismo y en el tejido social que nos rodea'],
+      ['3. Resiliencia','c) Capacidad de afrontar la adversidad con buen humor y pensamientos positivos']
+    ],
+    options:['1-a, 2-b, 3-c','1-b, 2-c, 3-a','1-c, 2-a, 3-b'],
+    correct:0,
+    feedback:'La correspondencia correcta es: <strong>Lazos Afectivos</strong> → generación activa de empatía, cariño y confianza mutua (a); <strong>Confianza</strong> → seguridad en uno mismo y en el tejido social (b); <strong>Resiliencia</strong> → capacidad de afrontar la adversidad con buen humor y pensamientos positivos (c).'
+  },
+  // ── Q26 · Relación de elementos · Correct: B ──
+  {
+    type:'relacion', typeLabel:'Relación de elementos',
+    text:'Seleccione la opción que relaciona correctamente cada fase del Ciclo Virtuoso con el espacio en que se desarrolla:',
+    tableHeaders:['Fase','Espacio de desarrollo'],
+    tableRows:[
+      ['1. Actividad Inicial','a) Casa — La familia colabora mediante narraciones, dibujos o historias'],
+      ['2. Tarea Familiar','b) Aula — Los alumnos dialogan sobre valores con la guía del docente'],
+      ['3. Momento Creativo','c) Aula — Se integra la historia familiar mediante el arte y el diálogo']
+    ],
+    options:['1-a, 2-c, 3-b','1-b, 2-a, 3-c','1-c, 2-b, 3-a'],
+    correct:1,
+    feedback:'Las relaciones correctas son: <strong>Actividad Inicial</strong> → Aula con el docente (b); <strong>Tarea Familiar</strong> → Casa con la familia (a); <strong>Momento Creativo</strong> → Aula integrando la experiencia familiar (c). La combinación correcta es <strong>1-b, 2-a, 3-c</strong>.'
+  },
+  // ── Q27 · Relación de elementos · Correct: C ──
+  {
+    type:'relacion', typeLabel:'Relación de elementos',
+    text:'Seleccione la opción que relaciona correctamente cada elemento de las Asambleas-Talleres con su función específica:',
+    tableHeaders:['Elemento','Función'],
+    tableRows:[
+      ['1. El Centro Intocable','a) Creación de actas y compromisos comunitarios asumidos públicamente'],
+      ['2. Evaluación y Retroalimentación','b) Revisión de Tareas Familiares y Momentos Creativos para ajustar la convivencia'],
+      ['3. Acuerdos Visibles','c) Mantener como enfoque absoluto el bienestar de niñas, niños y adolescentes']
+    ],
+    options:['1-b, 2-a, 3-c','1-a, 2-c, 3-b','1-c, 2-b, 3-a'],
+    correct:2,
+    feedback:'La correspondencia es: <strong>El Centro Intocable</strong> → bienestar absoluto de la niñez (c); <strong>Evaluación y Retroalimentación</strong> → revisión de Tareas Familiares y Momentos Creativos (b); <strong>Acuerdos Visibles</strong> → creación de actas y compromisos públicos (a). Combinación correcta: <strong>1-c, 2-b, 3-a</strong>.'
+  },
+  // ── Q28 · Relación de elementos · Correct: A ──
+  {
+    type:'relacion', typeLabel:'Relación de elementos',
+    text:'Seleccione la opción que relaciona correctamente cada componente de Seguridad y Cuidado Mutuo con su descripción:',
+    tableHeaders:['Componente','Descripción'],
+    tableRows:[
+      ['1. Vigilancia Social','a) Cuidado colectivo y alerta comunitaria frente a posibles peligros'],
+      ['2. Apoyo Comunitario','b) Vinculación de saberes, oficios y capacidades locales para la resiliencia'],
+      ['3. Conexión de Recursos','c) Redes de contención que aminoran los efectos de la inequidad']
+    ],
+    options:['1-a, 2-c, 3-b','1-b, 2-a, 3-c','1-c, 2-b, 3-a'],
+    correct:0,
+    feedback:'La correspondencia correcta es: <strong>Vigilancia Social</strong> → cuidado colectivo y alerta comunitaria (a); <strong>Apoyo Comunitario</strong> → redes de contención contra la inequidad como la violencia de género (c); <strong>Conexión de Recursos</strong> → vinculación de saberes y capacidades locales para la resiliencia (b).'
+  },
+  // ── Q29 · Relación de elementos · Correct: B ──
+  {
+    type:'relacion', typeLabel:'Relación de elementos',
+    text:'Seleccione la opción que relaciona correctamente cada actor del Puente del Contexto con su rol formativo:',
+    tableHeaders:['Actor','Rol formativo'],
+    tableRows:[
+      ['1. La Familia','a) Sistematización del aprendizaje, diversidad social y ciudadanía plena'],
+      ['2. La Escuela','b) Socialización primaria, formación ética y afectiva'],
+      ['3. La colaboración Escuela-Familia','c) Coherencia y continuidad educativa para el desarrollo integral']
+    ],
+    options:['1-a, 2-c, 3-b','1-b, 2-a, 3-c','1-c, 2-b, 3-a'],
+    correct:1,
+    feedback:'La guía establece: <strong>La Familia</strong> → socialización primaria y formación ética-afectiva (b); <strong>La Escuela</strong> → sistematización del aprendizaje, diversidad social y ciudadanía (a); <strong>Su colaboración</strong> → genera coherencia y continuidad educativa (c). Combinación: <strong>1-b, 2-a, 3-c</strong>.'
+  },
+  // ── Q30 · Relación de elementos · Correct: C ──
+  {
+    type:'relacion', typeLabel:'Relación de elementos',
+    text:'Seleccione la opción que relaciona correctamente cada dimensión de la educación como Derecho Multiplicador con su beneficio social:',
+    tableHeaders:['Dimensión','Beneficio social'],
+    tableRows:[
+      ['1. Salud','a) Desarrollo sostenible'],
+      ['2. Prosperidad','b) Igualdad de oportunidades'],
+      ['3. Justicia','c) Bienestar integral']
+    ],
+    options:['1-a, 2-c, 3-b','1-b, 2-a, 3-c','1-c, 2-a, 3-b'],
+    correct:2,
+    feedback:'Según la guía: <strong>Salud</strong> → bienestar integral (c); <strong>Prosperidad</strong> → desarrollo sostenible (a); <strong>Justicia</strong> → igualdad de oportunidades (b). Nota: la cuarta dimensión es Paz → convivencia libre de violencia. Combinación correcta: <strong>1-c, 2-a, 3-b</strong>.'
+  }
+];
+
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+let currentQ = 0, correct = 0, wrong = 0, studentName = '';
+
+const typeColors = {
+  directo:  { cls:'q-type-directo',  icon:'❓' },
+  completa: { cls:'q-type-completa', icon:'✏️' },
+  ordena:   { cls:'q-type-ordena',   icon:'🔢' },
+  relacion: { cls:'q-type-relacion', icon:'🔗' }
+};
+
+// ══════════════════════════════════════════════
+//  NAV TABS
+// ══════════════════════════════════════════════
+function showTab(tab) {
+  document.querySelectorAll('.nav-tab').forEach((b,i) => b.classList.toggle('active', i===(tab==='simulador'?0:1)));
+  document.getElementById('tabSimulador').style.display = tab==='simulador' ? 'block' : 'none';
+  document.getElementById('tabGuia').style.display      = tab==='guia'      ? 'block' : 'none';
+}
+
+// ══════════════════════════════════════════════
+//  SCREENS
+// ══════════════════════════════════════════════
+function setScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  el.classList.add('active');
+  el.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+// ══════════════════════════════════════════════
+//  START
+// ══════════════════════════════════════════════
+function startSimulator() {
+  const name = document.getElementById('studentName').value.trim();
+  if (!name) {
+    document.getElementById('studentName').focus();
+    document.getElementById('studentName').style.borderColor='var(--terracota)';
+    return;
+  }
+  studentName = name;
+  currentQ = 0; correct = 0; wrong = 0;
+  updateScoreMini();
+  setScreen('screenQuiz');
+  renderQuestion();
+}
+
+// ══════════════════════════════════════════════
+//  RENDER QUESTION
+// ══════════════════════════════════════════════
+function renderQuestion() {
+  const q = questions[currentQ];
+  const tc = typeColors[q.type];
+  updateProgress();
+
+  let tableHTML = '';
+  if (q.tableHeaders) {
+    tableHTML = `<table class="q-table">
+      <thead><tr>${q.tableHeaders.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
+      <tbody>${q.tableRows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>
+    </table>`;
+  }
+  if (q.listItems) {
+    tableHTML = `<div style="background:var(--crema);border:1px solid var(--crema-dark);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:14px;line-height:2;color:var(--cafe);font-weight:500;">
+      ${q.listItems.map(i=>`<div>${i}</div>`).join('')}
+    </div>`;
+  }
+
+  const optionsHTML = q.options.map((opt,i) => {
+    const letter = ['A','B','C'][i];
+    return `<button class="option-btn" id="opt-${i}" onclick="selectOption(${i})">
+      <div class="option-letter">${letter}</div>
+      <div class="option-text">${opt}</div>
+    </button>`;
+  }).join('');
+
+  document.getElementById('questionCard').innerHTML = `
+    <div class="q-type-badge ${tc.cls}">${tc.icon} ${q.typeLabel}</div>
+    <div class="q-number">Pregunta ${currentQ+1} de ${questions.length}</div>
+    <div class="q-text">${q.text}</div>
+    ${tableHTML}
+    <div class="options-list" id="optionsList">${optionsHTML}</div>
+    <div class="feedback-box" id="feedbackBox">
+      <div class="feedback-icon" id="feedbackIcon"></div>
+      <div class="feedback-text" id="feedbackText"></div>
+    </div>
+    <div class="next-wrap">
+      <button class="btn-next" id="btnNext" onclick="nextQuestion()">
+        ${currentQ < questions.length-1 ? 'Siguiente pregunta →' : 'Ver resultados →'}
+      </button>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════
+//  SELECT OPTION
+// ══════════════════════════════════════════════
+function selectOption(idx) {
+  const q = questions[currentQ];
+  const fb = document.getElementById('feedbackBox');
+  const isCorrect = idx === q.correct;
+
+  // Disable all buttons
+  document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+
+  // Mark selected
+  document.getElementById(`opt-${idx}`).classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) {
+    document.getElementById(`opt-${q.correct}`).classList.add('correct');
+  }
+
+  // Feedback
+  fb.className = `feedback-box show ${isCorrect ? 'correcto' : 'incorrecto'}`;
+  document.getElementById('feedbackIcon').textContent = isCorrect ? '✅' : '❌';
+  document.getElementById('feedbackText').innerHTML = isCorrect
+    ? `<strong>¡Respuesta correcta!</strong>${q.feedback}`
+    : `<strong>Respuesta incorrecta.</strong>${q.feedback}`;
+
+  if (isCorrect) correct++; else wrong++;
+  updateScoreMini();
+
+  // Show next button
+  const btnNext = document.getElementById('btnNext');
+  btnNext.textContent = currentQ < questions.length-1 ? 'Siguiente pregunta →' : 'Ver resultados →';
+  btnNext.classList.add('show');
+}
+
+// ══════════════════════════════════════════════
+//  NEXT
+// ══════════════════════════════════════════════
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) {
+    showResults();
+  } else {
+    renderQuestion();
+    document.getElementById('screenQuiz').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+}
+
+// ══════════════════════════════════════════════
+//  PROGRESS
+// ══════════════════════════════════════════════
+function updateProgress() {
+  const pct = ((currentQ) / questions.length) * 100;
+  document.getElementById('progressFill').style.width = Math.max(3.33, pct) + '%';
+  document.getElementById('progressCounter').textContent = `${currentQ+1} / ${questions.length}`;
+}
+function updateScoreMini() {
+  document.getElementById('scoreOk').textContent  = `✓ ${correct} correcta${correct!==1?'s':''}`;
+  document.getElementById('scoreBad').textContent = `✗ ${wrong} incorrecta${wrong!==1?'s':''}`;
+}
+
+// ══════════════════════════════════════════════
+//  RESULTS
+// ══════════════════════════════════════════════
+function showResults() {
+  setScreen('screenResults');
+  const pct = Math.round((correct / questions.length) * 100);
+
+  document.getElementById('resultsName').textContent = studentName;
+  document.getElementById('resAciertos').textContent = correct;
+  document.getElementById('resErrores').textContent  = wrong;
+  document.getElementById('donutPct').textContent    = pct + '%';
+  document.getElementById('progressFill').style.width = '100%';
+
+  // Donut color
+  const fill = document.getElementById('donutFill');
+  const circ = 2 * Math.PI * 68; // ~427
+  const color = pct >= 70 ? 'var(--correcto)' : pct >= 50 ? 'var(--dorado)' : 'var(--incorrecto)';
+  fill.setAttribute('stroke', color);
+  document.getElementById('donutPct').style.color = color;
+
+  // Animate donut
+  fill.style.strokeDashoffset = circ;
+  setTimeout(() => {
+    fill.style.strokeDashoffset = circ - (pct / 100) * circ;
+  }, 300);
+
+  // Trophy & message
+  let trophy, msg;
+  if (pct >= 90) {
+    trophy = '🏆';
+    msg = `¡Desempeño excepcional, ${studentName}! Dominas los conceptos de equidad, colaboración escuela-familia y convivencia. Eres un ejemplo de compromiso educativo.`;
+  } else if (pct >= 70) {
+    trophy = '🎖️';
+    msg = `Muy buen trabajo, ${studentName}. Tienes una sólida comprensión de los temas. Revisa los reactivos con error para alcanzar la excelencia.`;
+  } else if (pct >= 50) {
+    trophy = '📘';
+    msg = `Buen esfuerzo, ${studentName}. Tienes bases importantes pero hay temas que requieren mayor estudio. Consulta la Guía de Estudio y vuelve a intentarlo.`;
+  } else {
+    trophy = '💪';
+    msg = `No te desanimes, ${studentName}. Este es tu punto de partida. Revisa la Guía de Estudio con detenimiento y practica de nuevo. ¡Tú puedes lograrlo!`;
+  }
+  document.getElementById('resultsTrophy').textContent = trophy;
+  document.getElementById('resultsMsg').textContent = msg;
+}
+
+// ══════════════════════════════════════════════
+//  RESTART
+// ══════════════════════════════════════════════
+function restartSimulator() {
+  currentQ = 0; correct = 0; wrong = 0;
+  document.getElementById('studentName').value = '';
+  document.getElementById('studentName').style.borderColor = '';
+  updateScoreMini();
+  setScreen('screenWelcome');
+}
+</script>
+</body>
+</html>
